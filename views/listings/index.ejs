@@ -1,32 +1,54 @@
+ 
 <% layout("layouts/boilerPlate") %>
 
-    <h3>All Listings</h3>
-    <!-- 
-<form method="GET" action="/listings/new">
-    <button>Create New Listing</button>
-</form> -->
-    <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
+<div class="container">
+    <h3 class="mb-4">All Listings</h3>
+
+    <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4">
+
         <% for (let list of allListings) { %>
-            <a href="/listings/<%= list._id %>" class="listing-link">
-                <div class="card col">
-                    <img src="<%= list.image.url %>" class="card-img-top" alt="<%= list.title %>"
-                        style="height: 20rem;">
 
-                    <div class="card-img-overlay">
+            <div class="col">
+                <a href="/listings/<%= list._id %>" class="listing-link">
 
-                        
+                    <div class="card h-100">
+
+                        <img
+                            src="<%= list.image && list.image.url ? list.image.url : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6' %>"
+                            class="card-img-top"
+                            alt="<%= list.title %>"
+                            style="height: 20rem; object-fit: cover;"
+                        >
+
+                        <div class="card-body">
+                            <p class="card-text">
+
+                                <b>
+                                    <%= list.title %>
+                                </b>
+
+                                <br>
+
+                                &#8377;
+
+                                <% if (list.price != null) { %>
+                                    <%= list.price.toLocaleString("en-IN") %>
+                                <% } else { %>
+                                    N/A
+                                <% } %>
+
+                                / night
+
+                            </p>
+                        </div>
+
                     </div>
 
-                    <div class="card-body">
-                        <p class="card-text">
-                            <b>
-                                <%= list.title %>
-                            </b>
-                            <br>&#8377;
-                            <%= list.price.toLocaleString("en-IN") %>/ night
-                        </p>
-                    </div>
-                </div>
-                <% } %>
-            </a>
+                </a>
+            </div>
+
+        <% } %>
+
     </div>
+</div>
+    
