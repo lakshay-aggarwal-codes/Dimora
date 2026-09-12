@@ -1,12 +1,12 @@
-body{
-    display: flex;
-      font-family: "Plus Jakarta Sans", sans-serif !important;
-      flex-direction: column;
-      min-height: 100vh;
-} 
+body {
+  display: flex;
+  font-family: "Plus Jakarta Sans", sans-serif !important;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
-.container{
-    flex: 1;
+.container {
+  flex: 1;
 }
 .navbar {
   height: 5 rem;
@@ -55,55 +55,78 @@ body{
   height: 8rem;
 }
 
-
 /* Cards */
 
-.card{
-    border: none !important;
-    margin-bottom: 2rem;
+.listing-card {
+  border: none !important;
+  margin-bottom: 2rem;
 }
-.card-img-top{
-    border-radius: 1rem !important;
-    width: 100% !important;
-    object-fit: cover !important;
+.card-img-top {
+  border-radius: 1rem !important;
+  width: 100% !important;
+  object-fit: cover !important;
 }
-.card-body{
-    padding: 0;
-}
-
-.card-text p{
-    font-weight: 400 !important;
-}
-.listing-link{
-    text-decoration: none;
+.card-body {
+  padding: 0;
 }
 
+.card-text p {
+  font-weight: 400 !important;
+}
+.listing-link {
+  text-decoration: none;
+}
 
 /* card effect */
 
-.card-img-overlay{
-    opacity: 0;
+.card-img-overlay {
+  opacity: 0;
 }
 
-.card-img-overlay:hover{
-    opacity: 0.3;
-    background-color: white;
+.card-img-overlay:hover {
+  opacity: 0.3;
+  background-color: white;
 }
 
-.add-btn, .edit-btn{
+.add-btn,
+.edit-btn {
   background-color: #fe424d !important;
   border: none !important;
 }
 
-.show-img{
+.show-img {
   height: 30vh;
 }
 
-.btns{
+.btns {
   display: flex;
 }
 
-.show-card{
+.show-card {
   padding-left: 0;
   padding-right: 0;
+}
+
+.star-rating {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.star-rating input {
+  display: none;
+}
+
+.star-rating label {
+  font-size: 35px;
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star-rating label:hover,
+.star-rating label:hover ~ label,
+.star-rating input:checked ~ label {
+  color: gold;
 }
