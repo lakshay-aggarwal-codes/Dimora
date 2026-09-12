@@ -2,15 +2,14 @@
     <div class="row mt-3">
         <div class="col-8 offset-3">
 
-            <h3>Listing Details</h3>
+            <h3>
+                <%= listing.title%>
+            </h3>
         </div>
-        <div class="card col-6 show-card  offset-3">
+        <div class="card col-6 show-card listing-card offset-3">
             <img class="card-img-top show-img" src="<%= listing.image.url%>" alt="listing_image">
             <div class="card-body">
                 <p class="card-text">
-                    <b>
-                        <%= listing.title%>
-                    </b>
                     <br>
                     <%= listing.description%><br>
                         &#8377;
@@ -33,4 +32,54 @@
                 Delete
             </button>
         </form>
+    </div>
+
+    <div class="col-8 offset-3 mb-3">
+        <hr>
+        <h4>
+            Leave us a review!
+        </h4>
+        <form method="post" action="/listings/<%= listing.id%>/reviews" novalidate class="needs-validation">
+            <div class="mb-3 mt-3">
+                <label for="rating" class="form-label">Rating</label>
+                <div class="star-rating"> <input type="radio" id="star5" name="review[rating]" value="5"> <label
+                        for="star5">★</label> <input type="radio" id="star4" name="review[rating]" value="4"> <label
+                        for="star4">★</label> <input type="radio" id="star3" name="review[rating]" value="3"> <label
+                        for="star3">★</label> <input type="radio" id="star2" name="review[rating]" value="2"> <label
+                        for="star2">★</label> <input type="radio" id="star1" name="review[rating]" value="1"> <label
+                        for="star1">★</label> </div>
+                <!-- <input type="range" min="1" max="5" id="rating" class="form-range" name="review[rating]"> -->
+            </div>
+            <div class="mb-3 mt-3">
+                <label class="form-label" for="comment">Comment</label>
+                <textarea class="form-control" id="comment" required name="review[comment]" cols="30"
+                    rows="5"></textarea>
+                <div class="invalid-feedback">
+                    Please some comments for review
+                </div>
+            </div>
+            <button class="btn btn-outline-dark">Submit</button>
+        </form>
+
+        <hr>
+        <p><b>All Reviews</b></p>
+        <div class="row">
+            <% for(review of listing.reviews){%>
+                <div class="card col-5 ms-3 mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">username</h5>
+                        <p class="card-text">
+                            <%=review.comment%>
+                        </p>
+                        <p class="card-text">
+                            <%=review.rating%> &#9733;
+                        </p>
+                    </div>
+                    <form class="mb-3 text-end" method="post"
+                        action="/listings/<%= listing._id%>/reviews/<%= review._id%>?_method=Delete">
+                        <button class="btn btn-sm btn-dark">Delete Review</button>
+                    </form>
+                </div>
+                <%}%>
+        </div>
     </div>
