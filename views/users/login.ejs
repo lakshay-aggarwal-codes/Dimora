@@ -1,0 +1,23 @@
+<% layout("/layouts/boilerPlate") %>
+    <div class="row mt-3">
+        <div class="col-6 offset-3">
+            <h1>Login on Dimora</h1>
+            <form method="post" action="/login" class="needs-validation" novalidate>
+
+                <div class="mb-3">
+
+                    <label for="username" class="form-label">Username</label>
+                    <input name="username" class="form-control" id="username" type="text" required>
+                    
+                </div>
+
+                <div class="mb-3">
+
+                    <label for="password" class="form-label">Password</label>
+                    <input name="password" class="form-control" id="password" type="password" required>
+                     
+                </div>
+                <button class="btn btn-dark">Login</button>
+            </form>
+        </div>
+    </div>

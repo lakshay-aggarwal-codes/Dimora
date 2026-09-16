@@ -4,13 +4,15 @@ const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError");
-const listings = require("./routes/listing");
-const reviews = require("./routes/review");
 const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
-const LocalStratergy = require("passport-local");
+const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
+
+const listingRouter = require("./routes/listing");
+const reviewRouter = require("./routes/review");
+const useRouter = require("./routes/user");
 
 const app = express();
 const PORT = 8080;
@@ -58,7 +60,7 @@ app.use(flash());
 
 app.use(passport.initialize());
 app.use(passport.session());
-passport.use(new LocalStratergy(User.authenticate()));
+passport.use(new LocalStrategy(User.authenticate()));
 
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
@@ -66,11 +68,13 @@ passport.deserializeUser(User.deserializeUser());
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
+  res.locals.currUser = req.user;
   next();
 });
 
-app.use("/listings", listings);
-app.use("/listings/:id/reviews", reviews);
+app.use("/listings", listingRouter);
+app.use("/listings/:id/reviews", reviewRouter);
+app.use("/", useRouter)
 
 app.all("/{*splat}", (req, res, next) => {
   next(new ExpressError(404, "Page Not Found"));
