@@ -130,3 +130,10 @@ body {
 .star-rating input:checked ~ label {
   color: gold;
 }
+
+/* Map */
+
+#map {
+  height: 400px;
+  width: 80vh; 
+}
