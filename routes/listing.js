@@ -3,17 +3,22 @@ const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync");
 const Listing = require("../models/listing.js");
 const { isLoggedIn, isOwner, validateListing } = require("../middleware.js");
-
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
 const listingController = require("../controllers/listing.js");
 
 router
   .route("/")
   .get(wrapAsync(listingController.index))
-  .post(
-    isLoggedIn,
-    validateListing,
-    wrapAsync(listingController.createListing),
-  );
+  // .post(
+  //   isLoggedIn,
+  //   validateListing,
+  //   wrapAsync(listingController.createListing),
+  // );
+  .post(upload.single('listing[image][url]'), (req, res) => {
+    res.send(req.file);
+  });
+
 // EDIT - Show edit form
 router.get(
   "/:id/edit",
@@ -28,8 +33,7 @@ router
   .route("/:id")
   .get(wrapAsync(listingController.showListings))
   .put(
-    isLoggedIn,
-    isLoggedIn,
+    isLoggedIn, 
     isOwner,
     wrapAsync(listingController.updateListing),
   )
