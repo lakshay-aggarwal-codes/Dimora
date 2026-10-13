@@ -1,4 +1,7 @@
- require('dotenv').config()
+require("dotenv").config();
+
+const dns = require("node:dns");
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -7,6 +10,7 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError");
 const session = require("express-session");
+const { MongoStore } = require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -19,18 +23,19 @@ const useRouter = require("./routes/user");
 const app = express();
 const PORT = 8080;
 
-const MONGO_URL = "mongodb://127.0.0.1:27017/dimora";
+// const MONGO_URL = "mongodb://127.0.0.1:27017/dimora";
+const dbUrl = process.env.ATLASDB_URL;
 
-main()
-  .then(() => {
-    console.log("Connected to DB");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+// main()
+//   .then(() => {
+//     console.log("Connected to DB");
+//   })
+//   .catch((err) => {
+//     console.log(err);
+//   });
 
 async function main() {
-  await mongoose.connect(MONGO_URL);
+  await mongoose.connect(dbUrl);
 }
 
 app.set("view engine", "ejs");
@@ -42,7 +47,17 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
+const store = MongoStore.create({
+  mongoUrl: dbUrl,
+  touchAfter: 24 * 60 * 60,
+});
+
+store.on("error", (err) => {
+  console.error("Error in Mongo session store:", err);
+});
+
 const sessionOptions = {
+  store,
   secret: "mysupersecretcode",
   resave: false,
   saveUninitialized: true,
@@ -52,10 +67,6 @@ const sessionOptions = {
     httpOnly: true,
   },
 };
-
-// app.get("/", (req, res) => {
-//   res.send("namaste");
-// });
 
 app.use(session(sessionOptions));
 app.use(flash());
@@ -76,7 +87,7 @@ app.use((req, res, next) => {
 
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
-app.use("/", useRouter)
+app.use("/", useRouter);
 
 app.all("/{*splat}", (req, res, next) => {
   next(new ExpressError(404, "Page Not Found"));
@@ -87,6 +98,15 @@ app.use((err, req, res, next) => {
   res.status(statusCode).render("error.ejs", { err });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+main()
+  .then(() => {
+    console.log("Connected to DB");
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Failed to connect to MongoDB:", err);
+    process.exit(1);
+  });
