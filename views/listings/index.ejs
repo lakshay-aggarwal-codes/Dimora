@@ -1,32 +1,51 @@
-```ejs
 <% layout("layouts/boilerPlate") %>
 
     <style>
-        /* Filters container */
+        /* Main filter bar */
         #filters {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 2rem;
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            gap: 1rem;
+            margin: 1rem 0;
+            width: 100%;
         }
 
-        /* Category filters */
+        /* Category navigation */
+        .filter-nav {
+            display: flex;
+            align-items: center;
+            flex: 1 1 auto;
+            min-width: 0;
+            gap: 0.65rem;
+        }
+
+        /* Horizontal scrolling categories */
         .filter-container {
             display: flex;
-            align-items: flex-start;
-            gap: 2rem;
-            flex-wrap: wrap;
+            align-items: center;
+            flex: 1 1 auto;
+            min-width: 0;
+            gap: 1.4rem;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            padding: 0.25rem 0 0.5rem;
         }
 
+        .filter-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Individual category */
         .filter {
-            min-width: 65px;
+            flex: 0 0 auto;
+            min-width: 55px;
             text-align: center;
             cursor: pointer;
-            opacity: 0.75;
-            transition: opacity 0.2s ease, border-color 0.2s ease;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
             white-space: nowrap;
         }
 
@@ -35,22 +54,49 @@
         }
 
         .filter i {
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            margin-bottom: 0.35rem;
         }
 
         .filter p {
             margin: 0;
-            font-size: 0.95rem;
+            font-size: 0.75rem;
+        }
+
+        /* Previous and next buttons */
+        .filter-arrow {
+            flex: 0 0 30px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #d0d0d0;
+            border-radius: 50%;
+            background: white;
+            color: #222;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .filter-arrow:hover:not(:disabled) {
+            background: #f5f5f5;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .filter-arrow:disabled {
+            opacity: 0.3;
+            cursor: default;
         }
 
         /* Tax toggle */
         .tax-toggle {
-            margin-left: auto;
+            flex: 0 0 auto;
             display: flex;
             align-items: center;
             white-space: nowrap;
-            padding: 0.75rem;
+            padding: 0.5rem 0.65rem;
             border: 1px solid #dee2e6;
             border-radius: 0.75rem;
         }
@@ -58,9 +104,9 @@
         .tax-toggle .form-check {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
             margin: 0;
-            padding-left: 2.5em;
+            padding-left: 2.2em;
         }
 
         .tax-toggle .form-check-input {
@@ -70,7 +116,12 @@
 
         .tax-toggle .form-check-label {
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.75rem;
+        }
+
+        /* Tax information hidden by default */
+        .tax-info {
+            display: none;
         }
 
         /* Listing links */
@@ -96,129 +147,190 @@
         }
 
         /* Responsive layout */
-        @media (max-width: 768px) {
+        @media (max-width: 992px) {
             #filters {
-                align-items: flex-start;
+                gap: 0.6rem;
+            }
+
+            .filter-nav {
+                gap: 0.35rem;
             }
 
             .filter-container {
-                gap: 1.5rem;
+                gap: 0.9rem;
             }
 
             .tax-toggle {
-                margin-left: 0;
+                padding: 0.4rem;
+            }
+
+            .tax-toggle .form-check-label {
+                font-size: 0.7rem;
+            }
+
+            .filter-arrow {
+                flex-basis: 26px;
+                width: 26px;
+                height: 26px;
             }
         }
 
         @media (max-width: 576px) {
+            #filters {
+                gap: 0.4rem;
+            }
+
             .filter-container {
-                gap: 1.25rem;
+                gap: 0.75rem;
             }
 
             .filter {
-                min-width: 55px;
+                min-width: 48px;
+            }
+
+            .filter i {
+                font-size: 0.9rem;
             }
 
             .filter p {
-                font-size: 0.8rem;
+                font-size: 0.65rem;
             }
 
-            .tax-toggle {
+            .tax-toggle .form-check-label {
+                max-width: 85px;
                 white-space: normal;
+                line-height: 1.2;
             }
 
-            #tax-info{
-                display: none;
+            .tax-toggle .form-check {
+                padding-left: 1.8em;
             }
         }
     </style>
 
     <div class="container">
 
-        <h3 class="mb-4">All Listings</h3>
+        <!-- <h3 class="mb-4">All Listings</h3> -->
 
         <!-- Category filters and tax toggle -->
         <div id="filters">
 
-            <div class="filter-container">
+            <!-- Category navigation -->
+            <div class="filter-nav">
 
-                <!-- Trending -->
-                <div class="filter">
-                    <div>
-                        <i class="fa-solid fa-fire"></i>
+                <button type="button" class="filter-arrow" id="filters-prev" aria-label="Previous categories" disabled>
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+
+                <!-- IMPORTANT: Only ONE filter-container -->
+                <div class="filter-container" id="filter-container">
+
+                    <div class="filter">
+                        <div><i class="fa-solid fa-fire"></i></div>
+                        <p>Trending</p>
                     </div>
-                    <p>Trending</p>
+
+                    <div class="filter">
+                        <div><i class="fa-solid fa-tractor"></i></div>
+                        <p>Farms</p>
+                    </div>
+
+                    <div class="filter">
+                        <div><i class="fa-solid fa-mountain-sun"></i></div>
+                        <p>Mountains</p>
+                    </div>
+
+                    <div class="filter">
+                        <div><i class="fa-solid fa-umbrella-beach"></i></div>
+                        <p>Beaches</p>
+                    </div>
+
+                    <div class="filter">
+                        <div><i class="fa-solid fa-person-swimming"></i></div>
+                        <p>Amazing Pools</p>
+                    </div>
+
+                    <div class="filter">
+                        <div><i class="fa-solid fa-sun"></i></div>
+                        <p>Desert</p>
+                    </div>
+
+                    <div class="filter">
+                        <div><i class="fa-solid fa-chess-rook"></i></div>
+                        <p>Castles</p>
+                    </div>
+                    <!-- Tiny Homes -->
+                    <div class="filter">
+                        <div>
+                            <i class="fa-solid fa-house-chimney"></i>
+                        </div>
+                        <p>Tiny Homes</p>
+                    </div>
+
+                    <!-- Historical Homes -->
+                    <div class="filter">
+                        <div>
+                            <i class="fa-solid fa-landmark"></i>
+                        </div>
+                        <p>Historical Homes</p>
+                    </div>
+
+                    <!-- Skiing -->
+                    <div class="filter">
+                        <div>
+                            <i class="fa-solid fa-person-skiing"></i>
+                        </div>
+                        <p>Skiing</p>
+                    </div>
+
+                    <!-- Design -->
+                    <div class="filter">
+                        <div>
+                            <i class="fa-solid fa-palette"></i>
+                        </div>
+                        <p>Design</p>
+                    </div>
+
+                    <div class="filter">
+                        <div><i class="fa-solid fa-water"></i></div>
+                        <p>Lakefront</p>
+                    </div>
+
+                    <div class="filter">
+                        <div><i class="fa-solid fa-bed"></i></div>
+                        <p>Rooms</p>
+                    </div>
+
+                    <div class="filter">
+                        <div><i class="fa-solid fa-city"></i></div>
+                        <p>Iconic Cities</p>
+                    </div>
+
+                    <div class="filter">
+                        <div><i class="fa-solid fa-campground"></i></div>
+                        <p>Camping</p>
+                    </div>
+
+                    <div class="filter">
+                        <div><i class="fa-solid fa-snowflake"></i></div>
+                        <p>Arctic</p>
+                    </div>
+
+                    <div class="filter">
+                        <div><i class="fa-solid fa-tree"></i></div>
+                        <p>Countryside</p>
+                    </div>
+
                 </div>
 
-                <!-- Farms -->
-                <div class="filter">
-                    <div>
-                        <i class="fa-solid fa-tractor"></i>
-                    </div>
-                    <p>Farms</p>
-                </div>
-
-                <!-- Mountains -->
-                <div class="filter">
-                    <div>
-                        <i class="fa-solid fa-mountain-sun"></i>
-                    </div>
-                    <p>Mountains</p>
-                </div>
-
-                <!-- Beaches -->
-                <div class="filter">
-                    <div>
-                        <i class="fa-solid fa-umbrella-beach"></i>
-                    </div>
-                    <p>Beaches</p>
-                </div>
-
-                <!-- Amazing Pools -->
-                <div class="filter">
-                    <div>
-                        <i class="fa-solid fa-person-swimming"></i>
-                    </div>
-                    <p>Amazing Pools</p>
-                </div>
-
-                <!-- Iconic Cities -->
-                <div class="filter">
-                    <div>
-                        <i class="fa-solid fa-city"></i>
-                    </div>
-                    <p>Iconic Cities</p>
-                </div>
-
-                <!-- Camping -->
-                <div class="filter">
-                    <div>
-                        <i class="fa-solid fa-campground"></i>
-                    </div>
-                    <p>Camping</p>
-                </div>
-
-                <!-- Arctic -->
-                <div class="filter">
-                    <div>
-                        <i class="fa-solid fa-snowflake"></i>
-                    </div>
-                    <p>Arctic</p>
-                </div>
-
-                <!-- Countryside -->
-                <div class="filter">
-                    <div>
-                        <i class="fa-solid fa-tree"></i>
-                    </div>
-                    <p>Countryside</p>
-                </div>
+                <button type="button" class="filter-arrow" id="filters-next" aria-label="Next categories">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
 
             </div>
 
-            <!-- Display total after taxes -->
+            <!-- Tax toggle is OUTSIDE filter-nav -->
             <div class="tax-toggle">
-
                 <div class="form-check form-switch">
 
                     <input class="form-check-input" type="checkbox" role="switch" id="switchMdLabel">
@@ -228,15 +340,15 @@
                     </label>
 
                 </div>
-
             </div>
 
         </div>
+        <!-- END filters: listing cards must be outside this div -->
 
         <!-- All listing cards -->
         <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4 mt-3">
 
-            <% for (let list of allListings) { %>
+            <% for (const list of allListings) { %>
 
                 <div class="col">
 
@@ -262,19 +374,19 @@
                                     &#8377;
 
                                     <% if (list.price !=null) { %>
-
                                         <%= list.price.toLocaleString("en-IN") %>
-
                                             <% } else { %>
-
                                                 N/A
-
                                                 <% } %>
 
                                                     / night
 
+                                                    <i class="tax-info">
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;+18% GST
+                                                    </i>
+
                                 </p>
-                                <i class="tax-info">+18% GST</i>
+
                             </div>
 
                         </div>
@@ -288,14 +400,59 @@
         </div>
 
     </div>
-    ```
 
     <script>
-        let taxSwitch = document.getElementById('switchMdLabel');
-        taxSwitch.addEventListener('click', () => {
-            let taxInfo = document.getElementsByClassName('tax-info');
-            for(info of taxInfo){
-                info.style.display = 'inline';
+        // Previous and next category navigation
+        const filterContainer = document.getElementById("filter-container");
+        const prevButton = document.getElementById("filters-prev");
+        const nextButton = document.getElementById("filters-next");
+
+        if (filterContainer && prevButton && nextButton) {
+            const scrollAmount = 300;
+
+            prevButton.addEventListener("click", () => {
+                filterContainer.scrollBy({
+                    left: -scrollAmount,
+                    behavior: "smooth"
+                });
+            });
+
+            nextButton.addEventListener("click", () => {
+                filterContainer.scrollBy({
+                    left: scrollAmount,
+                    behavior: "smooth"
+                });
+            });
+
+            function updateFilterButtons() {
+                const maxScroll = Math.max(
+                    0,
+                    filterContainer.scrollWidth - filterContainer.clientWidth
+                );
+
+                prevButton.disabled = filterContainer.scrollLeft <= 1;
+                nextButton.disabled =
+                    filterContainer.scrollLeft >= maxScroll - 1;
             }
-        })
+
+            filterContainer.addEventListener("scroll", updateFilterButtons);
+            window.addEventListener("resize", updateFilterButtons);
+
+            updateFilterButtons();
+        }
+
+        // Display tax information based on the toggle state
+        const taxSwitch = document.getElementById("switchMdLabel");
+        const taxInfo = document.querySelectorAll(".tax-info");
+
+        if (taxSwitch) {
+            function updateTaxInfo() {
+                taxInfo.forEach((info) => {
+                    info.style.display = taxSwitch.checked ? "inline" : "none";
+                });
+            }
+
+            taxSwitch.addEventListener("change", updateTaxInfo);
+            updateTaxInfo();
+        }
     </script>
