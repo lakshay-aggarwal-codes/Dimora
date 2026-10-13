@@ -1,49 +1,301 @@
+```ejs
 <% layout("layouts/boilerPlate") %>
-    
-        <div class="container">
-            <h3 class="mb-4">All Listings</h3>
 
-            <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4">
+    <style>
+        /* Filters container */
+        #filters {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
 
-                <% for (let list of allListings) { %>
+        /* Category filters */
+        .filter-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
 
-                    <div class="col">
-                        <a href="/listings/<%= list._id %>" class="listing-link">
+        .filter {
+            min-width: 65px;
+            text-align: center;
+            cursor: pointer;
+            opacity: 0.75;
+            transition: opacity 0.2s ease, border-color 0.2s ease;
+            white-space: nowrap;
+        }
 
-                            <div class="card h-100 listing-card">
+        .filter:hover {
+            opacity: 1;
+        }
 
-                                <img src="<%= list.image && list.image.url ? list.image.url : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6' %>"
-                                    class="card-img-top" alt="<%= list.title %>"
-                                    style="height: 20rem; object-fit: cover;">
+        .filter i {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
 
-                                <div class="card-body">
-                                    <p class="card-text">
+        .filter p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
 
-                                        <b>
-                                            <%= list.title %>
-                                        </b>
+        /* Tax toggle */
+        .tax-toggle {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.75rem;
+        }
 
-                                        <br>
+        .tax-toggle .form-check {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+            padding-left: 2.5em;
+        }
 
-                                        &#8377;
+        .tax-toggle .form-check-input {
+            cursor: pointer;
+            margin-top: 0;
+        }
 
-                                        <% if (list.price !=null) { %>
-                                            <%= list.price.toLocaleString("en-IN") %>
-                                                <% } else { %>
-                                                    N/A
-                                                    <% } %>
+        .tax-toggle .form-check-label {
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
 
-                                                        / night
+        /* Listing links */
+        .listing-link {
+            text-decoration: none;
+            color: inherit;
+        }
 
-                                    </p>
-                                </div>
+        /* Listing cards */
+        .listing-card {
+            border: none;
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
 
-                            </div>
+        .listing-card:hover {
+            transform: translateY(-3px);
+        }
 
-                        </a>
+        .listing-card img {
+            border-radius: 1rem;
+        }
+
+        /* Responsive layout */
+        @media (max-width: 768px) {
+            #filters {
+                align-items: flex-start;
+            }
+
+            .filter-container {
+                gap: 1.5rem;
+            }
+
+            .tax-toggle {
+                margin-left: 0;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .filter-container {
+                gap: 1.25rem;
+            }
+
+            .filter {
+                min-width: 55px;
+            }
+
+            .filter p {
+                font-size: 0.8rem;
+            }
+
+            .tax-toggle {
+                white-space: normal;
+            }
+
+            #tax-info{
+                display: none;
+            }
+        }
+    </style>
+
+    <div class="container">
+
+        <h3 class="mb-4">All Listings</h3>
+
+        <!-- Category filters and tax toggle -->
+        <div id="filters">
+
+            <div class="filter-container">
+
+                <!-- Trending -->
+                <div class="filter">
+                    <div>
+                        <i class="fa-solid fa-fire"></i>
                     </div>
+                    <p>Trending</p>
+                </div>
 
-                    <% } %>
+                <!-- Farms -->
+                <div class="filter">
+                    <div>
+                        <i class="fa-solid fa-tractor"></i>
+                    </div>
+                    <p>Farms</p>
+                </div>
+
+                <!-- Mountains -->
+                <div class="filter">
+                    <div>
+                        <i class="fa-solid fa-mountain-sun"></i>
+                    </div>
+                    <p>Mountains</p>
+                </div>
+
+                <!-- Beaches -->
+                <div class="filter">
+                    <div>
+                        <i class="fa-solid fa-umbrella-beach"></i>
+                    </div>
+                    <p>Beaches</p>
+                </div>
+
+                <!-- Amazing Pools -->
+                <div class="filter">
+                    <div>
+                        <i class="fa-solid fa-person-swimming"></i>
+                    </div>
+                    <p>Amazing Pools</p>
+                </div>
+
+                <!-- Iconic Cities -->
+                <div class="filter">
+                    <div>
+                        <i class="fa-solid fa-city"></i>
+                    </div>
+                    <p>Iconic Cities</p>
+                </div>
+
+                <!-- Camping -->
+                <div class="filter">
+                    <div>
+                        <i class="fa-solid fa-campground"></i>
+                    </div>
+                    <p>Camping</p>
+                </div>
+
+                <!-- Arctic -->
+                <div class="filter">
+                    <div>
+                        <i class="fa-solid fa-snowflake"></i>
+                    </div>
+                    <p>Arctic</p>
+                </div>
+
+                <!-- Countryside -->
+                <div class="filter">
+                    <div>
+                        <i class="fa-solid fa-tree"></i>
+                    </div>
+                    <p>Countryside</p>
+                </div>
 
             </div>
+
+            <!-- Display total after taxes -->
+            <div class="tax-toggle">
+
+                <div class="form-check form-switch">
+
+                    <input class="form-check-input" type="checkbox" role="switch" id="switchMdLabel">
+
+                    <label class="form-check-label" for="switchMdLabel">
+                        Display Total after Taxes
+                    </label>
+
+                </div>
+
+            </div>
+
         </div>
+
+        <!-- All listing cards -->
+        <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4 mt-3">
+
+            <% for (let list of allListings) { %>
+
+                <div class="col">
+
+                    <a href="/listings/<%= list._id %>" class="listing-link">
+
+                        <div class="card h-100 listing-card">
+
+                            <img src="<%= list.image && list.image.url
+                                ? list.image.url
+                                : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6' %>"
+                                class="card-img-top" alt="<%= list.title %>" style="height: 20rem; object-fit: cover;">
+
+                            <div class="card-body">
+
+                                <p class="card-text">
+
+                                    <b>
+                                        <%= list.title %>
+                                    </b>
+
+                                    <br>
+
+                                    &#8377;
+
+                                    <% if (list.price !=null) { %>
+
+                                        <%= list.price.toLocaleString("en-IN") %>
+
+                                            <% } else { %>
+
+                                                N/A
+
+                                                <% } %>
+
+                                                    / night
+
+                                </p>
+                                <i class="tax-info">+18% GST</i>
+                            </div>
+
+                        </div>
+
+                    </a>
+
+                </div>
+
+                <% } %>
+
+        </div>
+
+    </div>
+    ```
+
+    <script>
+        let taxSwitch = document.getElementById('switchMdLabel');
+        taxSwitch.addEventListener('click', () => {
+            let taxInfo = document.getElementsByClassName('tax-info');
+            for(info of taxInfo){
+                info.style.display = 'inline';
+            }
+        })
+    </script>
