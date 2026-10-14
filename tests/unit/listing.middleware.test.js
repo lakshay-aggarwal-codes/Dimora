@@ -1,12 +1,10 @@
 // Middleware used by the listing routes, with the model stubbed (no database).
-const { ObjectId } = require("mongoose").Types;
-const Listing = require("../../src/models/listing");
-const { isOwner, validateListing } = require("../../src/middleware");
+const { validateListing } = require("../../src/middleware");
 const {
   requireImage,
   geocodeListing,
 } = require("../../src/middleware/listing");
-const { ValidationError, NotFoundError } = require("../../src/utils/errors");
+const { ValidationError } = require("../../src/utils/errors");
 const { geocoding, resetExternalMocks } = require("../helpers/mocks");
 const { loadEnv, resetConfigCache } = require("../../src/config/env");
 
@@ -40,57 +38,6 @@ const form = (listing) => ({
     price: "2500",
     ...listing,
   },
-});
-
-describe("isOwner", () => {
-  const me = new ObjectId();
-  const req = (extra) => ({
-    params: { id: "abc" },
-    user: { _id: me },
-    flash: jest.fn(),
-    ...extra,
-  });
-  const res = () => ({ redirect: jest.fn() });
-
-  test("a missing listing is a 404, not a crash", async () => {
-    jest.spyOn(Listing, "findById").mockResolvedValue(null);
-    await expect(isOwner(req(), res(), jest.fn())).rejects.toBeInstanceOf(
-      NotFoundError,
-    );
-  });
-
-  test("a listing without an owner belongs to nobody (redirect, no crash)", async () => {
-    jest.spyOn(Listing, "findById").mockResolvedValue({ owner: undefined });
-    const r = res();
-    const next = jest.fn();
-    await isOwner(req(), r, next);
-    expect(next).not.toHaveBeenCalled();
-    expect(r.redirect).toHaveBeenCalledWith("/listings/abc");
-  });
-
-  test("another user's listing redirects with a message", async () => {
-    jest
-      .spyOn(Listing, "findById")
-      .mockResolvedValue({ owner: new ObjectId() });
-    const rq = req();
-    const r = res();
-    await isOwner(rq, r, jest.fn());
-    expect(rq.flash).toHaveBeenCalledWith(
-      "error",
-      expect.stringMatching(/owner/),
-    );
-    expect(r.redirect).toHaveBeenCalledWith("/listings/abc");
-  });
-
-  test("the owner passes and the listing is left on req.listing", async () => {
-    const listing = { owner: me };
-    jest.spyOn(Listing, "findById").mockResolvedValue(listing);
-    const rq = req();
-    const next = jest.fn();
-    await isOwner(rq, res(), next);
-    expect(next).toHaveBeenCalledWith();
-    expect(rq.listing).toBe(listing);
-  });
 });
 
 describe("validateListing", () => {

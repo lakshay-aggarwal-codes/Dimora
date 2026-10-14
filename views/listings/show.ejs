@@ -5,7 +5,8 @@
             : "https://images.unsplash.com/photo-1564013799919-ab600027ffc6";
         const ownerName = listing.owner && listing.owner.username;
         const hasPrice = typeof listing.price === "number" && Number.isFinite(listing.price);
-        const isListingOwner = Boolean(currUser && listing.owner && listing.owner._id && listing.owner._id.equals(currUser._id));
+        const canEditListing = can("listing:edit", listing);
+        const canDeleteListing = can("listing:delete", listing);
     %>
     <div class="row mt-3">
         <div class="col-8 offset-3">
@@ -42,17 +43,21 @@
         <br>
     </div>
 
-    <% if(isListingOwner){ %>
+    <% if(canEditListing || canDeleteListing){ %>
         <div class="btns">
 
+            <% if(canEditListing){ %>
             <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark col-1 offset-3">Edit </a>
+            <% } %>
 
+            <% if(canDeleteListing){ %>
             <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
                 <%- include("../includes/csrf.ejs") %>
                 <button type="submit" class="btn btn-dark offset-4">
                     Delete
                 </button>
             </form>
+            <% } %>
         </div>
         <%}%>
 
@@ -113,7 +118,7 @@
                                                 <%=review.comment%>
                                             </p>
                                         </div>
-                                        <% if (currUser && review.author && review.author._id && review.author._id.equals(currUser._id)) { %>
+                                        <% if (can("review:delete", review)) { %>
                                         <form class="mb-3 text-end" method="post"
                                             action="/listings/<%= listing._id%>/reviews/<%= review._id%>?_method=Delete">
                                             <%- include("../includes/csrf.ejs") %>

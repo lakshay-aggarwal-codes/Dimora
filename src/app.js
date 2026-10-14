@@ -16,6 +16,7 @@ const { NotFoundError } = require("./utils/errors");
 const { createLogger } = require("./config/logger");
 const { createErrorHandler } = require("./middleware/errors");
 const User = require("./models/user.js");
+const { can } = require("./policies");
 
 const listingRouter = require("./routes/listing");
 const reviewRouter = require("./routes/review");
@@ -137,6 +138,8 @@ function createApp({
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
     res.locals.currUser = req.user;
+    // Views ask the same policies as the routes: can("listing:edit", listing).
+    res.locals.can = (action, resource) => can(action, req.user, resource);
     res.locals.mapPublicToken = config.mapbox.publicToken;
     next();
   });

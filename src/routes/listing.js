@@ -1,7 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync");
-const { isLoggedIn, isOwner, validateListing } = require("../middleware");
+const {
+  isLoggedIn,
+  authorize,
+  validateListing,
+} = require("../middleware");
 const { requireImage, geocodeListing } = require("../middleware/listing");
 const listingController = require("../controllers/listing.js");
 const { upload, uploadToCloudinary } = require("../config/cloudinary");
@@ -17,6 +21,7 @@ router
   .get(wrapAsync(listingController.index))
   .post(
     isLoggedIn,
+    authorize("listing:create"),
     upload.single(IMAGE_FIELD),
     validateListing,
     requireImage,
@@ -29,24 +34,33 @@ router
 router.get(
   "/:id/edit",
   isLoggedIn,
-  isOwner,
+  authorize("listing:edit"),
   wrapAsync(listingController.renderEditForm),
 );
 
-router.get("/new", isLoggedIn, listingController.renderNewForm);
+router.get(
+  "/new",
+  isLoggedIn,
+  authorize("listing:create"),
+  listingController.renderNewForm,
+);
 
 router
   .route("/:id")
   .get(wrapAsync(listingController.showListings))
   .put(
     isLoggedIn,
-    isOwner,
+    authorize("listing:edit"),
     upload.single(IMAGE_FIELD),
     validateListing,
     geocodeListing({ backTo: (req) => `/listings/${req.params.id}/edit` }),
     uploadToCloudinary,
     wrapAsync(listingController.updateListing),
   )
-  .delete(isLoggedIn, isOwner, wrapAsync(listingController.destroyListing));
+  .delete(
+    isLoggedIn,
+    authorize("listing:delete"),
+    wrapAsync(listingController.destroyListing),
+  );
 
 module.exports = router;

@@ -23,7 +23,7 @@ function hasGeometry(listing) {
 
 /**
  * Sets req.geometry from the submitted location + country.
- * On edit (req.listing is set by isOwner) it only looks the place up again when
+ * On edit (req.listing is set by authorize("listing:edit")) it only looks the place up again when
  * the location or country changed, or when the stored listing has no coordinates.
  * A place that cannot be found, or a geocoder outage, flashes a message and sends
  * the user back to the form (`backTo(req)`) so nothing is uploaded or saved.

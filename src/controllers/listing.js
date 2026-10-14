@@ -85,7 +85,7 @@ module.exports.renderEditForm = async (req, res) => {
 // With one, the old image is deleted from Cloudinary after the save succeeds.
 module.exports.updateListing = async (req, res) => {
   const { id } = req.params;
-  const listing = req.listing; // loaded by isOwner
+  const listing = req.listing; // loaded by authorize("listing:edit")
   const { title, description, location, country, price } = req.body.listing;
 
   const previousFilename = listing.image && listing.image.filename;

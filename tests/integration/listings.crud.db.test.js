@@ -305,7 +305,7 @@ describeDb("listing create / edit / delete", () => {
       expect(uploader.destroy.mock.calls[0][0]).not.toBe("dimora_DEV/old1");
     });
 
-    test("another user cannot edit (redirect, nothing changed)", async () => {
+    test("another user cannot edit (403, nothing changed)", async () => {
       const { listing } = await ownedListing();
       const { agent: stranger } = await loggedInAgent();
       const res = await putListing(
@@ -313,22 +313,20 @@ describeDb("listing create / edit / delete", () => {
         listing._id,
         fields({ "listing[title]": "Hijacked" }),
       );
-      expect(res.status).toBe(302);
-      expect(res.headers.location).toBe(`/listings/${listing._id}`);
+      expect(res.status).toBe(403);
       expect((await Listing.findById(listing._id)).title).toBe(
         "Original title",
       );
     });
 
-    test("a listing with no owner gives a redirect, not a 500", async () => {
+    test("a listing with no owner gives a 403, not a 500", async () => {
       const { agent, listing } = await ownedListing();
       await Listing.collection.updateOne(
         { _id: listing._id },
         { $unset: { owner: "" } },
       );
       const res = await agent.get(`/listings/${listing._id}/edit`);
-      expect(res.status).toBe(302);
-      expect(res.headers.location).toBe(`/listings/${listing._id}`);
+      expect(res.status).toBe(403);
     });
 
     test("editing or deleting a listing that does not exist is a 404", async () => {
