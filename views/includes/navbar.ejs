@@ -1,4 +1,4 @@
-<style>
+<style nonce="<%= locals.cspNonce %>">
     /* Search container */
     .search {
         flex: 1 1 400px;
@@ -133,7 +133,9 @@
                     <a class="nav-link" href="/login"><b> Login </b> </a>
                     <%}%>
                         <% if(currUser){%>
-                            <a class="nav-link" href="/logout"> <b> Logout</b> </a>
+                            <form class="d-inline" action="/logout" method="POST">
+                                <button type="submit" class="nav-link btn btn-link d-inline"><b>Logout</b></button>
+                            </form>
                             <%}%>
             </div>
         </div>

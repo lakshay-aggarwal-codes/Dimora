@@ -21,6 +21,11 @@ const listingRouter = require("./routes/listing");
 const reviewRouter = require("./routes/review");
 const useRouter = require("./routes/user");
 const pagesRouter = require("./routes/pages");
+const {
+  assignCspNonce,
+  securityHeaders,
+  createAuthLimiters,
+} = require("./middleware/security");
 
 const ROOT_DIR = path.join(__dirname, "..");
 
@@ -50,7 +55,15 @@ function createApp({
   app.set("view engine", "ejs");
   app.set("views", path.join(ROOT_DIR, "views"));
 
+  app.disable("x-powered-by");
+  // Behind one reverse proxy (Render, Railway, nginx...): needed for secure
+  // cookies and for rate limiting by the real client address.
+  if (config.isProduction) app.set("trust proxy", 1);
+
   app.engine("ejs", ejsMate);
+  // Before static files so every response carries the security headers.
+  app.use(assignCspNonce);
+  app.use(securityHeaders({ isProduction: Boolean(config.isProduction) }));
   app.use(express.static(path.join(ROOT_DIR, "public")));
 
   // After static files (so assets are not logged), before everything else so
@@ -96,11 +109,12 @@ function createApp({
     store,
     secret: config.sessionSecret,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
-      expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
       maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true,
+      sameSite: "lax",
+      secure: Boolean(config.isProduction),
     },
   };
 
@@ -121,6 +135,10 @@ function createApp({
     res.locals.mapPublicToken = config.mapbox.publicToken;
     next();
   });
+
+  const limiters = createAuthLimiters();
+  app.post("/login", limiters.login);
+  app.post("/signup", limiters.signup);
 
   app.use("/listings", listingRouter);
   app.use("/listings/:id/reviews", reviewRouter);

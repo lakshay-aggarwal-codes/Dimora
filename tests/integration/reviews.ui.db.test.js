@@ -18,7 +18,8 @@ describeDb("review form, timestamps and navbar (database)", () => {
   test("the navbar for a logged-in user shows Logout and no Sign Up", async () => {
     const { agent } = await loggedIn();
     const res = await agent.get("/listings");
-    expect(res.text).toContain('href="/logout"');
+    expect(res.text).toContain('action="/logout"');
+    expect(res.text).not.toContain('href="/logout"');
     expect(res.text).toContain("Logout");
     expect(res.text).not.toContain("Login out");
     expect(res.text).not.toContain('href="/signup');

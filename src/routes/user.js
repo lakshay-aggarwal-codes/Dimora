@@ -22,5 +22,6 @@ router
     wrapAsync(userController.login),
   );
 
-router.get("/logout", userController.logout);
+// POST only: a link or an <img> on another site must not be able to log you out.
+router.post("/logout", userController.logout);
 module.exports = router;
