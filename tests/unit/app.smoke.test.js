@@ -1,6 +1,4 @@
-// Run with: node --test tests/unit/app.smoke.test.js
 // P01-T03: the app is importable and runs without a database or a fixed port.
-const test = require("node:test");
 const assert = require("node:assert/strict");
 const { execFileSync } = require("node:child_process");
 const path = require("node:path");

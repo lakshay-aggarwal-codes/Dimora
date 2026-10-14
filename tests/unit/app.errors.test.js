@@ -1,15 +1,13 @@
-// Run with: node --test tests/unit/app.errors.test.js
 // P01-T04: behaviour of the real app (createApp) for errors and logging,
 // without a database.
-const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
-const { Writable } = require("node:stream");
 const session = require("express-session");
 const { createApp } = require("../../src/app");
 const { createLogger } = require("../../src/config/logger");
 const { buildErrorApp, listen } = require("../helpers/errorApp");
+const { memoryLog } = require("../helpers/logCapture");
 
 const CONFIG = {
   port: 0,
@@ -19,21 +17,6 @@ const CONFIG = {
   cloudinary: { cloudName: "c", apiKey: "k", apiSecret: "s" },
   mapbox: { serverToken: "pk.server", publicToken: "pk.public" },
 };
-
-function memoryLog() {
-  const lines = [];
-  const destination = new Writable({
-    write(chunk, enc, cb) {
-      lines.push(chunk.toString());
-      cb();
-    },
-  });
-  return {
-    logger: createLogger({ level: "info", destination }),
-    text: () => lines.join(""),
-    records: () => lines.join("").split("\n").filter(Boolean).map(JSON.parse),
-  };
-}
 
 async function withApp(overrides, fn) {
   const app = createApp({

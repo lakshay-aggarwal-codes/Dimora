@@ -16,6 +16,10 @@ module.exports = [
     },
   },
   {
+    files: ["tests/**/*.js", "jest.config.js"],
+    languageOptions: { globals: { ...globals.node, ...globals.jest } },
+  },
+  {
     files: ["public/js/**/*.js"],
     languageOptions: {
       ecmaVersion: "latest",
@@ -29,7 +33,11 @@ module.exports = [
     // P01-T06 rewrites this file (data- attributes); remove this block then.
     files: ["public/js/map.js"],
     languageOptions: {
-      globals: { mapboxgl: "readonly", mapToken: "readonly", listing: "readonly" },
+      globals: {
+        mapboxgl: "readonly",
+        mapToken: "readonly",
+        listing: "readonly",
+      },
     },
     rules: { "no-unused-vars": "off" },
   },

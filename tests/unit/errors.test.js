@@ -1,7 +1,5 @@
-// Run with: node --test tests/unit/errors.test.js
 // P01-T04: typed errors and the error handler (status mapping, production
 // safety, JSON variant, odd throws).
-const test = require("node:test");
 const assert = require("node:assert/strict");
 const mongoose = require("mongoose");
 const {
@@ -287,7 +285,9 @@ test("/api paths and Accept: application/json get a JSON error body", async () =
       const nf = await fetch(`${base}/api/thing`);
       assert.equal(nf.status, 404);
       assert.match(nf.headers.get("content-type"), /application\/json/);
-      assert.deepEqual(await nf.json(), {
+      // expect().toEqual: node:assert deep-equality compares prototypes, and
+      // JSON parsed by fetch comes from another realm under Jest.
+      expect(await nf.json()).toEqual({
         error: {
           status: 404,
           code: "not_found",
