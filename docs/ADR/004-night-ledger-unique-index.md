@@ -31,3 +31,25 @@ Create a `StayNight` document for every reserved or blocked night: `{ listing, d
 ## Alternative rejected
 
 Application-level availability checks, or relying on multi-document transactions alone. Checks are racy; transactions would force a replica set locally and still need a unique constraint for correctness.
+
+## Spike implementation and results (P07-T02)
+
+Implemented in `src/models/stayNight.js` and `src/services/ledger.js` (`reserveNights`, `releaseNights`, `availableRanges`).
+
+Details the design needed once it was built:
+
+- **Ascending insert order.** Nights are sorted before `insertMany(..., { ordered: true })`. With one global order, two overlapping requests cannot each hold part of the other's range and both fail: whoever takes the first contested night wins the rest.
+- **Compensation deletes by `_id`.** Each attempt generates its `_id`s up front and, on any error, deletes exactly those rows. Deleting by `source.id` would destroy the rows of an earlier successful call for the same reservation (a double submit).
+- **Transient conflicts.** A losing request can collide with rows another attempt is about to roll back, so a 409 may be spurious for a moment; callers may retry. Correctness (no night with two owners) is never affected.
+- **Stale-hold takeover** is one retry after `deleteMany({ listing, date: { $in: nights }, holdExpiresAt: { $lt: now } })`. The condition means a row that was confirmed (hold removed) is never deleted. A request retries only if that delete removed something.
+- `ConflictError` has code `nights_unavailable` and `conflictingDates` for the message.
+
+Measured results (to be filled in from a real MongoDB run; the sandbox that wrote this code had no `mongod`):
+
+| Check | Command | Result |
+|---|---|---|
+| 50 parallel requests, same nights: exactly one wins | `npm test -- tests/integration/ledger.db.test.js` | _not yet recorded_ |
+| 20 consecutive runs of the suite | `1..20 \| ForEach-Object { npm test -- tests/integration/ledger.db.test.js }` | _not yet recorded_ |
+| Time for 50 contenders on 3 nights (local mongod) | same | _not yet recorded_ |
+
+If any run shows two owners of a night or a request that holds only part of its nights, this ADR is revised before P07-T05 builds on it.
