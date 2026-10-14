@@ -3,6 +3,8 @@
 // Coverage report:        npm run test:coverage   (written to ./coverage)
 // Without a MongoDB binary (e.g. offline CI sandbox), skip the database-backed
 // suites:  $env:SKIP_DB_TESTS = "1"; npm test     (PowerShell)
+// Use an already running MongoDB instead of downloading one:
+//          $env:TEST_MONGODB_URI = "mongodb://127.0.0.1:27017"; npm test
 module.exports = {
   testEnvironment: "node",
   testMatch: ["<rootDir>/tests/**/*.test.js"],

@@ -1,6 +1,6 @@
 const Listing = require("../models/listing.js");
 const Review = require("../models/review.js");
-const { ValidationError } = require("../utils/errors");
+const { ValidationError, NotFoundError } = require("../utils/errors");
 const { listingSchema, reviewSchema } = require("../validation");
 
 module.exports.isLoggedIn = (req, res, next) => {
@@ -19,22 +19,32 @@ module.exports.saveRedirectUrl = (req, res, next) => {
   next();
 };
 
+// Loads the listing and checks that the logged-in user owns it. The listing is
+// left on req.listing so later steps do not fetch it again.
 module.exports.isOwner = async (req, res, next) => {
-  let { id } = req.params;
-  let listing = await Listing.findById(id);
-  if (!listing.owner._id.equals(res.locals.currUser._id)) {
+  const { id } = req.params;
+  const listing = await Listing.findById(id);
+  if (!listing) {
+    throw new NotFoundError("That listing does not exist.");
+  }
+  // A listing without an owner (old seed data) belongs to nobody.
+  if (!listing.owner || !listing.owner.equals(req.user._id)) {
     req.flash("error", "You aren't the owner of this listing");
     return res.redirect(`/listings/${id}`);
   }
+  req.listing = listing;
   next();
 };
 
 module.exports.validateListing = (req, res, next) => {
-  let { error } = listingSchema.validate(req.body);
+  // `?? {}`: a request with no parsable body must fail validation, not crash.
+  const { error, value } = listingSchema.validate(req.body ?? {});
   if (error) {
     let errMsg = error.details.map((el) => el.message).join(",");
     throw new ValidationError(errMsg);
-  } else next();
+  }
+  req.body = value; // trimmed strings, price as a number
+  next();
 };
 
 module.exports.validateReview = (req, res, next) => {

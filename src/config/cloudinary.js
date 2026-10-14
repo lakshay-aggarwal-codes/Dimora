@@ -13,6 +13,7 @@ function configureCloudinary({ cloudName, apiKey, apiSecret }) {
   });
 }
 
+const UPLOAD_FOLDER = "dimora_DEV";
 const ALLOWED_MIME_TYPES = ["image/png", "image/jpeg"];
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
@@ -29,7 +30,7 @@ const upload = multer({
 function uploadBuffer(buffer) {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: "dimora_DEV" },
+      { folder: UPLOAD_FOLDER },
       (err, result) => (err ? reject(err) : resolve(result)),
     );
     stream.end(buffer);
@@ -52,8 +53,26 @@ async function uploadToCloudinary(req, res, next) {
   }
 }
 
+// Best-effort removal of an image we uploaded (replaced image, or an upload
+// whose listing could not be saved). Never throws: a leftover image is not worth
+// failing the request. Ignores ids outside our folder (e.g. old seed data).
+async function deleteImage(publicId, log) {
+  if (typeof publicId !== "string" || !publicId.startsWith("dimora_")) {
+    return false;
+  }
+  try {
+    await cloudinary.uploader.destroy(publicId);
+    return true;
+  } catch (err) {
+    if (log) log.warn({ err, publicId }, "could not delete image");
+    return false;
+  }
+}
+
 module.exports = {
   cloudinary,
+  UPLOAD_FOLDER,
+  deleteImage,
   configureCloudinary,
   upload,
   uploadToCloudinary,

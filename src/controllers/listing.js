@@ -1,20 +1,9 @@
 const Listing = require("../models/listing.js");
-const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
-const { loadEnv } = require("../config/env");
+const { getGeocodingClient } = require("../services/geocoding");
+const { deleteImage } = require("../config/cloudinary");
 
-// Built on first use so that requiring this file does not need the environment.
-// server.js calls initGeocoding() at startup so a malformed MAPBOX_SERVER_TOKEN
-// still stops the server at boot, as it did before the app/server split.
-let geocodingClient;
-function getGeocodingClient() {
-  if (!geocodingClient) {
-    geocodingClient = mbxGeocoding({
-      accessToken: loadEnv().mapbox.serverToken,
-    });
-  }
-  return geocodingClient;
-}
-
+// server.js calls this at startup so a malformed MAPBOX_SERVER_TOKEN still
+// stops the server at boot (the client is otherwise built on first use).
 module.exports.initGeocoding = getGeocodingClient;
 
 module.exports.index = async (req, res) => {
@@ -44,33 +33,32 @@ module.exports.showListings = async (req, res) => {
 
   res.render("listings/show.ejs", { listing });
 };
-module.exports.createListing = async (req, res, next) => {
+// Runs after validateListing, requireImage, geocodeListing and uploadToCloudinary
+// (see routes/listing.js): req.body.listing is clean, req.geometry is set and
+// req.file.path / req.file.filename point at the uploaded image.
+module.exports.createListing = async (req, res) => {
+  const { title, description, location, country, price } = req.body.listing;
+
+  const newListing = new Listing({
+    title,
+    description,
+    location,
+    country,
+    price,
+    owner: req.user._id,
+    geometry: req.geometry,
+    image: { url: req.file.path, filename: req.file.filename },
+  });
+
   try {
-    let response = await getGeocodingClient()
-      .forwardGeocode({
-        query: req.body.listing.location,
-        limit: 1,
-      })
-      .send();
-
-    const geometry = response.body.features[0].geometry;
-
-    let url = req.file.path;
-    let filename = req.file.filename;
-
-    const newListing = new Listing(req.body.listing);
-
-    newListing.owner = req.user._id;
-    newListing.image = { url, filename };
-    newListing.geometry = geometry;
-
     await newListing.save();
-
-    req.flash("success", "New Listing Created");
-    res.redirect("/listings");
   } catch (err) {
-    next(err);
+    await deleteImage(req.file.filename, req.log); // do not orphan the upload
+    throw err;
   }
+
+  req.flash("success", "New Listing Created");
+  res.redirect("/listings");
 };
 module.exports.renderEditForm = async (req, res) => {
   const { id } = req.params;
@@ -80,32 +68,39 @@ module.exports.renderEditForm = async (req, res) => {
     req.flash("error", "Listing you requested for does not exist");
     return res.redirect("/listings");
   }
-  let originalImageUrl = listing.image.url;
-  originalImageUrl = originalImageUrl.replace("/upload", "/upload/w_250");
+  const imageUrl = listing.image && listing.image.url;
+  const originalImageUrl = imageUrl
+    ? imageUrl.replace("/upload", "/upload/w_250")
+    : null;
   res.render("listings/edit.ejs", { listing, originalImageUrl });
 };
 
+// The image is optional on edit: without a new file the stored image stays.
+// With one, the old image is deleted from Cloudinary after the save succeeds.
 module.exports.updateListing = async (req, res) => {
   const { id } = req.params;
+  const listing = req.listing; // loaded by isOwner
+  const { title, description, location, country, price } = req.body.listing;
 
-  const listing = await Listing.findById(id);
+  const previousFilename = listing.image && listing.image.filename;
 
-  if (!listing) {
-    req.flash("error", "Listing you requested for does not exist");
-    return res.redirect("/listings");
+  listing.set({ title, description, location, country, price });
+  if (req.geometry) listing.geometry = req.geometry;
+  if (req.file) {
+    listing.image = { url: req.file.path, filename: req.file.filename };
   }
 
-  if (!req.body.listing.image.url) {
-    req.body.listing.image = listing.image;
+  try {
+    await listing.save();
+  } catch (err) {
+    if (req.file) await deleteImage(req.file.filename, req.log);
+    throw err;
   }
 
-  let list = await Listing.findByIdAndUpdate(id, req.body.listing);
-  if (typeof req.file !== "undefined") {
-    let url = req.file.path;
-    let filename = req.file.filename;
-    list.image = { url, filename };
-    await list.save();
+  if (req.file && previousFilename) {
+    await deleteImage(previousFilename, req.log);
   }
+
   req.flash("success", "Listing Updated");
   res.redirect(`/listings/${id}`);
 };
