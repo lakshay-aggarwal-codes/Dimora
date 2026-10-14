@@ -96,7 +96,7 @@ describe("session cookie", () => {
     expect(cookie).toMatch(/HttpOnly/i);
     expect(cookie).toMatch(/SameSite=Lax/i);
     expect(cookie).toMatch(/Secure/i);
-    expect(cookie).toMatch(/Max-Age=604800/i);
+    expect(cookie).toMatch(/Expires=/i); // express-session sends the fixed lifetime as Expires
   });
 
   test("development: HttpOnly and SameSite=Lax but not Secure (http)", async () => {

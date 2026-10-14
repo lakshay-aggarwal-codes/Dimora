@@ -7,7 +7,7 @@
 
             <h3>Edit your Listing</h3>
 
-            <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation"
+            <form method="POST" action="/listings/<%= listing._id %>?_method=PUT&_csrf=<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>" novalidate class="needs-validation"
                 enctype="multipart/form-data">
 
                 <!-- Title -->

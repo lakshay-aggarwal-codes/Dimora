@@ -26,6 +26,7 @@ const {
   securityHeaders,
   createAuthLimiters,
 } = require("./middleware/security");
+const { csrfProtection } = require("./middleware/csrf");
 
 const ROOT_DIR = path.join(__dirname, "..");
 
@@ -120,6 +121,10 @@ function createApp({
 
   app.use(session(sessionOptions));
   app.use(flash());
+
+  // After the session and the urlencoded parser, before multer and every
+  // router: no state-changing route can run without a valid token (P01-T10).
+  app.use(csrfProtection());
 
   app.use(passport.initialize());
   app.use(passport.session());

@@ -48,6 +48,7 @@
             <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark col-1 offset-3">Edit </a>
 
             <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+                <%- include("../includes/csrf.ejs") %>
                 <button type="submit" class="btn btn-dark offset-4">
                     Delete
                 </button>
@@ -62,6 +63,7 @@
                         Leave us a review!
                     </h4>
                     <form method="post" action="/listings/<%= listing.id%>/reviews" novalidate class="needs-validation">
+                        <%- include("../includes/csrf.ejs") %>
                         <div class="mb-3 mt-3">
                             <label for="rating" class="form-label">Rating</label>
                             <fieldset class="starability-slot">
@@ -114,6 +116,7 @@
                                         <% if (currUser && review.author && review.author._id && review.author._id.equals(currUser._id)) { %>
                                         <form class="mb-3 text-end" method="post"
                                             action="/listings/<%= listing._id%>/reviews/<%= review._id%>?_method=Delete">
+                                            <%- include("../includes/csrf.ejs") %>
                                             <button class="btn btn-sm btn-dark">Delete Review</button>
                                         </form>
                                         <% } %>
@@ -125,7 +128,7 @@
             </div>
             <div class="col-6 offset-3 mb-3">
                 <h3>Where you'll be</h3>
-                <% if (locals.mapPoint) { %>
+                <% if (typeof mapPoint !== 'undefined' && mapPoint) { %>
                     <div id="map" data-token="<%= mapPublicToken %>" data-lng="<%= mapPoint.lng %>"
                         data-lat="<%= mapPoint.lat %>" data-title="<%= listing.title %>"></div>
                 <% } else { %>

@@ -4,7 +4,7 @@
             <br><br>
             <h3>Create New Listing</h3>
 
-            <form method="POST" action="/listings" novalidate class="needs-validation" enctype="multipart/form-data">
+            <form method="POST" action="/listings?_csrf=<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>" novalidate class="needs-validation" enctype="multipart/form-data">
                 <div class="mb-3">
 
                     <label for="title" class="form-label">Title</label>
