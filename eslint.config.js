@@ -28,17 +28,8 @@ module.exports = [
     },
   },
   {
-    // Documented exception: map.js reads globals that views/listings/show.ejs
-    // defines inline (mapToken, listing) and has top-level values it never reads.
-    // P01-T06 rewrites this file (data- attributes); remove this block then.
+    // map.js is a browser script that relies on the Mapbox GL global.
     files: ["public/js/map.js"],
-    languageOptions: {
-      globals: {
-        mapboxgl: "readonly",
-        mapToken: "readonly",
-        listing: "readonly",
-      },
-    },
-    rules: { "no-unused-vars": "off" },
+    languageOptions: { globals: { mapboxgl: "readonly" } },
   },
 ];

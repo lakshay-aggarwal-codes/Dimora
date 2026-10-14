@@ -1,6 +1,7 @@
 const Listing = require("../models/listing.js");
 const { getGeocodingClient } = require("../services/geocoding");
 const { deleteImage } = require("../config/cloudinary");
+const { toMapPoint } = require("../utils/geo");
 
 // server.js calls this at startup so a malformed MAPBOX_SERVER_TOKEN still
 // stops the server at boot (the client is otherwise built on first use).
@@ -31,7 +32,12 @@ module.exports.showListings = async (req, res) => {
     return res.redirect("/listings");
   }
 
-  res.render("listings/show.ejs", { listing });
+  // Only the validated coordinates reach the page (as data- attributes); the
+  // whole listing document is never serialised into a script.
+  res.render("listings/show.ejs", {
+    listing,
+    mapPoint: toMapPoint(listing.geometry),
+  });
 };
 // Runs after validateListing, requireImage, geocodeListing and uploadToCloudinary
 // (see routes/listing.js): req.body.listing is clean, req.geometry is set and
