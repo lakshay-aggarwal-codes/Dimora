@@ -1,4 +1,13 @@
 const User = require("../models/user");
+
+// The unique index on `email` (P02-T01) rejects a second account with the same
+// address with a duplicate-key error. Show a plain message, never the driver's.
+function isDuplicateEmailError(err) {
+  if (!err || err.code !== 11000) return false;
+  if (err.keyPattern && err.keyPattern.email) return true;
+  return typeof err.message === "string" && err.message.includes("email");
+}
+
 module.exports.signup = async (req, res, next) => {
   try {
     let { username, email, password } = req.body;
@@ -12,7 +21,12 @@ module.exports.signup = async (req, res, next) => {
       res.redirect("/listings");
     });
   } catch (e) {
-    req.flash("error", e.message);
+    req.flash(
+      "error",
+      isDuplicateEmailError(e)
+        ? "An account with that email address already exists."
+        : e.message,
+    );
     res.redirect("/signup");
   }
 };

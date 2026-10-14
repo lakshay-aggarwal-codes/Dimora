@@ -53,3 +53,22 @@ module.exports = {
   },
 };
 ```
+
+## Shipped migrations
+
+| File | What it does |
+|---|---|
+| `001-baseline.js` | No-op starting point. |
+| `002-user-model-v2.js` | Users: lower-cases/trims `email`, adds `displayName`, `role`, `status`, `bio`, `emailVerifiedAt`, `createdAt`, `updatedAt`, builds the unique index `email_1`. Does not delete users or touch `hash`/`salt`/`username`. |
+
+### 002 and duplicate emails
+
+Two accounts that share an address (ignoring case and spaces) make the unique index impossible. The migration then **changes nothing** and stops with a list of user ids and usernames (no emails are printed). `npm run migrate:dry` prints the same list without failing. To fix, change one address per group, then run the migration again:
+
+```powershell
+# mongosh "<your MONGODB_URI>"
+db.users.updateOne({ _id: ObjectId("<id from the report>") }, { $set: { email: "new-address@example.com" } })
+```
+
+Run `migrate:dry` and `migrate` **before** starting a version of the app that has the v2 user model: the model asks MongoDB for the same unique index at startup, and that fails while duplicates exist.
+
