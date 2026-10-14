@@ -20,6 +20,7 @@ const User = require("./models/user.js");
 const listingRouter = require("./routes/listing");
 const reviewRouter = require("./routes/review");
 const useRouter = require("./routes/user");
+const pagesRouter = require("./routes/pages");
 
 const ROOT_DIR = path.join(__dirname, "..");
 
@@ -123,6 +124,7 @@ function createApp({
 
   app.use("/listings", listingRouter);
   app.use("/listings/:id/reviews", reviewRouter);
+  app.use("/", pagesRouter);
   app.use("/", useRouter);
 
   app.all("/{*splat}", (req, res, next) => {
