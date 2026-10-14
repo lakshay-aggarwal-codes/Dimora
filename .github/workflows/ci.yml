@@ -1,0 +1,55 @@
+# Continuous integration (P01-T12): install from the lockfile, lint, test.
+# The security audit is a report only and never fails the build.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # mongodb-memory-server downloads a mongod binary on first use. Keep it
+      # outside node_modules (which `npm ci` wipes) so it can be cached.
+      MONGOMS_DOWNLOAD_DIR: ${{ github.workspace }}/.mongoms-cache
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Cache MongoDB binary (mongodb-memory-server)
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.MONGOMS_DOWNLOAD_DIR }}
+          key: mongoms-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            mongoms-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      # One worker: every database suite starts its own mongod, and on a cold
+      # cache parallel workers would all download the binary at once.
+      - name: Test
+        run: npm test -- --ci --runInBand
+
+      # Report only (non-blocking): shows known high/critical advisories.
+      - name: Dependency audit (report only)
+        continue-on-error: true
+        run: npm audit --audit-level=high
