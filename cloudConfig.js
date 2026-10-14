@@ -1,10 +1,12 @@
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 
+const { cloudinary: cloudinaryConfig } = require("./src/config/env").loadEnv();
+
 cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.CLOUD_API_KEY,
-  api_secret: process.env.CLOUD_API_SECRET,
+  cloud_name: cloudinaryConfig.cloudName,
+  api_key: cloudinaryConfig.apiKey,
+  api_secret: cloudinaryConfig.apiSecret,
 });
 
 const ALLOWED_MIME_TYPES = ["image/png", "image/jpeg"];

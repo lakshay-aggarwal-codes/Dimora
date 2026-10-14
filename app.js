@@ -1,7 +1,22 @@
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 
-const dns = require("node:dns");
-dns.setServers(["8.8.8.8", "1.1.1.1"]);
+const { loadEnv, EnvValidationError } = require("./src/config/env");
+
+let config;
+try {
+  config = loadEnv();
+} catch (err) {
+  if (err instanceof EnvValidationError) {
+    console.error(err.format());
+    process.exit(1);
+  }
+  throw err;
+}
+config.warnings.forEach((w) => console.warn(`[config] ${w}`));
+
+if (config.dnsServers.length) {
+  require("node:dns").setServers(config.dnsServers);
+}
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -21,10 +36,10 @@ const reviewRouter = require("./routes/review");
 const useRouter = require("./routes/user");
 
 const app = express();
-const PORT = 8080;
+const PORT = config.port;
 
 // const MONGO_URL = "mongodb://127.0.0.1:27017/dimora";
-const dbUrl = process.env.ATLASDB_URL;
+const dbUrl = config.mongodbUri;
 
 // main()
 //   .then(() => {
@@ -58,7 +73,7 @@ store.on("error", (err) => {
 
 const sessionOptions = {
   store,
-  secret: "mysupersecretcode",
+  secret: config.sessionSecret,
   resave: false,
   saveUninitialized: true,
   cookie: {
@@ -82,6 +97,7 @@ app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.currUser = req.user;
+  res.locals.mapPublicToken = config.mapbox.publicToken;
   next();
 });
 
