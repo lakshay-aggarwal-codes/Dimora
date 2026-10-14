@@ -6,6 +6,7 @@ const { execFileSync } = require("node:child_process");
 const path = require("node:path");
 const session = require("express-session");
 const mongoose = require("mongoose");
+const { createLogger } = require("../../src/config/logger");
 
 const ROOT = path.join(__dirname, "..", "..");
 
@@ -22,6 +23,7 @@ async function withServer(fn) {
   const app = createApp({
     config: CONFIG,
     sessionStore: new session.MemoryStore(),
+    logger: createLogger({ level: "silent" }),
   });
   const server = await new Promise((resolve) => {
     const s = app.listen(0, "127.0.0.1", () => resolve(s));
@@ -75,6 +77,10 @@ test("views and static files resolve after the move into src/", async () => {
 test("createApp() can be called more than once (each call is an independent app)", () => {
   const { createApp } = require("../../src/app");
   const make = () =>
-    createApp({ config: CONFIG, sessionStore: new session.MemoryStore() });
+    createApp({
+      config: CONFIG,
+      sessionStore: new session.MemoryStore(),
+      logger: createLogger({ level: "silent" }),
+    });
   assert.notEqual(make(), make());
 });

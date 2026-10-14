@@ -2,9 +2,18 @@
 
     <div class="row mt-3">
         <div class="alert alert-danger col-6 offset-3" role="alert">
-         
-            <p class="alert-heading">
-                <%= err.message %>
-            </p>
+            <h4 class="alert-heading"><%= status %> &middot; <%= title %></h4>
+            <p><%= message %></p>
+            <% if (requestId) { %>
+                <p class="mb-0 small text-muted">Reference: <%= requestId %></p>
+            <% } %>
+            <hr>
+            <a class="alert-link" href="/listings">Back to listings</a>
         </div>
+        <% if (detail) { %>
+            <div class="col-10 offset-1">
+                <p class="small text-muted mb-1">Development detail (hidden in production):</p>
+                <pre class="small border rounded p-2" style="white-space: pre-wrap;"><%= detail %></pre>
+            </div>
+        <% } %>
     </div>

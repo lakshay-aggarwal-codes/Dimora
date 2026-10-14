@@ -1,6 +1,8 @@
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 
+const { ValidationError } = require("../utils/errors");
+
 // Credentials are applied by createApp() (src/app.js), not when this file is
 // required, so importing it has no side effects.
 function configureCloudinary({ cloudName, apiKey, apiSecret }) {
@@ -20,7 +22,7 @@ const upload = multer({
   limits: { fileSize: MAX_IMAGE_BYTES, files: 1 },
   fileFilter: (req, file, cb) => {
     if (ALLOWED_MIME_TYPES.includes(file.mimetype)) return cb(null, true);
-    cb(new Error("Only PNG and JPEG images are allowed"));
+    cb(new ValidationError("Only PNG and JPEG images are allowed"));
   },
 });
 

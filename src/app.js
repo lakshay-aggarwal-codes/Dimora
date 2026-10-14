@@ -10,7 +10,11 @@ const LocalStrategy = require("passport-local");
 
 const { loadEnv } = require("./config/env");
 const { configureCloudinary } = require("./config/cloudinary");
-const ExpressError = require("./utils/ExpressError");
+const pinoHttp = require("pino-http");
+const { randomUUID } = require("node:crypto");
+const { NotFoundError } = require("./utils/errors");
+const { createLogger } = require("./config/logger");
+const { createErrorHandler } = require("./middleware/errors");
 const User = require("./models/user.js");
 
 const listingRouter = require("./routes/listing");
@@ -30,8 +34,14 @@ const ROOT_DIR = path.join(__dirname, "..");
  * @param {object} [options.sessionStore] express-session store. Default: a
  *   MongoStore on config.mongodbUri. Tests pass a MemoryStore so no database
  *   is needed.
+ * @param {object} [options.logger] pino logger (default: JSON to stdout;
+ *   silent when config.isTest).
  */
-function createApp({ config = loadEnv(), sessionStore } = {}) {
+function createApp({
+  config = loadEnv(),
+  sessionStore,
+  logger = createLogger({ level: config.isTest ? "silent" : "info" }),
+} = {}) {
   configureCloudinary(config.cloudinary);
 
   const app = express();
@@ -39,11 +49,35 @@ function createApp({ config = loadEnv(), sessionStore } = {}) {
   app.set("view engine", "ejs");
   app.set("views", path.join(ROOT_DIR, "views"));
 
-  app.use(express.urlencoded({ extended: true }));
-  app.use(methodOverride("_method"));
-
   app.engine("ejs", ejsMate);
   app.use(express.static(path.join(ROOT_DIR, "public")));
+
+  // After static files (so assets are not logged), before everything else so
+  // every other log line and error carries the request id. Only the id, method
+  // and path (no query string, headers or body) are logged for a request.
+  app.use(
+    pinoHttp({
+      logger,
+      genReqId: (req, res) => {
+        const id = randomUUID();
+        res.setHeader("X-Request-Id", id);
+        return id;
+      },
+      serializers: {
+        req: (req) => ({
+          id: req.id,
+          method: req.method,
+          url: (req.url || "").split("?")[0],
+        }),
+        res: (res) => ({ statusCode: res.statusCode }),
+      },
+      customLogLevel: (req, res, err) =>
+        err || res.statusCode >= 500 ? "error" : "info",
+    }),
+  );
+
+  app.use(express.urlencoded({ extended: true }));
+  app.use(methodOverride("_method"));
 
   let store = sessionStore;
   if (!store) {
@@ -92,15 +126,10 @@ function createApp({ config = loadEnv(), sessionStore } = {}) {
   app.use("/", useRouter);
 
   app.all("/{*splat}", (req, res, next) => {
-    next(new ExpressError(404, "Page Not Found"));
+    next(new NotFoundError());
   });
 
-  // Express recognises an error handler by its four arguments, so `next` must stay.
-  // eslint-disable-next-line no-unused-vars
-  app.use((err, req, res, next) => {
-    let { statusCode = 500 } = err;
-    res.status(statusCode).render("error.ejs", { err });
-  });
+  app.use(createErrorHandler({ isProduction: config.isProduction, logger }));
 
   return app;
 }
