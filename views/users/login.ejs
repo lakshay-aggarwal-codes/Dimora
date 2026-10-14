@@ -4,18 +4,21 @@
             <h1>Login on Dimora</h1>
             <form method="post" action="/login" class="needs-validation" novalidate>
                 <%- include("../includes/csrf.ejs") %>
+                <% if (typeof next !== 'undefined' && next) { %>
+                <input type="hidden" name="next" value="<%= next %>">
+                <% } %>
 
                 <div class="mb-3">
 
                     <label for="username" class="form-label">Username</label>
-                    <input name="username" class="form-control" id="username" type="text" required>
+                    <input name="username" class="form-control" id="username" type="text" autocomplete="username" required>
                     
                 </div>
 
                 <div class="mb-3">
 
                     <label for="password" class="form-label">Password</label>
-                    <input name="password" class="form-control" id="password" type="password" required>
+                    <input name="password" class="form-control" id="password" type="password" autocomplete="current-password" required>
                      
                 </div>
                 <button class="btn btn-dark">Login</button>

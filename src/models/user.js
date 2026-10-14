@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
 const passportLocalMongoose = require("passport-local-mongoose").default;
+const { parseDateOnly } = require("../utils/dates");
 
 const ROLES = ["member", "admin"];
 const STATUSES = ["active", "suspended", "deleted"];
 
 // Deliberately simple: one "@", no spaces, a dot in the domain. Strict address
-// validation (Joi) belongs to the signup form (P02-T02); this only keeps
+// validation (Joi) is done by the signup form (`signupSchema`); this only keeps
 // obvious garbage out of the unique index.
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -38,7 +39,7 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
-    // "suspended" accounts cannot log in (enforced in P02-T02); "deleted" is
+    // "suspended" accounts cannot log in (enforced by the login controller); "deleted" is
     // the anonymised state used by account deletion (P02-T04).
     status: {
       type: String,
@@ -77,7 +78,30 @@ userSchema.pre("validate", function () {
   }
 });
 
-userSchema.plugin(passportLocalMongoose);
+// Per-account brake on password guessing (P02-T02), on top of the per-IP rate
+// limit. passport-local-mongoose slows repeated failures down (each failure
+// makes the next attempt wait longer, up to MAX_INTERVAL_MS) and, after
+// MAX_ATTEMPTS failures, refuses even the correct password until
+// UNLOCK_INTERVAL_MS has passed since the last attempt. A correct password
+// resets the counter.
+const LOGIN_LIMITS = Object.freeze({
+  MAX_ATTEMPTS: 10,
+  UNLOCK_INTERVAL_MS: 15 * 60 * 1000,
+  MAX_INTERVAL_MS: 5 * 60 * 1000,
+});
+
+userSchema.plugin(passportLocalMongoose, {
+  limitAttempts: true,
+  maxAttempts: LOGIN_LIMITS.MAX_ATTEMPTS,
+  unlockInterval: LOGIN_LIMITS.UNLOCK_INTERVAL_MS,
+  maxInterval: LOGIN_LIMITS.MAX_INTERVAL_MS,
+});
+
+// The plugin defaults `last` (time of the last attempt) to "now". Accounts
+// created before this task have no such field, so "now" would be filled in each
+// time they are loaded and their first login would look like a too-fast retry.
+// A missing value means "no attempt yet".
+userSchema.path("last").default(() => parseDateOnly("1970-01-01"));
 
 const User = mongoose.model("User", userSchema);
 
@@ -85,3 +109,4 @@ module.exports = User;
 module.exports.ROLES = ROLES;
 module.exports.STATUSES = STATUSES;
 module.exports.EMAIL_PATTERN = EMAIL_PATTERN;
+module.exports.LOGIN_LIMITS = LOGIN_LIMITS;

@@ -1,6 +1,7 @@
 const { ForbiddenError } = require("../utils/errors");
 const { hasRole } = require("../policies/shared");
 const { ROLES } = require("../models/user");
+const { safeRedirectPath } = require("../utils/safeRedirect");
 
 /** Remembers where the visitor was going and sends them to the login page. */
 function redirectToLogin(req, res) {
@@ -14,11 +15,19 @@ function isLoggedIn(req, res, next) {
   next();
 }
 
+/**
+ * Login only: works out where to send the user afterwards and leaves it in
+ * `res.locals.redirectUrl` (undefined = use the default). Sources, in order:
+ * the page they were stopped at (session), then a `next` form field / query
+ * parameter. Either is used only if it is a same-site path.
+ */
 function saveRedirectUrl(req, res, next) {
-  if (req.session.redirectUrl) {
-    res.locals.redirectUrl = req.session.redirectUrl;
-    delete req.session.redirectUrl;
-  }
+  const fromSession = req.session && req.session.redirectUrl;
+  if (req.session) delete req.session.redirectUrl;
+  const fromForm = (req.body && req.body.next) || (req.query && req.query.next);
+  const target =
+    safeRedirectPath(fromSession, null) || safeRedirectPath(fromForm, null);
+  if (target) res.locals.redirectUrl = target;
   next();
 }
 

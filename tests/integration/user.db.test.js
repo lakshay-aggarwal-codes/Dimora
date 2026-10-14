@@ -55,7 +55,7 @@ describeDb("user model v2 (database)", () => {
     expect(stored.createdAt).toBeInstanceOf(Date);
   });
 
-  test("signup with a taken email shows a plain message, not a driver error", async () => {
+  test("signup with a taken email shows a neutral message, not a driver error", async () => {
     await createUser({ username: "owner", email: "taken@example.com" });
     const agent = createAgent();
     const res = await agent.post("/signup").type("form").send({
@@ -66,8 +66,9 @@ describeDb("user model v2 (database)", () => {
     expect(res.status).toBe(302);
     expect(res.headers.location).toBe("/signup");
     const page = await agent.get("/signup");
-    expect(page.text).toContain("already exists");
-    expect(page.text).not.toContain("E11000");
+    // neutral wording (P02-T02): does not confirm that the address is registered
+    expect(page.text).toContain("create an account with those details");
+    expect(page.text).not.toMatch(/E11000|already exists|duplicate/i);
     expect(await User.countDocuments()).toBe(1);
   });
 
