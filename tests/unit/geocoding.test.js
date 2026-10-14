@@ -39,6 +39,22 @@ test("looks up 'location, country' and returns a GeoJSON Point", async () => {
   });
 });
 
+test("uses the permanent geocoding mode only when MAPBOX_GEOCODING_PERMANENT=true", async () => {
+  process.env.MAPBOX_GEOCODING_PERMANENT = "true";
+  resetConfigCache();
+  try {
+    await geocodeAddress({ location: "Goa", country: "India" });
+    expect(geocoding.forwardGeocode).toHaveBeenLastCalledWith({
+      query: "Goa, India",
+      limit: 1,
+      mode: "mapbox.places-permanent",
+    });
+  } finally {
+    delete process.env.MAPBOX_GEOCODING_PERMANENT;
+    resetConfigCache();
+  }
+});
+
 test("no features, a non-Point geometry or bad coordinates are 'location not found'", async () => {
   geocoding.__noResults();
   await assert.rejects(

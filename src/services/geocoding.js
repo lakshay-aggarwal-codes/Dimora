@@ -60,7 +60,11 @@ async function geocodeAddress({ location, country }) {
   const geocoder = getGeocodingClient();
   let response;
   try {
-    response = await geocoder.forwardGeocode({ query, limit: 1 }).send();
+    const request = { query, limit: 1 };
+    // Stored coordinates need Mapbox's permanent licence (ADR-007); opt-in.
+    if (loadEnv().mapbox.permanentGeocoding)
+      request.mode = "mapbox.places-permanent";
+    response = await geocoder.forwardGeocode(request).send();
   } catch (err) {
     throw new GeocoderUnavailableError(err);
   }

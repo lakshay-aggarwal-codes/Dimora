@@ -8,7 +8,11 @@ function testConfig(overrides = {}) {
     mongodbUri: "mongodb://127.0.0.1:1/never-connected",
     sessionSecret: "test-session-secret-not-for-production",
     cloudinary: { cloudName: "test", apiKey: "key", apiSecret: "secret" },
-    mapbox: { serverToken: "pk.test-server", publicToken: "pk.test-public" },
+    mapbox: {
+      serverToken: "pk.test-server",
+      publicToken: "pk.test-public",
+      permanentGeocoding: false,
+    },
     appBaseUrl: "http://localhost:0",
     dnsServers: [],
     warnings: [],

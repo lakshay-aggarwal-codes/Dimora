@@ -130,6 +130,30 @@ test("secret Mapbox token as public token: error in production, warning otherwis
   assert.ok(cfg.warnings.some((w) => /sk\./.test(w)));
 });
 
+test("server and public token must differ: error in production, warning otherwise", () => {
+  const same = {
+    MAPBOX_SERVER_TOKEN: "pk.same",
+    MAPBOX_PUBLIC_TOKEN: "pk.same",
+  };
+  assert.match(problemsOf({ ...PROD, ...same }).join("\n"), /same token/);
+  const cfg = validateEnv({ ...VALID, ...same });
+  assert.ok(cfg.warnings.some((w) => /same token/.test(w)));
+  assert.deepEqual(problemsOf(PROD), []);
+});
+
+test("MAPBOX_GEOCODING_PERMANENT defaults to false and accepts true/false", () => {
+  assert.equal(validateEnv(VALID).mapbox.permanentGeocoding, false);
+  assert.equal(
+    validateEnv({ ...VALID, MAPBOX_GEOCODING_PERMANENT: "true" }).mapbox
+      .permanentGeocoding,
+    true,
+  );
+  assert.match(
+    problemsOf({ ...VALID, MAPBOX_GEOCODING_PERMANENT: "maybe" }).join("\n"),
+    /MAPBOX_GEOCODING_PERMANENT/,
+  );
+});
+
 test("legacy variable names still work and produce warnings", () => {
   const legacy = {
     ATLASDB_URL: VALID.MONGODB_URI,
@@ -143,7 +167,8 @@ test("legacy variable names still work and produce warnings", () => {
   assert.equal(cfg.mongodbUri, VALID.MONGODB_URI);
   assert.equal(cfg.mapbox.serverToken, "pk.legacy");
   assert.equal(cfg.mapbox.publicToken, "pk.legacy");
-  assert.equal(cfg.warnings.length, 6);
+  // 6 deprecated names + 1 for the shared MAP_TOKEN (same server and public token)
+  assert.equal(cfg.warnings.length, 7);
 });
 
 test("new names win over legacy names", () => {

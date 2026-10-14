@@ -10,6 +10,6 @@ Decisions that shape the whole codebase. Each record states context, decision, c
 | [004](004-night-ledger-unique-index.md) | Booking integrity uses a unique-index night ledger | Accepted | P07-T02 (measured results) |
 | [005](005-test-stack.md) | Test stack: Jest, supertest, mongodb-memory-server | Accepted | P01-T08 |
 | [006](006-csrf-approach.md) | CSRF protection approach | Provisional | P01-T10 (verify package) |
-| [007](007-maps-provider.md) | Maps provider: keep Mapbox (provisional) | Provisional | P06-T01 |
+| [007](007-maps-provider.md) | Maps provider: keep Mapbox, two tokens | Accepted (limits to be confirmed by owner) | P06-T01 |
 | [008](008-market-defaults.md) | Market defaults: India, INR, Asia/Kolkata | Accepted | P19-T02 |
 | [009](009-simulated-payments.md) | Payments are simulated and labelled | Accepted | P16-T02 |

@@ -21,6 +21,7 @@ const KEYS = [
   "CLOUDINARY_API_SECRET",
   "MAPBOX_SERVER_TOKEN",
   "MAPBOX_PUBLIC_TOKEN",
+  "MAPBOX_GEOCODING_PERMANENT",
   "APP_BASE_URL",
   "DNS_SERVERS",
 ];
@@ -71,6 +72,9 @@ const schema = Joi.object({
   CLOUDINARY_API_SECRET: Joi.string().required(),
   MAPBOX_SERVER_TOKEN: Joi.string().required(),
   MAPBOX_PUBLIC_TOKEN: Joi.string().required(),
+  // true = geocode with Mapbox's "permanent" mode, the licence for results that
+  // are stored in the database (ADR-007). Off by default: see the ADR first.
+  MAPBOX_GEOCODING_PERMANENT: Joi.boolean().default(false),
   APP_BASE_URL: Joi.string()
     .uri({ scheme: ["http", "https"] })
     .when("NODE_ENV", { is: "production", then: Joi.required() })
@@ -143,6 +147,17 @@ function validateEnv(source = process.env) {
     if (isProduction) problems.push(msg);
     else warnings.push(msg);
   }
+  // One token for both jobs defeats the split (ADR-007): whatever the browser
+  // can read could then call the geocoding API.
+  if (
+    raw.MAPBOX_SERVER_TOKEN &&
+    raw.MAPBOX_SERVER_TOKEN === raw.MAPBOX_PUBLIC_TOKEN
+  ) {
+    const msg =
+      "MAPBOX_SERVER_TOKEN and MAPBOX_PUBLIC_TOKEN are the same token; the public token is sent to browsers, so create a separate server token";
+    if (isProduction) problems.push(msg);
+    else warnings.push(msg);
+  }
 
   if (problems.length) throw new EnvValidationError(problems, warnings);
 
@@ -162,6 +177,7 @@ function validateEnv(source = process.env) {
     mapbox: Object.freeze({
       serverToken: value.MAPBOX_SERVER_TOKEN,
       publicToken: value.MAPBOX_PUBLIC_TOKEN,
+      permanentGeocoding: value.MAPBOX_GEOCODING_PERMANENT === true,
     }),
     appBaseUrl: value.APP_BASE_URL || `http://localhost:${port}`,
     dnsServers,
