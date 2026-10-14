@@ -1,5 +1,4 @@
 const express = require("express");
-const User = require("../models/user.js");
 const wrapAsync = require("../utils/wrapAsync");
 const router = express.Router({ mergeParams: true });
 const passport = require("passport");

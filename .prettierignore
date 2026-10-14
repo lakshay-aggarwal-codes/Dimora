@@ -1,0 +1,8 @@
+node_modules
+coverage
+package-lock.json
+public
+views
+docs
+*.md
+init/data.js

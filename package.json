@@ -1,7 +1,7 @@
 {
-  "name": "project",
+  "name": "dimora",
   "version": "1.0.0",
-  "description": "",
+  "description": "Dimora - property rental marketplace (Express, Mongoose, EJS)",
   "homepage": "https://github.com/lakshay-aggarwal-codes/Dimora#readme",
   "bugs": {
     "url": "https://github.com/lakshay-aggarwal-codes/Dimora/issues"
@@ -16,9 +16,17 @@
   "engines": {
     "node": ">=20.19.0"
   },
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "node --test",
+    "seed": "node init/index.js",
+    "migrate": "node scripts/migrate.js"
   },
   "dependencies": {
     "@mapbox/mapbox-sdk": "^0.16.2",
@@ -37,5 +45,12 @@
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^9.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "nodemon": "^3.0.0",
+    "prettier": "^3.0.0"
   }
 }

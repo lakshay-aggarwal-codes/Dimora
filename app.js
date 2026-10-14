@@ -109,8 +109,10 @@ app.all("/{*splat}", (req, res, next) => {
   next(new ExpressError(404, "Page Not Found"));
 });
 
+// Express recognises an error handler by its four arguments, so `next` must stay.
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  let { statusCode = 500, message = "Something went wrong" } = err;
+  let { statusCode = 500 } = err;
   res.status(statusCode).render("error.ejs", { err });
 });
 
