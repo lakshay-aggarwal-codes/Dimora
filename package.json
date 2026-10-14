@@ -16,16 +16,16 @@
   "engines": {
     "node": ">=20.19.0"
   },
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "node --test",
-    "seed": "node init/index.js",
+    "seed": "node scripts/seed.js",
     "migrate": "node scripts/migrate.js"
   },
   "dependencies": {

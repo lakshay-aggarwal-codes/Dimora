@@ -5,4 +5,4 @@ public
 views
 docs
 *.md
-init/data.js
+scripts/seed-data.js

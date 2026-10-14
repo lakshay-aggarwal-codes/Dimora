@@ -1,8 +1,21 @@
 const Listing = require("../models/listing.js");
 const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
-const { loadEnv } = require("../src/config/env");
-const mapToken = loadEnv().mapbox.serverToken;
-const geocodingClient = mbxGeocoding({ accessToken: mapToken });
+const { loadEnv } = require("../config/env");
+
+// Built on first use so that requiring this file does not need the environment.
+// server.js calls initGeocoding() at startup so a malformed MAPBOX_SERVER_TOKEN
+// still stops the server at boot, as it did before the app/server split.
+let geocodingClient;
+function getGeocodingClient() {
+  if (!geocodingClient) {
+    geocodingClient = mbxGeocoding({
+      accessToken: loadEnv().mapbox.serverToken,
+    });
+  }
+  return geocodingClient;
+}
+
+module.exports.initGeocoding = getGeocodingClient;
 
 module.exports.index = async (req, res) => {
   const allListings = await Listing.find({});
@@ -33,7 +46,7 @@ module.exports.showListings = async (req, res) => {
 };
 module.exports.createListing = async (req, res, next) => {
   try {
-    let response = await geocodingClient
+    let response = await getGeocodingClient()
       .forwardGeocode({
         query: req.body.listing.location,
         limit: 1,

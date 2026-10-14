@@ -1,13 +1,15 @@
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 
-const { cloudinary: cloudinaryConfig } = require("./src/config/env").loadEnv();
-
-cloudinary.config({
-  cloud_name: cloudinaryConfig.cloudName,
-  api_key: cloudinaryConfig.apiKey,
-  api_secret: cloudinaryConfig.apiSecret,
-});
+// Credentials are applied by createApp() (src/app.js), not when this file is
+// required, so importing it has no side effects.
+function configureCloudinary({ cloudName, apiKey, apiSecret }) {
+  cloudinary.config({
+    cloud_name: cloudName,
+    api_key: apiKey,
+    api_secret: apiSecret,
+  });
+}
 
 const ALLOWED_MIME_TYPES = ["image/png", "image/jpeg"];
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -50,6 +52,7 @@ async function uploadToCloudinary(req, res, next) {
 
 module.exports = {
   cloudinary,
+  configureCloudinary,
   upload,
   uploadToCloudinary,
 };

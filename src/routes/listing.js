@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync");
-const { isLoggedIn, isOwner, validateListing } = require("../middleware.js");
+const { isLoggedIn, isOwner, validateListing } = require("../middleware");
 const listingController = require("../controllers/listing.js");
-const { upload, uploadToCloudinary } = require("../cloudConfig.js");
+const { upload, uploadToCloudinary } = require("../config/cloudinary");
 
 router
   .route("/")
