@@ -14,7 +14,9 @@ test("a listing without geometry fails validation (the baseline seed defect, D-0
 });
 
 test("overrides win and generated users are unique", () => {
-  assert.equal(buildListingData({ price: 1 }).price, 1);
+  assert.equal(buildListingData({ price: 1 }).pricing.nightlyMinor, 100);
+  assert.equal(buildListingData({ price: undefined }).pricing, undefined);
+  assert.equal(buildListingData().status, "published");
   const a = buildUserData();
   const b = buildUserData();
   assert.notEqual(a.username, b.username);

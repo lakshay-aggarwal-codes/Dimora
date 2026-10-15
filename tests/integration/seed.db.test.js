@@ -45,11 +45,15 @@ describeDb("seed script", () => {
     const listing = await Listing.findOne({ title: "Mountain Retreat" });
     const { user } = await createUser();
     await createReview({ listing, author: user });
-    await Listing.updateOne({ _id: listing._id }, { price: 1 });
+    await Listing.updateOne(
+      { _id: listing._id },
+      { "pricing.nightlyMinor": 10000 },
+    );
 
     await runSeed();
     const again = await Listing.findById(listing._id);
-    expect(again.price).toBe(1000);
+    expect(again.pricing.nightlyMinor).toBe(100000);
+    expect(again.status).toBe("published");
     expect(again.reviews).toHaveLength(1);
     expect(await Review.countDocuments({})).toBe(1);
   });

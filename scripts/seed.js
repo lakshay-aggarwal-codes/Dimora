@@ -14,6 +14,11 @@ const Listing = require("../src/models/listing.js");
 const Review = require("../src/models/review.js");
 const User = require("../src/models/user.js");
 const { data: sampleListings } = require("./seed-data.js");
+const {
+  rupeesToMinor,
+  addressFromLegacy,
+  imagesFromCover,
+} = require("../src/utils/listingFields");
 
 const DEMO_HOST = Object.freeze({
   username: "dimora_demo_host",
@@ -55,9 +60,20 @@ function parseArgs(argv) {
   return { reset: argv.includes("--reset") };
 }
 
-/** The sample listings for one owner. Does not modify the seed data. */
+/**
+ * The sample listings for one owner, in the v2 listing shape. The seed data
+ * keeps its simple form (`price` in rupees); this converts it. Does not modify
+ * the seed data.
+ */
 function buildSeedListings(ownerId) {
-  return sampleListings.map((item) => ({ ...item, owner: ownerId }));
+  return sampleListings.map(({ price, ...item }) => ({
+    ...item,
+    status: "published",
+    pricing: { nightlyMinor: rupeesToMinor(price), currency: "INR" },
+    address: addressFromLegacy(item.location, item.country),
+    images: imagesFromCover(item.image),
+    owner: ownerId,
+  }));
 }
 
 async function ensureDemoHost() {

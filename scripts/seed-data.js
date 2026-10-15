@@ -1,6 +1,6 @@
 // Sample listings for scripts/seed.js. `geometry` is a GeoJSON Point
 // ([longitude, latitude]) at the named place, hard-coded so seeding needs no
-// Mapbox key. `price` is in rupees for now (money moves to paise in P08-T01).
+// Mapbox key. `price` is in rupees here; scripts/seed.js converts it to paise.
 const sampleListings = [
   {
     title: "Cozy Beachfront Cottage",

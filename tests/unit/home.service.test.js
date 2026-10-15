@@ -1,6 +1,6 @@
 // P03-T05: pure parts of the home page data (no database, no Express).
 const { pickDestinations, loadHomeData } = require("../../src/services/home");
-const { toCardItem, priceToMinor } = require("../../src/utils/listingCard");
+const { toCardItem } = require("../../src/utils/listingCard");
 
 const L = (location, country, extra = {}) => ({
   _id: `id-${Math.random()}`,
@@ -57,19 +57,26 @@ describe("pickDestinations", () => {
   });
 });
 
-describe("toCardItem / priceToMinor", () => {
-  test("rupees become integer paise; odd prices never throw later", () => {
-    expect(priceToMinor(1200)).toBe(120000);
-    expect(priceToMinor(1200.5)).toBe(120050);
-    expect(Number.isInteger(priceToMinor(19.99))).toBe(true);
-    for (const bad of [undefined, null, "12", NaN, Infinity, -5]) {
-      expect(priceToMinor(bad)).toBeNull();
+describe("toCardItem", () => {
+  test("paise pass through; a missing, fractional or negative price becomes null", () => {
+    const item = (pricing) => toCardItem({ _id: 1, title: "t", pricing });
+    expect(item({ nightlyMinor: 120000 }).priceMinor).toBe(120000);
+    expect(item({ nightlyMinor: 0 }).priceMinor).toBe(0);
+    for (const bad of [undefined, null, "12", NaN, 12.5, -5]) {
+      expect(item({ nightlyMinor: bad }).priceMinor).toBeNull();
     }
+    expect(item(undefined).priceMinor).toBeNull();
   });
 
   test("maps a listing, tolerating a missing image and a null listing", () => {
     expect(
-      toCardItem({ _id: 7, title: "A", price: 10, location: "L", country: "C" }),
+      toCardItem({
+        _id: 7,
+        title: "A",
+        pricing: { nightlyMinor: 1000, currency: "INR" },
+        location: "L",
+        country: "C",
+      }),
     ).toEqual({
       id: "7",
       title: "A",
@@ -98,7 +105,7 @@ describe("loadHomeData", () => {
   }
 
   test("asks for the newest listings, bounded, and returns at most 6 cards", async () => {
-    const docs = Array.from({ length: 10 }, (_, i) => L("Goa", "India", { price: i }));
+    const docs = Array.from({ length: 10 }, (_, i) => L("Goa", "India", { pricing: { nightlyMinor: 10000 + i } }));
     const m = model(docs);
     const out = await loadHomeData(m);
     expect(out.featured).toHaveLength(6);

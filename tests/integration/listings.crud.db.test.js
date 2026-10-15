@@ -59,7 +59,12 @@ describeDb("listing create / edit / delete", () => {
       const listing = await Listing.findOne({ title: "Seaside Cottage" });
       expect(listing).not.toBeNull();
       expect(String(listing.owner)).toBe(String(user._id));
-      expect(listing.price).toBe(2500);
+      expect(listing.pricing.nightlyMinor).toBe(250000);
+      expect(listing.status).toBe("published");
+      expect(listing.images).toHaveLength(1);
+      expect(listing.images[0].url).toBe(listing.image.url);
+      expect(listing.address.city).toBe(listing.location);
+      expect(listing.needsReview).toBe(true);
       expect(listing.geometry.type).toBe("Point");
       expect([...listing.geometry.coordinates]).toEqual([77.209, 28.6139]);
       expect(listing.image.url).toMatch(
@@ -210,7 +215,7 @@ describeDb("listing create / edit / delete", () => {
       expect(res.headers.location).toBe(`/listings/${listing._id}`);
       const stored = await Listing.findById(listing._id);
       expect(stored.title).toBe("Renamed");
-      expect(stored.price).toBe(3100);
+      expect(stored.pricing.nightlyMinor).toBe(310000);
       expect(stored.image.filename).toBe("dimora_DEV/old1");
       expect(geocoding.forwardGeocode).not.toHaveBeenCalled();
       expect(uploader.upload_stream).not.toHaveBeenCalled();

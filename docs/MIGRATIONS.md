@@ -60,6 +60,7 @@ module.exports = {
 |---|---|
 | `001-baseline.js` | No-op starting point. |
 | `002-user-model-v2.js` | Users: lower-cases/trims `email`, adds `displayName`, `role`, `status`, `bio`, `emailVerifiedAt`, `createdAt`, `updatedAt`, builds the unique index `email_1`. Does not delete users or touch `hash`/`salt`/`username`. |
+| `003-listing-model-v2.js` | Listings: `status` "published" for every existing listing, `pricing.nightlyMinor` = old rupee `price` x 100 (old value kept in `legacyPrice`, `price` removed), `address.city/country` guessed from `location/country`, `images[]` from the old `image`, defaults for the new fields, rating aggregates from the existing reviews, `createdAt/updatedAt`, `needsReview`, and four indexes. Never deletes a listing. |
 
 ### 002 and duplicate emails
 
@@ -72,3 +73,17 @@ db.users.updateOne({ _id: ObjectId("<id from the report>") }, { $set: { email: "
 
 Run `migrate:dry` and `migrate` **before** starting a version of the app that has the v2 user model: the model asks MongoDB for the same unique index at startup, and that fails while duplicates exist.
 
+
+### 003: before and after
+
+Run `migrate:dry` and `migrate` **before** starting the version of the app with the v2 listing model. Until it has run, old listings still load but show "Price not set", because the model no longer reads the old `price` field.
+
+A listing is flagged `needsReview: true` when its address was guessed, its price is missing or under INR 100, or it has no coordinates. The dry run prints the counts (`withoutPrice`, `belowFloor`, `withoutGeometry`, `flaggedForReview`). A listing with no usable price gets **no** price (it is not invented); set it by editing the listing.
+
+Rollback is manual, because the runner only calls `up`. To put the old `price` field back and drop the four indexes, from the repo root in PowerShell:
+
+```powershell
+node -e "require('dotenv').config(); const {MongoClient}=require('mongodb'); (async()=>{const c=await MongoClient.connect(process.env.MONGODB_URI); const db=c.db(); console.log(await require('./scripts/migrations/003-listing-model-v2').down(db,{})); await c.close()})()"
+```
+
+Then remove its record so it can run again later: `db.schema_migrations.deleteOne({ _id: "003-listing-model-v2" })`. The new fields stay in the documents (old code ignores them) and `status` is not undone.

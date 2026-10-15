@@ -50,6 +50,14 @@ describe("validateListing", () => {
     expect(req.body.listing.price).toBe(2500);
   });
 
+  test("accepts the price floor and ceiling exactly", () => {
+    for (const price of ["100", "1000000"]) {
+      const req = { body: form({ price }) };
+      validateListing(req, {}, jest.fn());
+      expect(req.body.listing.price).toBe(Number(price));
+    }
+  });
+
   test("rejects a missing body, blank fields, negative price and a text image field", () => {
     const bad = [
       undefined,
@@ -57,6 +65,8 @@ describe("validateListing", () => {
       form({ title: "   " }),
       form({ price: "-1" }),
       form({ price: "abc" }),
+      form({ price: "99" }), // under the INR 100 floor
+      form({ price: "1000001" }), // over the INR 10 lakh ceiling
       form({ image: { url: "http://evil.example/x.png" } }),
     ];
     for (const body of bad) {

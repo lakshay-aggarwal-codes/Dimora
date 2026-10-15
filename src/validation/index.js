@@ -6,7 +6,8 @@ module.exports.listingSchema = Joi.object({
         description: Joi.string().trim().required(),
         location: Joi.string().trim().required(),
         country: Joi.string().trim().required(),
-        price: Joi.number().required().min(0),
+        // Rupees, as typed in the form. The floor matches the model (INR 100).
+        price: Joi.number().required().min(100).max(1000000),
         // The image is never read from the body: it is the uploaded file
         // (multer), so a submitted `listing[image]` text field is rejected.
     }).required(),

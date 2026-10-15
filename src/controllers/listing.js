@@ -2,6 +2,12 @@ const Listing = require("../models/listing.js");
 const { getGeocodingClient } = require("../services/geocoding");
 const { deleteImage } = require("../config/cloudinary");
 const { toMapPoint } = require("../utils/geo");
+const {
+  rupeesToMinor,
+  minorToRupees,
+  addressFromLegacy,
+  imagesFromCover,
+} = require("../utils/listingFields");
 
 // server.js calls this at startup so a malformed MAPBOX_SERVER_TOKEN still
 // stops the server at boot (the client is otherwise built on first use).
@@ -53,16 +59,25 @@ module.exports.showListings = async (req, res) => {
 // req.file.path / req.file.filename point at the uploaded image.
 module.exports.createListing = async (req, res) => {
   const { title, description, location, country, price } = req.body.listing;
+  const cover = { url: req.file.path, filename: req.file.filename };
 
   const newListing = new Listing({
     title,
     description,
     location,
     country,
-    price,
+    // The old form has no draft step, so a listing is public as soon as it is
+    // saved. The wizard (P04-T02) creates drafts and P04-T05 publishes them.
+    status: "published",
+    pricing: { nightlyMinor: rupeesToMinor(price), currency: "INR" },
+    // The form asks for free text; the structured address is a guess the host
+    // confirms later (P04-T04).
+    address: addressFromLegacy(location, country),
+    needsReview: true,
     owner: req.user._id,
     geometry: req.geometry,
-    image: { url: req.file.path, filename: req.file.filename },
+    image: cover,
+    images: imagesFromCover(cover),
   });
 
   try {
@@ -89,6 +104,7 @@ module.exports.renderEditForm = async (req, res) => {
     : null;
   res.render("listings/edit.ejs", {
     listing,
+    priceRupees: minorToRupees(listing.pricing && listing.pricing.nightlyMinor),
     originalImageUrl,
     pageTitle: `Edit ${listing.title}`,
   });
@@ -103,10 +119,15 @@ module.exports.updateListing = async (req, res) => {
 
   const previousFilename = listing.image && listing.image.filename;
 
-  listing.set({ title, description, location, country, price });
+  listing.set({ title, description, location, country });
+  listing.set("pricing.nightlyMinor", rupeesToMinor(price));
+  // While the address is still the guess made from the old text fields, keep it
+  // in step with them; a confirmed address (needsReview false) is left alone.
+  if (listing.needsReview) listing.address = addressFromLegacy(location, country);
   if (req.geometry) listing.geometry = req.geometry;
   if (req.file) {
     listing.image = { url: req.file.path, filename: req.file.filename };
+    listing.images = imagesFromCover(listing.image);
   }
 
   try {

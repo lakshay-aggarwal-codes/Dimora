@@ -50,7 +50,7 @@ async function loadHomeData(
   { scan = SCAN_LIMIT, featured = FEATURED_LIMIT } = {},
 ) {
   const docs = await ListingModel.find({})
-    .select("title image price location country")
+    .select("title image pricing location country")
     .sort({ _id: -1 })
     .limit(scan)
     .lean();
