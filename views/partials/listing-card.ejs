@@ -1,0 +1,27 @@
+<%#
+    One listing in a grid. Local: item = { id, title, imageUrl, location,
+    country, priceMinor, currency, rating, reviewCount, taxNote }.
+    Missing image -> a stock photo; missing price -> "Price not set"; no
+    rating -> the rating line is left out. A long title is cut to two lines
+    by CSS (the whole title stays in the page).
+%>
+<%
+    const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6";
+    const cardImage = item.imageUrl ? item.imageUrl : FALLBACK_IMAGE;
+    const where = [item.location, item.country].filter(Boolean).join(", ");
+    const hasRating = typeof item.rating === "number" && Number.isFinite(item.rating);
+%>
+<a href="/listings/<%= encodeURIComponent(item.id) %>" class="listing-link">
+    <div class="card h-100 listing-card">
+        <%# The title below names the link, so the photo is decorative: empty alt. %>
+        <img src="<%= cardImage %>" class="card-img-top listing-card-img" alt="">
+        <div class="card-body">
+            <p class="card-text">
+                <b class="listing-card-title"><%= item.title %></b>
+                <% if (where) { %><span class="listing-card-where"><%= where %></span><% } %>
+                <%- include("./price.ejs", { amountMinor: item.priceMinor, currency: item.currency, unit: "night", note: item.taxNote }) %>
+                <% if (hasRating) { %><span class="listing-card-rating"><%- include("./rating.ejs", { rating: item.rating, count: item.reviewCount }) %></span><% } %>
+            </p>
+        </div>
+    </div>
+</a>

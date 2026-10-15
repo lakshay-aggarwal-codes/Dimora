@@ -1,0 +1,42 @@
+<%#
+    Page links. Locals: page, totalPages, baseUrl (a path such as "/listings"),
+    query (other query parameters to keep), param (default "page"). Needs
+    the pagination view helper (src/utils/pagination.js). Shows nothing for one page.
+%>
+<%
+    const pageCount = pagination.toPageCount(typeof totalPages !== "undefined" ? totalPages : 1);
+    const currentPage = pagination.toPage(typeof page !== "undefined" ? page : 1, pageCount);
+    const base = typeof baseUrl !== "undefined" ? baseUrl : "/";
+    const keep = typeof query !== "undefined" ? query : {};
+    const paramName = typeof param !== "undefined" && param ? param : "page";
+    const hrefFor = (n) => pagination.pageHref(base, keep, n, paramName);
+%>
+<% if (pageCount > 1) { %>
+<nav aria-label="Pagination" class="pagination-nav">
+    <ul class="pagination justify-content-center flex-wrap">
+        <li class="page-item<%= currentPage === 1 ? ' disabled' : '' %>">
+            <% if (currentPage === 1) { %>
+            <span class="page-link" aria-disabled="true">Previous</span>
+            <% } else { %>
+            <a class="page-link" href="<%= hrefFor(currentPage - 1) %>" rel="prev">Previous</a>
+            <% } %>
+        </li>
+        <% pagination.pageItems(currentPage, pageCount).forEach((item) => { %>
+            <% if (item.type === "gap") { %>
+            <li class="page-item disabled"><span class="page-link" aria-hidden="true">&hellip;</span></li>
+            <% } else if (item.current) { %>
+            <li class="page-item active"><span class="page-link" aria-current="page"><span class="visually-hidden">Page </span><%= item.number %></span></li>
+            <% } else { %>
+            <li class="page-item"><a class="page-link" href="<%= hrefFor(item.number) %>"><span class="visually-hidden">Page </span><%= item.number %></a></li>
+            <% } %>
+        <% }) %>
+        <li class="page-item<%= currentPage === pageCount ? ' disabled' : '' %>">
+            <% if (currentPage === pageCount) { %>
+            <span class="page-link" aria-disabled="true">Next</span>
+            <% } else { %>
+            <a class="page-link" href="<%= hrefFor(currentPage + 1) %>" rel="next">Next</a>
+            <% } %>
+        </li>
+    </ul>
+</nav>
+<% } %>

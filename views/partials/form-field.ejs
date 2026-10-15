@@ -1,0 +1,48 @@
+<%#
+    One labelled form control with hint and error, wired with aria-describedby.
+    Locals: id (required, letters/digits/-/_), name (default id), label
+    (required), type (text, email, password, number, search, tel, url, date,
+    textarea, select; default text), value, hint, error, required, placeholder,
+    autocomplete, options ([{ value, label }] for select), attrs (an object;
+    only minlength, maxlength, min, max, step, pattern, inputmode, rows,
+    accept, multiple are passed on).
+    A password field never gets its value back.
+%>
+<%
+    if (typeof id === "undefined" || !/^[A-Za-z][A-Za-z0-9_-]*$/.test(id)) {
+        throw new Error("form-field: `id` is required and may only contain letters, digits, - and _");
+    }
+    if (typeof label === "undefined" || !label) {
+        throw new Error("form-field: `label` is required");
+    }
+    const FIELD_TYPES = ["text", "email", "password", "number", "search", "tel", "url", "date", "textarea", "select"];
+    const fieldType = FIELD_TYPES.includes(typeof type !== "undefined" ? type : "") ? type : "text";
+    const fieldName = typeof name !== "undefined" && name ? name : id;
+    const fieldValue = typeof value !== "undefined" && value !== null && fieldType !== "password" ? String(value) : "";
+    const hintText = typeof hint !== "undefined" && hint ? String(hint) : "";
+    const errorText = typeof error !== "undefined" && error ? String(error) : "";
+    const isRequired = typeof required !== "undefined" && Boolean(required);
+    const hintId = `${id}-hint`;
+    const errorId = `${id}-error`;
+    const describedBy = [hintText ? hintId : "", errorText ? errorId : ""].filter(Boolean).join(" ");
+    const ALLOWED_ATTRS = ["minlength", "maxlength", "min", "max", "step", "pattern", "inputmode", "rows", "accept", "multiple"];
+    const extra = Object.entries(typeof attrs === "object" && attrs ? attrs : {})
+        .filter(([key, v]) => ALLOWED_ATTRS.includes(key) && v !== undefined && v !== null && v !== false);
+    const controlClass = (fieldType === "select" ? "form-select" : "form-control") + (errorText ? " is-invalid" : "");
+%>
+<div class="form-field mb-3">
+    <label for="<%= id %>" class="form-label"><%= label %><% if (isRequired) { %> <span class="form-required" aria-hidden="true">*</span><% } %></label>
+    <% if (fieldType === "textarea") { %>
+    <textarea class="<%= controlClass %>" id="<%= id %>" name="<%= fieldName %>"<% if (isRequired) { %> required<% } %><% if (typeof placeholder !== "undefined" && placeholder) { %> placeholder="<%= placeholder %>"<% } %><% if (errorText) { %> aria-invalid="true"<% } %><% if (describedBy) { %> aria-describedby="<%= describedBy %>"<% } %><% extra.forEach(([key, v]) => { %> <%= key %>="<%= v === true ? key : v %>"<% }) %>><%= fieldValue %></textarea>
+    <% } else if (fieldType === "select") { %>
+    <select class="<%= controlClass %>" id="<%= id %>" name="<%= fieldName %>"<% if (isRequired) { %> required<% } %><% if (errorText) { %> aria-invalid="true"<% } %><% if (describedBy) { %> aria-describedby="<%= describedBy %>"<% } %>>
+        <% (typeof options !== "undefined" && Array.isArray(options) ? options : []).forEach((option) => { %>
+        <option value="<%= option.value %>"<% if (String(option.value) === fieldValue) { %> selected<% } %>><%= option.label %></option>
+        <% }) %>
+    </select>
+    <% } else { %>
+    <input class="<%= controlClass %>" id="<%= id %>" name="<%= fieldName %>" type="<%= fieldType %>"<% if (fieldType !== "password" && fieldValue !== "") { %> value="<%= fieldValue %>"<% } %><% if (isRequired) { %> required<% } %><% if (typeof placeholder !== "undefined" && placeholder) { %> placeholder="<%= placeholder %>"<% } %><% if (typeof autocomplete !== "undefined" && autocomplete) { %> autocomplete="<%= autocomplete %>"<% } %><% if (errorText) { %> aria-invalid="true"<% } %><% if (describedBy) { %> aria-describedby="<%= describedBy %>"<% } %><% extra.forEach(([key, v]) => { %> <%= key %>="<%= v === true ? key : v %>"<% }) %>>
+    <% } %>
+    <% if (hintText) { %><div id="<%= hintId %>" class="form-text"><%= hintText %></div><% } %>
+    <% if (errorText) { %><div id="<%= errorId %>" class="form-error"><%= errorText %></div><% } %>
+</div>

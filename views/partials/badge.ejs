@@ -1,0 +1,10 @@
+<%#
+    Small status label. Locals: text, variant (neutral | primary | accent |
+    success | warning | danger; anything else is neutral). Meaning is in the
+    text, never in the colour alone.
+%>
+<%
+    const BADGE_VARIANTS = ["neutral", "primary", "accent", "success", "warning", "danger"];
+    const badgeVariant = BADGE_VARIANTS.includes(typeof variant !== "undefined" ? variant : "") ? variant : "neutral";
+%>
+<span class="dim-badge dim-badge-<%= badgeVariant %>"><%= typeof text !== "undefined" && text !== null ? text : "" %></span>

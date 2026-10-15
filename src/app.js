@@ -18,6 +18,8 @@ const { createErrorHandler } = require("./middleware/errors");
 const User = require("./models/user.js");
 const { can } = require("./policies");
 const { fullTitle, metaDescription } = require("./utils/pageMeta");
+const { formatMoney } = require("./utils/money");
+const pagination = require("./utils/pagination");
 
 const listingRouter = require("./routes/listing");
 const reviewRouter = require("./routes/review");
@@ -60,6 +62,7 @@ function createApp({
   // <title> and meta description helpers used by views/layouts/boilerPlate.ejs
   app.locals.fullTitle = fullTitle;
   app.locals.metaDescription = metaDescription;
+  app.locals.pagination = pagination; // used by views/partials/pagination.ejs
 
   app.disable("x-powered-by");
   // Behind one reverse proxy (Render, Railway, nginx...): needed for secure
@@ -143,6 +146,7 @@ function createApp({
     res.locals.error = req.flash("error");
     res.locals.currUser = req.user;
     res.locals.currentPath = req.path; // marks the current page in the navbar
+    res.locals.formatMoney = formatMoney; // integer minor units -> "₹1,200"
     // Views ask the same policies as the routes: can("listing:edit", listing).
     res.locals.can = (action, resource) => can(action, req.user, resource);
     res.locals.mapPublicToken = config.mapbox.publicToken;

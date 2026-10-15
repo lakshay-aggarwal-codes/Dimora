@@ -1,0 +1,16 @@
+<%#
+    Price. Locals: amountMinor (integer, e.g. paise; null/undefined = no price),
+    currency (default "INR"), unit (e.g. "night"), note (e.g. "+18% GST", hidden
+    by default, see .tax-info). Needs the formatMoney view helper (src/utils/money.js).
+%>
+<%
+    const priceCurrency = typeof currency !== "undefined" && currency ? currency : "INR";
+    const hasAmount = typeof amountMinor !== "undefined" && amountMinor !== null;
+    const priceUnit = typeof unit !== "undefined" && unit ? String(unit) : "";
+    const priceNote = typeof note !== "undefined" && note ? String(note) : "";
+%>
+<% if (hasAmount) { %>
+<span class="price"><span class="price-amount"><%= formatMoney(amountMinor, priceCurrency) %></span><% if (priceUnit) { %> <span class="price-unit">/ <%= priceUnit %></span><% } %><% if (priceNote) { %> <i class="tax-info"><%= priceNote %></i><% } %></span>
+<% } else { %>
+<span class="price price-unset">Price not set</span>
+<% } %>

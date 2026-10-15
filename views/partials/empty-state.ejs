@@ -1,0 +1,19 @@
+<%#
+    "Nothing here" block. Locals: title (required), message, icon (a Font
+    Awesome class such as "fa-house"), actionHref (a path on this site),
+    actionLabel, headingLevel (2-6, default 2).
+%>
+<%
+    const emptyTitle = typeof title !== "undefined" ? String(title) : "";
+    const emptyMessage = typeof message !== "undefined" && message ? String(message) : "";
+    const emptyIcon = typeof icon !== "undefined" && /^fa-[a-z0-9-]+$/.test(icon) ? icon : "";
+    const level = [2, 3, 4, 5, 6].includes(typeof headingLevel !== "undefined" ? Number(headingLevel) : 2) ? Number(typeof headingLevel !== "undefined" ? headingLevel : 2) : 2;
+    const href = typeof actionHref !== "undefined" && typeof actionHref === "string" && actionHref[0] === "/" && actionHref[1] !== "/" && actionHref[1] !== "\\" ? actionHref : "";
+    const actionText = typeof actionLabel !== "undefined" && actionLabel ? String(actionLabel) : "";
+%>
+<div class="empty-state">
+    <% if (emptyIcon) { %><i class="fa-solid <%= emptyIcon %> empty-state-icon" aria-hidden="true"></i><% } %>
+    <h<%= level %> class="empty-state-title"><%= emptyTitle %></h<%= level %>>
+    <% if (emptyMessage) { %><p class="empty-state-message"><%= emptyMessage %></p><% } %>
+    <% if (href && actionText) { %><a class="btn btn-dark" href="<%= href %>"><%= actionText %></a><% } %>
+</div>

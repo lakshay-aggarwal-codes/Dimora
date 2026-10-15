@@ -1,0 +1,43 @@
+<%#
+    Confirmation dialog for a destructive action (Bootstrap modal). Locals:
+    id (required), title, message, action (a path on this site, required),
+    methodOverride ("DELETE", "PUT" or "PATCH"; default none = POST),
+    confirmLabel, cancelLabel, confirmVariant ("danger" or "dark").
+    Open it with a button: data-bs-toggle="modal" data-bs-target="#<id>".
+    The form carries the CSRF token (includes/csrf.ejs).
+%>
+<%
+    if (typeof id === "undefined" || !/^[A-Za-z][A-Za-z0-9_-]*$/.test(id)) {
+        throw new Error("confirm-modal: `id` is required and may only contain letters, digits, - and _");
+    }
+    if (typeof action !== "string" || action[0] !== "/" || action[1] === "/" || action[1] === "\\") {
+        throw new Error("confirm-modal: `action` must be a path on this site");
+    }
+    const OVERRIDES = ["DELETE", "PUT", "PATCH"];
+    const override = typeof methodOverride !== "undefined" && OVERRIDES.includes(String(methodOverride).toUpperCase())
+        ? String(methodOverride).toUpperCase() : "";
+    const formAction = override ? `${action}${action.includes("?") ? "&" : "?"}_method=${override}` : action;
+    const modalTitle = typeof title !== "undefined" && title ? String(title) : "Are you sure?";
+    const modalMessage = typeof message !== "undefined" && message ? String(message) : "";
+    const confirmText = typeof confirmLabel !== "undefined" && confirmLabel ? String(confirmLabel) : "Confirm";
+    const cancelText = typeof cancelLabel !== "undefined" && cancelLabel ? String(cancelLabel) : "Cancel";
+    const confirmClass = typeof confirmVariant !== "undefined" && confirmVariant === "dark" ? "btn-dark" : "btn-danger";
+%>
+<div class="modal fade" id="<%= id %>" tabindex="-1" aria-labelledby="<%= id %>-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST" action="<%= formAction %>">
+                <%- include("../includes/csrf.ejs") %>
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="<%= id %>-title"><%= modalTitle %></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <% if (modalMessage) { %><div class="modal-body"><p class="mb-0"><%= modalMessage %></p></div><% } %>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal"><%= cancelText %></button>
+                    <button type="submit" class="btn <%= confirmClass %>"><%= confirmText %></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

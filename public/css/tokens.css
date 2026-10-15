@@ -35,7 +35,14 @@
   --palette-white: #ffffff;
   --palette-gold-700: #a86400;
   --palette-red-700: #b42318;
+  --palette-red-800: #8e1c13;
   --palette-green-700: #1a6b3c;
+  --palette-teal-subtle-text: #0b5252;
+  --palette-green-100: #dcf1e4;
+  --palette-red-100: #fbe4e1;
+  --palette-amber-100: #fdefd2;
+  --palette-amber-900: #7a4b00;
+  --palette-orange-100: #f8e3da;
   --palette-black-a-8: rgb(27 42 47 / 8%);
   --palette-black-a-16: rgb(27 42 47 / 16%);
   --palette-black-a-24: rgb(27 42 47 / 24%);
@@ -69,7 +76,22 @@
 
   --color-star: var(--palette-gold-700);
   --color-danger: var(--palette-red-700);
+  --color-danger-hover: var(--palette-red-800);
   --color-success: var(--palette-green-700);
+
+  /* Badges: text colour on a tinted background, each pair >= 4.5:1 */
+  --color-badge-neutral-bg: var(--palette-sand-100);
+  --color-badge-neutral-text: var(--palette-ink);
+  --color-badge-primary-bg: var(--palette-teal-100);
+  --color-badge-primary-text: var(--palette-teal-subtle-text);
+  --color-badge-accent-bg: var(--palette-orange-100);
+  --color-badge-accent-text: var(--palette-orange-800);
+  --color-badge-success-bg: var(--palette-green-100);
+  --color-badge-success-text: var(--palette-green-700);
+  --color-badge-warning-bg: var(--palette-amber-100);
+  --color-badge-warning-text: var(--palette-amber-900);
+  --color-badge-danger-bg: var(--palette-red-100);
+  --color-badge-danger-text: var(--palette-red-700);
 
   --color-overlay: var(--palette-black-a-24);
   --color-scrim-light: var(--palette-white);

@@ -1,0 +1,19 @@
+<%#
+    Average rating. Locals: rating (0-5 or null), count (number of reviews).
+    No rating, or no reviews, shows "No reviews yet". Screen readers get one
+    sentence instead of the star icon and digits.
+%>
+<%
+    const ratingNumber = typeof rating === "number" && Number.isFinite(rating) ? Math.min(5, Math.max(0, rating)) : null;
+    const reviewCount = typeof count === "number" && Number.isInteger(count) && count >= 0 ? count : null;
+    const rated = ratingNumber !== null && reviewCount !== 0;
+    const reviewsLabel = reviewCount === 1 ? "1 review" : `${reviewCount} reviews`;
+%>
+<% if (rated) { %>
+<span class="rating">
+    <span class="visually-hidden">Rated <%= ratingNumber.toFixed(1) %> out of 5<% if (reviewCount !== null) { %> from <%= reviewsLabel %><% } %></span>
+    <span aria-hidden="true"><i class="fa-solid fa-star rating-star"></i> <span class="rating-value"><%= ratingNumber.toFixed(1) %></span><% if (reviewCount !== null) { %> <span class="rating-count">(<%= reviewCount %>)</span><% } %></span>
+</span>
+<% } else { %>
+<span class="rating rating-none">No reviews yet</span>
+<% } %>

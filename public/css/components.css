@@ -463,3 +463,160 @@
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
 }
+
+/* ---- Partials (P03-T03) ---- */
+
+/* price */
+.price-amount {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+}
+
+.price-unit {
+  color: var(--color-text-muted);
+}
+
+.price-unset {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* rating */
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.rating-star {
+  color: var(--color-star);
+}
+
+.rating-value {
+  font-weight: var(--font-weight-medium);
+}
+
+.rating-count,
+.rating-none {
+  color: var(--color-text-muted);
+}
+
+/* listing card extras */
+.listing-card-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+.listing-card-where,
+.listing-card-rating {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* badge */
+.dim-badge {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+}
+
+.dim-badge-neutral {
+  background-color: var(--color-badge-neutral-bg);
+  color: var(--color-badge-neutral-text);
+}
+
+.dim-badge-primary {
+  background-color: var(--color-badge-primary-bg);
+  color: var(--color-badge-primary-text);
+}
+
+.dim-badge-accent {
+  background-color: var(--color-badge-accent-bg);
+  color: var(--color-badge-accent-text);
+}
+
+.dim-badge-success {
+  background-color: var(--color-badge-success-bg);
+  color: var(--color-badge-success-text);
+}
+
+.dim-badge-warning {
+  background-color: var(--color-badge-warning-bg);
+  color: var(--color-badge-warning-text);
+}
+
+.dim-badge-danger {
+  background-color: var(--color-badge-danger-bg);
+  color: var(--color-badge-danger-text);
+}
+
+/* form field */
+.form-required {
+  color: var(--color-danger);
+}
+
+.form-error {
+  margin-top: var(--space-1);
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+  border-color: var(--color-danger);
+}
+
+/* pagination (Bootstrap variables mapped to the tokens) */
+.pagination {
+  --bs-pagination-color: var(--color-link);
+  --bs-pagination-hover-color: var(--color-link-hover);
+  --bs-pagination-active-bg: var(--color-primary);
+  --bs-pagination-active-border-color: var(--color-primary);
+  --bs-pagination-active-color: var(--color-on-primary);
+  --bs-pagination-disabled-color: var(--color-text-muted);
+  --bs-pagination-border-color: var(--color-border);
+  --bs-pagination-focus-box-shadow: var(--shadow-focus);
+}
+
+.pagination-nav {
+  margin: var(--space-6) 0;
+}
+
+/* empty state */
+.empty-state {
+  max-width: var(--size-flash-max);
+  margin: var(--space-7) auto;
+  text-align: center;
+}
+
+.empty-state-icon {
+  margin-bottom: var(--space-4);
+  color: var(--color-primary);
+  font-size: var(--font-size-2xl);
+}
+
+.empty-state-title {
+  font-size: var(--font-size-xl);
+}
+
+.empty-state-message {
+  color: var(--color-text-muted);
+}
+
+/* danger button follows the token (Bootstrap's own red is not in the palette) */
+.btn-danger {
+  --bs-btn-bg: var(--color-danger);
+  --bs-btn-border-color: var(--color-danger);
+  --bs-btn-hover-bg: var(--color-danger-hover);
+  --bs-btn-hover-border-color: var(--color-danger-hover);
+  --bs-btn-active-bg: var(--color-danger-hover);
+  --bs-btn-active-border-color: var(--color-danger-hover);
+}

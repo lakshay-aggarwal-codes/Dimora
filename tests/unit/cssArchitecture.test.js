@@ -217,6 +217,14 @@ describe("colour contrast", () => {
     ["--color-accent", "--color-surface-raised"],
     ["--color-primary", "--color-surface-sunken"],
     ["--color-danger", "--color-surface-raised"],
+    ["--color-on-primary", "--color-danger"],
+    ["--color-on-primary", "--color-danger-hover"],
+    ["--color-badge-neutral-text", "--color-badge-neutral-bg"],
+    ["--color-badge-primary-text", "--color-badge-primary-bg"],
+    ["--color-badge-accent-text", "--color-badge-accent-bg"],
+    ["--color-badge-success-text", "--color-badge-success-bg"],
+    ["--color-badge-warning-text", "--color-badge-warning-bg"],
+    ["--color-badge-danger-text", "--color-badge-danger-bg"],
     ["--color-success", "--color-surface-raised"],
   ];
   const UI_PAIRS = [
