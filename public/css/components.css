@@ -2,9 +2,22 @@
    Replaces the inline <style> blocks that lived in navbar.ejs and
    listings/index.ejs. Values come from tokens.css only. */
 
-/* ---- Navbar ---- */
+/* ---- Header and navbar ---- */
+.site-header {
+  background-color: var(--color-surface-raised);
+  border-bottom: 1px solid var(--color-border);
+}
+
 .navbar {
   background-color: var(--color-surface-raised);
+}
+
+.navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text);
+  font-weight: var(--font-weight-bold);
 }
 
 .navbar-brand .fa-compass {
@@ -19,6 +32,60 @@
 .nav-link:hover,
 .nav-link:focus-visible {
   color: var(--color-primary);
+}
+
+.nav-strong {
+  font-weight: var(--font-weight-bold);
+}
+
+/* The current page. Not colour alone: the underline also marks it. */
+.nav-link[aria-current="page"] {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: var(--space-1);
+}
+
+/* Buttons that sit in the navbar and look like its links (bell, account). */
+.nav-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 0;
+  background: transparent;
+}
+
+.nav-icon-btn[aria-disabled="true"] {
+  color: var(--color-text-muted);
+  cursor: default;
+}
+
+.account-name {
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdown-menu {
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-lg);
+}
+
+.dropdown-item {
+  color: var(--color-text);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus-visible {
+  background-color: var(--color-primary-subtle);
+  color: var(--color-text);
+}
+
+/* ---- Flash messages ---- */
+.flash-stack {
+  width: 100%;
+  max-width: var(--size-flash-max);
+  margin-top: var(--space-4);
 }
 
 /* ---- Search (navbar) ---- */
@@ -364,38 +431,35 @@
 }
 
 /* ---- Footer ---- */
-.f-info {
+.site-footer {
+  min-height: var(--size-footer);
+  padding: var(--space-5) var(--space-4);
+  background-color: var(--color-surface-sunken);
+  text-align: center;
+}
+
+.footer-links {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: var(--size-footer);
-  padding: var(--space-4);
-  text-align: center;
-  background-color: var(--color-surface-sunken);
+  gap: var(--space-2) var(--space-5);
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
 }
 
-.f-info-links,
-.f-info-socials,
-.f-info-brand {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.f-info-links a {
-  margin: 0 var(--space-2);
+.footer-links a {
   color: var(--color-text);
   text-decoration: none;
 }
 
-.f-info-links a:hover {
+.footer-links a:hover,
+.footer-links a:focus-visible {
   text-decoration: underline;
 }
 
-.f-info-socials i {
-  margin-right: var(--space-4);
-  font-size: var(--font-size-lg);
+.footer-copy {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
 }

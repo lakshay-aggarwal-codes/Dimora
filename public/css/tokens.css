@@ -123,6 +123,7 @@
   --size-search-max: 32.5rem;
   --size-search-min: 17.5rem;
   --size-brand-icon: 2rem;
+  --size-flash-max: 40rem;
 
   /* ---- Motion (set to 0ms by base.css when the user asks for reduced motion) ---- */
   --duration-fast: 150ms;
@@ -132,6 +133,7 @@
 
   /* ---- Stacking ---- */
   --z-sticky: 1020;
+  --z-skip-link: 2000;
 }
 
 /*

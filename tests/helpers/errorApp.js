@@ -5,6 +5,7 @@ const express = require("express");
 const ejsMate = require("ejs-mate");
 const { createErrorHandler } = require("../../src/middleware/errors");
 const { createLogger } = require("../../src/config/logger");
+const { fullTitle, metaDescription } = require("../../src/utils/pageMeta");
 
 const ROOT = path.join(__dirname, "..", "..");
 
@@ -14,6 +15,9 @@ function buildErrorApp({ isProduction, routes, logger }) {
   app.engine("ejs", ejsMate);
   app.set("view engine", "ejs");
   app.set("views", path.join(ROOT, "views"));
+  // same view helpers as src/app.js (the layout builds <title> with them)
+  app.locals.fullTitle = fullTitle;
+  app.locals.metaDescription = metaDescription;
   app.use((req, res, next) => {
     req.id = "test-request-id";
     res.locals.success = [];

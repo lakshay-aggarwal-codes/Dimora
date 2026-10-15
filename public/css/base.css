@@ -43,8 +43,33 @@ body {
 }
 
 /* The page content grows, so the footer sits at the bottom of short pages. */
-.container {
-  flex: 1;
+main {
+  flex: 1 0 auto;
+  width: 100%;
+}
+
+/* <main> receives focus from the skip link; no ring on the whole page. */
+main:focus {
+  outline: none;
+}
+
+/* "Skip to main content": hidden until a keyboard user tabs to it. */
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: var(--z-skip-link);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+}
+
+.skip-link:hover,
+.skip-link:focus {
+  color: var(--color-on-primary);
 }
 
 a {

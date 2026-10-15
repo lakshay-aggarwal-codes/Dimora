@@ -149,7 +149,7 @@ describe("signup error messages never come from the driver", () => {
     );
     expect(page).toContain("couldn&#39;t create an account with those details");
     expect(page).not.toMatch(
-      /E11000|duplicate|already exists|already registered|index/i,
+      /E11000|duplicate|already exists|already registered|dup key/i,
     );
   });
 

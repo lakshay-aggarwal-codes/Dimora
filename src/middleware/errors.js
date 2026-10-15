@@ -133,6 +133,7 @@ function createErrorHandler({ isProduction, logger }) {
       {
         status,
         title: titleFor(status),
+        pageTitle: `${status} ${titleFor(status)}`,
         message,
         detail,
         requestId,
@@ -141,6 +142,7 @@ function createErrorHandler({ isProduction, logger }) {
         success: res.locals.success || [],
         error: res.locals.error || [],
         currUser: res.locals.currUser || null,
+        currentPath: res.locals.currentPath || "",
         mapPublicToken: res.locals.mapPublicToken || "",
       },
       (renderErr, html) => {

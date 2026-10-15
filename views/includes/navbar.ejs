@@ -1,42 +1,82 @@
-<nav class="navbar navbar-expand-md bg-body-lights border-bottom sticky-top">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/listings"><i class="fa-regular fa-compass"></i></a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
-                <!-- <a class="nav-link" href="/ ">Home</a> -->
-                <a class="nav-link" href="/listings"> Explore </a>
-            </div>
+<%
+    // Exact match only: aria-current="page" means "this link is this page".
+    const here = typeof currentPath === "string" ? (currentPath.replace(/\/+$/, "") || "/") : "";
+    const current = (href) => (here === href ? ' aria-current="page"' : "");
+%>
+<header class="site-header sticky-top">
+    <nav class="navbar navbar-expand-md" aria-label="Main">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/listings">
+                <i class="fa-regular fa-compass" aria-hidden="true"></i>
+                <span class="brand-name">Dimora</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#site-nav"
+                aria-controls="site-nav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
+            <div class="collapse navbar-collapse" id="site-nav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/listings"<%- current("/listings") %>>Explore</a>
+                    </li>
+                </ul>
 
-            <div class="navbar-nav search">
-                <form action="/listings" method="GET" role="search">
-                    <input class="form-control search-input" type="search" name="search"
-                        placeholder="Search destinations" aria-label="Search destinations" autocomplete="off">
+                <div class="navbar-nav search">
+                    <form action="/listings" method="GET" role="search">
+                        <label class="visually-hidden" for="nav-search">Search destinations</label>
+                        <input class="form-control search-input" id="nav-search" type="search" name="search"
+                            placeholder="Search destinations" autocomplete="off">
+                        <button class="btn btn-search" type="submit">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                            <span>Search</span>
+                        </button>
+                    </form>
+                </div>
 
-                    <button class="btn btn-search" type="submit">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <span>Search</span>
-                    </button>
-                </form>
-            </div>
-
-
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/listings/new">Dimora your home</a>
-                <% if(!currUser){%>
-                    <a class="nav-link" href="/signup"><b> Sign Up </b></a>
-                    <a class="nav-link" href="/login"><b> Login </b> </a>
-                    <%}%>
-                        <% if(currUser){%>
-                            <form class="d-inline" action="/logout" method="POST">
-                                <%- include("./csrf.ejs") %>
-                                <button type="submit" class="nav-link btn btn-link d-inline"><b>Logout</b></button>
-                            </form>
-                            <%}%>
+                <ul class="navbar-nav ms-md-auto align-items-md-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/listings/new"<%- current("/listings/new") %>>Dimora your home</a>
+                    </li>
+                    <% if (!currUser) { %>
+                        <li class="nav-item">
+                            <a class="nav-link nav-strong" href="/signup"<%- current("/signup") %>>Sign up</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-strong" href="/login"<%- current("/login") %>>Log in</a>
+                        </li>
+                    <% } else { %>
+                        <li class="nav-item">
+                            <%# Placeholder until notifications exist (P11-T01): reachable by keyboard, does nothing. %>
+                            <button type="button" class="nav-link nav-icon-btn" aria-disabled="true"
+                                data-placeholder="notifications">
+                                <i class="fa-regular fa-bell" aria-hidden="true"></i>
+                                <span class="visually-hidden">Notifications (coming soon)</span>
+                            </button>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <button type="button" class="nav-link nav-icon-btn dropdown-toggle" id="account-menu"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-regular fa-circle-user" aria-hidden="true"></i>
+                                <span class="account-name"><%= currUser.username %></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="account-menu">
+                                <li>
+                                    <span class="dropdown-item-text small">Signed in as
+                                        <strong><%= currUser.username %></strong></span>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form action="/logout" method="POST">
+                                        <%- include("./csrf.ejs") %>
+                                        <button type="submit" class="dropdown-item">Logout</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    <% } %>
+                </ul>
             </div>
         </div>
-    </div>
-</nav>
+    </nav>
+</header>

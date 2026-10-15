@@ -9,11 +9,18 @@ module.exports.initGeocoding = getGeocodingClient;
 
 module.exports.index = async (req, res) => {
   const allListings = await Listing.find({});
-  res.render("listings/index.ejs", { allListings });
+  res.render("listings/index.ejs", {
+    allListings,
+    pageTitle: "Explore stays",
+    pageDescription: "Browse places to stay on Dimora.",
+  });
 };
 
 module.exports.renderNewForm = (req, res) => {
-  res.render("listings/new.ejs");
+  res.render("listings/new.ejs", {
+    pageTitle: "List your place",
+    pageDescription: "Add your home to Dimora and welcome guests.",
+  });
 };
 
 module.exports.showListings = async (req, res) => {
@@ -37,6 +44,8 @@ module.exports.showListings = async (req, res) => {
   res.render("listings/show.ejs", {
     listing,
     mapPoint: toMapPoint(listing.geometry),
+    pageTitle: listing.title,
+    pageDescription: listing.description,
   });
 };
 // Runs after validateListing, requireImage, geocodeListing and uploadToCloudinary
@@ -78,7 +87,11 @@ module.exports.renderEditForm = async (req, res) => {
   const originalImageUrl = imageUrl
     ? imageUrl.replace("/upload", "/upload/w_250")
     : null;
-  res.render("listings/edit.ejs", { listing, originalImageUrl });
+  res.render("listings/edit.ejs", {
+    listing,
+    originalImageUrl,
+    pageTitle: `Edit ${listing.title}`,
+  });
 };
 
 // The image is optional on edit: without a new file the stored image stays.

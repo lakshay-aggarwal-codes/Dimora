@@ -17,6 +17,7 @@ const { createLogger } = require("./config/logger");
 const { createErrorHandler } = require("./middleware/errors");
 const User = require("./models/user.js");
 const { can } = require("./policies");
+const { fullTitle, metaDescription } = require("./utils/pageMeta");
 
 const listingRouter = require("./routes/listing");
 const reviewRouter = require("./routes/review");
@@ -56,6 +57,9 @@ function createApp({
 
   app.set("view engine", "ejs");
   app.set("views", path.join(ROOT_DIR, "views"));
+  // <title> and meta description helpers used by views/layouts/boilerPlate.ejs
+  app.locals.fullTitle = fullTitle;
+  app.locals.metaDescription = metaDescription;
 
   app.disable("x-powered-by");
   // Behind one reverse proxy (Render, Railway, nginx...): needed for secure
@@ -138,6 +142,7 @@ function createApp({
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
     res.locals.currUser = req.user;
+    res.locals.currentPath = req.path; // marks the current page in the navbar
     // Views ask the same policies as the routes: can("listing:edit", listing).
     res.locals.can = (action, resource) => can(action, req.user, resource);
     res.locals.mapPublicToken = config.mapbox.publicToken;

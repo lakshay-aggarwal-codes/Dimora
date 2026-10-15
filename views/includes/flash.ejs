@@ -1,14 +1,23 @@
-<% if (success && success.length> 0) { %>
-    <div class="alert alert-success alert-dismissible fade show col-6 mx-auto" role="alert">
-        <%= success %>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-    <% } %>
-
-
-        <% if (error && error.length> 0) { %>
-            <div class="alert alert-danger alert-dismissible fade show col-6 mx-auto" role="alert">
-                <%= error %>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<%
+    // One alert per message. Successes are announced politely (role="status"),
+    // errors immediately (role="alert").
+    const asList = (value) => (Array.isArray(value) ? value : value ? [value] : []);
+    const successMessages = asList(typeof success !== "undefined" ? success : []);
+    const errorMessages = asList(typeof error !== "undefined" ? error : []);
+%>
+<% if (successMessages.length || errorMessages.length) { %>
+    <div class="flash-stack mx-auto">
+        <% successMessages.forEach((message) => { %>
+            <div class="alert alert-success alert-dismissible fade show" role="status">
+                <%= message %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <% } %>
+        <% }) %>
+        <% errorMessages.forEach((message) => { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <%= message %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <% }) %>
+    </div>
+<% } %>

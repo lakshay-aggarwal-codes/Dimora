@@ -85,10 +85,15 @@ module.exports.signup = async (req, res, next) => {
 };
 
 module.exports.renderSignupForm = (req, res) => {
-  res.render("./users/signup.ejs");
+  res.render("./users/signup.ejs", {
+    pageTitle: "Sign up",
+    pageDescription: "Create a Dimora account to book stays or list your home.",
+  });
 };
 module.exports.renderLoginForm = (req, res) => {
   res.render("./users/login.ejs", {
+    pageTitle: "Log in",
+    pageDescription: "Log in to your Dimora account.",
     next: safeRedirectPath(req.query && req.query.next, ""),
   });
 };
