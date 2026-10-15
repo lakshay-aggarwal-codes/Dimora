@@ -212,10 +212,6 @@
   --bs-btn-active-color: var(--color-on-accent);
 }
 
-.btns {
-  display: flex;
-}
-
 /* ---- Listing cards ---- */
 .listing-link {
   text-decoration: none;
@@ -254,13 +250,12 @@
   height: var(--size-card-image);
 }
 
-.show-card {
-  padding-left: 0;
-  padding-right: 0;
-}
-
 .show-img {
-  height: var(--size-show-image);
+  width: 100%;
+  height: auto;
+  aspect-ratio: var(--ratio-show-image);
+  max-height: var(--size-show-image-max);
+  object-fit: cover;
 }
 
 .tax-info {
@@ -295,7 +290,14 @@
   overflow-x: auto;
   scroll-behavior: smooth;
   scrollbar-width: none;
-  padding: var(--space-1) 0 var(--space-2);
+  /* Room for the focus ring, which the scroll container would otherwise clip. */
+  padding: var(--space-1) var(--space-1) var(--space-2);
+  margin: 0;
+  list-style: none;
+}
+
+.filter-container > li {
+  flex: 0 0 auto;
 }
 
 .filter-container::-webkit-scrollbar {
@@ -303,26 +305,37 @@
 }
 
 .filter {
-  flex: 0 0 auto;
+  display: block;
   min-width: 3.5rem;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
   text-align: center;
-  cursor: pointer;
   color: var(--color-text-muted);
+  text-decoration: none;
   white-space: nowrap;
   transition: color var(--duration-base) var(--easing-standard);
 }
 
-.filter:hover {
+.filter:hover,
+.filter:focus-visible {
   color: var(--color-text);
+  text-decoration: none;
+}
+
+/* Used by the real category filter (P05-T04): the active category. */
+.filter[aria-current="true"] {
+  color: var(--color-text);
+  box-shadow: inset 0 calc(-1 * var(--space-1) / 2) 0 var(--color-text);
 }
 
 .filter i {
+  display: block;
   font-size: var(--font-size-md);
   margin-bottom: var(--space-1);
 }
 
-.filter p {
-  margin: 0;
+.filter-label {
+  display: block;
   font-size: var(--font-size-xs);
 }
 
@@ -412,6 +425,7 @@
 
   .filter {
     min-width: 3rem;
+    padding: var(--space-1);
   }
 
   .tax-toggle .form-check-label {
@@ -428,6 +442,7 @@
 /* ---- Error page ---- */
 .error-detail {
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 /* ---- Footer ---- */
@@ -619,4 +634,92 @@
   --bs-btn-hover-border-color: var(--color-danger-hover);
   --bs-btn-active-bg: var(--color-danger-hover);
   --bs-btn-active-border-color: var(--color-danger-hover);
+}
+
+/* ---- Responsive and accessibility repair (P03-T04) ---- */
+
+/* Listing detail: stacked on phones, two columns from the lg breakpoint. Long
+   unbroken words (titles, descriptions, reviews) wrap instead of widening the
+   page. */
+.listing-detail {
+  overflow-wrap: anywhere;
+}
+
+.listing-header {
+  margin-bottom: var(--space-4);
+}
+
+.listing-header h1 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.listing-where {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.listing-hero {
+  margin: 0 0 var(--space-4);
+}
+
+.listing-panel {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-raised);
+}
+
+.listing-price {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.listing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.listing-actions form {
+  margin: 0;
+}
+
+.listing-reviews {
+  margin-top: var(--space-7);
+}
+
+.review-card {
+  height: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-raised);
+}
+
+.review-author {
+  margin: 0 0 var(--space-1);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
+
+.review-rating {
+  margin: 0 0 var(--space-2);
+}
+
+.review-card form {
+  margin: var(--space-3) 0 0;
+  text-align: end;
+}
+
+/* The current photo on the edit form. */
+.listing-edit-photo {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  max-height: var(--size-show-image-max);
+  border-radius: var(--radius-md);
 }

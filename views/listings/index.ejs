@@ -1,125 +1,55 @@
 <% layout("layouts/boilerPlate") %>
-
-    <div class="container">
-
-        <!-- <h3 class="mb-4">All Listings</h3> -->
+<%
+    // Category strip. These are real links so keyboard and screen-reader users can
+    // reach them; the filtering itself arrives with P05-T04 (until then the
+    // page ignores ?category and shows every listing).
+    const categories = [
+        { slug: "trending", label: "Trending", icon: "fa-fire" },
+        { slug: "farms", label: "Farms", icon: "fa-tractor" },
+        { slug: "mountains", label: "Mountains", icon: "fa-mountain-sun" },
+        { slug: "beaches", label: "Beaches", icon: "fa-umbrella-beach" },
+        { slug: "amazing-pools", label: "Amazing Pools", icon: "fa-person-swimming" },
+        { slug: "desert", label: "Desert", icon: "fa-sun" },
+        { slug: "castles", label: "Castles", icon: "fa-chess-rook" },
+        { slug: "tiny-homes", label: "Tiny Homes", icon: "fa-house-chimney" },
+        { slug: "historical-homes", label: "Historical Homes", icon: "fa-landmark" },
+        { slug: "skiing", label: "Skiing", icon: "fa-person-skiing" },
+        { slug: "design", label: "Design", icon: "fa-palette" },
+        { slug: "lakefront", label: "Lakefront", icon: "fa-water" },
+        { slug: "rooms", label: "Rooms", icon: "fa-bed" },
+        { slug: "iconic-cities", label: "Iconic Cities", icon: "fa-city" },
+        { slug: "camping", label: "Camping", icon: "fa-campground" },
+        { slug: "arctic", label: "Arctic", icon: "fa-snowflake" },
+        { slug: "countryside", label: "Countryside", icon: "fa-tree" }
+    ];
+%>
+        <h1 class="visually-hidden">Explore places to stay</h1>
 
         <!-- Category filters and tax toggle -->
         <div id="filters">
 
-            <!-- Category navigation -->
-            <div class="filter-nav">
+            <nav class="filter-nav" aria-label="Categories">
 
                 <button type="button" class="filter-arrow" id="filters-prev" aria-label="Previous categories" disabled>
-                    <i class="fa-solid fa-chevron-left"></i>
+                    <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
                 </button>
 
-                <!-- IMPORTANT: Only ONE filter-container -->
-                <div class="filter-container" id="filter-container">
-
-                    <div class="filter">
-                        <div><i class="fa-solid fa-fire"></i></div>
-                        <p>Trending</p>
-                    </div>
-
-                    <div class="filter">
-                        <div><i class="fa-solid fa-tractor"></i></div>
-                        <p>Farms</p>
-                    </div>
-
-                    <div class="filter">
-                        <div><i class="fa-solid fa-mountain-sun"></i></div>
-                        <p>Mountains</p>
-                    </div>
-
-                    <div class="filter">
-                        <div><i class="fa-solid fa-umbrella-beach"></i></div>
-                        <p>Beaches</p>
-                    </div>
-
-                    <div class="filter">
-                        <div><i class="fa-solid fa-person-swimming"></i></div>
-                        <p>Amazing Pools</p>
-                    </div>
-
-                    <div class="filter">
-                        <div><i class="fa-solid fa-sun"></i></div>
-                        <p>Desert</p>
-                    </div>
-
-                    <div class="filter">
-                        <div><i class="fa-solid fa-chess-rook"></i></div>
-                        <p>Castles</p>
-                    </div>
-                    <!-- Tiny Homes -->
-                    <div class="filter">
-                        <div>
-                            <i class="fa-solid fa-house-chimney"></i>
-                        </div>
-                        <p>Tiny Homes</p>
-                    </div>
-
-                    <!-- Historical Homes -->
-                    <div class="filter">
-                        <div>
-                            <i class="fa-solid fa-landmark"></i>
-                        </div>
-                        <p>Historical Homes</p>
-                    </div>
-
-                    <!-- Skiing -->
-                    <div class="filter">
-                        <div>
-                            <i class="fa-solid fa-person-skiing"></i>
-                        </div>
-                        <p>Skiing</p>
-                    </div>
-
-                    <!-- Design -->
-                    <div class="filter">
-                        <div>
-                            <i class="fa-solid fa-palette"></i>
-                        </div>
-                        <p>Design</p>
-                    </div>
-
-                    <div class="filter">
-                        <div><i class="fa-solid fa-water"></i></div>
-                        <p>Lakefront</p>
-                    </div>
-
-                    <div class="filter">
-                        <div><i class="fa-solid fa-bed"></i></div>
-                        <p>Rooms</p>
-                    </div>
-
-                    <div class="filter">
-                        <div><i class="fa-solid fa-city"></i></div>
-                        <p>Iconic Cities</p>
-                    </div>
-
-                    <div class="filter">
-                        <div><i class="fa-solid fa-campground"></i></div>
-                        <p>Camping</p>
-                    </div>
-
-                    <div class="filter">
-                        <div><i class="fa-solid fa-snowflake"></i></div>
-                        <p>Arctic</p>
-                    </div>
-
-                    <div class="filter">
-                        <div><i class="fa-solid fa-tree"></i></div>
-                        <p>Countryside</p>
-                    </div>
-
-                </div>
+                <ul class="filter-container" id="filter-container" role="list">
+                    <% categories.forEach((category) => { %>
+                        <li>
+                            <a class="filter" href="/listings?category=<%= category.slug %>">
+                                <i class="fa-solid <%= category.icon %>" aria-hidden="true"></i>
+                                <span class="filter-label"><%= category.label %></span>
+                            </a>
+                        </li>
+                    <% }) %>
+                </ul>
 
                 <button type="button" class="filter-arrow" id="filters-next" aria-label="Next categories">
-                    <i class="fa-solid fa-chevron-right"></i>
+                    <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                 </button>
 
-            </div>
+            </nav>
 
             <!-- Tax toggle is OUTSIDE filter-nav -->
             <div class="tax-toggle">
@@ -138,7 +68,7 @@
         <!-- END filters: listing cards must be outside this div -->
 
         <!-- All listing cards -->
-        <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4 mt-3">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-3">
 
             <% for (const list of allListings) { %>
 
@@ -159,8 +89,6 @@
                 <% } %>
 
         </div>
-
-    </div>
 
     <script nonce="<%= typeof cspNonce !== 'undefined' ? cspNonce : '' %>">
         // Previous and next category navigation

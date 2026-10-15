@@ -140,7 +140,8 @@
   --size-icon-button: 1.875rem;
   --size-map-height: 25rem;
   --size-card-image: 20rem;
-  --size-show-image: 30vh;
+  --ratio-show-image: 3 / 2;
+  --size-show-image-max: 30rem;
   --size-footer: 8rem;
   --size-search-max: 32.5rem;
   --size-search-min: 17.5rem;

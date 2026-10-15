@@ -5,31 +5,25 @@
             <form method="post" action="/signup" class="needs-validation" novalidate>
                 <%- include("../includes/csrf.ejs") %>
 
-                <div class="mb-3">
+                <%- include("../partials/form-field.ejs", {
+                    id: "username", label: "Username", autocomplete: "username", required: true,
+                    hint: "3 to 30 characters: letters, numbers and underscores.",
+                    feedback: "Use 3 to 30 letters, numbers or underscores.",
+                    attrs: { minlength: 3, maxlength: 30, pattern: "[A-Za-z0-9_]+" }
+                }) %>
+                <%- include("../partials/form-field.ejs", {
+                    id: "email", label: "Email", type: "email", autocomplete: "email", required: true,
+                    feedback: "Enter a valid email address.",
+                    attrs: { maxlength: 254 }
+                }) %>
+                <%- include("../partials/form-field.ejs", {
+                    id: "password", label: "Password", type: "password", autocomplete: "new-password", required: true,
+                    hint: "At least 10 characters. Avoid common passwords.",
+                    feedback: "Use at least 10 characters.",
+                    attrs: { minlength: 10, maxlength: 128 }
+                }) %>
 
-                    <label for="username" class="form-label">Username</label>
-                    <input name="username" class="form-control" id="username" type="text" autocomplete="username" minlength="3" maxlength="30" pattern="[A-Za-z0-9_]+" aria-describedby="usernameHelp" required>
-                    <div id="usernameHelp" class="form-text">3 to 30 characters: letters, numbers and underscores.</div>
-                    <div class="valid-feedback">
-                        looks good!
-                    </div>
-                </div>
-
-
-                <div class="mb-3">
-
-                    <label for="email" class="form-label">Email</label>
-                    <input name="email" class="form-control" id="email" type="email" autocomplete="email" maxlength="254" required>
-                </div>
-
-
-
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input name="password" class="form-control" id="password" type="password" autocomplete="new-password" minlength="10" maxlength="128" aria-describedby="passwordHelp" required>
-                    <div id="passwordHelp" class="form-text">At least 10 characters. Avoid common passwords.</div>
-                </div>
-                <button class="btn btn-dark">SignUp</button>
+                <button type="submit" class="btn btn-dark">SignUp</button>
             </form>
         </div>
     </div>

@@ -3,7 +3,9 @@
     Locals: id (required, letters/digits/-/_), name (default id), label
     (required), type (text, email, password, number, search, tel, url, date,
     textarea, select; default text), value, hint, error, required, placeholder,
-    autocomplete, options ([{ value, label }] for select), attrs (an object;
+    autocomplete, feedback (the message shown when the browser's own check
+    fails; only used when there is no server `error`), options ([{ value,
+    label }] for select), attrs (an object;
     only minlength, maxlength, min, max, step, pattern, inputmode, rows,
     accept, multiple are passed on).
     A password field never gets its value back.
@@ -22,9 +24,11 @@
     const hintText = typeof hint !== "undefined" && hint ? String(hint) : "";
     const errorText = typeof error !== "undefined" && error ? String(error) : "";
     const isRequired = typeof required !== "undefined" && Boolean(required);
+    const feedbackText = !errorText && typeof feedback !== "undefined" && feedback ? String(feedback) : "";
     const hintId = `${id}-hint`;
+    const feedbackId = `${id}-feedback`;
     const errorId = `${id}-error`;
-    const describedBy = [hintText ? hintId : "", errorText ? errorId : ""].filter(Boolean).join(" ");
+    const describedBy = [hintText ? hintId : "", feedbackText ? feedbackId : "", errorText ? errorId : ""].filter(Boolean).join(" ");
     const ALLOWED_ATTRS = ["minlength", "maxlength", "min", "max", "step", "pattern", "inputmode", "rows", "accept", "multiple"];
     const extra = Object.entries(typeof attrs === "object" && attrs ? attrs : {})
         .filter(([key, v]) => ALLOWED_ATTRS.includes(key) && v !== undefined && v !== null && v !== false);
@@ -44,5 +48,6 @@
     <input class="<%= controlClass %>" id="<%= id %>" name="<%= fieldName %>" type="<%= fieldType %>"<% if (fieldType !== "password" && fieldValue !== "") { %> value="<%= fieldValue %>"<% } %><% if (isRequired) { %> required<% } %><% if (typeof placeholder !== "undefined" && placeholder) { %> placeholder="<%= placeholder %>"<% } %><% if (typeof autocomplete !== "undefined" && autocomplete) { %> autocomplete="<%= autocomplete %>"<% } %><% if (errorText) { %> aria-invalid="true"<% } %><% if (describedBy) { %> aria-describedby="<%= describedBy %>"<% } %><% extra.forEach(([key, v]) => { %> <%= key %>="<%= v === true ? key : v %>"<% }) %>>
     <% } %>
     <% if (hintText) { %><div id="<%= hintId %>" class="form-text"><%= hintText %></div><% } %>
+    <% if (feedbackText) { %><div id="<%= feedbackId %>" class="invalid-feedback"><%= feedbackText %></div><% } %>
     <% if (errorText) { %><div id="<%= errorId %>" class="form-error"><%= errorText %></div><% } %>
 </div>

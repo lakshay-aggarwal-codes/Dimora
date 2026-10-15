@@ -1,18 +1,18 @@
 <% layout("/layouts/boilerPlate") %>
 
     <div class="row mt-3">
-        <div class="alert alert-danger col-12 col-md-8 col-lg-6 mx-auto" role="alert">
-            <h4 class="alert-heading"><%= status %> &middot; <%= title %></h4>
+        <section class="alert alert-danger col-12 col-md-8 col-lg-6 mx-auto" aria-labelledby="error-title">
+            <h1 class="alert-heading h4" id="error-title"><%= status %> &middot; <%= title %></h1>
             <p><%= message %></p>
             <% if (requestId) { %>
-                <p class="mb-0 small text-muted">Reference: <%= requestId %></p>
+                <p class="mb-0 small">Reference: <%= requestId %></p>
             <% } %>
             <hr>
             <a class="alert-link" href="/listings">Back to listings</a>
-        </div>
+        </section>
         <% if (detail) { %>
             <div class="col-12 col-md-10 mx-auto">
-                <p class="small text-muted mb-1">Development detail (hidden in production):</p>
+                <p class="small mb-1">Development detail (hidden in production):</p>
                 <pre class="small border rounded p-2 error-detail"><%= detail %></pre>
             </div>
         <% } %>

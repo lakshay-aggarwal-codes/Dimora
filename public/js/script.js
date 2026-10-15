@@ -11,6 +11,12 @@
         if (!form.checkValidity()) {
           event.preventDefault();
           event.stopPropagation();
+          // Keyboard and screen-reader users land on the first problem. A
+          // radio group (the star rating) is focused through its first radio.
+          const firstInvalid = form.querySelector(":invalid");
+          if (firstInvalid && typeof firstInvalid.focus === "function") {
+            firstInvalid.focus();
+          }
         }
 
         form.classList.add("was-validated");
