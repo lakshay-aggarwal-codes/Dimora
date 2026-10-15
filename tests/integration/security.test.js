@@ -68,7 +68,8 @@ describe("CSP nonce", () => {
       ...(res.text.match(/<script(?![^>]*\bsrc=)[^>]*>/g) || []),
       ...(res.text.match(/<style[^>]*>/g) || []),
     ];
-    expect(inline.length).toBeGreaterThanOrEqual(3); // navbar + index style, index script
+    expect(inline.length).toBeGreaterThanOrEqual(1); // the index script
+    expect(res.text).not.toMatch(/<style[\s>]/); // styles live in public/css (P03-T01)
     for (const tag of inline) expect(tag).toContain(`nonce="${nonce}"`);
     expect(res.text).not.toMatch(/\son[a-z]+="/); // no inline event handlers
   });

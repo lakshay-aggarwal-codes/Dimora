@@ -66,9 +66,11 @@ test("views and static files resolve after the move into src/", async () => {
     assert.equal(page.status, 200);
     assert.match(await page.text(), /<form/i);
 
-    const css = await fetch(`${base}/css/style.css`);
-    assert.equal(css.status, 200);
-    assert.match(css.headers.get("content-type"), /text\/css/);
+    for (const file of ["tokens", "base", "components"]) {
+      const css = await fetch(`${base}/css/${file}.css`);
+      assert.equal(css.status, 200, `${file}.css`);
+      assert.match(css.headers.get("content-type"), /text\/css/);
+    }
   });
 });
 

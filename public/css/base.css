@@ -1,0 +1,92 @@
+/* Base layer (P03-T01): element defaults, Bootstrap bridge, layout skeleton.
+   Values come from tokens.css only. Loaded after Bootstrap, so no !important. */
+
+/* Respect "reduce motion": every animation time in the site is a --duration-*
+   token, so zeroing them here switches the whole site's motion off. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Bootstrap 5.3 reads these variables, so its utilities, forms and alerts pick
+   up the Dimora palette and type. */
+:root {
+  --bs-body-font-family: var(--font-family-base);
+  --bs-body-font-size: var(--font-size-md);
+  --bs-body-line-height: var(--line-height-base);
+  --bs-body-color: var(--color-text);
+  --bs-body-bg: var(--color-surface);
+  --bs-secondary-color: var(--color-text-muted);
+  --bs-emphasis-color: var(--color-text);
+  --bs-border-color: var(--color-border);
+  --bs-link-color: var(--color-link);
+  --bs-link-hover-color: var(--color-link-hover);
+  --bs-link-color-rgb: var(--color-link-rgb);
+  --bs-link-hover-color-rgb: var(--color-link-hover-rgb);
+  --bs-focus-ring-color: var(--color-focus-ring);
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: var(--font-family-base);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+}
+
+/* The page content grows, so the footer sits at the bottom of short pages. */
+.container {
+  flex: 1;
+}
+
+a {
+  color: var(--color-link);
+}
+
+a:hover {
+  color: var(--color-link-hover);
+}
+
+/* One visible, consistent keyboard focus indicator. */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* Form controls: outline strong enough to see (UI contrast >= 3:1). */
+.form-control,
+.form-select {
+  color: var(--color-text);
+  background-color: var(--color-surface-raised);
+  border-color: var(--color-border-strong);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--color-focus);
+  box-shadow: var(--shadow-focus);
+}
+
+.form-label {
+  font-weight: var(--font-weight-medium);
+}
+
+/* Map (D-18: was a fixed 80vh width, which overflowed phones). */
+#map {
+  width: 100%;
+  max-width: 100%;
+  height: var(--size-map-height);
+  border-radius: var(--radius-md);
+}

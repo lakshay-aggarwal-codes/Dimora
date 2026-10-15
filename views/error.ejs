@@ -1,7 +1,7 @@
 <% layout("/layouts/boilerPlate") %>
 
     <div class="row mt-3">
-        <div class="alert alert-danger col-6 offset-3" role="alert">
+        <div class="alert alert-danger col-12 col-md-8 col-lg-6 mx-auto" role="alert">
             <h4 class="alert-heading"><%= status %> &middot; <%= title %></h4>
             <p><%= message %></p>
             <% if (requestId) { %>
@@ -11,9 +11,9 @@
             <a class="alert-link" href="/listings">Back to listings</a>
         </div>
         <% if (detail) { %>
-            <div class="col-10 offset-1">
+            <div class="col-12 col-md-10 mx-auto">
                 <p class="small text-muted mb-1">Development detail (hidden in production):</p>
-                <pre class="small border rounded p-2" style="white-space: pre-wrap;"><%= detail %></pre>
+                <pre class="small border rounded p-2 error-detail"><%= detail %></pre>
             </div>
         <% } %>
     </div>

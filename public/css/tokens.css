@@ -1,0 +1,146 @@
+/*
+ * Dimora design tokens (P03-T01).
+ *
+ * The ONLY file that may contain colour values, spacing/radius/shadow numbers,
+ * type sizes and animation times. base.css, components.css and rating.css use
+ * var(--...) (tests/unit/cssArchitecture.test.js enforces this).
+ *
+ * Palette: deep teal (primary), warm sand (surfaces), ink (text) and one burnt-
+ * orange accent for prices and calls to action. Contrast (WCAG 2.x), measured
+ * by the same test:
+ *   text >= 4.5:1   ink / ink-muted on sand, white and sunken; on-primary on
+ *                   primary; on-accent on accent; primary and accent on sand/white
+ *   UI   >= 3:1     border-strong, focus ring, star on sand and white
+ *
+ * Two layers: raw palette values first, then SEMANTIC names (--color-text,
+ * --color-surface, ...). Components only use the semantic layer. A dark theme
+ * later means redefining the semantic layer (see the commented block at the end);
+ * dark mode itself is deferred.
+ */
+:root {
+  color-scheme: light;
+
+  /* ---- Palette (raw values; do not use in components) ---- */
+  --palette-ink: #1b2a2f;
+  --palette-ink-soft: #4a5a5f;
+  --palette-teal-700: #0f6b6b;
+  --palette-teal-800: #0b5252;
+  --palette-teal-100: #d7ecea;
+  --palette-orange-700: #b3441c;
+  --palette-orange-800: #8f3615;
+  --palette-sand-50: #fbf7f0;
+  --palette-sand-100: #f1ebe0;
+  --palette-sand-300: #d9d2c5;
+  --palette-grey-600: #6f7a7a;
+  --palette-white: #ffffff;
+  --palette-gold-700: #a86400;
+  --palette-red-700: #b42318;
+  --palette-green-700: #1a6b3c;
+  --palette-black-a-8: rgb(27 42 47 / 8%);
+  --palette-black-a-16: rgb(27 42 47 / 16%);
+  --palette-black-a-24: rgb(27 42 47 / 24%);
+  --palette-teal-a-25: rgb(15 107 107 / 25%);
+
+  /* ---- Semantic colours ---- */
+  --color-text: var(--palette-ink);
+  --color-text-muted: var(--palette-ink-soft);
+  --color-surface: var(--palette-sand-50); /* page background */
+  --color-surface-raised: var(--palette-white); /* cards, inputs, navbar */
+  --color-surface-sunken: var(--palette-sand-100); /* footer, wells */
+  --color-border: var(--palette-sand-300); /* decorative dividers */
+  --color-border-strong: var(--palette-grey-600); /* control outlines, >= 3:1 */
+
+  --color-primary: var(--palette-teal-700);
+  --color-primary-hover: var(--palette-teal-800);
+  --color-primary-subtle: var(--palette-teal-100);
+  --color-on-primary: var(--palette-white);
+
+  --color-accent: var(--palette-orange-700); /* prices and calls to action */
+  --color-accent-hover: var(--palette-orange-800);
+  --color-on-accent: var(--palette-white);
+
+  --color-link: var(--palette-teal-700);
+  --color-link-hover: var(--palette-teal-800);
+  /* Bootstrap wants links as "r, g, b" triples too */
+  --color-link-rgb: 15, 107, 107;
+  --color-link-hover-rgb: 11, 82, 82;
+  --color-focus: var(--palette-teal-700);
+  --color-focus-ring: var(--palette-teal-a-25);
+
+  --color-star: var(--palette-gold-700);
+  --color-danger: var(--palette-red-700);
+  --color-success: var(--palette-green-700);
+
+  --color-overlay: var(--palette-black-a-24);
+  --color-scrim-light: var(--palette-white);
+
+  /* ---- Spacing scale (4px base) ---- */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* ---- Radius ---- */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-pill: 999px;
+  --radius-round: 50%;
+
+  /* ---- Shadow ---- */
+  --shadow-sm: 0 1px 3px var(--palette-black-a-16);
+  --shadow-md: 0 3px 8px var(--palette-black-a-16);
+  --shadow-lg: 0 8px 24px var(--palette-black-a-16);
+  --shadow-focus: 0 0 0 3px var(--color-focus-ring);
+
+  /* ---- Typography ---- */
+  --font-family-base: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 2rem;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --line-height-tight: 1.25;
+  --line-height-base: 1.5;
+
+  /* ---- Layout sizes ---- */
+  --size-control: 2.875rem; /* search field and button height */
+  --size-icon-button: 1.875rem;
+  --size-map-height: 25rem;
+  --size-card-image: 20rem;
+  --size-show-image: 30vh;
+  --size-footer: 8rem;
+  --size-search-max: 32.5rem;
+  --size-search-min: 17.5rem;
+  --size-brand-icon: 2rem;
+
+  /* ---- Motion (set to 0ms by base.css when the user asks for reduced motion) ---- */
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 700ms;
+  --easing-standard: ease;
+
+  /* ---- Stacking ---- */
+  --z-sticky: 1020;
+}
+
+/*
+ * Dark theme placeholder (deferred, not active): redefine the SEMANTIC layer
+ * only, for example
+ *
+ *   @media (prefers-color-scheme: dark) {
+ *     :root { --color-text: ...; --color-surface: ...; }
+ *   }
+ *
+ * and re-run the contrast checks in tests/unit/cssArchitecture.test.js.
+ */

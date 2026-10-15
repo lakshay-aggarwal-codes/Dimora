@@ -1,0 +1,401 @@
+/* Components (P03-T01): navbar, search, buttons, cards, filter bar, footer.
+   Replaces the inline <style> blocks that lived in navbar.ejs and
+   listings/index.ejs. Values come from tokens.css only. */
+
+/* ---- Navbar ---- */
+.navbar {
+  background-color: var(--color-surface-raised);
+}
+
+.navbar-brand .fa-compass {
+  color: var(--color-primary);
+  font-size: var(--size-brand-icon);
+}
+
+.nav-link {
+  color: var(--color-text);
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: var(--color-primary);
+}
+
+/* ---- Search (navbar) ---- */
+.search {
+  flex: 1 1 25rem;
+  width: 100%;
+  max-width: var(--size-search-max);
+  min-width: var(--size-search-min);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.search form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.search-input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: var(--size-control);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-raised);
+  font-size: var(--font-size-md);
+  transition:
+    border-color var(--duration-base) var(--easing-standard),
+    box-shadow var(--duration-base) var(--easing-standard);
+}
+
+.search-input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+.search-input:focus {
+  border-color: var(--color-focus);
+  box-shadow: var(--shadow-focus);
+  outline: none;
+}
+
+.btn-search {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--size-control);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-base) var(--easing-standard),
+    transform var(--duration-base) var(--easing-standard),
+    box-shadow var(--duration-base) var(--easing-standard);
+}
+
+.btn-search:hover,
+.btn-search:focus-visible {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  color: var(--color-on-accent);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-search:active {
+  transform: scale(0.97);
+}
+
+.btn-search i {
+  margin: 0;
+}
+
+@media (max-width: 767.98px) {
+  .search {
+    flex: 1 1 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: var(--space-3) 0;
+  }
+}
+
+/* ---- Buttons ---- */
+.btn-dark {
+  --bs-btn-bg: var(--color-text);
+  --bs-btn-border-color: var(--color-text);
+  --bs-btn-hover-bg: var(--color-primary-hover);
+  --bs-btn-hover-border-color: var(--color-primary-hover);
+  --bs-btn-active-bg: var(--color-primary-hover);
+  --bs-btn-active-border-color: var(--color-primary-hover);
+  --bs-btn-focus-shadow-rgb: var(--color-link-rgb);
+}
+
+.btn-outline-dark {
+  --bs-btn-color: var(--color-text);
+  --bs-btn-border-color: var(--color-text);
+  --bs-btn-hover-bg: var(--color-text);
+  --bs-btn-hover-border-color: var(--color-text);
+  --bs-btn-active-bg: var(--color-text);
+  --bs-btn-active-border-color: var(--color-text);
+}
+
+/* The main call to action on a form (create / save a listing). */
+.add-btn,
+.edit-btn {
+  --bs-btn-bg: var(--color-accent);
+  --bs-btn-border-color: var(--color-accent);
+  --bs-btn-hover-bg: var(--color-accent-hover);
+  --bs-btn-hover-border-color: var(--color-accent-hover);
+  --bs-btn-active-bg: var(--color-accent-hover);
+  --bs-btn-active-border-color: var(--color-accent-hover);
+  --bs-btn-color: var(--color-on-accent);
+  --bs-btn-hover-color: var(--color-on-accent);
+  --bs-btn-active-color: var(--color-on-accent);
+}
+
+.btns {
+  display: flex;
+}
+
+/* ---- Listing cards ---- */
+.listing-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.listing-card {
+  margin-bottom: var(--space-6);
+  border: none;
+  border-radius: var(--radius-lg);
+  background-color: transparent;
+  overflow: hidden;
+  transition: transform var(--duration-base) var(--easing-standard);
+}
+
+.listing-card:hover {
+  transform: translateY(calc(-1 * var(--space-1)));
+}
+
+.listing-card .card-body {
+  padding: 0;
+}
+
+.listing-card .card-text {
+  font-weight: var(--font-weight-regular);
+}
+
+.card-img-top {
+  width: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+}
+
+/* Card photo on the listings page (was an inline style). */
+.listing-card-img {
+  height: var(--size-card-image);
+}
+
+.show-card {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.show-img {
+  height: var(--size-show-image);
+}
+
+.tax-info {
+  display: none;
+}
+
+/* ---- Category filter bar (listings page) ---- */
+#filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: var(--space-4);
+  margin: var(--space-4) 0;
+  width: 100%;
+}
+
+.filter-nav {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: var(--space-2);
+}
+
+.filter-container {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: var(--space-5);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding: var(--space-1) 0 var(--space-2);
+}
+
+.filter-container::-webkit-scrollbar {
+  display: none;
+}
+
+.filter {
+  flex: 0 0 auto;
+  min-width: 3.5rem;
+  text-align: center;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  transition: color var(--duration-base) var(--easing-standard);
+}
+
+.filter:hover {
+  color: var(--color-text);
+}
+
+.filter i {
+  font-size: var(--font-size-md);
+  margin-bottom: var(--space-1);
+}
+
+.filter p {
+  margin: 0;
+  font-size: var(--font-size-xs);
+}
+
+.filter-arrow {
+  flex: 0 0 var(--size-icon-button);
+  width: var(--size-icon-button);
+  height: var(--size-icon-button);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-round);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-base) var(--easing-standard),
+    box-shadow var(--duration-base) var(--easing-standard);
+}
+
+.filter-arrow:hover:not(:disabled) {
+  background: var(--color-surface-sunken);
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-arrow:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.tax-toggle {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-raised);
+}
+
+.tax-toggle .form-check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: 2.2em;
+}
+
+.tax-toggle .form-check-input {
+  cursor: pointer;
+  margin-top: 0;
+}
+
+.tax-toggle .form-check-label {
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+}
+
+@media (max-width: 992px) {
+  #filters {
+    gap: var(--space-3);
+  }
+
+  .filter-nav {
+    gap: var(--space-1);
+  }
+
+  .filter-container {
+    gap: var(--space-4);
+  }
+
+  .tax-toggle {
+    padding: var(--space-2);
+  }
+}
+
+@media (max-width: 576px) {
+  #filters {
+    gap: var(--space-2);
+  }
+
+  .filter-container {
+    gap: var(--space-3);
+  }
+
+  .filter {
+    min-width: 3rem;
+  }
+
+  .tax-toggle .form-check-label {
+    max-width: 5.5rem;
+    white-space: normal;
+    line-height: var(--line-height-tight);
+  }
+
+  .tax-toggle .form-check {
+    padding-left: 1.8em;
+  }
+}
+
+/* ---- Error page ---- */
+.error-detail {
+  white-space: pre-wrap;
+}
+
+/* ---- Footer ---- */
+.f-info {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--size-footer);
+  padding: var(--space-4);
+  text-align: center;
+  background-color: var(--color-surface-sunken);
+}
+
+.f-info-links,
+.f-info-socials,
+.f-info-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.f-info-links a {
+  margin: 0 var(--space-2);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.f-info-links a:hover {
+  text-decoration: underline;
+}
+
+.f-info-socials i {
+  margin-right: var(--space-4);
+  font-size: var(--font-size-lg);
+}
