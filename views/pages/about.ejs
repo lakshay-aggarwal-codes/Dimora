@@ -1,0 +1,17 @@
+<% layout("/layouts/boilerPlate") %>
+<article class="prose-page">
+    <h1>About Dimora</h1>
+    <%- include("../partials/college-notice.ejs") %>
+    <p>Dimora is a small marketplace for stays. People list a home with photos, a price and a location, and guests browse, read reviews and see where a place is on a map.</p>
+    <h2>What it is for</h2>
+    <p>It is a learning project: a full web application built step by step, with sign-up and log-in, listings, reviews, search and, over time, availability and bookings. It is not a company and it does not run real stays.</p>
+    <h2>What is real and what is not</h2>
+    <ul>
+        <li>Accounts, listings, photos and reviews are stored for real, so please do not post anything you would not want kept.</li>
+        <li>Bookings and payments are simulated. No card is charged and no host is paid.</li>
+        <li>Listings you see may be sample data added to make the site easier to try.</li>
+    </ul>
+    <h2>How it is built</h2>
+    <p>Dimora uses Node.js with Express, MongoDB, and server-rendered EJS pages with Bootstrap. The code is on <a href="https://github.com/lakshay-aggarwal-codes/Dimora" rel="noopener noreferrer">GitHub</a>.</p>
+    <p><a class="btn btn-dark" href="/listings">Explore stays</a></p>
+</article>

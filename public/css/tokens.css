@@ -140,13 +140,14 @@
   --size-icon-button: 1.875rem;
   --size-map-height: 25rem;
   --size-card-image: 20rem;
-  --ratio-show-image: 3 / 2;
-  --size-show-image-max: 30rem;
+  --size-show-image: 30vh;
   --size-footer: 8rem;
   --size-search-max: 32.5rem;
   --size-search-min: 17.5rem;
   --size-brand-icon: 2rem;
   --size-flash-max: 40rem;
+  --size-prose-max: 44rem;
+  --size-destination-image: 3.5rem;
 
   /* ---- Motion (set to 0ms by base.css when the user asks for reduced motion) ---- */
   --duration-fast: 150ms;

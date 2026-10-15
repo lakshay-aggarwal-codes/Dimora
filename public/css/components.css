@@ -212,6 +212,10 @@
   --bs-btn-active-color: var(--color-on-accent);
 }
 
+.btns {
+  display: flex;
+}
+
 /* ---- Listing cards ---- */
 .listing-link {
   text-decoration: none;
@@ -250,12 +254,13 @@
   height: var(--size-card-image);
 }
 
+.show-card {
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .show-img {
-  width: 100%;
-  height: auto;
-  aspect-ratio: var(--ratio-show-image);
-  max-height: var(--size-show-image-max);
-  object-fit: cover;
+  height: var(--size-show-image);
 }
 
 .tax-info {
@@ -290,14 +295,7 @@
   overflow-x: auto;
   scroll-behavior: smooth;
   scrollbar-width: none;
-  /* Room for the focus ring, which the scroll container would otherwise clip. */
-  padding: var(--space-1) var(--space-1) var(--space-2);
-  margin: 0;
-  list-style: none;
-}
-
-.filter-container > li {
-  flex: 0 0 auto;
+  padding: var(--space-1) 0 var(--space-2);
 }
 
 .filter-container::-webkit-scrollbar {
@@ -305,37 +303,26 @@
 }
 
 .filter {
-  display: block;
+  flex: 0 0 auto;
   min-width: 3.5rem;
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-md);
   text-align: center;
+  cursor: pointer;
   color: var(--color-text-muted);
-  text-decoration: none;
   white-space: nowrap;
   transition: color var(--duration-base) var(--easing-standard);
 }
 
-.filter:hover,
-.filter:focus-visible {
+.filter:hover {
   color: var(--color-text);
-  text-decoration: none;
-}
-
-/* Used by the real category filter (P05-T04): the active category. */
-.filter[aria-current="true"] {
-  color: var(--color-text);
-  box-shadow: inset 0 calc(-1 * var(--space-1) / 2) 0 var(--color-text);
 }
 
 .filter i {
-  display: block;
   font-size: var(--font-size-md);
   margin-bottom: var(--space-1);
 }
 
-.filter-label {
-  display: block;
+.filter p {
+  margin: 0;
   font-size: var(--font-size-xs);
 }
 
@@ -425,7 +412,6 @@
 
   .filter {
     min-width: 3rem;
-    padding: var(--space-1);
   }
 
   .tax-toggle .form-check-label {
@@ -442,7 +428,6 @@
 /* ---- Error page ---- */
 .error-detail {
   white-space: pre-wrap;
-  overflow-wrap: anywhere;
 }
 
 /* ---- Footer ---- */
@@ -636,90 +621,185 @@
   --bs-btn-active-border-color: var(--color-danger-hover);
 }
 
-/* ---- Responsive and accessibility repair (P03-T04) ---- */
-
-/* Listing detail: stacked on phones, two columns from the lg breakpoint. Long
-   unbroken words (titles, descriptions, reviews) wrap instead of widening the
-   page. */
-.listing-detail {
-  overflow-wrap: anywhere;
+/* ---- Home page and static pages (P03-T05) ---- */
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary-subtle);
+  color: var(--color-text);
 }
 
-.listing-header {
-  margin-bottom: var(--space-4);
+.notice-icon {
+  margin-top: var(--space-1);
+  color: var(--color-primary);
 }
 
-.listing-header h1 {
-  margin: 0 0 var(--space-1);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-}
-
-.listing-where {
+.notice-text {
   margin: 0;
-  color: var(--color-text-muted);
 }
 
-.listing-hero {
-  margin: 0 0 var(--space-4);
+.prose-page {
+  max-width: var(--size-prose-max);
+  margin: var(--space-6) auto;
 }
 
-.listing-panel {
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background-color: var(--color-surface-raised);
-}
-
-.listing-price {
-  margin: 0;
+.prose-page h2 {
+  margin-top: var(--space-6);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
 }
 
-.listing-actions {
+.prose-page li {
+  margin-bottom: var(--space-2);
+}
+
+.home-hero {
+  margin: var(--space-5) 0 var(--space-6);
+  padding: var(--space-6) var(--space-4);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-raised);
+  box-shadow: var(--shadow-sm);
+}
+
+.home-title {
+  max-width: 24ch;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+.home-lead {
+  max-width: 60ch;
+  margin-bottom: var(--space-5);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+}
+
+.hero-search {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-end;
   gap: var(--space-3);
-  margin-top: var(--space-4);
 }
 
-.listing-actions form {
+.hero-search-fields {
+  display: grid;
+  flex: 1 1 28rem;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0 var(--space-3);
+}
+
+.hero-search-button {
+  margin-bottom: var(--space-3);
+}
+
+.home-section {
+  margin: var(--space-6) 0;
+}
+
+.home-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.home-section-title {
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.destination-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: var(--space-3);
   margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.listing-reviews {
-  margin-top: var(--space-7);
-}
-
-.review-card {
-  height: 100%;
-  padding: var(--space-4);
+.destination-link {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background-color: var(--color-surface-raised);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: box-shadow var(--duration-base) var(--easing-standard);
 }
 
-.review-author {
-  margin: 0 0 var(--space-1);
+.destination-link:hover,
+.destination-link:focus-visible {
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+}
+
+.destination-image {
+  grid-row: 1 / span 2;
+  width: var(--size-destination-image);
+  height: var(--size-destination-image);
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+
+.destination-name {
+  font-weight: var(--font-weight-bold);
+  overflow-wrap: anywhere;
+}
+
+.destination-count {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.how-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style-position: inside;
+}
+
+.how-steps li {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-sunken);
+  font-weight: var(--font-weight-bold);
+}
+
+.how-steps p {
+  margin: 0;
+  font-weight: var(--font-weight-regular);
+}
+
+.how-step-title {
+  display: inline;
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
 }
 
-.review-rating {
-  margin: 0 0 var(--space-2);
+.how-steps li > p {
+  margin-top: var(--space-2);
 }
 
-.review-card form {
-  margin: var(--space-3) 0 0;
-  text-align: end;
+.home-promise {
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-primary-subtle);
 }
 
-/* The current photo on the edit form. */
-.listing-edit-photo {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  max-height: var(--size-show-image-max);
-  border-radius: var(--radius-md);
+.home-promise p {
+  max-width: 60ch;
 }

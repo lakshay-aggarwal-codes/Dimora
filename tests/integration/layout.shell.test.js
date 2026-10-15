@@ -87,7 +87,7 @@ describe("document structure", () => {
 
   test("the brand link has a text name, not only an icon", () => {
     expect(html.login).toMatch(
-      /<a class="navbar-brand" href="\/listings">[\s\S]*?<span class="brand-name">Dimora<\/span>/,
+      /<a class="navbar-brand" href="\/">[\s\S]*?<span class="brand-name">Dimora<\/span>/,
     );
     expect(html.login).toMatch(/fa-compass" aria-hidden="true"/);
   });
@@ -138,6 +138,7 @@ describe("document structure", () => {
     for (const href of [
       "/listings",
       "/listings/new",
+      "/about",
       "/privacy",
       "/terms",
       "/login",
@@ -147,7 +148,7 @@ describe("document structure", () => {
     }
     expect(html.login).not.toMatch(/fa-facebook|fa-instagram|fa-linkedin/);
     expect(html.login).toContain(
-      `&copy; ${new Date().getFullYear()} Dimora Private Limited`,
+      `&copy; ${new Date().getFullYear()} Dimora, a college project`,
     );
   });
 });

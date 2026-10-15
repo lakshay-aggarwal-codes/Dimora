@@ -1,0 +1,76 @@
+<% layout("/layouts/boilerPlate") %>
+
+<section class="home-hero" aria-labelledby="home-title">
+    <h1 id="home-title" class="home-title">Find a place that feels like home</h1>
+    <p class="home-lead">Search by place, see what a stay really costs, or open your own home to guests.</p>
+    <form class="hero-search" action="/listings" method="GET" role="search">
+        <div class="hero-search-fields">
+            <%- include("../partials/form-field.ejs", { id: "hero-destination", name: "search", type: "search", label: "Where", placeholder: "Search destinations", autocomplete: "off" }) %>
+            <%- include("../partials/form-field.ejs", { id: "hero-check-in", name: "checkIn", type: "date", label: "Check in" }) %>
+            <%- include("../partials/form-field.ejs", { id: "hero-check-out", name: "checkOut", type: "date", label: "Check out" }) %>
+            <%- include("../partials/form-field.ejs", { id: "hero-guests", name: "guests", type: "number", label: "Guests", placeholder: "Add guests", attrs: { min: 1, max: 16, step: 1 } }) %>
+        </div>
+        <button class="btn btn-search hero-search-button" type="submit">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <span>Search</span>
+        </button>
+    </form>
+    <%- include("../partials/college-notice.ejs") %>
+</section>
+
+<section class="home-section" aria-labelledby="featured-title">
+    <div class="home-section-head">
+        <h2 id="featured-title" class="home-section-title">Newest stays</h2>
+        <% if (featured.length) { %><a href="/listings">Browse all stays</a><% } %>
+    </div>
+    <% if (featured.length) { %>
+        <div class="row row-cols-lg-3 row-cols-md-2 row-cols-1 g-4">
+            <% featured.forEach((item) => { %>
+                <div class="col"><%- include("../partials/listing-card.ejs", { item }) %></div>
+            <% }) %>
+        </div>
+    <% } else { %>
+        <%- include("../partials/empty-state.ejs", { title: "No stays yet", message: "Be the first to list a place on Dimora.", icon: "fa-house", actionHref: "/listings/new", actionLabel: "List your place", headingLevel: 3 }) %>
+    <% } %>
+</section>
+
+<% if (destinations.length) { %>
+<section class="home-section" aria-labelledby="destinations-title">
+    <h2 id="destinations-title" class="home-section-title">Popular destinations</h2>
+    <ul class="destination-list">
+        <% destinations.forEach((place) => { %>
+            <li>
+                <a class="destination-link" href="/listings?search=<%= encodeURIComponent(place.search) %>">
+                    <% if (place.imageUrl) { %><img class="destination-image" src="<%= place.imageUrl %>" alt="" loading="lazy"><% } %>
+                    <span class="destination-name"><%= place.label %></span>
+                    <span class="destination-count"><%= place.count %> <%= place.count === 1 ? "stay" : "stays" %></span>
+                </a>
+            </li>
+        <% }) %>
+    </ul>
+</section>
+<% } %>
+
+<section class="home-section" aria-labelledby="how-title">
+    <h2 id="how-title" class="home-section-title">How it works</h2>
+    <ol class="how-steps">
+        <li>
+            <h3 class="how-step-title">Find a place</h3>
+            <p>Search by destination and dates, then look at photos, the map and reviews.</p>
+        </li>
+        <li>
+            <h3 class="how-step-title">Check the full price</h3>
+            <p>See the nightly price and the GST note before you decide, not after.</p>
+        </li>
+        <li>
+            <h3 class="how-step-title">Stay, or host</h3>
+            <p>Book a stay, or list your own home and set your own price and rules.</p>
+        </li>
+    </ol>
+</section>
+
+<section class="home-section home-promise" aria-labelledby="promise-title">
+    <h2 id="promise-title" class="home-section-title">No surprise costs</h2>
+    <p>Every listing shows its nightly price with the GST note, and the checkout will break the total into nightly rate, fees and taxes before you confirm. Dimora never asks for card details: payments here are simulated.</p>
+    <a class="btn btn-dark" href="/listings/new">List your place</a>
+</section>
