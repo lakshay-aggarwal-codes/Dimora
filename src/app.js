@@ -24,6 +24,7 @@ const { imageUrl } = require("./utils/imageUrl");
 
 const listingRouter = require("./routes/listing");
 const imagesRouter = require("./routes/images");
+const hostRouter = require("./routes/host");
 const reviewRouter = require("./routes/review");
 const useRouter = require("./routes/user");
 const pagesRouter = require("./routes/pages");
@@ -160,6 +161,7 @@ function createApp({
   app.post("/login", limiters.login);
   app.post("/signup", limiters.signup);
 
+  app.use("/host", hostRouter);
   app.use("/listings/:id/images", imagesRouter);
   app.use("/listings", listingRouter);
   app.use("/listings/:id/reviews", reviewRouter);

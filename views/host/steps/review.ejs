@@ -1,0 +1,41 @@
+<%
+    const done = steps.filter((item) => item.n < steps.length);
+    const missing = done.filter((item) => !item.complete);
+    const label = (list, value) => (list.find((item) => item.value === value) || {}).label || "Not set";
+    const nightly = listing.get("pricing.nightlyMinor");
+    const cleaning = listing.get("pricing.cleaningFeeMinor");
+    const amenityLabels = (listing.amenities || []).map((value) => label(lists.AMENITIES, value));
+%>
+<p class="text-muted">Check everything, then publish. Until you publish, only you can see this listing.</p>
+
+<% if (missing.length) { %>
+<div class="alert alert-warning" role="alert">
+    <p class="mb-2">These steps still need attention:</p>
+    <ul class="mb-0">
+        <% missing.forEach((item) => { %>
+        <li><a href="/host/listings/<%= listing._id %>/steps/<%= item.n %>">Step <%= item.n %>: <%= item.title %></a></li>
+        <% }) %>
+    </ul>
+</div>
+<% } %>
+
+<dl class="review-summary">
+    <dt>Title</dt><dd><%= listing.title %></dd>
+    <dt>Type</dt><dd><%= label(lists.PROPERTY_TYPES, listing.propertyType) %> · <%= label(lists.ROOM_TYPES, listing.roomType) %></dd>
+    <dt>Description</dt><dd><%= listing.description %></dd>
+    <dt>Where</dt><dd><%= [listing.get("address.line1"), listing.get("address.city"), listing.get("address.state"), listing.get("address.country"), listing.get("address.postalCode")].filter(Boolean).join(", ") || "Not set" %></dd>
+    <dt>Space</dt><dd><%= listing.get("capacity.guests") %> guests · <%= listing.get("capacity.bedrooms") %> bedrooms · <%= listing.get("capacity.beds") %> beds · <%= listing.get("capacity.bathrooms") %> bathrooms</dd>
+    <dt>Amenities</dt><dd><%= amenityLabels.length ? amenityLabels.join(", ") : "None chosen" %></dd>
+    <dt>Photos</dt><dd><%= (listing.images || []).length %></dd>
+    <dt>Price</dt><dd><%= Number.isInteger(nightly) ? formatMoney(nightly, listing.get("pricing.currency") || "INR") + " per night" : "Not set" %><% if (Number.isInteger(cleaning) && cleaning > 0) { %> + <%= formatMoney(cleaning, listing.get("pricing.currency") || "INR") %> cleaning fee<% } %></dd>
+    <dt>Stay length</dt><dd><%= listing.minNights %> to <%= listing.maxNights %> nights</dd>
+    <dt>Check-in / out</dt><dd><%= listing.checkInTime %> / <%= listing.checkOutTime %></dd>
+    <dt>Cancellation</dt><dd><%= label(lists.CANCELLATION_POLICIES, listing.cancellationPolicy) %><%= listing.instantBook ? " · Instant book" : "" %></dd>
+    <% if (listing.houseRules) { %><dt>House rules</dt><dd><%= listing.houseRules %></dd><% } %>
+</dl>
+
+<form method="POST" action="/host/listings/<%= listing._id %>/publish" class="wizard-actions">
+    <%- include("../../includes/csrf.ejs") %>
+    <a class="btn btn-outline-dark" href="/host/listings/<%= listing._id %>/steps/5">Back</a>
+    <button type="submit" class="btn btn-dark"<% if (missing.length) { %> disabled aria-disabled="true"<% } %>>Publish listing</button>
+</form>

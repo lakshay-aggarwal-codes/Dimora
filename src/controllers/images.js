@@ -5,7 +5,12 @@
 const images = require("../services/images");
 const { AppError, NotFoundError, ValidationError } = require("../utils/errors");
 
-const backTo = (req) => `/listings/${req.params.id}/edit#photos`;
+// The listing wizard's photo step uses the same actions and asks to come back
+// to itself with ?wizard=1 (a fixed target, never a URL taken from the request).
+const backTo = (req) =>
+  req.query && req.query.wizard === "1"
+    ? `/host/listings/${req.params.id}/steps/4`
+    : `/listings/${req.params.id}/edit#photos`;
 
 // Problems the host can fix (a bad file, a full gallery, a failed upload) come
 // back to the form as a message; anything else is a real error.

@@ -30,7 +30,7 @@
             <% }) %>
         </div>
     <% } else { %>
-        <%- include("../partials/empty-state.ejs", { title: "No stays yet", message: "Be the first to list a place on Dimora.", icon: "fa-house", actionHref: "/listings/new", actionLabel: "List your place", headingLevel: 3 }) %>
+        <%- include("../partials/empty-state.ejs", { title: "No stays yet", message: "Be the first to list a place on Dimora.", icon: "fa-house", actionHref: "/host/listings/new", actionLabel: "List your place", headingLevel: 3 }) %>
     <% } %>
 </section>
 
@@ -72,5 +72,5 @@
 <section class="home-section home-promise" aria-labelledby="promise-title">
     <h2 id="promise-title" class="home-section-title">No surprise costs</h2>
     <p>Every listing shows its nightly price with the GST note, and the checkout will break the total into nightly rate, fees and taxes before you confirm. Dimora never asks for card details: payments here are simulated.</p>
-    <a class="btn btn-dark" href="/listings/new">List your place</a>
+    <a class="btn btn-dark" href="/host/listings/new">List your place</a>
 </section>

@@ -43,7 +43,7 @@ describe("home page", () => {
     stubHomeListings([]);
     const res = await createAgent().get("/");
     expect(res.text).toContain("No stays yet");
-    expect(res.text).toContain('href="/listings/new"');
+    expect(res.text).toContain('href="/host/listings/new"');
     expect(res.text).not.toContain("listing-card");
     expect(res.text).not.toContain("Popular destinations");
   });

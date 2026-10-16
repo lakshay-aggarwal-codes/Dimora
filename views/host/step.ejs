@@ -1,0 +1,41 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    One page of the listing wizard. Locals: listing (undefined for the first,
+    unsaved step), step, steps (stepper rows), values, errors, formError, lists,
+    photoList, maxImages, draftToken. The step's own form is in steps/<key>.ejs.
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-10 col-xl-8 mx-auto">
+        <nav aria-label="Listing steps" class="wizard-nav">
+            <ol class="wizard-steps">
+                <% steps.forEach((item) => { %>
+                <li class="wizard-step<%= item.n === step.n ? ' is-current' : '' %><%= item.complete ? ' is-done' : '' %>">
+                    <% if (item.reachable && listing) { %>
+                    <a href="/host/listings/<%= listing._id %>/steps/<%= item.n %>"<% if (item.n === step.n) { %> aria-current="step"<% } %>>
+                        <span class="wizard-step-number" aria-hidden="true"><%= item.n %></span>
+                        <span class="wizard-step-title"><%= item.title %></span>
+                        <% if (item.complete) { %><span class="visually-hidden">(done)</span><% } %>
+                    </a>
+                    <% } else { %>
+                    <span class="wizard-step-static"<% if (item.n === step.n) { %> aria-current="step"<% } %>>
+                        <span class="wizard-step-number" aria-hidden="true"><%= item.n %></span>
+                        <span class="wizard-step-title"><%= item.title %></span>
+                        <% if (item.n !== step.n) { %><span class="visually-hidden">(not available yet)</span><% } %>
+                    </span>
+                    <% } %>
+                </li>
+                <% }) %>
+            </ol>
+        </nav>
+
+        <h1 class="h3">Step <%= step.n %> of <%= steps.length %>: <%= step.title %></h1>
+
+        <% if (formError) { %>
+        <div class="alert alert-danger" role="alert"><%= formError %></div>
+        <% } else if (Object.keys(errors).length) { %>
+        <div class="alert alert-danger" role="alert">Please fix the highlighted fields.</div>
+        <% } %>
+
+        <%- include("steps/" + step.key + ".ejs") %>
+    </div>
+</div>

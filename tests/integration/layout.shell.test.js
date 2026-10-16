@@ -137,7 +137,7 @@ describe("document structure", () => {
   test("the footer has real links and no fake social icons", () => {
     for (const href of [
       "/listings",
-      "/listings/new",
+      "/host/listings/new",
       "/about",
       "/privacy",
       "/terms",

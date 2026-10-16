@@ -1,0 +1,9 @@
+<p class="text-muted">Add at least one photo; the first is the cover shown in search results. You can change the order later.</p>
+
+<%- include("../../partials/photo-manager.ejs", { listing, images: photoList, maxImages, wizard: true }) %>
+
+<form method="POST" action="/host/listings/<%= listing._id %>/steps/4" class="wizard-actions mt-4">
+    <%- include("../../includes/csrf.ejs") %>
+    <a class="btn btn-outline-dark" href="/host/listings/<%= listing._id %>/steps/3">Back</a>
+    <button type="submit" class="btn btn-dark">Continue</button>
+</form>

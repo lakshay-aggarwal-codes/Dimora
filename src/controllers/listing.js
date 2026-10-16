@@ -1,4 +1,6 @@
 const Listing = require("../models/listing.js");
+const { can } = require("../policies");
+const { isAdmin } = require("../policies/shared");
 const { getGeocodingClient } = require("../services/geocoding");
 const { deleteImage } = require("../config/cloudinary");
 const { galleryOf, replaceCover } = require("../services/images");
@@ -16,7 +18,8 @@ const {
 module.exports.initGeocoding = getGeocodingClient;
 
 module.exports.index = async (req, res) => {
-  const allListings = await Listing.find({});
+  // Only published listings are public; drafts (the wizard) are not listed.
+  const allListings = await Listing.find({ status: "published" });
   res.render("listings/index.ejs", {
     allListings,
     pageTitle: "Explore stays",
@@ -42,7 +45,14 @@ module.exports.showListings = async (req, res) => {
       },
     })
     .populate("owner");
-  if (!listing) {
+  // A draft or unpublished listing is visible to its host and to admins only;
+  // to everyone else it looks exactly like a listing that does not exist.
+  const visible =
+    listing &&
+    (listing.status === "published" ||
+      can("listing:edit", req.user, listing) ||
+      isAdmin(req.user));
+  if (!visible) {
     req.flash("error", "Listing you requested for does not exist");
     return res.redirect("/listings");
   }

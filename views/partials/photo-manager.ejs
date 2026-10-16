@@ -11,6 +11,8 @@
     const base = `/listings/${listing._id}/images`;
     const token = typeof csrfToken !== "undefined" ? csrfToken : "";
     const managed = photos.filter((photo) => photo.id);
+    const inWizard = typeof wizard !== "undefined" && wizard === true;
+    const more = inWizard ? "&wizard=1" : "";
 %>
 <section class="photo-manager mt-5" id="photos" aria-labelledby="photos-heading">
     <h2 id="photos-heading" class="h4">Photos</h2>
@@ -31,7 +33,7 @@
                     <% if (index === 0) { %><%- include("./badge.ejs", { text: "Cover", variant: "primary" }) %><% } %>
                 </p>
 
-                <form method="POST" action="<%= base %>/<%= photo.id %>?_method=PUT" class="photo-text-form">
+                <form method="POST" action="<%= base %>/<%= photo.id %>?_method=PUT<%= more %>" class="photo-text-form">
                     <%- include("../includes/csrf.ejs") %>
                     <div class="mb-2">
                         <label for="alt-<%= photo.id %>" class="form-label">Description for screen readers</label>
@@ -46,21 +48,21 @@
 
                 <div class="photo-actions">
                     <% if (index > 0) { %>
-                    <form method="POST" action="<%= base %>/<%= photo.id %>/move?_method=PUT">
+                    <form method="POST" action="<%= base %>/<%= photo.id %>/move?_method=PUT<%= more %>">
                         <%- include("../includes/csrf.ejs") %>
                         <input type="hidden" name="direction" value="earlier">
                         <button type="submit" class="btn btn-outline-dark btn-sm">Move earlier</button>
                     </form>
                     <% } %>
                     <% if (index < managed.length - 1) { %>
-                    <form method="POST" action="<%= base %>/<%= photo.id %>/move?_method=PUT">
+                    <form method="POST" action="<%= base %>/<%= photo.id %>/move?_method=PUT<%= more %>">
                         <%- include("../includes/csrf.ejs") %>
                         <input type="hidden" name="direction" value="later">
                         <button type="submit" class="btn btn-outline-dark btn-sm">Move later</button>
                     </form>
                     <% } %>
                     <% if (index > 0) { %>
-                    <form method="POST" action="<%= base %>/<%= photo.id %>/cover?_method=PUT">
+                    <form method="POST" action="<%= base %>/<%= photo.id %>/cover?_method=PUT<%= more %>">
                         <%- include("../includes/csrf.ejs") %>
                         <button type="submit" class="btn btn-outline-dark btn-sm">Make cover</button>
                     </form>
@@ -77,7 +79,7 @@
         id: `remove-photo-${index}`,
         title: "Remove this photo?",
         message: "It will be deleted from your listing and cannot be recovered.",
-        action: `${base}/${photo.id}`,
+        action: `${base}/${photo.id}${inWizard ? "?wizard=1" : ""}`,
         methodOverride: "DELETE",
         confirmLabel: "Remove photo"
     }) %>
@@ -85,7 +87,7 @@
     <% } %>
 
     <% if (room > 0) { %>
-    <form method="POST" action="<%= base %>?_csrf=<%= token %>" enctype="multipart/form-data" class="photo-upload mt-4">
+    <form method="POST" action="<%= base %>?_csrf=<%= token %><%= more %>" enctype="multipart/form-data" class="photo-upload mt-4">
         <label for="photos-input" class="form-label">Add photos</label>
         <input id="photos-input" name="photos" type="file" class="form-control" multiple required
             accept="image/png,image/jpeg,image/webp" aria-describedby="photos-hint">

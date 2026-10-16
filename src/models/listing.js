@@ -11,18 +11,11 @@ const Schema = mongoose.Schema;
 const Review = require("./review");
 
 const STATUSES = ["draft", "published", "unpublished", "suspended"];
-const PROPERTY_TYPES = [
-  "house",
-  "apartment",
-  "villa",
-  "cabin",
-  "cottage",
-  "farm_stay",
-  "hotel",
-  "other",
-];
-const ROOM_TYPES = ["entire_place", "private_room", "shared_room"];
-const CANCELLATION_POLICIES = ["flexible", "moderate", "strict"];
+const {
+  PROPERTY_TYPE_VALUES: PROPERTY_TYPES,
+  ROOM_TYPE_VALUES: ROOM_TYPES,
+  CANCELLATION_POLICY_VALUES: CANCELLATION_POLICIES,
+} = require("../config/constants");
 
 // Nightly price floor: INR 100 (10 000 paise). A stay below it is almost
 // certainly a typo (1 instead of 1000). Ceiling: INR 10 lakh a night.
@@ -141,15 +134,20 @@ const listingSchema = new Schema(
     needsReview: { type: Boolean, default: false },
 
     // Precise point: private (never sent to the browser as such, P06-T02).
+    // A draft has none until the location step has looked the address up.
     geometry: {
       type: {
         type: String,
         enum: ["Point"],
-        required: true,
+        required: function () {
+          return this.status !== "draft";
+        },
       },
       coordinates: {
         type: [Number],
-        required: true,
+        required: function () {
+          return this.status !== "draft";
+        },
       },
     },
 
@@ -236,6 +234,12 @@ const listingSchema = new Schema(
       ref: "User",
     },
 
+    // Listing wizard (P04-T02). `wizardSteps` lists the steps (1-5) the host has
+    // completed; `draftToken` is a one-time id the first step carries so that
+    // submitting it twice (double click, back button) makes one draft.
+    wizardSteps: { type: [Number], default: undefined },
+    draftToken: { type: String, maxlength: 64 },
+
     // Soft delete: the row stays, the pages stop showing it (P04-T05).
     deletedAt: { type: Date },
   },
@@ -273,6 +277,16 @@ listingSchema.index(
   { name: "pricing.nightlyMinor_1" },
 );
 // 2dsphere(publicGeometry) comes with P06-T02.
+
+// One draft per (host, form): see draftToken. Built by migration 005.
+listingSchema.index(
+  { owner: 1, draftToken: 1 },
+  {
+    name: "owner_1_draftToken_1",
+    unique: true,
+    partialFilterExpression: { draftToken: { $type: "string" } },
+  },
+);
 
 listingSchema.post("findOneAndDelete", async (listing) => {
   if (listing) {

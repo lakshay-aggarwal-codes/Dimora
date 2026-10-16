@@ -1012,3 +1012,81 @@
   height: auto;
   border-radius: var(--radius-sm);
 }
+
+/* ---- Listing wizard (P04-T02) ---- */
+.wizard-nav {
+  margin-bottom: var(--space-4);
+}
+
+.wizard-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wizard-step a,
+.wizard-step-static {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.wizard-step a {
+  color: var(--color-text);
+}
+
+.wizard-step.is-current a,
+.wizard-step.is-current .wizard-step-static {
+  color: var(--color-text);
+  font-weight: var(--font-weight-bold);
+}
+
+.wizard-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background-color: var(--color-surface-raised);
+}
+
+.wizard-step.is-done .wizard-step-number,
+.wizard-step.is-current .wizard-step-number {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-subtle);
+}
+
+.wizard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.amenity-fieldset {
+  border: 0;
+  padding: 0;
+}
+
+.amenity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: var(--space-2) var(--space-4);
+}
+
+.review-summary dt {
+  margin-top: var(--space-3);
+  font-weight: var(--font-weight-bold);
+}
+
+.review-summary dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

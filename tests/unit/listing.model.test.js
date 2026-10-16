@@ -180,3 +180,38 @@ describe("indexes", () => {
     );
   });
 });
+
+describe("drafts and the wizard fields (P04-T02)", () => {
+  const withoutPoint = () => {
+    const data = buildListingData();
+    delete data.geometry;
+    return data;
+  };
+
+  test("a draft needs no coordinates; a published listing does", async () => {
+    expect(await errorsOf({ ...withoutPoint(), status: "draft" })).toEqual({});
+    const errors = await errorsOf({ ...withoutPoint(), status: "published" });
+    // geometry.type is the one that cannot default; an empty coordinates array
+    // passes Mongoose's own `required`, which is why the wizard also checks it.
+    expect(Object.keys(errors)).toContain("geometry.type");
+  });
+
+  test("a draft still needs a title", async () => {
+    expect(Object.keys(await errorsOf({ status: "draft" }))).toEqual(["title"]);
+  });
+
+  test("wizardSteps is empty until a step is saved; draftToken is optional text", () => {
+    const doc = new Listing({ title: "T" });
+    expect(doc.wizardSteps).toBeUndefined();
+    expect(doc.draftToken).toBeUndefined();
+  });
+
+  test("declares the one-draft-per-form unique partial index", () => {
+    const found = Listing.schema
+      .indexes()
+      .find(([, options]) => options.name === "owner_1_draftToken_1");
+    expect(found[0]).toEqual({ owner: 1, draftToken: 1 });
+    expect(found[1].unique).toBe(true);
+    expect(found[1].partialFilterExpression).toEqual({ draftToken: { $type: "string" } });
+  });
+});
