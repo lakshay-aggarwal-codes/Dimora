@@ -79,7 +79,9 @@ describe("login and signup", () => {
   test("every field has a label, an id and an accessible message", async () => {
     const agent = createAgent();
     const login = (await agent.get("/login")).text;
-    expect(login).toContain('<label for="username" class="form-label">Username');
+    expect(login).toContain(
+      '<label for="username" class="form-label">Username',
+    );
     expect(login).toContain('id="username"');
     expect(login).toContain('autocomplete="username"');
     expect(login).toContain('aria-describedby="username-feedback"');
@@ -88,8 +90,12 @@ describe("login and signup", () => {
     expect(login).toContain('class="btn btn-dark"');
 
     const signup = (await agent.get("/signup")).text;
-    expect(signup).toContain('aria-describedby="username-hint username-feedback"');
-    expect(signup).toContain('aria-describedby="password-hint password-feedback"');
+    expect(signup).toContain(
+      'aria-describedby="username-hint username-feedback"',
+    );
+    expect(signup).toContain(
+      'aria-describedby="password-hint password-feedback"',
+    );
     expect(signup).toContain('autocomplete="new-password"');
     expect(signup).toContain('minlength="10"');
     expect(signup).toContain('type="email"');
@@ -115,9 +121,15 @@ describe("listings page", () => {
   test("categories are links; the grid starts at one column", async () => {
     jest.spyOn(Listing, "find").mockResolvedValue([]);
     const html = (await createAgent().get("/listings")).text;
-    expect(count(html, /<a class="filter" href="\/listings\?category=/g)).toBe(17);
-    expect(html).toContain('<a class="filter" href="/listings?category=trending">');
-    expect(html).toContain('<a class="filter" href="/listings?category=amazing-pools">');
+    expect(count(html, /<a class="filter" href="\/listings\?category=/g)).toBe(
+      17,
+    );
+    expect(html).toContain(
+      '<a class="filter" href="/listings?category=trending">',
+    );
+    expect(html).toContain(
+      '<a class="filter" href="/listings?category=amazing-pools">',
+    );
     expect(html).toContain('<nav class="filter-nav" aria-label="Categories">');
     expect(html).toContain("row-cols-1 row-cols-md-2 row-cols-lg-3");
     expect(html).not.toContain('<div class="filter">');
@@ -133,17 +145,24 @@ describe("detail page", () => {
     expect(html).toContain("col-12 col-lg-7");
     expect(html).toContain("col-12 col-lg-5");
     expect(html).toContain("<aside");
-    for (const id of ["about-heading", "summary-heading", "map-heading", "reviews-heading"]) {
+    for (const id of [
+      "about-heading",
+      "summary-heading",
+      "map-heading",
+      "reviews-heading",
+    ]) {
       expect(html).toContain(`id="${id}"`);
     }
     expect(html).toContain("No reviews yet.");
-    expect(html).toMatch(/alt="Photo of Seaside Cottage"/);
+    expect(html).toContain('alt="Seaside Cottage, photo 1 of 1"');
   });
 
   test("a listing without a photo uses a decorative placeholder (empty alt)", async () => {
     stubShow(plainListing({ image: undefined }));
     const html = (await createAgent().get(`/listings/${OID}`)).text;
-    expect(html).toMatch(/<img class="card-img-top show-img" src="https:\/\/[^"]+" alt="">/);
+    expect(html).toMatch(
+      /<img class="gallery-main-img" src="https:\/\/[^"]+" alt="">/,
+    );
   });
 
   test("reviews are a list of articles with an accessible rating", async () => {
@@ -186,10 +205,19 @@ describe("detail page", () => {
 
 describe("new and edit forms", () => {
   test("new: responsive column, every control has an id its label points at", async () => {
-    const html = await renderView("listings/new.ejs", { currentPath: "/listings/new" });
+    const html = await renderView("listings/new.ejs", {
+      currentPath: "/listings/new",
+    });
     expect(html).toContain("col-12 col-md-10 col-lg-8 mx-auto");
     expect(html).toMatch(/<h1 class="h3">Create New Listing<\/h1>/);
-    for (const id of ["title", "description", "image", "price", "country", "location"]) {
+    for (const id of [
+      "title",
+      "description",
+      "image",
+      "price",
+      "country",
+      "location",
+    ]) {
       expect(html).toContain(`<label for="${id}"`);
       expect(html).toMatch(new RegExp(`<(?:input|textarea)[^>]* id="${id}"`));
       expect(html).toContain(`id="${id}-feedback"`);
@@ -211,9 +239,18 @@ describe("new and edit forms", () => {
     expect(html).toMatch(/<h1 class="h3">Edit your Listing<\/h1>/);
     expect(html).toContain('value="Cabin &#34;North&#34;"');
     expect(html).toContain('value="1800"');
-    expect(html).toContain(`action="/listings/${OID}?_method=PUT&_csrf=tok123"`);
+    expect(html).toContain(
+      `action="/listings/${OID}?_method=PUT&_csrf=tok123"`,
+    );
     expect(html).toContain('alt="Current photo of this listing"');
-    for (const id of ["title", "description", "image", "price", "country", "location"]) {
+    for (const id of [
+      "title",
+      "description",
+      "image",
+      "price",
+      "country",
+      "location",
+    ]) {
       expect(html).toContain(`<label for="${id}"`);
       expect(html).toMatch(new RegExp(`<(?:input|textarea)[^>]* id="${id}"`));
     }

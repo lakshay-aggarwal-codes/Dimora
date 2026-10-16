@@ -1,150 +1,71 @@
 <% layout("/layouts/boilerPlate") %>
-
-    <div class="row">
-        <div class="col-8 offset-2">
-
-            <br><br>
-
-            <h3>Edit your Listing</h3>
+    <%
+        const photoList = typeof gallery !== "undefined" ? gallery : [];
+        const priceValue = typeof priceRupees !== "undefined" && priceRupees !== null ? priceRupees : "";
+    %>
+    <div class="row mt-3">
+        <div class="col-12 col-md-10 col-lg-8 mx-auto">
+            <h1 class="h3">Edit your Listing</h1>
 
             <form method="POST" action="/listings/<%= listing._id %>?_method=PUT&_csrf=<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>" novalidate class="needs-validation"
                 enctype="multipart/form-data">
 
-                <!-- Title -->
                 <div class="mb-3">
-                    <label for="title" class="form-label">
-                        Title
-                    </label>
-
+                    <label for="title" class="form-label">Title</label>
                     <input id="title" value="<%= listing.title %>" name="listing[title]" type="text"
-                        class="form-control" required>
-
-                    <div class="valid-feedback">
-                        Title looks good!
-                    </div>
-
-                    <div class="invalid-feedback">
-                        Please enter a title.
-                    </div>
+                        class="form-control" aria-describedby="title-feedback" required>
+                    <div class="invalid-feedback" id="title-feedback">Please enter a title.</div>
                 </div>
 
-
-                <!-- Description -->
                 <div class="mb-3">
-                    <label for="description" class="form-label">
-                        Description
-                    </label>
-
-                    <textarea id="description" name="listing[description]" required
-                        class="form-control"><%= listing.description %></textarea>
-
-                    <div class="valid-feedback">
-                        Description looks good!
-                    </div>
-
-                    <div class="invalid-feedback">
-                        Please enter a short description.
-                    </div>
+                    <label for="description" class="form-label">Description</label>
+                    <textarea id="description" name="listing[description]" class="form-control" rows="4"
+                        aria-describedby="description-feedback" required><%= listing.description %></textarea>
+                    <div class="invalid-feedback" id="description-feedback">Please enter a short description.</div>
                 </div>
-
 
                 <% if (originalImageUrl) { %>
-                <div class="mb-3">Current cover photo<br>
-                    <img src="<%=originalImageUrl%>" alt="Current cover photo of this listing" />
+                <div class="mb-3">
+                    <p class="form-label mb-1">Current photo</p>
+                    <img class="edit-current-photo" src="<%= originalImageUrl %>" alt="Current photo of this listing">
                 </div>
                 <% } %>
 
-                <!-- Image -->
                 <div class="mb-3">
-                    <label for="image" class="form-label">
-                        Replace cover photo
-                    </label>
+                    <label for="image" class="form-label">Replace cover photo</label>
                     <input id="image" name="listing[image][url]" class="form-control" type="file"
-                        accept="image/png,image/jpeg,image/webp">
+                        accept="image/png,image/jpeg,image/webp" aria-describedby="image-hint">
+                    <div class="form-text" id="image-hint">Optional. The other photos are managed below.</div>
                 </div>
 
-                <!-- Price + Country -->
                 <div class="row">
-
-                    <!-- Price -->
-                    <div class="mb-3 col-md-4">
-
-                        <label for="price" class="form-label">
-                            Price
-                        </label>
-
-                        <input id="price" value="<%= priceRupees ?? '' %>" name="listing[price]" type="number" min="100" step="any"
-                            class="form-control" required>
-
-                        <div class="valid-feedback">
-                            Price looks good!
-                        </div>
-
-                        <div class="invalid-feedback">
-                            Please enter a valid price.
-                        </div>
-
+                    <div class="mb-3 col-12 col-md-4">
+                        <label for="price" class="form-label">Price</label>
+                        <input id="price" value="<%= priceValue %>" name="listing[price]" type="number" min="100"
+                            step="any" inputmode="decimal" class="form-control" aria-describedby="price-feedback" required>
+                        <div class="invalid-feedback" id="price-feedback">Please enter a valid price (at least 100).</div>
                     </div>
 
-
-                    <!-- Country -->
-                    <div class="mb-3 col-md-8">
-
-                        <label for="country" class="form-label">
-                            Country
-                        </label>
-
+                    <div class="mb-3 col-12 col-md-8">
+                        <label for="country" class="form-label">Country</label>
                         <input id="country" value="<%= listing.country ?? '' %>" name="listing[country]" type="text"
-                            class="form-control" required>
-
-                        <div class="valid-feedback">
-                            Country looks good!
-                        </div>
-
-                        <div class="invalid-feedback">
-                            Please enter the country name.
-                        </div>
-
+                            class="form-control" aria-describedby="country-feedback" required>
+                        <div class="invalid-feedback" id="country-feedback">Please enter the country name.</div>
                     </div>
-
                 </div>
 
-
-                <!-- Location -->
                 <div class="mb-3">
-
-                    <label for="location" class="form-label">
-                        Location
-                    </label>
-
+                    <label for="location" class="form-label">Location</label>
                     <input id="location" value="<%= listing.location ?? '' %>" name="listing[location]" type="text"
-                        class="form-control" required>
-
-                    <div class="valid-feedback">
-                        Location looks good!
-                    </div>
-
-                    <div class="invalid-feedback">
-                        Please enter the location.
-                    </div>
-
+                        class="form-control" aria-describedby="location-feedback" required>
+                    <div class="invalid-feedback" id="location-feedback">Please enter the location.</div>
                 </div>
 
-
-                <!-- Submit -->
                 <div class="mb-3">
-
-                    <button class="btn mt-3 btn-dark edit-btn" type="submit">
-                        Edit Listing
-                    </button>
-
+                    <button class="btn btn-dark edit-btn" type="submit">Edit Listing</button>
                 </div>
-
-                <br><br>
-
             </form>
 
-            <%- include("../partials/photo-manager.ejs", { listing, images: gallery, maxImages: 10 }) %>
-
+            <%- include("../partials/photo-manager.ejs", { listing, images: photoList, maxImages: 10 }) %>
         </div>
     </div>

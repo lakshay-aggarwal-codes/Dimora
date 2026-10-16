@@ -254,15 +254,6 @@
   height: var(--size-card-image);
 }
 
-.show-card {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.show-img {
-  height: var(--size-show-image);
-}
-
 .tax-info {
   display: none;
 }
@@ -303,6 +294,9 @@
 }
 
 .filter {
+  display: block;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
   flex: 0 0 auto;
   min-width: 3.5rem;
   text-align: center;
@@ -312,7 +306,8 @@
   transition: color var(--duration-base) var(--easing-standard);
 }
 
-.filter:hover {
+.filter:hover,
+.filter:focus-visible {
   color: var(--color-text);
 }
 
@@ -814,10 +809,13 @@
   display: block;
 }
 
-.gallery-main-img {
+/* The detail photo scales with its column (no viewport-height sizing). */
+.gallery-main-img,
+.show-img {
   display: block;
   width: 100%;
-  height: var(--size-gallery-main);
+  max-height: var(--size-show-image-max);
+  aspect-ratio: var(--ratio-show-image);
   object-fit: cover;
   border-radius: var(--radius-lg);
 }
@@ -954,4 +952,63 @@
   flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: var(--space-3);
+}
+
+/* ---- Detail page (P03-T04) ---- */
+.listing-detail {
+  overflow-wrap: anywhere;
+}
+
+.detail-place {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.detail-panel {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-raised);
+  box-shadow: var(--shadow-sm);
+}
+
+.detail-price {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-xl);
+}
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.detail-description {
+  white-space: pre-line;
+}
+
+.review-card {
+  height: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-raised);
+}
+
+.review-rating {
+  margin-bottom: var(--space-2);
+  color: var(--color-star);
+  font-weight: var(--font-weight-medium);
+}
+
+.detail-review-form {
+  max-width: 40rem;
+  margin-bottom: var(--space-5);
+}
+
+.edit-current-photo {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
 }
