@@ -51,12 +51,17 @@ function normalizeError(err) {
   }
   if (err && typeof err === "object" && err.name === "MulterError") {
     const tooBig = err.code === "LIMIT_FILE_SIZE";
+    const tooMany =
+      err.code === "LIMIT_FILE_COUNT" || err.code === "LIMIT_UNEXPECTED_FILE";
+    let message = "The upload could not be processed.";
+    if (tooBig) message = "That image is too large (maximum 5 MB).";
+    else if (tooMany)
+      message =
+        "Too many files were sent (a listing can have at most 10 photos).";
     return {
       status: tooBig ? 413 : 400,
       code: "upload_rejected",
-      message: tooBig
-        ? "That image is too large (maximum 5 MB)."
-        : "The upload could not be processed.",
+      message,
     };
   }
   // http-errors style client errors from Express/body-parser (4xx, expose=true).

@@ -6,7 +6,11 @@ const {
   authorize,
   validateListing,
 } = require("../middleware");
-const { requireImage, geocodeListing } = require("../middleware/listing");
+const {
+  requireImage,
+  verifyUploadedImage,
+  geocodeListing,
+} = require("../middleware/listing");
 const listingController = require("../controllers/listing.js");
 const { upload, uploadToCloudinary } = require("../config/cloudinary");
 
@@ -25,6 +29,7 @@ router
     upload.single(IMAGE_FIELD),
     validateListing,
     requireImage,
+    verifyUploadedImage,
     geocodeListing({ backTo: () => "/listings/new" }),
     uploadToCloudinary,
     wrapAsync(listingController.createListing),
@@ -53,6 +58,7 @@ router
     authorize("listing:edit"),
     upload.single(IMAGE_FIELD),
     validateListing,
+    verifyUploadedImage,
     geocodeListing({ backTo: (req) => `/listings/${req.params.id}/edit` }),
     uploadToCloudinary,
     wrapAsync(listingController.updateListing),

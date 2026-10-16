@@ -43,6 +43,7 @@
   --palette-amber-100: #fdefd2;
   --palette-amber-900: #7a4b00;
   --palette-orange-100: #f8e3da;
+  --palette-black-a-85: rgb(27 42 47 / 85%);
   --palette-black-a-8: rgb(27 42 47 / 8%);
   --palette-black-a-16: rgb(27 42 47 / 16%);
   --palette-black-a-24: rgb(27 42 47 / 24%);
@@ -94,6 +95,7 @@
   --color-badge-danger-text: var(--palette-red-700);
 
   --color-overlay: var(--palette-black-a-24);
+  --color-backdrop: var(--palette-black-a-85);
   --color-scrim-light: var(--palette-white);
 
   /* ---- Spacing scale (4px base) ---- */
@@ -146,6 +148,10 @@
   --size-search-min: 17.5rem;
   --size-brand-icon: 2rem;
   --size-flash-max: 40rem;
+  --size-gallery-main: 26rem;
+  --size-gallery-thumb: 7.5rem;
+  --size-photo-thumb: 9rem;
+  --size-lightbox-image: 80vh;
   --size-prose-max: 44rem;
   --size-destination-image: 3.5rem;
 

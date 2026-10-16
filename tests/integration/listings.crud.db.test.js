@@ -147,7 +147,7 @@ describeDb("listing create / edit / delete", () => {
         contentType: "text/plain",
       });
       expect(res.status).toBe(400);
-      expect(res.text).toMatch(/PNG and JPEG/);
+      expect(res.text).toMatch(/PNG, JPEG or WebP/);
       expect(await Listing.countDocuments()).toBe(0);
       expect(uploader.upload_stream).not.toHaveBeenCalled();
     });

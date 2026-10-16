@@ -29,8 +29,9 @@
                     <div class="mb-3 col-12 col-md-4">
                         <label for="price" class="form-label">Price</label>
                         <input id="price" placeholder="Enter price" name="listing[price]" class="form-control"
-                            type="number" min="0" inputmode="numeric" aria-describedby="price-feedback" required>
-                        <div class="invalid-feedback" id="price-feedback">Please enter a valid price.</div>
+                            type="number" min="100" max="1000000" step="any" inputmode="decimal"
+                            aria-describedby="price-feedback" required>
+                        <div class="invalid-feedback" id="price-feedback">Enter a price between 100 and 1,000,000 rupees.</div>
                     </div>
 
                     <div class="mb-3 col-12 col-md-8">

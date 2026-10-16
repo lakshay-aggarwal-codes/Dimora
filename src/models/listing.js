@@ -44,15 +44,18 @@ const minorAmount = (min) => ({
   validate: integer,
 });
 
-const imageSchema = new Schema(
-  {
-    url: { type: String, required: true },
-    filename: { type: String },
-    caption: { type: String, trim: true, maxlength: 200 },
-    order: { type: Number, min: 0, validate: integer, default: 0 },
-  },
-  { _id: false },
-);
+// One gallery photo (P04-T03). `_id` identifies it in the photo routes.
+// `publicId` is the Cloudinary id (empty for pictures that are not ours, such
+// as seed data). `alt` is the text a screen reader reads, `caption` is shown
+// under the photo in the viewer. The array order is the display order and
+// `order` mirrors it (0 = the cover); src/services/images.js keeps both in step.
+const imageSchema = new Schema({
+  url: { type: String, required: true },
+  publicId: { type: String },
+  alt: { type: String, trim: true, maxlength: 200 },
+  caption: { type: String, trim: true, maxlength: 200 },
+  order: { type: Number, min: 0, validate: integer, default: 0 },
+});
 
 const nearbyItemSchema = new Schema(
   {
@@ -94,8 +97,9 @@ const listingSchema = new Schema(
     propertyType: { type: String, enum: PROPERTY_TYPES },
     roomType: { type: String, enum: ROOM_TYPES },
 
-    // Legacy cover image. images[] is the gallery; until the media service
-    // (P04-T03) both are written together and image is the first picture.
+    // Mirror of the cover photo (images[0]), kept in step by the media service
+    // (src/services/images.js) because older pages and the cards still read it.
+    // images[] is the source of truth.
     image: {
       filename: {
         type: String,

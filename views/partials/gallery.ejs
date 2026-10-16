@@ -1,0 +1,59 @@
+<%#
+    Photo gallery for a listing page. Locals: images (from galleryOf: [{ url,
+    alt, caption }], cover first), title. Needs the imageUrl view helper.
+    Every photo is a real link to the large picture, so it works without
+    JavaScript; public/js/gallery.js turns the links into a keyboard-friendly
+    viewer (<dialog>) with previous/next, Escape to close and focus returned
+    to the photo that was opened.
+%>
+<%
+    const photos = typeof images !== "undefined" && Array.isArray(images) ? images : [];
+    const galleryTitle = typeof title !== "undefined" && title ? String(title) : "this stay";
+    const FALLBACK = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6";
+    const altFor = (photo, index) => photo.alt || `${galleryTitle}, photo ${index + 1} of ${photos.length}`;
+%>
+<% if (photos.length === 0) { %>
+<div class="gallery gallery-empty">
+    <img class="gallery-main-img" src="<%= FALLBACK %>" alt="">
+</div>
+<% } else { %>
+<section class="gallery" data-gallery aria-label="Photos of <%= galleryTitle %>">
+    <a class="gallery-main" href="<%= imageUrl(photos[0].url, 'full') %>" data-gallery-item
+        data-alt="<%= altFor(photos[0], 0) %>" data-caption="<%= photos[0].caption %>">
+        <img class="gallery-main-img" src="<%= imageUrl(photos[0].url, 'card') %>" alt="<%= altFor(photos[0], 0) %>">
+        <% if (photos.length > 1) { %>
+        <span class="gallery-more">Show all <%= photos.length %> photos</span>
+        <% } %>
+    </a>
+    <% if (photos.length > 1) { %>
+    <ul class="gallery-thumbs">
+        <% photos.slice(1).forEach((photo, offset) => { const index = offset + 1; %>
+        <li>
+            <a class="gallery-thumb" href="<%= imageUrl(photo.url, 'full') %>" data-gallery-item
+                data-alt="<%= altFor(photo, index) %>" data-caption="<%= photo.caption %>">
+                <img src="<%= imageUrl(photo.url, 'thumb') %>" alt="Photo <%= index + 1 %> of <%= photos.length %>: <%= altFor(photo, index) %>">
+            </a>
+        </li>
+        <% }) %>
+    </ul>
+    <% } %>
+
+    <dialog class="lightbox" data-lightbox aria-label="Photo viewer">
+        <div class="lightbox-bar">
+            <p class="lightbox-count" data-lightbox-count aria-live="polite"></p>
+            <button type="button" class="lightbox-button" data-lightbox-close>Close</button>
+        </div>
+        <figure class="lightbox-figure">
+            <img class="lightbox-img" data-lightbox-img alt="">
+            <figcaption class="lightbox-caption" data-lightbox-caption aria-live="polite"></figcaption>
+        </figure>
+        <% if (photos.length > 1) { %>
+        <div class="lightbox-nav">
+            <button type="button" class="lightbox-button" data-lightbox-prev>Previous</button>
+            <button type="button" class="lightbox-button" data-lightbox-next>Next</button>
+        </div>
+        <% } %>
+    </dialog>
+</section>
+<script src="/js/gallery.js" defer></script>
+<% } %>

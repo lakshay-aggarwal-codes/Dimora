@@ -39,9 +39,9 @@ test("addressFromLegacy trims, skips blanks and never returns undefined fields",
 
 test("imagesFromCover gives one entry, or none when there is no usable cover", () => {
   expect(imagesFromCover({ url: "https://i/a.jpg", filename: "f" })).toEqual([
-    { url: "https://i/a.jpg", filename: "f", caption: "", order: 0 },
+    { url: "https://i/a.jpg", publicId: "f", alt: "", caption: "", order: 0 },
   ]);
-  expect(imagesFromCover({ url: "https://i/a.jpg" })[0].filename).toBe("");
+  expect(imagesFromCover({ url: "https://i/a.jpg" })[0].publicId).toBe("");
   for (const bad of [undefined, null, {}, { url: "" }, { url: 5 }]) {
     expect(imagesFromCover(bad)).toEqual([]);
   }

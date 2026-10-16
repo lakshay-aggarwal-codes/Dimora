@@ -1,8 +1,5 @@
 <% layout("/layouts/boilerPlate")%>
     <%
-        const imageUrl = listing.image && listing.image.url
-            ? listing.image.url
-            : "https://images.unsplash.com/photo-1564013799919-ab600027ffc6";
         const ownerName = listing.owner && listing.owner.username;
         const nightlyMinor = listing.pricing && listing.pricing.nightlyMinor;
         const hasPrice = Number.isInteger(nightlyMinor);
@@ -16,7 +13,7 @@
             </h3>
         </div>
         <div class="card col-6 show-card listing-card offset-3">
-            <img class="card-img-top show-img" src="<%= imageUrl %>" alt="<%= listing.title %>">
+            <%- include("../partials/gallery.ejs", { images: gallery, title: listing.title }) %>
             <div class="card-body">
                 <p class="card-text">
                     <% if (ownerName) { %>

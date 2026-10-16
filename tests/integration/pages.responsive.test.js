@@ -204,7 +204,8 @@ describe("new and edit forms", () => {
   test("edit: values filled in, labels linked, current photo has alt text", async () => {
     const html = await renderView("listings/edit.ejs", {
       currentPath: `/listings/${OID}/edit`,
-      listing: plainListing({ title: 'Cabin "North"', price: 1800 }),
+      listing: plainListing({ title: 'Cabin "North"' }),
+      priceRupees: 1800,
       originalImageUrl: "https://res.cloudinary.test/a.jpg",
     });
     expect(html).toMatch(/<h1 class="h3">Edit your Listing<\/h1>/);

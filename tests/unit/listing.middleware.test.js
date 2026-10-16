@@ -154,3 +154,43 @@ describe("geocodeListing", () => {
     }
   });
 });
+
+// P04-T03: the photo must really be an image (first bytes), not just named like one
+describe("verifyUploadedImage", () => {
+  const { verifyUploadedImage } = require("../../src/middleware/listing");
+  const PNG = Buffer.from("89504e470d0a1a0a0000000d49484452", "hex");
+
+  test("passes when there is no file (edit without a new photo)", () => {
+    const next = jest.fn();
+    verifyUploadedImage({}, {}, next);
+    expect(next).toHaveBeenCalledWith();
+  });
+
+  test("passes a real image whatever it is called", () => {
+    const next = jest.fn();
+    verifyUploadedImage(
+      { file: { buffer: PNG, originalname: "x.txt", mimetype: "text/plain" } },
+      {},
+      next,
+    );
+    expect(next).toHaveBeenCalledWith();
+  });
+
+  test("refuses a text file that claims to be a JPEG", () => {
+    const next = jest.fn();
+    expect(() =>
+      verifyUploadedImage(
+        {
+          file: {
+            buffer: Buffer.from("just some text, honestly"),
+            originalname: "a.jpg",
+            mimetype: "image/jpeg",
+          },
+        },
+        {},
+        next,
+      ),
+    ).toThrow(/not a PNG, JPEG or WebP/);
+    expect(next).not.toHaveBeenCalled();
+  });
+});

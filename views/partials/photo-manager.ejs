@@ -1,0 +1,98 @@
+<%#
+    The host's photo manager (edit page). Locals: listing, images (galleryOf),
+    maxImages. Must sit OUTSIDE the listing's own <form>: every action here is
+    its own small form. The upload form is multipart, so its CSRF token goes in
+    the query string.
+%>
+<%
+    const photos = typeof images !== "undefined" && Array.isArray(images) ? images : [];
+    const limit = typeof maxImages !== "undefined" ? maxImages : 10;
+    const room = Math.max(0, limit - photos.length);
+    const base = `/listings/${listing._id}/images`;
+    const token = typeof csrfToken !== "undefined" ? csrfToken : "";
+    const managed = photos.filter((photo) => photo.id);
+%>
+<section class="photo-manager mt-5" id="photos" aria-labelledby="photos-heading">
+    <h2 id="photos-heading" class="h4">Photos</h2>
+    <p class="text-muted"><%= photos.length %> of <%= limit %>. The first photo is the cover shown in search results.</p>
+
+    <% if (photos.length > 0 && managed.length === 0) { %>
+    <p class="text-muted">This listing's photos have not been upgraded yet (run <code>npm run migrate</code>); they can be changed after that.</p>
+    <% } %>
+
+    <% if (managed.length > 0) { %>
+    <ol class="photo-list">
+        <% managed.forEach((photo, index) => { %>
+        <li class="photo-item">
+            <img class="photo-thumb" src="<%= imageUrl(photo.url, 'edit') %>" alt="<%= photo.alt || `Photo ${index + 1}` %>">
+            <div class="photo-body">
+                <p class="photo-position">
+                    Photo <%= index + 1 %> of <%= managed.length %>
+                    <% if (index === 0) { %><%- include("./badge.ejs", { text: "Cover", variant: "primary" }) %><% } %>
+                </p>
+
+                <form method="POST" action="<%= base %>/<%= photo.id %>?_method=PUT" class="photo-text-form">
+                    <%- include("../includes/csrf.ejs") %>
+                    <div class="mb-2">
+                        <label for="alt-<%= photo.id %>" class="form-label">Description for screen readers</label>
+                        <input id="alt-<%= photo.id %>" name="alt" type="text" maxlength="200" class="form-control" value="<%= photo.alt %>">
+                    </div>
+                    <div class="mb-2">
+                        <label for="caption-<%= photo.id %>" class="form-label">Caption (optional)</label>
+                        <input id="caption-<%= photo.id %>" name="caption" type="text" maxlength="200" class="form-control" value="<%= photo.caption %>">
+                    </div>
+                    <button type="submit" class="btn btn-outline-dark btn-sm">Save details</button>
+                </form>
+
+                <div class="photo-actions">
+                    <% if (index > 0) { %>
+                    <form method="POST" action="<%= base %>/<%= photo.id %>/move?_method=PUT">
+                        <%- include("../includes/csrf.ejs") %>
+                        <input type="hidden" name="direction" value="earlier">
+                        <button type="submit" class="btn btn-outline-dark btn-sm">Move earlier</button>
+                    </form>
+                    <% } %>
+                    <% if (index < managed.length - 1) { %>
+                    <form method="POST" action="<%= base %>/<%= photo.id %>/move?_method=PUT">
+                        <%- include("../includes/csrf.ejs") %>
+                        <input type="hidden" name="direction" value="later">
+                        <button type="submit" class="btn btn-outline-dark btn-sm">Move later</button>
+                    </form>
+                    <% } %>
+                    <% if (index > 0) { %>
+                    <form method="POST" action="<%= base %>/<%= photo.id %>/cover?_method=PUT">
+                        <%- include("../includes/csrf.ejs") %>
+                        <button type="submit" class="btn btn-outline-dark btn-sm">Make cover</button>
+                    </form>
+                    <% } %>
+                    <button type="button" class="btn btn-outline-dark btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#remove-photo-<%= index %>">Remove</button>
+                </div>
+            </div>
+        </li>
+        <% }) %>
+    </ol>
+    <% managed.forEach((photo, index) => { %>
+    <%- include("./confirm-modal.ejs", {
+        id: `remove-photo-${index}`,
+        title: "Remove this photo?",
+        message: "It will be deleted from your listing and cannot be recovered.",
+        action: `${base}/${photo.id}`,
+        methodOverride: "DELETE",
+        confirmLabel: "Remove photo"
+    }) %>
+    <% }) %>
+    <% } %>
+
+    <% if (room > 0) { %>
+    <form method="POST" action="<%= base %>?_csrf=<%= token %>" enctype="multipart/form-data" class="photo-upload mt-4">
+        <label for="photos-input" class="form-label">Add photos</label>
+        <input id="photos-input" name="photos" type="file" class="form-control" multiple required
+            accept="image/png,image/jpeg,image/webp" aria-describedby="photos-hint">
+        <div id="photos-hint" class="form-text">PNG, JPEG or WebP, up to 5 MB each. You can add <%= room %> more.</div>
+        <button type="submit" class="btn btn-dark mt-2">Upload</button>
+    </form>
+    <% } else { %>
+    <p class="mt-4 text-muted">You have reached the limit of <%= limit %> photos. Remove one to add another.</p>
+    <% } %>
+</section>

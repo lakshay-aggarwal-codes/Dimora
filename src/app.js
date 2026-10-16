@@ -20,8 +20,10 @@ const { can } = require("./policies");
 const { fullTitle, metaDescription } = require("./utils/pageMeta");
 const { formatMoney } = require("./utils/money");
 const pagination = require("./utils/pagination");
+const { imageUrl } = require("./utils/imageUrl");
 
 const listingRouter = require("./routes/listing");
+const imagesRouter = require("./routes/images");
 const reviewRouter = require("./routes/review");
 const useRouter = require("./routes/user");
 const pagesRouter = require("./routes/pages");
@@ -62,6 +64,7 @@ function createApp({
   // <title> and meta description helpers used by views/layouts/boilerPlate.ejs
   app.locals.fullTitle = fullTitle;
   app.locals.metaDescription = metaDescription;
+  app.locals.imageUrl = imageUrl; // Cloudinary size/format presets for <img>
   app.locals.pagination = pagination; // used by views/partials/pagination.ejs
 
   app.disable("x-powered-by");
@@ -157,6 +160,7 @@ function createApp({
   app.post("/login", limiters.login);
   app.post("/signup", limiters.signup);
 
+  app.use("/listings/:id/images", imagesRouter);
   app.use("/listings", listingRouter);
   app.use("/listings/:id/reviews", reviewRouter);
   app.use("/", pagesRouter);

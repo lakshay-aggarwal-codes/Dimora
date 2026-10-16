@@ -24,11 +24,18 @@ function addressFromLegacy(location, country) {
   return address;
 }
 
-/** The images[] entry for a stored cover image, or [] when there is none. */
+/** The images[] entry for a stored cover image, or [] when there is none.
+ *  (`filename` is the old name of the Cloudinary id; it becomes `publicId`.) */
 function imagesFromCover(image) {
   if (!image || typeof image.url !== "string" || !image.url) return [];
   return [
-    { url: image.url, filename: image.filename || "", caption: "", order: 0 },
+    {
+      url: image.url,
+      publicId: image.filename || "",
+      alt: "",
+      caption: "",
+      order: 0,
+    },
   ];
 }
 

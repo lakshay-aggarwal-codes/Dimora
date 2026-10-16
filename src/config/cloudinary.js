@@ -1,8 +1,6 @@
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 
-const { ValidationError } = require("../utils/errors");
-
 // Credentials are applied by createApp() (src/app.js), not when this file is
 // required, so importing it has no side effects.
 function configureCloudinary({ cloudName, apiKey, apiSecret }) {
@@ -14,23 +12,34 @@ function configureCloudinary({ cloudName, apiKey, apiSecret }) {
 }
 
 const UPLOAD_FOLDER = "dimora_DEV";
-const ALLOWED_MIME_TYPES = ["image/png", "image/jpeg"];
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_UPLOAD_FILES = 10;
+// Cloudinary refuses anything that is not one of these, whatever the browser
+// said it was (defence in depth: src/services/images.js already checks the
+// first bytes of every file before it is sent).
+const ALLOWED_FORMATS = ["jpg", "png", "webp"];
 
-// Files are held in memory, then streamed to Cloudinary by uploadToCloudinary.
+// Files are held in memory, then streamed to Cloudinary. There is deliberately
+// no fileFilter on the declared type: the browser chooses that, so it proves
+// nothing. src/services/images.js looks at the file's real first bytes.
+const limits = { fileSize: MAX_IMAGE_BYTES };
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_IMAGE_BYTES, files: 1 },
-  fileFilter: (req, file, cb) => {
-    if (ALLOWED_MIME_TYPES.includes(file.mimetype)) return cb(null, true);
-    cb(new ValidationError("Only PNG and JPEG images are allowed"));
-  },
+  limits: { ...limits, files: 1 },
+});
+const uploadPhotos = multer({
+  storage: multer.memoryStorage(),
+  limits: { ...limits, files: MAX_UPLOAD_FILES },
 });
 
 function uploadBuffer(buffer) {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: UPLOAD_FOLDER },
+      {
+        folder: UPLOAD_FOLDER,
+        resource_type: "image",
+        allowed_formats: ALLOWED_FORMATS,
+      },
       (err, result) => (err ? reject(err) : resolve(result)),
     );
     stream.end(buffer);
@@ -75,5 +84,10 @@ module.exports = {
   deleteImage,
   configureCloudinary,
   upload,
+  uploadPhotos,
+  uploadBuffer,
   uploadToCloudinary,
+  MAX_IMAGE_BYTES,
+  MAX_UPLOAD_FILES,
+  ALLOWED_FORMATS,
 };

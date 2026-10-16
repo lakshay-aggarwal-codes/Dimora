@@ -67,7 +67,7 @@ describe("detail page", () => {
   test("a listing with no image falls back to a placeholder picture", async () => {
     const { res } = await showPage({ image: undefined });
     expect(res.status).toBe(200);
-    expect(res.text).toMatch(/<img class="card-img-top show-img" src="https:\/\/[^"]+"/);
+    expect(res.text).toMatch(/<img class="gallery-main-img" src="https:\/\/[^"]+"/);
   });
 
   test("a listing without usable coordinates shows a message instead of a map", async () => {

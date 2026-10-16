@@ -49,17 +49,18 @@
 
 
                 <% if (originalImageUrl) { %>
-                <div class="mb-3">Original Listing Image<br>
-                    <img src="<%=originalImageUrl%>" />
+                <div class="mb-3">Current cover photo<br>
+                    <img src="<%=originalImageUrl%>" alt="Current cover photo of this listing" />
                 </div>
                 <% } %>
 
                 <!-- Image -->
                 <div class="mb-3">
                     <label for="image" class="form-label">
-                        Upload New Image
+                        Replace cover photo
                     </label>
-                    <input name="listing[image][url]" class="form-control" type="file">
+                    <input id="image" name="listing[image][url]" class="form-control" type="file"
+                        accept="image/png,image/jpeg,image/webp">
                 </div>
 
                 <!-- Price + Country -->
@@ -142,6 +143,8 @@
                 <br><br>
 
             </form>
+
+            <%- include("../partials/photo-manager.ejs", { listing, images: gallery, maxImages: 10 }) %>
 
         </div>
     </div>

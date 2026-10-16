@@ -334,3 +334,14 @@ test("if the error page itself cannot render, a plain-text fallback is sent", as
     await new Promise((r) => server.close(r));
   }
 });
+
+// P04-T03: too many photos in one upload says so
+test("a multer file-count error gets its own message", () => {
+  for (const code of ["LIMIT_FILE_COUNT", "LIMIT_UNEXPECTED_FILE"]) {
+    const n = normalizeError(
+      Object.assign(new Error("Too many files"), { name: "MulterError", code }),
+    );
+    assert.equal(n.status, 400);
+    assert.match(n.message, /at most 10 photos/);
+  }
+});

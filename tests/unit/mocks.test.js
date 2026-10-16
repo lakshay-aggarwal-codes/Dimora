@@ -24,8 +24,11 @@ test("uploadToCloudinary stores the mocked url/public id on req.file and drops t
   assert.match(req.file.filename, /^dimora_DEV\/image\d+$/);
   assert.equal(req.file.buffer, undefined);
   expect(uploader.upload_stream).toHaveBeenCalledTimes(1);
+  // Cloudinary itself also refuses anything but these formats (D-16)
   expect(uploader.upload_stream.mock.calls[0][0]).toEqual({
     folder: "dimora_DEV",
+    resource_type: "image",
+    allowed_formats: ["jpg", "png", "webp"],
   });
 });
 

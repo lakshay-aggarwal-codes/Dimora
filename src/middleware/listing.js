@@ -1,4 +1,5 @@
 const { ValidationError } = require("../utils/errors");
+const { assertValidImage } = require("../services/images");
 const {
   geocodeAddress,
   LocationNotFoundError,
@@ -10,6 +11,14 @@ module.exports.requireImage = (req, res, next) => {
   if (!req.file) {
     throw new ValidationError("Please choose an image for your listing.");
   }
+  next();
+};
+
+// A submitted photo must really be a PNG, JPEG or WebP (its first bytes are
+// checked, not the name or the type the browser claims) and small enough. Runs
+// before geocoding and before anything is sent to Cloudinary.
+module.exports.verifyUploadedImage = (req, res, next) => {
+  if (req.file) assertValidImage(req.file);
   next();
 };
 

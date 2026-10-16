@@ -61,6 +61,7 @@ module.exports = {
 | `001-baseline.js` | No-op starting point. |
 | `002-user-model-v2.js` | Users: lower-cases/trims `email`, adds `displayName`, `role`, `status`, `bio`, `emailVerifiedAt`, `createdAt`, `updatedAt`, builds the unique index `email_1`. Does not delete users or touch `hash`/`salt`/`username`. |
 | `003-listing-model-v2.js` | Listings: `status` "published" for every existing listing, `pricing.nightlyMinor` = old rupee `price` x 100 (old value kept in `legacyPrice`, `price` removed), `address.city/country` guessed from `location/country`, `images[]` from the old `image`, defaults for the new fields, rating aggregates from the existing reviews, `createdAt/updatedAt`, `needsReview`, and four indexes. Never deletes a listing. |
+| `004-listing-images-v2.js` | Listing photos: in every `images[]` entry `filename` is renamed `publicId`, an `_id` is added (photo routes identify a photo by it), `alt` is added, `order` is set to the array position. Skips photos already upgraded; deletes nothing except the renamed `filename` key. Manual `down` puts `filename` back. |
 
 ### 002 and duplicate emails
 

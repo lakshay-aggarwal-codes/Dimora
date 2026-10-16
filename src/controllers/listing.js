@@ -1,7 +1,9 @@
 const Listing = require("../models/listing.js");
 const { getGeocodingClient } = require("../services/geocoding");
 const { deleteImage } = require("../config/cloudinary");
+const { galleryOf, replaceCover } = require("../services/images");
 const { toMapPoint } = require("../utils/geo");
+const { imageUrl } = require("../utils/imageUrl");
 const {
   rupeesToMinor,
   minorToRupees,
@@ -49,6 +51,7 @@ module.exports.showListings = async (req, res) => {
   // whole listing document is never serialised into a script.
   res.render("listings/show.ejs", {
     listing,
+    gallery: galleryOf(listing),
     mapPoint: toMapPoint(listing.geometry),
     pageTitle: listing.title,
     pageDescription: listing.description,
@@ -98,14 +101,12 @@ module.exports.renderEditForm = async (req, res) => {
     req.flash("error", "Listing you requested for does not exist");
     return res.redirect("/listings");
   }
-  const imageUrl = listing.image && listing.image.url;
-  const originalImageUrl = imageUrl
-    ? imageUrl.replace("/upload", "/upload/w_250")
-    : null;
+  const gallery = galleryOf(listing);
   res.render("listings/edit.ejs", {
     listing,
+    gallery,
     priceRupees: minorToRupees(listing.pricing && listing.pricing.nightlyMinor),
-    originalImageUrl,
+    originalImageUrl: gallery.length ? imageUrl(gallery[0].url, "edit") : null,
     pageTitle: `Edit ${listing.title}`,
   });
 };
@@ -117,17 +118,21 @@ module.exports.updateListing = async (req, res) => {
   const listing = req.listing; // loaded by authorize("listing:edit")
   const { title, description, location, country, price } = req.body.listing;
 
-  const previousFilename = listing.image && listing.image.filename;
+  let previousFilename;
 
   listing.set({ title, description, location, country });
   listing.set("pricing.nightlyMinor", rupeesToMinor(price));
   // While the address is still the guess made from the old text fields, keep it
   // in step with them; a confirmed address (needsReview false) is left alone.
-  if (listing.needsReview) listing.address = addressFromLegacy(location, country);
+  if (listing.needsReview)
+    listing.address = addressFromLegacy(location, country);
   if (req.geometry) listing.geometry = req.geometry;
   if (req.file) {
-    listing.image = { url: req.file.path, filename: req.file.filename };
-    listing.images = imagesFromCover(listing.image);
+    // The single-photo field replaces the cover; the rest of the gallery stays.
+    previousFilename = replaceCover(listing, {
+      url: req.file.path,
+      publicId: req.file.filename,
+    });
   }
 
   try {
