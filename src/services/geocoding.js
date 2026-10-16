@@ -48,7 +48,17 @@ function isPoint(geometry) {
  * Looks a place up and returns a GeoJSON Point `{ type, coordinates: [lng, lat] }`.
  * Throws LocationNotFoundError (no/invalid result) or GeocoderUnavailableError.
  */
-async function geocodeAddress({ location, country }) {
+async function geocodeAddress(input) {
+  return (await lookupAddress(input)).geometry;
+}
+
+/**
+ * Like geocodeAddress, but also returns Mapbox's own name for the place it
+ * found ("Panaji, Goa, India"), so a host can check the match before saving.
+ * `placeName` is "" when Mapbox gave none.
+ * @returns {Promise<{ geometry: object, placeName: string }>}
+ */
+async function lookupAddress({ location, country }) {
   const query = [location, country]
     .map((part) => (typeof part === "string" ? part.trim() : ""))
     .filter(Boolean)
@@ -73,15 +83,20 @@ async function geocodeAddress({ location, country }) {
   const geometry =
     Array.isArray(features) && features[0] && features[0].geometry;
   if (!isPoint(geometry)) throw new LocationNotFoundError();
+  const name = features[0].place_name;
   return {
-    type: "Point",
-    coordinates: [geometry.coordinates[0], geometry.coordinates[1]],
+    geometry: {
+      type: "Point",
+      coordinates: [geometry.coordinates[0], geometry.coordinates[1]],
+    },
+    placeName: typeof name === "string" ? name.trim().slice(0, 300) : "",
   };
 }
 
 module.exports = {
   getGeocodingClient,
   geocodeAddress,
+  lookupAddress,
   LocationNotFoundError,
   GeocoderUnavailableError,
 };

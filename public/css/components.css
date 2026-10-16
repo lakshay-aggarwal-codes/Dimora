@@ -1090,3 +1090,20 @@
   margin: 0;
   overflow-wrap: anywhere;
 }
+
+/* ---- Edit page sections (P04-T04) ---- */
+.edit-sections-nav {
+  margin-bottom: var(--space-4);
+}
+
+.edit-section {
+  margin: var(--space-6) 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.confirm-address {
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-lg);
+  overflow-wrap: anywhere;
+}

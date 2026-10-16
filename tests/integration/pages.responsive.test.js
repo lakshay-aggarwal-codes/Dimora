@@ -229,39 +229,70 @@ describe("new and edit forms", () => {
     expect(html).toContain("col-12 col-md-8");
   });
 
-  test("edit: values filled in, labels linked, current photo has alt text", async () => {
+  test("edit: one form per section, values filled in, every control labelled", async () => {
+    const listing = plainListing({ title: 'Cabin "North"' });
     const html = await renderView("listings/edit.ejs", {
       currentPath: `/listings/${OID}/edit`,
-      listing: plainListing({ title: 'Cabin "North"' }),
-      priceRupees: 1800,
-      originalImageUrl: "https://res.cloudinary.test/a.jpg",
+      listing,
+      values: {
+        basics: { title: 'Cabin "North"', description: "d", propertyType: "cabin", roomType: "entire_place" },
+        location: { line1: "1 Hill Rd", city: "Manali", state: "", country: "India", postalCode: "" },
+        details: { guests: 4, bedrooms: 2, beds: 2, bathrooms: 1, amenities: ["wifi"] },
+        pricing: {
+          price: 1800,
+          cleaningFee: 0,
+          minNights: 1,
+          maxNights: 30,
+          checkInTime: "14:00",
+          checkOutTime: "11:00",
+          cancellationPolicy: "moderate",
+          instantBook: false,
+          houseRules: "",
+        },
+      },
+      errors: { basics: {}, location: {}, details: {}, pricing: {} },
+      lists: require("../../src/config/constants"),
+      gallery: [],
+      maxImages: 10,
+      formError: undefined,
+      failedKey: undefined,
     });
     expect(html).toMatch(/<h1 class="h3">Edit your Listing<\/h1>/);
     expect(html).toContain('value="Cabin &#34;North&#34;"');
     expect(html).toContain('value="1800"');
-    expect(html).toContain(
-      `action="/listings/${OID}?_method=PUT&_csrf=tok123"`,
-    );
-    expect(html).toContain('alt="Current photo of this listing"');
-    for (const id of [
-      "title",
-      "description",
-      "image",
-      "price",
-      "country",
-      "location",
-    ]) {
+    for (const key of ["basics", "location", "details", "pricing"]) {
+      expect(html).toContain(
+        `action="/listings/${OID}/sections/${key}?_method=PUT"`,
+      );
+      expect(html).toContain(`id="${key}-heading"`);
+    }
+    for (const id of ["title", "description", "city", "country", "guests", "price"]) {
       expect(html).toContain(`<label for="${id}"`);
       expect(html).toMatch(new RegExp(`<(?:input|textarea)[^>]* id="${id}"`));
     }
+    expect(html).toContain('aria-label="Sections of this listing"');
+    expect(html).toContain('id="photos"');
   });
 
-  test("edit without a stored image shows no 'current image' block", async () => {
+  test("edit: a refused section shows its errors and a summary above the forms", async () => {
     const html = await renderView("listings/edit.ejs", {
       currentPath: `/listings/${OID}/edit`,
       listing: plainListing(),
-      originalImageUrl: undefined,
+      values: {
+        basics: { title: "Hi", description: "", propertyType: "", roomType: "" },
+        location: {},
+        details: { amenities: [] },
+        pricing: {},
+      },
+      errors: { basics: { title: "Title must be at least 5 characters." }, location: {}, details: {}, pricing: {} },
+      lists: require("../../src/config/constants"),
+      gallery: [],
+      maxImages: 10,
+      formError: undefined,
+      failedKey: "basics",
     });
-    expect(html).not.toContain("Current listing image");
+    expect(html).toContain("Title must be at least 5 characters.");
+    expect(html).toContain("Please fix the highlighted fields in");
+    expect(html).toMatch(/aria-invalid="true"/);
   });
 });

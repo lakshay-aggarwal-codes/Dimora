@@ -1,0 +1,25 @@
+<%#
+    The details fields (no <form>, no buttons), shared by the listing wizard and the
+    edit page. Locals: values, errors, lists.
+%>
+    <div class="row">
+        <div class="col-6 col-md-3"><%- include("../../partials/form-field.ejs", { id: "guests", type: "number", label: "Guests", value: values.guests, error: errors.guests, required: true, attrs: { min: 1, max: 16, step: 1 } }) %></div>
+        <div class="col-6 col-md-3"><%- include("../../partials/form-field.ejs", { id: "bedrooms", type: "number", label: "Bedrooms", value: values.bedrooms, error: errors.bedrooms, required: true, attrs: { min: 0, max: 50, step: 1 } }) %></div>
+        <div class="col-6 col-md-3"><%- include("../../partials/form-field.ejs", { id: "beds", type: "number", label: "Beds", value: values.beds, error: errors.beds, required: true, attrs: { min: 0, max: 50, step: 1 } }) %></div>
+        <div class="col-6 col-md-3"><%- include("../../partials/form-field.ejs", { id: "bathrooms", type: "number", label: "Bathrooms", value: values.bathrooms, error: errors.bathrooms, required: true, attrs: { min: 0, max: 50, step: 0.5 } }) %></div>
+    </div>
+
+    <fieldset class="amenity-fieldset mb-3"<% if (errors.amenities) { %> aria-describedby="amenities-error"<% } %>>
+        <legend class="h5">Amenities</legend>
+        <p class="text-muted">Tick only what guests will really find.</p>
+        <div class="amenity-grid">
+            <% const chosen = [].concat(values.amenities || []); %>
+            <% lists.AMENITIES.forEach((amenity) => { %>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="amenities" id="amenity-<%= amenity.value %>" value="<%= amenity.value %>"<% if (chosen.includes(amenity.value)) { %> checked<% } %>>
+                <label class="form-check-label" for="amenity-<%= amenity.value %>"><%= amenity.label %></label>
+            </div>
+            <% }) %>
+        </div>
+        <% if (errors.amenities) { %><div id="amenities-error" class="invalid-feedback d-block"><%= errors.amenities %></div><% } %>
+    </fieldset>

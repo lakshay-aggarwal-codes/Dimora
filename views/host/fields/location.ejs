@@ -1,0 +1,10 @@
+<%#
+    The location fields (no <form>, no buttons), shared by the listing wizard and the
+    edit page. Locals: values, errors, lists.
+%>
+    <p class="text-muted">Guests see the city and state, not your street address. We use the address to find the place on the map.</p>
+    <%- include("../../partials/form-field.ejs", { id: "line1", label: "Street address", value: values.line1, error: errors.line1, required: true, autocomplete: "address-line1", attrs: { maxlength: 200 } }) %>
+    <%- include("../../partials/form-field.ejs", { id: "city", label: "City", value: values.city, error: errors.city, required: true, autocomplete: "address-level2", attrs: { maxlength: 100 } }) %>
+    <%- include("../../partials/form-field.ejs", { id: "state", label: "State or region", value: values.state, error: errors.state, autocomplete: "address-level1", attrs: { maxlength: 100 } }) %>
+    <%- include("../../partials/form-field.ejs", { id: "country", label: "Country", value: values.country, error: errors.country, required: true, autocomplete: "country-name", attrs: { maxlength: 100 } }) %>
+    <%- include("../../partials/form-field.ejs", { id: "postalCode", label: "Postal code", value: values.postalCode, error: errors.postalCode, autocomplete: "postal-code", attrs: { maxlength: 20 } }) %>

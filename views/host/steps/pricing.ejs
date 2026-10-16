@@ -1,21 +1,6 @@
 <form method="POST" action="/host/listings/<%= listing._id %>/steps/5" novalidate>
     <%- include("../../includes/csrf.ejs") %>
-    <div class="row">
-        <div class="col-12 col-md-6"><%- include("../../partials/form-field.ejs", { id: "price", type: "number", label: "Price per night (₹)", value: values.price, error: errors.price, required: true, hint: "At least ₹100.", attrs: { min: 100, max: 1000000, step: "any" } }) %></div>
-        <div class="col-12 col-md-6"><%- include("../../partials/form-field.ejs", { id: "cleaningFee", type: "number", label: "Cleaning fee (₹)", value: values.cleaningFee, error: errors.cleaningFee, hint: "Charged once per stay. Leave 0 for none.", attrs: { min: 0, max: 1000000, step: "any" } }) %></div>
-    </div>
-    <div class="row">
-        <div class="col-6 col-md-3"><%- include("../../partials/form-field.ejs", { id: "minNights", type: "number", label: "Minimum nights", value: values.minNights, error: errors.minNights, required: true, attrs: { min: 1, max: 365, step: 1 } }) %></div>
-        <div class="col-6 col-md-3"><%- include("../../partials/form-field.ejs", { id: "maxNights", type: "number", label: "Maximum nights", value: values.maxNights, error: errors.maxNights, required: true, attrs: { min: 1, max: 365, step: 1 } }) %></div>
-        <div class="col-6 col-md-3"><%- include("../../partials/form-field.ejs", { id: "checkInTime", label: "Check-in time", value: values.checkInTime, error: errors.checkInTime, required: true, hint: "24-hour, like 14:00.", attrs: { maxlength: 5, pattern: "([01][0-9]|2[0-3]):[0-5][0-9]" } }) %></div>
-        <div class="col-6 col-md-3"><%- include("../../partials/form-field.ejs", { id: "checkOutTime", label: "Check-out time", value: values.checkOutTime, error: errors.checkOutTime, required: true, hint: "24-hour, like 11:00.", attrs: { maxlength: 5, pattern: "([01][0-9]|2[0-3]):[0-5][0-9]" } }) %></div>
-    </div>
-    <%- include("../../partials/form-field.ejs", { id: "cancellationPolicy", type: "select", label: "Cancellation policy", value: values.cancellationPolicy, error: errors.cancellationPolicy, required: true, options: lists.CANCELLATION_POLICIES }) %>
-    <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" name="instantBook" id="instantBook" value="on"<% if (values.instantBook === true || values.instantBook === "on") { %> checked<% } %>>
-        <label class="form-check-label" for="instantBook">Instant book: guests are confirmed without waiting for you</label>
-    </div>
-    <%- include("../../partials/form-field.ejs", { id: "houseRules", type: "textarea", label: "House rules", value: values.houseRules, error: errors.houseRules, hint: "Optional. Quiet hours, no smoking, and so on.", attrs: { rows: 4, maxlength: 2000 } }) %>
+    <%- include("../fields/pricing.ejs") %>
     <div class="wizard-actions">
         <a class="btn btn-outline-dark" href="/host/listings/<%= listing._id %>/steps/4">Back</a>
         <button type="submit" class="btn btn-dark">Save and continue</button>

@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const { geocoding, resetExternalMocks } = require("../helpers/mocks");
 const {
   geocodeAddress,
+  lookupAddress,
   LocationNotFoundError,
   GeocoderUnavailableError,
 } = require("../../src/services/geocoding");
@@ -105,4 +106,35 @@ test("not-found is a 400 the user can fix", () => {
   const err = new LocationNotFoundError();
   expect(err.statusCode).toBe(400);
   expect(err.code).toBe("location_not_found");
+});
+
+test("lookupAddress also returns Mapbox's name for the place (trimmed, capped)", async () => {
+  geocoding.__setFeatures([
+    {
+      place_name: "  Panaji, Goa, India  ",
+      geometry: { type: "Point", coordinates: [73.8, 15.5] },
+    },
+  ]);
+  const found = await lookupAddress({ location: "Panaji", country: "India" });
+  expect(found).toEqual({
+    geometry: { type: "Point", coordinates: [73.8, 15.5] },
+    placeName: "Panaji, Goa, India",
+  });
+
+  geocoding.__setFeatures([
+    { place_name: "x".repeat(500), geometry: { type: "Point", coordinates: [1, 2] } },
+  ]);
+  expect((await lookupAddress({ location: "a", country: "b" })).placeName).toHaveLength(300);
+});
+
+test("lookupAddress: no name from Mapbox gives an empty placeName; failures are the same errors", async () => {
+  expect((await lookupAddress({ location: "Goa", country: "India" })).placeName).toBe("");
+  geocoding.__noResults();
+  await expect(lookupAddress({ location: "Qwxz", country: "" })).rejects.toBeInstanceOf(
+    LocationNotFoundError,
+  );
+  geocoding.__failWith(new Error("down"));
+  await expect(lookupAddress({ location: "Goa", country: "" })).rejects.toBeInstanceOf(
+    GeocoderUnavailableError,
+  );
 });

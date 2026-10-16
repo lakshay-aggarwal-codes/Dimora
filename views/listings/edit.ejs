@@ -1,71 +1,52 @@
 <% layout("/layouts/boilerPlate") %>
-    <%
-        const photoList = typeof gallery !== "undefined" ? gallery : [];
-        const priceValue = typeof priceRupees !== "undefined" && priceRupees !== null ? priceRupees : "";
-    %>
-    <div class="row mt-3">
-        <div class="col-12 col-md-10 col-lg-8 mx-auto">
-            <h1 class="h3">Edit your Listing</h1>
+<%#
+    Edit a published or unpublished listing, one section at a time. Locals:
+    listing, values/errors (by section key), formError, failedKey, lists, gallery,
+    maxImages. Each section is its own form (a form cannot sit inside another),
+    so saving one never touches the others; the photo manager is the last section.
+%>
+<%
+    const sections = [
+        { key: "basics", title: "The basics" },
+        { key: "location", title: "Location" },
+        { key: "details", title: "Rooms and amenities" },
+        { key: "pricing", title: "Price and rules" },
+        { key: "photos", title: "Photos" },
+    ];
+%>
+<div class="row mt-3">
+    <div class="col-12 col-md-10 col-lg-8 mx-auto">
+        <h1 class="h3">Edit your Listing</h1>
+        <p class="text-muted"><a href="/listings/<%= listing._id %>"><%= listing.title %></a> · <%= listing.status %></p>
 
-            <form method="POST" action="/listings/<%= listing._id %>?_method=PUT&_csrf=<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>" novalidate class="needs-validation"
-                enctype="multipart/form-data">
+        <% if (listing.needsReview) { %>
+        <div class="alert alert-warning" role="status">We guessed this listing's address from its old location text. Please check it in the Location section and save it to confirm.</div>
+        <% } %>
+        <% if (formError) { %>
+        <div class="alert alert-danger" role="alert"><%= formError %></div>
+        <% } else if (failedKey) { %>
+        <div class="alert alert-danger" role="alert">Please fix the highlighted fields in “<%= (sections.find((s) => s.key === failedKey) || {}).title %>”.</div>
+        <% } %>
 
-                <div class="mb-3">
-                    <label for="title" class="form-label">Title</label>
-                    <input id="title" value="<%= listing.title %>" name="listing[title]" type="text"
-                        class="form-control" aria-describedby="title-feedback" required>
-                    <div class="invalid-feedback" id="title-feedback">Please enter a title.</div>
-                </div>
+        <nav aria-label="Sections of this listing" class="edit-sections-nav">
+            <ul class="list-inline">
+                <% sections.forEach((section) => { %>
+                <li class="list-inline-item"><a href="#<%= section.key %>"><%= section.title %></a></li>
+                <% }) %>
+            </ul>
+        </nav>
 
-                <div class="mb-3">
-                    <label for="description" class="form-label">Description</label>
-                    <textarea id="description" name="listing[description]" class="form-control" rows="4"
-                        aria-describedby="description-feedback" required><%= listing.description %></textarea>
-                    <div class="invalid-feedback" id="description-feedback">Please enter a short description.</div>
-                </div>
-
-                <% if (originalImageUrl) { %>
-                <div class="mb-3">
-                    <p class="form-label mb-1">Current photo</p>
-                    <img class="edit-current-photo" src="<%= originalImageUrl %>" alt="Current photo of this listing">
-                </div>
-                <% } %>
-
-                <div class="mb-3">
-                    <label for="image" class="form-label">Replace cover photo</label>
-                    <input id="image" name="listing[image][url]" class="form-control" type="file"
-                        accept="image/png,image/jpeg,image/webp" aria-describedby="image-hint">
-                    <div class="form-text" id="image-hint">Optional. The other photos are managed below.</div>
-                </div>
-
-                <div class="row">
-                    <div class="mb-3 col-12 col-md-4">
-                        <label for="price" class="form-label">Price</label>
-                        <input id="price" value="<%= priceValue %>" name="listing[price]" type="number" min="100"
-                            step="any" inputmode="decimal" class="form-control" aria-describedby="price-feedback" required>
-                        <div class="invalid-feedback" id="price-feedback">Please enter a valid price (at least 100).</div>
-                    </div>
-
-                    <div class="mb-3 col-12 col-md-8">
-                        <label for="country" class="form-label">Country</label>
-                        <input id="country" value="<%= listing.country ?? '' %>" name="listing[country]" type="text"
-                            class="form-control" aria-describedby="country-feedback" required>
-                        <div class="invalid-feedback" id="country-feedback">Please enter the country name.</div>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label for="location" class="form-label">Location</label>
-                    <input id="location" value="<%= listing.location ?? '' %>" name="listing[location]" type="text"
-                        class="form-control" aria-describedby="location-feedback" required>
-                    <div class="invalid-feedback" id="location-feedback">Please enter the location.</div>
-                </div>
-
-                <div class="mb-3">
-                    <button class="btn btn-dark edit-btn" type="submit">Edit Listing</button>
-                </div>
+        <% ["basics", "location", "details", "pricing"].forEach((key) => { const meta = sections.find((s) => s.key === key); %>
+        <section id="<%= key %>" class="edit-section" aria-labelledby="<%= key %>-heading">
+            <h2 id="<%= key %>-heading" class="h4"><%= meta.title %></h2>
+            <form method="POST" action="/listings/<%= listing._id %>/sections/<%= key %>?_method=PUT" novalidate>
+                <%- include("../includes/csrf.ejs") %>
+                <%- include("../host/fields/" + key + ".ejs", { values: values[key], errors: errors[key], lists }) %>
+                <button type="submit" class="btn btn-dark">Save <%= meta.title.toLowerCase() %></button>
             </form>
+        </section>
+        <% }) %>
 
-            <%- include("../partials/photo-manager.ejs", { listing, images: photoList, maxImages: 10 }) %>
-        </div>
+        <%- include("../partials/photo-manager.ejs", { listing, images: gallery, maxImages }) %>
     </div>
+</div>

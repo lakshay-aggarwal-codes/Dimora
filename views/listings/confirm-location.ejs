@@ -1,0 +1,32 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    Shown after a changed address has been looked up. Locals: listing, address
+    (the validated fields), placeName (Mapbox's name for the match, may be empty).
+    Nothing is saved until the box is ticked and the form sent; the point itself
+    stays on the server.
+%>
+<div class="row mt-3">
+    <div class="col-12 col-md-10 col-lg-8 mx-auto">
+        <h1 class="h3">Is this the right place?</h1>
+        <p>You asked for:</p>
+        <p class="confirm-address"><%= [address.line1, address.city, address.state, address.country, address.postalCode].filter(Boolean).join(", ") %></p>
+        <p>We found:</p>
+        <p class="confirm-address"><strong><%= placeName || "A place at that address (no name given)" %></strong></p>
+        <p class="text-muted">Guests will see this place on the map. If it looks wrong, go back and add more detail, such as the city and country.</p>
+
+        <form method="POST" action="/listings/<%= listing._id %>/sections/location?_method=PUT" novalidate>
+            <%- include("../includes/csrf.ejs") %>
+            <% ["line1", "city", "state", "country", "postalCode"].forEach((name) => { %>
+            <input type="hidden" name="<%= name %>" value="<%= address[name] || '' %>">
+            <% }) %>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" name="confirmed" id="confirmed" value="on" required>
+                <label class="form-check-label" for="confirmed">Yes, this is the right place</label>
+            </div>
+            <div class="wizard-actions">
+                <a class="btn btn-outline-dark" href="/listings/<%= listing._id %>/edit#location">Change the address</a>
+                <button type="submit" class="btn btn-dark">Save location</button>
+            </div>
+        </form>
+    </div>
+</div>

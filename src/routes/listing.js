@@ -12,6 +12,7 @@ const {
   geocodeListing,
 } = require("../middleware/listing");
 const listingController = require("../controllers/listing.js");
+const sectionsController = require("../controllers/sections");
 const { upload, uploadToCloudinary } = require("../config/cloudinary");
 
 // The file input in the new/edit forms is named like a nested field.
@@ -35,12 +36,19 @@ router
     wrapAsync(listingController.createListing),
   );
 
-// EDIT - Show edit form
+// EDIT - the edit page (a form per section) and one route to save a section.
+// A changed address is looked up and confirmed first (controllers/sections.js).
 router.get(
   "/:id/edit",
   isLoggedIn,
   authorize("listing:edit"),
-  wrapAsync(listingController.renderEditForm),
+  sectionsController.renderEditForm,
+);
+router.put(
+  "/:id/sections/:key",
+  isLoggedIn,
+  authorize("listing:edit"),
+  wrapAsync(sectionsController.save),
 );
 
 router.get(

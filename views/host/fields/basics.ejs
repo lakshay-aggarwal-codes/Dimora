@@ -1,0 +1,8 @@
+<%#
+    The basics fields (no <form>, no buttons), shared by the listing wizard and the
+    edit page. Locals: values, errors, lists.
+%>
+    <%- include("../../partials/form-field.ejs", { id: "title", label: "Title", value: values.title, error: errors.title, required: true, hint: "A short name guests will see (5 to 100 characters).", attrs: { maxlength: 100 } }) %>
+    <%- include("../../partials/form-field.ejs", { id: "description", type: "textarea", label: "Description", value: values.description, error: errors.description, required: true, hint: "What makes the place special? At least 20 characters.", attrs: { rows: 5, maxlength: 3000 } }) %>
+    <%- include("../../partials/form-field.ejs", { id: "propertyType", type: "select", label: "Property type", value: values.propertyType, error: errors.propertyType, required: true, options: [{ value: "", label: "Choose one" }].concat(lists.PROPERTY_TYPES) }) %>
+    <%- include("../../partials/form-field.ejs", { id: "roomType", type: "select", label: "What guests get", value: values.roomType, error: errors.roomType, required: true, options: [{ value: "", label: "Choose one" }].concat(lists.ROOM_TYPES) }) %>
