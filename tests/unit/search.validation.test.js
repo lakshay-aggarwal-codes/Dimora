@@ -122,3 +122,30 @@ describe("operator injection", () => {
     expect(errorKeys({ keywords: "x".repeat(101) })).toEqual(["keywords"]);
   });
 });
+
+describe("sort and page (P05-T03)", () => {
+  test("every sort name is accepted; the default is not required", () => {
+    for (const sort of ["relevance", "price_asc", "price_desc", "rating", "newest"]) {
+      expect(ok({ sort }).sort).toBe(sort);
+    }
+    expect(ok({ sort: "" })).toEqual({});
+    expect(ok({}).sort).toBeUndefined();
+  });
+
+  test("an unknown sort is refused (never passed to the database) and the rest still works", () => {
+    for (const sort of ["cheapest", "price", "__proto__", "$natural", "relevance,newest", { $meta: "x" }, ["newest", "rating"]]) {
+      expect(errorKeys({ sort })).toEqual(["sort"]);
+    }
+    const result = parseSearchParams({ sort: "cheapest", guests: "2" });
+    expect(result.value).toEqual({ guests: 2 });
+  });
+
+  test("page is a whole number from 1 to 1000", () => {
+    expect(ok({ page: "3" }).page).toBe(3);
+    expect(ok({ page: "" })).toEqual({});
+    for (const page of ["0", "-1", "1.5", "abc", "1001", "1e9", { $gt: 1 }, ["1", "2"]]) {
+      expect(errorKeys({ page })).toEqual(["page"]);
+    }
+    expect(ok({ page: "1000" }).page).toBe(1000);
+  });
+});

@@ -11,9 +11,11 @@ function stubHomeListings(docs) {
     select: () => query,
     sort: () => query,
     limit: () => query,
+    skip: () => query,
     lean: () => query,
     then: (resolve, reject) => Promise.resolve(docs).then(resolve, reject),
   };
+  jest.spyOn(Listing, "countDocuments").mockResolvedValue(docs.length);
   return jest.spyOn(Listing, "find").mockReturnValue(query);
 }
 

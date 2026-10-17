@@ -61,6 +61,52 @@
 
     </div>
 
+    <%
+        // Results bar: how many stays, and the sort choices. Every link keeps the
+        // search and starts again at page 1.
+        const sortHref = (value) =>
+            pagination.pageHref("/listings", Object.assign({}, results.params, { sort: value === "relevance" ? undefined : value }), 1);
+        const firstShown = (results.page - 1) * results.pageSize + 1;
+        const lastShown = Math.min(results.page * results.pageSize, results.total);
+        const filtered = Object.keys(results.params).length > 0;
+    %>
+    <div class="results-bar">
+        <p class="results-count" role="status">
+            <% if (results.total === 0) { %>No stays found
+            <% } else if (results.outOfRange) { %><%= results.total %> <%= results.total === 1 ? "stay" : "stays" %>
+            <% } else if (results.totalPages === 1) { %><%= results.total %> <%= results.total === 1 ? "stay" : "stays" %>
+            <% } else { %>Showing <%= firstShown %>&ndash;<%= lastShown %> of <%= results.total %> stays<% } %>
+        </p>
+        <nav aria-label="Sort results" class="sort-nav">
+            <span id="sort-label" class="sort-label">Sort by</span>
+            <ul class="sort-list" aria-labelledby="sort-label">
+                <% sortOptions.forEach((option) => { %>
+                <li><a class="sort-link<%= results.sort === option.value ? ' is-current' : '' %>" href="<%= sortHref(option.value) %>"<% if (results.sort === option.value) { %> aria-current="true"<% } %>><%= option.label %></a></li>
+                <% }) %>
+            </ul>
+        </nav>
+    </div>
+
+    <% if (results.outOfRange) { %>
+    <%- include("../partials/empty-state.ejs", {
+        title: "That page does not exist",
+        message: "There " + (results.totalPages === 1 ? "is only 1 page" : "are only " + results.totalPages + " pages") + " of results.",
+        icon: "fa-book-open",
+        actionHref: pagination.pageHref("/listings", results.params, results.totalPages),
+        actionLabel: "Go to the last page",
+        headingLevel: 2
+    }) %>
+    <% } else if (allListings.length === 0) { %>
+    <%- include("../partials/empty-state.ejs", {
+        title: filtered ? "No stays match your search" : "No stays yet",
+        message: filtered ? "Try fewer filters, or see every stay." : "Be the first to list a place on Dimora.",
+        icon: "fa-house",
+        actionHref: filtered ? "/listings" : "/host/listings/new",
+        actionLabel: filtered ? "See all stays" : "List your place",
+        headingLevel: 2
+    }) %>
+    <% } %>
+
     <!-- All listing cards: one column on phones, two from md, three from lg -->
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-3">
         <% for (const list of allListings) { %>
@@ -78,6 +124,8 @@
         </div>
         <% } %>
     </div>
+
+    <%- include("../partials/pagination.ejs", { page: results.page, totalPages: results.totalPages, baseUrl: "/listings", query: results.params }) %>
 
     <script nonce="<%= typeof cspNonce !== 'undefined' ? cspNonce : '' %>">
         // Previous and next category navigation

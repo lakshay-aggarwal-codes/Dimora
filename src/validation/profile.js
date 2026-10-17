@@ -3,12 +3,14 @@
 // can never be used to change more than it shows.
 const Joi = require("joi");
 
+// eslint-disable-next-line no-control-regex -- refusing control characters is the point
 const NO_CONTROL_CHARS = /^[^\u0000-\u0009\u000B\u000C\u000E-\u001F\u007F]*$/;
 
 const profileSchema = Joi.object({
   displayName: Joi.string()
     .trim()
     .max(60)
+    // eslint-disable-next-line no-control-regex -- refusing control characters is the point
     .pattern(/^[^\u0000-\u001F\u007F]*$/)
     .allow("")
     .default("")

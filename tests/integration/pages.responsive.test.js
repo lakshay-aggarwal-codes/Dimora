@@ -4,6 +4,7 @@
 const { createAgent, createTestApp } = require("../helpers/agent");
 const { buildListingData } = require("../helpers/factories");
 const Listing = require("../../src/models/listing");
+const { stubListings } = require("../helpers/listingsStub");
 
 afterEach(() => jest.restoreAllMocks());
 
@@ -51,9 +52,7 @@ function stubShow(listing) {
 
 describe("every page has one h1 and no fixed offsets", () => {
   test("login, signup, privacy, 404, listings and a detail page", async () => {
-    jest
-      .spyOn(Listing, "find")
-      .mockResolvedValue([new Listing(buildListingData())]);
+    stubListings([new Listing(buildListingData())]);
     stubShow(plainListing());
     const agent = createAgent();
     for (const url of [
@@ -119,7 +118,7 @@ describe("error pages", () => {
 
 describe("listings page", () => {
   test("categories are links; the grid starts at one column", async () => {
-    jest.spyOn(Listing, "find").mockResolvedValue([]);
+    stubListings([]);
     const html = (await createAgent().get("/listings")).text;
     expect(count(html, /<a class="filter" href="\/listings\?category=/g)).toBe(
       17,

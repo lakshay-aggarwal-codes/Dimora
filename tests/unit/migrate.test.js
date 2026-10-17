@@ -181,7 +181,9 @@ describe("runMigrations", () => {
     );
     expect(ids).toEqual(["001-ok"]);
 
-    // Once fixed, the next run applies 002 and 003.
+    // Once fixed, the next run applies 002 and 003. (Jest keeps its own module
+    // registry, so the rewritten file has to be dropped from it explicitly.)
+    jest.resetModules();
     require("node:fs").writeFileSync(
       require("node:path").join(dir, "002-boom.js"),
       migrationSource(),

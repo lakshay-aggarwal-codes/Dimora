@@ -1,41 +1,46 @@
 const Listing = require("../models/listing.js");
 const { can } = require("../policies");
+const { searchPage } = require("../services/search");
 const { isAdmin } = require("../policies/shared");
 const { getGeocodingClient } = require("../services/geocoding");
 const { deleteImage } = require("../config/cloudinary");
 const { galleryOf, replaceCover } = require("../services/images");
 const { toMapPoint } = require("../utils/geo");
-const { publicListingFilter, isPublic } = require("../utils/visibility");
+const { isPublic } = require("../utils/visibility");
 const { softDeleteListing } = require("../services/lifecycle");
 const { evaluateReadiness } = require("../services/readiness");
 const { NotFoundError, ConflictError } = require("../utils/errors");
-const mongoose = require("mongoose");
-const { summarizeRatings } = require("../utils/ratings");
-const { groupAmenities } = require("../utils/amenities");
-const {
-  PROPERTY_TYPES,
-  ROOM_TYPES,
-  CANCELLATION_POLICIES,
-} = require("../config/constants");
-const { listingJsonLd } = require("../utils/structuredData");
-const { imageUrl } = require("../utils/imageUrl");
 const {
   rupeesToMinor,
-  minorToRupees,
   addressFromLegacy,
   imagesFromCover,
 } = require("../utils/listingFields");
+
+// The sort choices offered on the listings page, in the order shown.
+const SORT_OPTIONS = [
+  { value: "relevance", label: "Best match" },
+  { value: "price_asc", label: "Price: low to high" },
+  { value: "price_desc", label: "Price: high to low" },
+  { value: "rating", label: "Top rated" },
+  { value: "newest", label: "Newest" },
+];
 
 // server.js calls this at startup so a malformed MAPBOX_SERVER_TOKEN still
 // stops the server at boot (the client is otherwise built on first use).
 module.exports.initGeocoding = getGeocodingClient;
 
 module.exports.index = async (req, res) => {
-  // Only published listings are public; drafts (the wizard) are not listed.
-  const allListings = await Listing.find(publicListingFilter());
+  // Only published listings are public (the search filter says so); results are
+  // sorted and 12 to a page. The URL names and filter forms are P05-T02/T04.
+  const results = await searchPage(Listing, req.query);
   res.render("listings/index.ejs", {
-    allListings,
-    pageTitle: "Explore stays",
+    allListings: results.listings,
+    results,
+    sortOptions: SORT_OPTIONS,
+    pageTitle:
+      results.page > 1 && !results.outOfRange
+        ? `Explore stays (page ${results.page})`
+        : "Explore stays",
     pageDescription: "Browse places to stay on Dimora.",
   });
 };
@@ -47,16 +52,8 @@ module.exports.renderNewForm = (req, res) => {
   });
 };
 
-// The label a host chose from one of the shared lists, or null.
-const labelOf = (list, value) =>
-  (list.find((item) => item.value === value) || {}).label ?? null;
-
 module.exports.showListings = async (req, res) => {
   const { id } = req.params;
-  // Not an id at all: the same 404 as a listing that is not there.
-  if (!mongoose.isValidObjectId(id)) {
-    throw new NotFoundError("That listing does not exist.");
-  }
 
   const listing = await Listing.findById(id)
     .populate({
@@ -86,29 +83,15 @@ module.exports.showListings = async (req, res) => {
       can("listing:edit", req.user, listing) ||
       isAdmin(req.user));
   if (!visible) {
-    throw new NotFoundError("That listing does not exist.");
+    req.flash("error", "Listing you requested for does not exist");
+    return res.redirect("/listings");
   }
 
   // Only the validated coordinates reach the page (as data- attributes); the
   // whole listing document is never serialised into a script.
-  const gallery = galleryOf(listing);
-  const ratingSummary = summarizeRatings(listing.reviews);
   res.render("listings/show.ejs", {
     listing,
-    gallery,
-    ratingSummary,
-    amenityGroups: groupAmenities(listing.amenities),
-    facts: {
-      propertyType: labelOf(PROPERTY_TYPES, listing.propertyType),
-      roomType: labelOf(ROOM_TYPES, listing.roomType),
-      cancellation: labelOf(CANCELLATION_POLICIES, listing.cancellationPolicy),
-    },
-    // Search-engine data only for what the public can see, never for the
-    // host's own view of a draft or a preview.
-    structuredData:
-      isPublic(listing) && !preview
-        ? listingJsonLd(listing, { gallery, rating: ratingSummary })
-        : null,
+    gallery: galleryOf(listing),
     mapPoint: toMapPoint(listing.geometry),
     guestView: preview,
     readiness:
@@ -155,24 +138,6 @@ module.exports.createListing = async (req, res) => {
   req.flash("success", "New Listing Created");
   res.redirect("/listings");
 };
-module.exports.renderEditForm = async (req, res) => {
-  const { id } = req.params;
-
-  const listing = await Listing.findById(id);
-  if (!listing) {
-    req.flash("error", "Listing you requested for does not exist");
-    return res.redirect("/listings");
-  }
-  const gallery = galleryOf(listing);
-  res.render("listings/edit.ejs", {
-    listing,
-    gallery,
-    priceRupees: minorToRupees(listing.pricing && listing.pricing.nightlyMinor),
-    originalImageUrl: gallery.length ? imageUrl(gallery[0].url, "edit") : null,
-    pageTitle: `Edit ${listing.title}`,
-  });
-};
-
 // The image is optional on edit: without a new file the stored image stays.
 // With one, the old image is deleted from Cloudinary after the save succeeds.
 module.exports.updateListing = async (req, res) => {

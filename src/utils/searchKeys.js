@@ -8,14 +8,14 @@ const MAX_KEY = 100;
 const MAX_PARTS = 3;
 const MAX_PART = 60;
 
-/** "  São  Paulo! " -> "sao paulo". Only letters, digits and single spaces survive ("Île-de-France" -> "ile de france"). */
+/** "  São  Paulo! " -> "sao paulo". Only letters (with their marks, so Devanagari vowel signs stay), digits and single spaces survive ("Île-de-France" -> "ile de france"). */
 function normaliseToken(value) {
   if (typeof value !== "string") return "";
   return value
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/[^\p{L}\p{M}\p{N}\s]/gu, " ")
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, MAX_KEY);

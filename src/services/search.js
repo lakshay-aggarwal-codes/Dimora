@@ -10,12 +10,14 @@
 //   amenities    all of
 //   instantBook  true = only instant-book listings
 //
-// Sorting, paging and the URL live in P05-T02/T03.
-const { parseSearchParams } = require("../validation/search");
+// `sort` and `page` (P05-T03) are handled by searchPage below; the URL names and
+// forms are P05-T02.
+const { parseSearchParams, DEFAULT_SORT } = require("../validation/search");
 const { publicListingFilter } = require("../utils/visibility");
 const { destinationParts, escapeRegex } = require("../utils/searchKeys");
 const { rupeesToMinor } = require("../utils/listingFields");
 
+const PAGE_SIZE = 12;
 const DEFAULT_LIMIT = 24;
 const MAX_LIMIT = 100;
 
@@ -87,7 +89,68 @@ async function explainSearch(Listing, query) {
   return Listing.find(filter).explain("executionStats");
 }
 
+/**
+ * The Mongo sort for a sort name. Every order ends with `_id` in the same
+ * direction, so two listings never tie and a listing never appears on two
+ * pages (or none) while paging.
+ *  relevance  text score (only when searching by keywords), then rating, then newest
+ *  price_asc / price_desc   nightly price
+ *  rating     average rating, then number of reviews
+ *  newest     most recently created
+ * @returns {{ sort: object, projection?: object }}
+ */
+function sortSpec(name, { hasText = false } = {}) {
+  switch (name) {
+    case "price_asc":
+      return { sort: { "pricing.nightlyMinor": 1, _id: 1 } };
+    case "price_desc":
+      return { sort: { "pricing.nightlyMinor": -1, _id: -1 } };
+    case "rating":
+      return { sort: { ratingAvg: -1, ratingCount: -1, _id: -1 } };
+    case "newest":
+      return { sort: { createdAt: -1, _id: -1 } };
+    default: // relevance
+      return hasText
+        ? {
+            projection: { score: { $meta: "textScore" } },
+            sort: { score: { $meta: "textScore" }, ratingAvg: -1, ratingCount: -1, _id: -1 },
+          }
+        : { sort: { ratingAvg: -1, ratingCount: -1, _id: -1 } };
+  }
+}
+
+/**
+ * One page of results with the numbers a results page needs.
+ * @returns {Promise<{
+ *   listings: object[], total: number, page: number, totalPages: number,
+ *   pageSize: number, sort: string, outOfRange: boolean,
+ *   params: object, errors: object, filter: object }>}
+ * `outOfRange` is true when the page asked for is past the last one: then
+ * `listings` is empty and `totalPages` says where the last page is.
+ */
+async function searchPage(Listing, query) {
+  const { params, errors, filter } = searchFilterFor(query);
+  const sort = params.sort || DEFAULT_SORT;
+  const requested = Number.isInteger(params.page) ? params.page : 1;
+
+  const total = await Listing.countDocuments(filter);
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const base = { total, page: requested, totalPages, pageSize: PAGE_SIZE, sort, params, errors, filter };
+  if (requested > totalPages) return { ...base, listings: [], outOfRange: true };
+
+  const spec = sortSpec(sort, { hasText: Boolean(filter.$text) });
+  const cursor = spec.projection ? Listing.find(filter, spec.projection) : Listing.find(filter);
+  const listings = await cursor
+    .sort(spec.sort)
+    .skip((requested - 1) * PAGE_SIZE)
+    .limit(PAGE_SIZE);
+  return { ...base, listings, outOfRange: false };
+}
+
 module.exports = {
+  PAGE_SIZE,
+  sortSpec,
+  searchPage,
   DEFAULT_LIMIT,
   MAX_LIMIT,
   buildFilter,

@@ -7,6 +7,7 @@ const { createAgent } = require("../helpers/agent");
 const { buildListingData } = require("../helpers/factories");
 const Listing = require("../../src/models/listing");
 const { evaluateReadiness } = require("../../src/services/readiness");
+const { stubListings } = require("../helpers/listingsStub");
 
 const VIEWS = path.join(__dirname, "..", "..", "views");
 const renderPartial = (name, locals) =>
@@ -132,11 +133,12 @@ describe("who sees what", () => {
     ).toBe(404);
   });
 
-  test("a draft is a 404 for visitors, and so is its preview", async () => {
+  test("a draft: visitors are sent away; the preview is a 404, not a hint that it exists", async () => {
     const doc = make({ status: "draft" });
     stubFindById(doc);
     const plain = await createAgent().get(`/listings/${doc._id}`);
-    expect(plain.status).toBe(404);
+    expect(plain.status).toBe(302);
+    expect(plain.headers.location).toBe("/listings");
     const preview = await createAgent().get(`/listings/${doc._id}?preview=1`);
     expect(preview.status).toBe(404);
     expect(preview.text).not.toContain(doc.title);
@@ -145,14 +147,14 @@ describe("who sees what", () => {
   test("an unpublished listing looks missing to visitors", async () => {
     const doc = make({ status: "unpublished" });
     stubFindById(doc);
-    expect((await createAgent().get(`/listings/${doc._id}`)).status).toBe(404);
+    expect((await createAgent().get(`/listings/${doc._id}`)).status).toBe(302);
   });
 
   test("a deleted listing is gone for visitors even if it was published", async () => {
     const doc = make({ status: "published" });
     doc.deletedAt = new Date();
     stubFindById(doc);
-    expect((await createAgent().get(`/listings/${doc._id}`)).status).toBe(404);
+    expect((await createAgent().get(`/listings/${doc._id}`)).status).toBe(302);
     expect(
       (await createAgent().get(`/listings/${doc._id}?preview=1`)).status,
     ).toBe(404);
@@ -167,7 +169,7 @@ describe("who sees what", () => {
   });
 
   test("the public list and the home page ask only for published, not deleted listings", async () => {
-    const find = jest.spyOn(Listing, "find").mockResolvedValue([]);
+    const { find } = stubListings([]);
     await createAgent().get("/listings");
     expect(find).toHaveBeenCalledWith({ status: "published", deletedAt: null });
   });

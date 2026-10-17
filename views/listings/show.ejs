@@ -23,7 +23,8 @@
         const host = listing.owner || null;
         const hostName = host && (host.displayName || host.username);
         const hostInitial = hostName ? Array.from(hostName)[0].toUpperCase() : "";
-        const memberSince = host && host.createdAt && !Number.isNaN(new Date(host.createdAt).getTime()) ? new Date(host.createdAt).getUTCFullYear() : null;
+        const joined = host && host.createdAt;
+        const memberSince = joined && typeof joined.getUTCFullYear === "function" && !Number.isNaN(joined.getTime()) ? joined.getUTCFullYear() : null;
         const amenitySections = typeof amenityGroups !== "undefined" && Array.isArray(amenityGroups) ? amenityGroups : [];
         const rulesText = typeof listing.houseRules === "string" ? listing.houseRules.trim() : "";
         const knowRows = [

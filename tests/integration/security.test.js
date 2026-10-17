@@ -3,8 +3,8 @@
 // request would reach it).
 const { createAgent } = require("../helpers/agent");
 const { testConfig } = require("../helpers/config");
-const Listing = require("../../src/models/listing");
 const User = require("../../src/models/user");
+const { stubListings } = require("../helpers/listingsStub");
 
 afterEach(() => {
   jest.restoreAllMocks();
@@ -58,7 +58,7 @@ describe("response headers", () => {
 
 describe("CSP nonce", () => {
   test("every inline script and style carries this request's nonce", async () => {
-    jest.spyOn(Listing, "find").mockResolvedValue([]);
+    stubListings([]);
     const res = await createAgent().get("/listings");
     expect(res.status).toBe(200);
     const nonce = nonceOf(res);

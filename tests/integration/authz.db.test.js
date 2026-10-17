@@ -10,7 +10,7 @@ const {
   createListing,
   createReview,
 } = require("../helpers/factories");
-const { uploader, resetExternalMocks } = require("../helpers/mocks");
+const { resetExternalMocks } = require("../helpers/mocks");
 const Listing = require("../../src/models/listing");
 const Review = require("../../src/models/review");
 const User = require("../../src/models/user");

@@ -3,6 +3,7 @@
 const { createAgent } = require("../helpers/agent");
 const { buildListingData } = require("../helpers/factories");
 const Listing = require("../../src/models/listing");
+const { stubListings } = require("../helpers/listingsStub");
 
 afterEach(() => jest.restoreAllMocks());
 
@@ -18,7 +19,7 @@ test("each listing is a card with its link, title, place and formatted price", a
     ),
     new Listing(buildListingData({ title: "Hill Cabin", price: 1200 })),
   ];
-  jest.spyOn(Listing, "find").mockResolvedValue(docs);
+  stubListings(docs);
   const res = await createAgent().get("/listings");
   expect(res.status).toBe(200);
   expect(res.text.match(/class="card h-100 listing-card"/g)).toHaveLength(2);
@@ -34,14 +35,14 @@ test("each listing is a card with its link, title, place and formatted price", a
 test("a listing without a price shows 'Price not set' instead of breaking the page", async () => {
   const doc = new Listing(buildListingData({ title: "No Price" }));
   doc.set("pricing.nightlyMinor", undefined);
-  jest.spyOn(Listing, "find").mockResolvedValue([doc]);
+  stubListings([doc]);
   const res = await createAgent().get("/listings");
   expect(res.status).toBe(200);
   expect(res.text).toContain("Price not set");
 });
 
 test("no listings is still a page (no cards)", async () => {
-  jest.spyOn(Listing, "find").mockResolvedValue([]);
+  stubListings([]);
   const res = await createAgent().get("/listings");
   expect(res.status).toBe(200);
   expect(res.text).not.toContain("listing-card");

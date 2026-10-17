@@ -31,11 +31,25 @@ const integer = {
   message: "{PATH} must be a whole number",
 };
 
-const minorAmount = (min) => ({
+// The floor is checked for a new or changed value only: an amount that is
+// already stored (an old listing priced below today's floor) must not stop the
+// host from saving, unpublishing or deleting that listing.
+const minorAmount = (min, path) => ({
   type: Number,
-  min: [min, `{PATH} must be at least ${min} (minor units)`],
   max: [MAX_MINOR, "{PATH} is too large"],
-  validate: integer,
+  validate: [
+    integer,
+    {
+      validator: function atLeastMin(value) {
+        if (value === null || value === undefined) return true;
+        // `this` is the document when it validates itself (not in update validators).
+        const isDoc = this && typeof this.isModified === "function";
+        if (isDoc && !this.isNew && path && !this.isModified(path)) return true;
+        return value >= min;
+      },
+      message: `{PATH} must be at least ${min} (minor units)`,
+    },
+  ],
 });
 
 // One gallery photo (P04-T03). `_id` identifies it in the photo routes.
@@ -203,9 +217,9 @@ const listingSchema = new Schema(
     },
 
     pricing: {
-      nightlyMinor: minorAmount(MIN_NIGHTLY_MINOR),
-      weekendNightlyMinor: minorAmount(MIN_NIGHTLY_MINOR),
-      cleaningFeeMinor: { ...minorAmount(0), default: 0 },
+      nightlyMinor: minorAmount(MIN_NIGHTLY_MINOR, "pricing.nightlyMinor"),
+      weekendNightlyMinor: minorAmount(MIN_NIGHTLY_MINOR, "pricing.weekendNightlyMinor"),
+      cleaningFeeMinor: { ...minorAmount(0, "pricing.cleaningFeeMinor"), default: 0 },
       currency: {
         type: String,
         default: "INR",

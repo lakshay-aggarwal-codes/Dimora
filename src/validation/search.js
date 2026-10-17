@@ -10,6 +10,10 @@ const {
 } = require("../config/constants");
 
 const MAX_RUPEES = 1000000;
+// Result order and page (P05-T03). The default order is "relevance".
+const SORTS = Object.freeze(["relevance", "price_asc", "price_desc", "rating", "newest"]);
+const DEFAULT_SORT = "relevance";
+const MAX_PAGE = 1000;
 
 const text = (label, max) =>
   Joi.string()
@@ -42,6 +46,23 @@ const searchSchema = Joi.object({
   roomType: oneOrMany(ROOM_TYPE_VALUES, "Room type"),
   amenities: oneOrMany(AMENITY_VALUES, "Amenities"),
   instantBook: Joi.boolean().truthy("1", "true", "on").falsy("0", "false", "off", ""),
+  sort: Joi.string()
+    .empty("")
+    .valid(...SORTS)
+    .label("Sort order")
+    .messages({ "any.only": "Sort order is not one of the choices." }),
+  page: Joi.number()
+    .empty("")
+    .integer()
+    .min(1)
+    .max(MAX_PAGE)
+    .label("Page")
+    .messages({
+      "number.base": "Page must be a number.",
+      "number.integer": "Page must be a whole number.",
+      "number.min": "Page must be 1 or more.",
+      "number.max": `Page must be ${MAX_PAGE} or fewer.`,
+    }),
 })
   .custom((value, helpers) => {
     if (
@@ -66,6 +87,8 @@ const KNOWN = [
   "roomType",
   "amenities",
   "instantBook",
+  "sort",
+  "page",
 ];
 
 /**
@@ -114,4 +137,11 @@ function compact(value) {
   return out;
 }
 
-module.exports = { parseSearchParams, searchSchema, MAX_RUPEES };
+module.exports = {
+  parseSearchParams,
+  searchSchema,
+  MAX_RUPEES,
+  SORTS,
+  DEFAULT_SORT,
+  MAX_PAGE,
+};
