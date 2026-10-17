@@ -9,10 +9,8 @@ const { publicListingFilter, isPublic } = require("../utils/visibility");
 const { softDeleteListing } = require("../services/lifecycle");
 const { evaluateReadiness } = require("../services/readiness");
 const { NotFoundError, ConflictError } = require("../utils/errors");
-const { imageUrl } = require("../utils/imageUrl");
 const {
   rupeesToMinor,
-  minorToRupees,
   addressFromLegacy,
   imagesFromCover,
 } = require("../utils/listingFields");
@@ -124,24 +122,6 @@ module.exports.createListing = async (req, res) => {
   req.flash("success", "New Listing Created");
   res.redirect("/listings");
 };
-module.exports.renderEditForm = async (req, res) => {
-  const { id } = req.params;
-
-  const listing = await Listing.findById(id);
-  if (!listing) {
-    req.flash("error", "Listing you requested for does not exist");
-    return res.redirect("/listings");
-  }
-  const gallery = galleryOf(listing);
-  res.render("listings/edit.ejs", {
-    listing,
-    gallery,
-    priceRupees: minorToRupees(listing.pricing && listing.pricing.nightlyMinor),
-    originalImageUrl: gallery.length ? imageUrl(gallery[0].url, "edit") : null,
-    pageTitle: `Edit ${listing.title}`,
-  });
-};
-
 // The image is optional on edit: without a new file the stored image stays.
 // With one, the old image is deleted from Cloudinary after the save succeeds.
 module.exports.updateListing = async (req, res) => {

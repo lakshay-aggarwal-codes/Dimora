@@ -1,0 +1,77 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    "My listings". Locals: rows (see src/services/hostListings.js), truncated,
+    maxRows. A table, so that status, readiness and date line up; it scrolls
+    sideways inside its own box on a narrow screen instead of squeezing.
+%>
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="my-listings-head">
+            <h1 class="h3">My listings</h1>
+            <a class="btn btn-dark" href="/host/listings/new">List a new place</a>
+        </div>
+
+        <% if (!rows.length) { %>
+        <%- include("../partials/empty-state.ejs", {
+            title: "You have no listings yet",
+            message: "List your first place: it takes six short steps, and you can stop and carry on later.",
+            icon: "fa-house",
+            actionHref: "/host/listings/new",
+            actionLabel: "List your place",
+            headingLevel: 2
+        }) %>
+        <% } else { %>
+        <div class="table-responsive">
+            <table class="table align-middle my-listings-table">
+                <caption class="visually-hidden">Your listings with their status, how much of the checklist is done, and when each last changed</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Listing</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Ready to publish</th>
+                        <th scope="col">Last updated</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% rows.forEach((row) => { %>
+                    <tr>
+                        <th scope="row" class="my-listings-title">
+                            <% if (row.coverUrl) { %><img class="my-listings-thumb" src="<%= imageUrl(row.coverUrl, 'thumb') %>" alt="" loading="lazy"><% } else { %><span class="my-listings-thumb my-listings-thumb-empty" aria-hidden="true"></span><% } %>
+                            <span>
+                                <span class="my-listings-name"><%= row.title %></span>
+                                <% if (row.where) { %><span class="my-listings-where"><%= row.where %></span><% } %>
+                            </span>
+                        </th>
+                        <td><%- include("../partials/badge.ejs", { text: row.statusLabel, variant: row.statusVariant }) %></td>
+                        <td>
+                            <progress class="readiness-bar" max="100" value="<%= row.score %>" aria-label="Checklist progress for <%= row.title %>"><%= row.score %>%</progress>
+                            <span class="my-listings-score"><%= row.score %>%</span>
+                            <span class="my-listings-missing"><%= row.missing === 0 ? "Everything is done" : row.missing + (row.missing === 1 ? " item to do" : " items to do") %></span>
+                        </td>
+                        <td><% if (row.updatedIso) { %><time datetime="<%= row.updatedIso %>"><%= row.updatedLabel %></time><% } else { %>Not known<% } %></td>
+                        <td>
+                            <div class="my-listings-actions">
+                                <% row.actions.forEach((action) => { %>
+                                <% if (action.kind === "post") { %>
+                                <form method="POST" action="<%= action.href %>">
+                                    <%- include("../includes/csrf.ejs") %>
+                                    <button type="submit" class="btn btn-sm <%= action.primary ? 'btn-dark' : 'btn-outline-dark' %>"><%= action.label %><span class="visually-hidden">: <%= row.title %></span></button>
+                                </form>
+                                <% } else { %>
+                                <a class="btn btn-sm <%= action.primary ? 'btn-dark' : 'btn-outline-dark' %>" href="<%= action.href %>"><%= action.label %><span class="visually-hidden">: <%= row.title %></span></a>
+                                <% } %>
+                                <% }) %>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <% if (truncated) { %>
+        <p class="text-muted">Showing your <%= maxRows %> most recently changed listings.</p>
+        <% } %>
+        <% } %>
+    </div>
+</div>

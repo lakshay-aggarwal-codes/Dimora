@@ -8,6 +8,8 @@ const router = express.Router();
 const mayCreate = [isLoggedIn, authorize("listing:create")];
 const mayEdit = [isLoggedIn, authorize("listing:edit")];
 
+router.get("/listings", isLoggedIn, wrapAsync(controller.myListings));
+
 // "/new" must come before "/:id".
 router.get("/listings/new", ...mayCreate, controller.newForm);
 router.post("/listings", ...mayCreate, wrapAsync(controller.create));

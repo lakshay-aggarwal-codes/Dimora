@@ -3,6 +3,7 @@
 // draft is invisible to the public until it is published at the end.
 const crypto = require("node:crypto");
 const Listing = require("../models/listing");
+const { loadHostListings, MAX_ROWS } = require("../services/hostListings");
 const wizard = require("../services/wizard");
 const { galleryOf, MAX_IMAGES } = require("../services/images");
 const {
@@ -256,5 +257,17 @@ module.exports.status = (req, res) => {
     readiness: evaluateReadiness(listing),
     pageTitle: `Status of ${listing.title}`,
     pageDescription: "Publish, unpublish or delete your listing.",
+  });
+};
+
+// "My listings": everything this host owns and what to do next with each.
+module.exports.myListings = async (req, res) => {
+  const { rows, truncated } = await loadHostListings(Listing, req.user._id);
+  res.render("host/listings.ejs", {
+    rows,
+    truncated,
+    maxRows: MAX_ROWS,
+    pageTitle: "My listings",
+    pageDescription: "Your listings, their status and what to do next.",
   });
 };

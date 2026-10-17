@@ -1091,6 +1091,22 @@
   overflow-wrap: anywhere;
 }
 
+/* ---- Edit page sections (P04-T04) ---- */
+.edit-sections-nav {
+  margin-bottom: var(--space-4);
+}
+
+.edit-section {
+  margin: var(--space-6) 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.confirm-address {
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-lg);
+  overflow-wrap: anywhere;
+
 /* ---- Host Readiness Checklist (P04-T05) ---- */
 .readiness {
   margin: var(--space-5) 0;
@@ -1157,4 +1173,58 @@
   flex-wrap: wrap;
   gap: var(--space-2);
   margin: var(--space-4) 0;
+}
+
+/* ---- My listings (P04-T06) ---- */
+.my-listings-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.my-listings-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 14rem;
+  font-weight: var(--font-weight-regular);
+}
+
+.my-listings-thumb {
+  flex: none;
+  width: 4.5rem;
+  height: 3.5rem;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+
+.my-listings-thumb-empty {
+  background-color: var(--color-surface-sunken);
+}
+
+.my-listings-name,
+.my-listings-where,
+.my-listings-score,
+.my-listings-missing {
+  display: block;
+}
+
+.my-listings-name {
+  font-weight: var(--font-weight-bold);
+  overflow-wrap: anywhere;
+}
+
+.my-listings-where,
+.my-listings-missing {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.my-listings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }

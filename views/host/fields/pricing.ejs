@@ -18,3 +18,7 @@
         <label class="form-check-label" for="instantBook">Instant book: guests are confirmed without waiting for you</label>
     </div>
     <%- include("../../partials/form-field.ejs", { id: "houseRules", type: "textarea", label: "House rules", value: values.houseRules, error: errors.houseRules, hint: "Optional. Quiet hours, no smoking, and so on.", attrs: { rows: 4, maxlength: 2000 } }) %>
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="noSpecialRules" id="noSpecialRules" value="on"<% if (values.noSpecialRules === true || values.noSpecialRules === "on") { %> checked<% } %>>
+        <label class="form-check-label" for="noSpecialRules">I have no special house rules (used only when the box above is empty)</label>
+    </div>
