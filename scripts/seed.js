@@ -14,6 +14,7 @@ const Listing = require("../src/models/listing.js");
 const Review = require("../src/models/review.js");
 const User = require("../src/models/user.js");
 const { data: sampleListings } = require("./seed-data.js");
+const { keysForListing } = require("../src/utils/searchKeys");
 const {
   rupeesToMinor,
   addressFromLegacy,
@@ -66,14 +67,19 @@ function parseArgs(argv) {
  * the seed data.
  */
 function buildSeedListings(ownerId) {
-  return sampleListings.map(({ price, ...item }) => ({
-    ...item,
-    status: "published",
-    pricing: { nightlyMinor: rupeesToMinor(price), currency: "INR" },
-    address: addressFromLegacy(item.location, item.country),
-    images: imagesFromCover(item.image),
-    owner: ownerId,
-  }));
+  return sampleListings.map(({ price, ...item }) => {
+    const address = addressFromLegacy(item.location, item.country);
+    return {
+      ...item,
+      status: "published",
+      pricing: { nightlyMinor: rupeesToMinor(price), currency: "INR" },
+      address,
+      images: imagesFromCover(item.image),
+      // bulkWrite skips the model's validate hook, so the search keys are set here.
+      ...keysForListing({ address, country: item.country }),
+      owner: ownerId,
+    };
+  });
 }
 
 async function ensureDemoHost() {

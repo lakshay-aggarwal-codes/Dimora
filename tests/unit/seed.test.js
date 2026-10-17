@@ -46,6 +46,20 @@ describe("seed data", () => {
     }
   });
 
+  test("every built seed listing carries search keys that match what the model computes from its address", () => {
+    const { keysForListing } = require("../../src/utils/searchKeys");
+    for (const doc of buildSeedListings(owner)) {
+      const expected = keysForListing(new Listing(doc));
+      expect({ title: doc.title, cityKey: doc.cityKey, locationKey: doc.locationKey }).toEqual({
+        title: doc.title,
+        cityKey: expected.cityKey,
+        locationKey: expected.locationKey,
+      });
+      expect(doc.cityKey).toBeTruthy();
+      expect(doc.countryKey).toBeTruthy();
+    }
+  });
+
   test("buildSeedListings sets the owner and does not modify the seed data", () => {
     const built = buildSeedListings(owner);
     expect(built).toHaveLength(29);

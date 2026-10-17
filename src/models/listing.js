@@ -9,6 +9,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const Review = require("./review");
+const { keysForListing } = require("../utils/searchKeys");
 
 const STATUSES = ["draft", "published", "unpublished", "suspended"];
 const {
@@ -242,11 +243,28 @@ const listingSchema = new Schema(
     wizardSteps: { type: [Number], default: undefined },
     draftToken: { type: String, maxlength: 64 },
 
+    // Search keys (P05-T01): lower-case, accent-free copies of the city, state
+    // and country, kept in step with the address by the validate hook below.
+    cityKey: { type: String, maxlength: 100 },
+    stateKey: { type: String, maxlength: 100 },
+    countryKey: { type: String, maxlength: 100 },
+    locationKey: { type: String, maxlength: 320 },
+
     // Soft delete: the row stays, the pages stop showing it (P04-T05).
     deletedAt: { type: Date },
   },
   { timestamps: true },
 );
+
+// The search keys always follow the address (and, for old listings, the
+// free-text location), so a save can never leave them stale. Updates that skip
+// `save()` (updateOne, bulkWrite) must set them themselves; see buildSeedListings.
+listingSchema.pre("validate", function () {
+  const keys = keysForListing(this);
+  for (const [name, value] of Object.entries(keys)) {
+    if (this.get(name) !== value) this.set(name, value);
+  }
+});
 
 // A stay whose minimum is longer than its maximum can never be booked.
 listingSchema.pre("validate", function () {
@@ -277,6 +295,16 @@ listingSchema.index(
 listingSchema.index(
   { "pricing.nightlyMinor": 1 },
   { name: "pricing.nightlyMinor_1" },
+);
+// Search (P05-T01): status + city + price, and status + country + price, serve
+// the destination box and the price filter. Built by migration 006.
+listingSchema.index(
+  { status: 1, cityKey: 1, "pricing.nightlyMinor": 1 },
+  { name: "status_1_cityKey_1_pricing.nightlyMinor_1" },
+);
+listingSchema.index(
+  { status: 1, countryKey: 1, "pricing.nightlyMinor": 1 },
+  { name: "status_1_countryKey_1_pricing.nightlyMinor_1" },
 );
 // 2dsphere(publicGeometry) comes with P06-T02.
 
