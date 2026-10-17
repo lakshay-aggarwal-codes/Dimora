@@ -72,6 +72,7 @@ function formValues(listing, n) {
         cancellationPolicy: get(listing, "cancellationPolicy"),
         instantBook: Boolean(listing.instantBook),
         houseRules: get(listing, "houseRules"),
+        noSpecialRules: Boolean(listing.noSpecialRules),
       };
     }
     default:
@@ -91,7 +92,9 @@ function isStepComplete(listing, n) {
   if (!(listing.wizardSteps || []).includes(n)) return false;
   if (n === 4) return galleryOf(listing).length >= 1;
   if (n === 2 && !hasPoint(listing)) return false;
-  return Object.keys(validateStep(n, formValues(listing, n)).errors).length === 0;
+  return (
+    Object.keys(validateStep(n, formValues(listing, n)).errors).length === 0
+  );
 }
 
 /** The steps for the stepper: { n, key, title, complete, reachable }. */
@@ -178,6 +181,8 @@ function applyStep(listing, n, value, { geometry } = {}) {
         cancellationPolicy: value.cancellationPolicy,
         instantBook: value.instantBook,
         houseRules: value.houseRules || undefined,
+        // written rules replace the "none" confirmation
+        noSpecialRules: value.houseRules ? false : value.noSpecialRules,
       });
       break;
     default:
@@ -198,7 +203,8 @@ function addressChanged(listing, value) {
   return (
     !hasPoint(listing) ||
     ["line1", "city", "state", "country", "postalCode"].some(
-      (key) => String(now[key] ?? "").trim() !== String(value[key] ?? "").trim(),
+      (key) =>
+        String(now[key] ?? "").trim() !== String(value[key] ?? "").trim(),
     )
   );
 }

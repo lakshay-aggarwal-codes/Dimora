@@ -1,0 +1,33 @@
+<%#
+    The Host Readiness Checklist. Locals: listing, readiness (from
+    evaluateReadiness: { score, canPublish, checks }). Each item says "Done" or
+    "To do" in words, not only by colour, and links to where it is fixed.
+    The same readiness object decides whether Publish works.
+%>
+<%
+    const fixHref = (check) => listing.status === "draft"
+        ? `/host/listings/${listing._id}/steps/${check.step}`
+        : `/listings/${listing._id}/edit`;
+%>
+<section class="readiness" aria-labelledby="readiness-heading">
+    <h2 id="readiness-heading" class="h5">Ready to publish?</h2>
+    <p class="readiness-score">
+        <strong><%= readiness.score %>%</strong> of the checklist is done.
+        <span class="visually-hidden"><%= readiness.canPublish ? "Everything is done." : "Some items are still to do." %></span>
+    </p>
+    <progress class="readiness-bar" max="100" value="<%= readiness.score %>" aria-label="Checklist progress"><%= readiness.score %>%</progress>
+    <ul class="readiness-list">
+        <% readiness.checks.forEach((check) => { %>
+        <li class="readiness-item<%= check.passed ? ' is-done' : '' %>">
+            <span class="readiness-state" aria-hidden="true"><%= check.passed ? "✓" : "•" %></span>
+            <div>
+                <span class="readiness-label"><%= check.label %></span>
+                <span class="visually-hidden">: <%= check.passed ? "done" : "to do" %></span>
+                <% if (!check.passed) { %>
+                <span class="readiness-hint"><%= check.hint %> <a href="<%= fixHref(check) %>">Fix this<span class="visually-hidden">: <%= check.label %></span></a></span>
+                <% } %>
+            </div>
+        </li>
+        <% }) %>
+    </ul>
+</section>

@@ -53,3 +53,11 @@ module.exports = {
   CANCELLATION_POLICY_VALUES: values(CANCELLATION_POLICIES),
   AMENITY_VALUES: values(AMENITIES),
 };
+
+// Host Readiness Checklist (P04-T05): what a listing needs before it can be
+// published. Presence counts, not quality (see src/services/readiness.js).
+const READINESS = Object.freeze({
+  minPhotos: 5,
+  minDescriptionChars: 200,
+});
+module.exports.READINESS = READINESS;

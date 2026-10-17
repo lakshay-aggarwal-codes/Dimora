@@ -13,8 +13,22 @@ router.get("/listings/new", ...mayCreate, controller.newForm);
 router.post("/listings", ...mayCreate, wrapAsync(controller.create));
 
 router.get("/listings/:id", ...mayEdit, controller.resume);
-router.get("/listings/:id/steps/:n", ...mayEdit, wrapAsync(controller.showStep));
-router.post("/listings/:id/steps/:n", ...mayEdit, wrapAsync(controller.saveStep));
+router.get(
+  "/listings/:id/steps/:n",
+  ...mayEdit,
+  wrapAsync(controller.showStep),
+);
+router.post(
+  "/listings/:id/steps/:n",
+  ...mayEdit,
+  wrapAsync(controller.saveStep),
+);
+router.get("/listings/:id/status", ...mayEdit, controller.status);
 router.post("/listings/:id/publish", ...mayEdit, wrapAsync(controller.publish));
+router.post(
+  "/listings/:id/unpublish",
+  ...mayEdit,
+  wrapAsync(controller.unpublish),
+);
 
 module.exports = router;

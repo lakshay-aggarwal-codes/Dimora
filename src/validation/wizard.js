@@ -125,6 +125,10 @@ const pricing = Joi.object({
     .falsy("off", "0", "false", "")
     .default(false),
   houseRules: text("House rules", { max: 2000, required: false }),
+  noSpecialRules: Joi.boolean()
+    .truthy("on", "1", "true")
+    .falsy("off", "0", "false", "")
+    .default(false),
 })
   .custom((value, helpers) => {
     if (value.minNights > value.maxNights) {

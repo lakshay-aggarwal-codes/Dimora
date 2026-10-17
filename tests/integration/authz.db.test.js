@@ -104,7 +104,9 @@ describeDb("object-level authorization (database)", () => {
       const w = await world();
       const res = await w[who].agent.delete(showPath(w));
       expect(res.status).toBe(status);
-      expect(Boolean(await Listing.findById(w.listing._id))).toBe(kept);
+      // delete is a soft delete (P04-T05): "kept" means not marked deleted
+      const stored = await Listing.findById(w.listing._id);
+      expect(Boolean(stored && !stored.deletedAt)).toBe(kept);
     });
   });
 

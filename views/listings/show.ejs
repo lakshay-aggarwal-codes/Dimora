@@ -3,12 +3,25 @@
         const ownerName = listing.owner && listing.owner.username;
         const nightlyMinor = listing.pricing && listing.pricing.nightlyMinor;
         const hasPrice = Number.isInteger(nightlyMinor);
-        const canEditListing = can("listing:edit", listing);
-        const canDeleteListing = can("listing:delete", listing);
+        // "Preview as a guest" hides everything only the host sees.
+        const guestPreview = typeof guestView !== "undefined" && guestView;
+        const canEditListing = !guestPreview && can("listing:edit", listing);
+        const canDeleteListing = !guestPreview && can("listing:delete", listing);
         const place = [listing.location, listing.country].filter(Boolean).join(", ");
         const reviews = Array.isArray(listing.reviews) ? listing.reviews : [];
     %>
     <article class="listing-detail mt-3">
+        <% if (guestPreview) { %>
+        <div class="alert alert-info" role="status">
+            This is how guests see your listing.
+            <a href="/host/listings/<%= listing._id %>/status">Back to your listing's status</a>
+        </div>
+        <% } else if (listing.status !== "published" && canEditListing) { %>
+        <div class="alert alert-warning" role="status">
+            This listing is <strong><%= listing.status === "draft" ? "a draft" : "unpublished" %></strong>: only you can see it.
+            <a href="/host/listings/<%= listing._id %>/status">See what is left to do</a>
+        </div>
+        <% } %>
         <div class="mb-3">
             <h1><%= listing.title %></h1>
             <% if (place) { %><p class="detail-place"><%= place %></p><% } %>
@@ -45,6 +58,7 @@
                     <div class="detail-actions">
                         <% if (canEditListing) { %>
                         <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark">Edit</a>
+                        <a href="/host/listings/<%= listing._id %>/status" class="btn btn-outline-dark">Listing status</a>
                         <% } %>
                         <% if (canDeleteListing) { %>
                         <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">

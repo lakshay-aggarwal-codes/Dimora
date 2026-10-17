@@ -34,8 +34,11 @@
     <% if (listing.houseRules) { %><dt>House rules</dt><dd><%= listing.houseRules %></dd><% } %>
 </dl>
 
+<%- include("../../partials/readiness.ejs", { listing, readiness }) %>
+
 <form method="POST" action="/host/listings/<%= listing._id %>/publish" class="wizard-actions">
     <%- include("../../includes/csrf.ejs") %>
     <a class="btn btn-outline-dark" href="/host/listings/<%= listing._id %>/steps/5">Back</a>
-    <button type="submit" class="btn btn-dark"<% if (missing.length) { %> disabled aria-disabled="true"<% } %>>Publish listing</button>
+    <a class="btn btn-outline-dark" href="/listings/<%= listing._id %>?preview=1">Preview as a guest</a>
+    <button type="submit" class="btn btn-dark"<% if (missing.length || !readiness.canPublish) { %> disabled aria-disabled="true"<% } %>>Publish listing</button>
 </form>

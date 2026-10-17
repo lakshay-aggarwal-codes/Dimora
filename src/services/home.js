@@ -1,6 +1,7 @@
 // Data for the home page (P03-T05): the newest stays and the places that have
 // the most stays. Only published listings are used; drafts from the wizard are not.
 const { toCardItem } = require("../utils/listingCard");
+const { publicListingFilter } = require("../utils/visibility");
 
 const SCAN_LIMIT = 100; // newest listings looked at; keeps the query cheap
 const FEATURED_LIMIT = 6;
@@ -48,7 +49,7 @@ async function loadHomeData(
   ListingModel,
   { scan = SCAN_LIMIT, featured = FEATURED_LIMIT } = {},
 ) {
-  const docs = await ListingModel.find({ status: "published" })
+  const docs = await ListingModel.find(publicListingFilter())
     .select("title image pricing location country")
     .sort({ _id: -1 })
     .limit(scan)

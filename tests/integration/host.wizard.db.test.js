@@ -69,19 +69,48 @@ const post = (agent, listing, n, body) =>
 
 async function draftAtStep(agent, upTo) {
   const { res } = await startDraft(agent);
-  const id = /\/host\/listings\/([0-9a-f]{24})\/steps\/2/.exec(res.headers.location)[1];
+  const id = /\/host\/listings\/([0-9a-f]{24})\/steps\/2/.exec(
+    res.headers.location,
+  )[1];
   let listing = await Listing.findById(id);
   if (upTo >= 2) await post(agent, listing, 2, LOCATION);
   if (upTo >= 3) await post(agent, listing, 3, DETAILS);
   if (upTo >= 4) {
     await agent
       .post(`/listings/${id}/images?wizard=1`)
-      .attach("photos", JPEG(), { filename: "a.jpg", contentType: "image/jpeg" });
+      .attach("photos", JPEG(), {
+        filename: "a.jpg",
+        contentType: "image/jpeg",
+      });
     await post(agent, listing, 4, {});
   }
   if (upTo >= 5) await post(agent, listing, 5, PRICING);
   listing = await Listing.findById(id);
   return listing;
+}
+
+// The wizard only checks that each step was saved; publishing also needs the
+// Host Readiness Checklist (P04-T05): 5 photos and a 200-character description.
+async function makeReady(listing) {
+  const images = [1, 2, 3, 4, 5].map((n) => ({
+    url: `https://res.cloudinary.test/dimora_DEV/ready${n}.jpg`,
+    publicId: `dimora_DEV/ready${n}`,
+    alt: "",
+    caption: "",
+    order: n - 1,
+  }));
+  await Listing.updateOne(
+    { _id: listing._id },
+    {
+      $set: {
+        images,
+        "image.url": images[0].url,
+        "image.filename": images[0].publicId,
+        description: `${BASICS.description} `.repeat(6),
+      },
+    },
+  );
+  return Listing.findById(listing._id);
 }
 
 beforeEach(() => geocoding.forwardGeocode.mockClear());
@@ -138,7 +167,10 @@ describeDb("listing wizard", () => {
       const form = await agent.get("/host/listings/new");
       const draftToken = TOKEN.exec(form.text)[1];
       const send = () =>
-        agent.post("/host/listings").type("form").send({ ...BASICS, draftToken });
+        agent
+          .post("/host/listings")
+          .type("form")
+          .send({ ...BASICS, draftToken });
       const first = await send();
       const second = await send();
       expect(second.headers.location).toBe(first.headers.location);
@@ -207,14 +239,18 @@ describeDb("listing wizard", () => {
     test("looks the address up and stores the point; the street address stays out of the public text", async () => {
       const { agent } = await host();
       const draft = await draftAtStep(agent, 1);
-      geocoding.__setFeatures([{ geometry: { type: "Point", coordinates: [73.8, 15.5] } }]);
+      geocoding.__setFeatures([
+        { geometry: { type: "Point", coordinates: [73.8, 15.5] } },
+      ]);
       const res = await post(agent, draft, 2, LOCATION);
       expect(res.headers.location).toBe(stepUrl(draft, 3));
       const stored = await Listing.findById(draft._id);
       expect(stored.geometry.coordinates).toEqual([73.8, 15.5]);
       expect(stored.address.line1).toBe("12 Beach Road");
       expect(stored.location).toBe("Goa, Goa");
-      expect(geocoding.forwardGeocode.mock.calls[0][0].query).toContain("12 Beach Road");
+      expect(geocoding.forwardGeocode.mock.calls[0][0].query).toContain(
+        "12 Beach Road",
+      );
     });
 
     test("an address Mapbox cannot find is a message on the form; nothing is saved", async () => {
@@ -253,7 +289,11 @@ describeDb("listing wizard", () => {
     test("invalid details are refused with messages", async () => {
       const { agent } = await host();
       const draft = await draftAtStep(agent, 2);
-      const res = await post(agent, draft, 3, { ...DETAILS, guests: "0", bathrooms: "1.3" });
+      const res = await post(agent, draft, 3, {
+        ...DETAILS,
+        guests: "0",
+        bathrooms: "1.3",
+      });
       expect(res.status).toBe(400);
       expect(res.text).toMatch(/Guests must be at least 1/);
       expect(res.text).toMatch(/Bathrooms can be a whole or half number/);
@@ -262,7 +302,10 @@ describeDb("listing wizard", () => {
     test("an unknown amenity is refused", async () => {
       const { agent } = await host();
       const draft = await draftAtStep(agent, 2);
-      const res = await post(agent, draft, 3, { ...DETAILS, amenities: ["wifi", "jetpack"] });
+      const res = await post(agent, draft, 3, {
+        ...DETAILS,
+        amenities: ["wifi", "jetpack"],
+      });
       expect(res.status).toBe(400);
       expect((await Listing.findById(draft._id)).amenities).toHaveLength(0);
     });
@@ -284,7 +327,11 @@ describeDb("listing wizard", () => {
     test("minimum nights above maximum nights is refused", async () => {
       const { agent } = await host();
       const draft = await draftAtStep(agent, 4);
-      const res = await post(agent, draft, 5, { ...PRICING, minNights: "9", maxNights: "2" });
+      const res = await post(agent, draft, 5, {
+        ...PRICING,
+        minNights: "9",
+        maxNights: "2",
+      });
       expect(res.status).toBe(400);
       expect(res.text).toMatch(/cannot be more than/);
     });
@@ -292,7 +339,11 @@ describeDb("listing wizard", () => {
     test("fields that do not belong to the step cannot be smuggled in", async () => {
       const { agent } = await host();
       const draft = await draftAtStep(agent, 4);
-      const res = await post(agent, draft, 5, { ...PRICING, status: "published", owner: "x" });
+      const res = await post(agent, draft, 5, {
+        ...PRICING,
+        status: "published",
+        owner: "x",
+      });
       expect(res.status).toBe(400);
       expect((await Listing.findById(draft._id)).status).toBe("draft");
     });
@@ -312,7 +363,10 @@ describeDb("listing wizard", () => {
       const draft = await draftAtStep(agent, 3);
       const up = await agent
         .post(`/listings/${draft._id}/images?wizard=1`)
-        .attach("photos", JPEG(), { filename: "a.jpg", contentType: "image/jpeg" });
+        .attach("photos", JPEG(), {
+          filename: "a.jpg",
+          contentType: "image/jpeg",
+        });
       expect(up.headers.location).toBe(stepUrl(draft, 4));
       const page = await agent.get(stepUrl(draft, 4));
       expect(page.text).toContain("1 photo added.");
@@ -326,7 +380,10 @@ describeDb("listing wizard", () => {
       const draft = await draftAtStep(agent, 3);
       const up = await agent
         .post(`/listings/${draft._id}/images`)
-        .attach("photos", JPEG(), { filename: "a.jpg", contentType: "image/jpeg" });
+        .attach("photos", JPEG(), {
+          filename: "a.jpg",
+          contentType: "image/jpeg",
+        });
       expect(up.headers.location).toBe(`/listings/${draft._id}/edit#photos`);
     });
   });
@@ -338,7 +395,9 @@ describeDb("listing wizard", () => {
       const { agent: stranger } = await host();
       expect((await stranger.get(stepUrl(draft, 2))).status).toBe(403);
       expect((await post(stranger, draft, 2, LOCATION)).status).toBe(403);
-      expect((await stranger.post(`/host/listings/${draft._id}/publish`)).status).toBe(403);
+      expect(
+        (await stranger.post(`/host/listings/${draft._id}/publish`)).status,
+      ).toBe(403);
     });
 
     test("a draft is not listed, not on the home page, and not viewable by others", async () => {
@@ -364,10 +423,15 @@ describeDb("listing wizard", () => {
 
     test("an unpublished listing also looks missing to visitors", async () => {
       const { user } = await host();
-      const listing = await createListing({ owner: user._id, status: "unpublished" });
+      const listing = await createListing({
+        owner: user._id,
+        status: "unpublished",
+      });
       const res = await createAgent().get(`/listings/${listing._id}`);
       expect(res.status).toBe(302);
-      expect((await createAgent().get("/listings")).text).not.toContain(listing.title);
+      expect((await createAgent().get("/listings")).text).not.toContain(
+        listing.title,
+      );
     });
 
     test("a published listing is not editable in the wizard: it points to the edit page", async () => {
@@ -383,9 +447,12 @@ describeDb("listing wizard", () => {
     test("the review lists what was entered, escaped, and offers Publish", async () => {
       const { agent } = await host();
       const draft = await draftAtStep(agent, 5);
+      await makeReady(draft);
       await Listing.updateOne(
         { _id: draft._id },
-        { description: "<script>alert(1)</script> and more words to be long enough" },
+        {
+          description: `<script>alert(1)</script> ${"more words ".repeat(30)}`,
+        },
       );
       const res = await agent.get(stepUrl(draft, 6));
       expect(res.status).toBe(200);
@@ -396,9 +463,29 @@ describeDb("listing wizard", () => {
       expect(res.text).not.toMatch(/ disabled aria-disabled/);
     });
 
-    test("publishing a finished draft makes it public everywhere", async () => {
+    test("a draft with every step saved but a short checklist is refused, with the reasons", async () => {
+      const { agent } = await host();
+      const draft = await draftAtStep(agent, 5); // 1 photo, 49-character description
+      const res = await agent.post(`/host/listings/${draft._id}/publish`);
+      expect(res.status).toBe(302);
+      expect((await Listing.findById(draft._id)).status).toBe("draft");
+      const page = await agent.get(res.headers.location);
+      expect(page.text).toContain("not ready to publish");
+      expect(page.text).toContain("At least 5 photos");
+    });
+
+    test("the review step shows the checklist and keeps Publish disabled until it is done", async () => {
       const { agent } = await host();
       const draft = await draftAtStep(agent, 5);
+      const res = await agent.get(stepUrl(draft, 6));
+      expect(res.text).toContain("Ready to publish?");
+      expect(res.text).toMatch(/ disabled aria-disabled/);
+      expect(res.text).toContain("Preview as a guest");
+    });
+
+    test("publishing a finished draft makes it public everywhere", async () => {
+      const { agent } = await host();
+      const draft = await makeReady(await draftAtStep(agent, 5));
       const res = await agent.post(`/host/listings/${draft._id}/publish`);
       expect(res.status).toBe(302);
       expect(res.headers.location).toBe(`/listings/${draft._id}`);
@@ -411,7 +498,7 @@ describeDb("listing wizard", () => {
 
     test("publishing twice is harmless", async () => {
       const { agent } = await host();
-      const draft = await draftAtStep(agent, 5);
+      const draft = await makeReady(await draftAtStep(agent, 5));
       await agent.post(`/host/listings/${draft._id}/publish`);
       const again = await agent.post(`/host/listings/${draft._id}/publish`);
       expect(again.status).toBe(302);
@@ -420,8 +507,11 @@ describeDb("listing wizard", () => {
 
     test("removing the photo after step 4 blocks publishing again", async () => {
       const { agent } = await host();
-      const draft = await draftAtStep(agent, 5);
-      await Listing.updateOne({ _id: draft._id }, { $set: { images: [] }, $unset: { image: 1 } });
+      const draft = await makeReady(await draftAtStep(agent, 5));
+      await Listing.updateOne(
+        { _id: draft._id },
+        { $set: { images: [] }, $unset: { image: 1 } },
+      );
       const res = await agent.post(`/host/listings/${draft._id}/publish`);
       expect(res.headers.location).toBe(stepUrl(draft, 4));
       expect((await Listing.findById(draft._id)).status).toBe("draft");
@@ -430,7 +520,10 @@ describeDb("listing wizard", () => {
     test("going back to change an earlier step keeps later steps finished", async () => {
       const { agent } = await host();
       const draft = await draftAtStep(agent, 5);
-      const res = await post(agent, draft, 1, { ...BASICS, title: "A new title for the flat" });
+      const res = await post(agent, draft, 1, {
+        ...BASICS,
+        title: "A new title for the flat",
+      });
       expect(res.headers.location).toBe(stepUrl(draft, 2));
       const stored = await Listing.findById(draft._id);
       expect(stored.title).toBe("A new title for the flat");

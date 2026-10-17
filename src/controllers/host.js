@@ -11,6 +11,8 @@ const {
   GeocoderUnavailableError,
 } = require("../services/geocoding");
 const { validateStep } = require("../validation/wizard");
+const { evaluateReadiness } = require("../services/readiness");
+const lifecycle = require("../services/lifecycle");
 const { NotFoundError, ValidationError } = require("../utils/errors");
 const {
   PROPERTY_TYPES,
@@ -21,8 +23,12 @@ const {
 
 const TOKEN = /^[0-9a-f-]{36}$/i;
 const stepUrl = (id, n) => `/host/listings/${id}/steps/${n}`;
+const statusUrl = (id) => `/host/listings/${id}/status`;
 
-function renderStep(res, { listing, n, values, errors = {}, status = 200, formError }) {
+function renderStep(
+  res,
+  { listing, n, values, errors = {}, status = 200, formError },
+) {
   const step = wizard.stepByNumber(n);
   const steps = listing
     ? wizard.stepStatuses(listing)
@@ -41,6 +47,8 @@ function renderStep(res, { listing, n, values, errors = {}, status = 200, formEr
     lists: { PROPERTY_TYPES, ROOM_TYPES, CANCELLATION_POLICIES, AMENITIES },
     photoList: listing && n === 4 ? galleryOf(listing) : [],
     maxImages: MAX_IMAGES,
+    readiness:
+      listing && n === wizard.REVIEW_STEP ? evaluateReadiness(listing) : null,
     draftToken: listing ? undefined : crypto.randomUUID(),
     pageTitle: `${step.title} (step ${n} of ${wizard.STEPS.length})`,
     pageDescription: "Add your place to Dimora, one short step at a time.",
@@ -50,7 +58,10 @@ function renderStep(res, { listing, n, values, errors = {}, status = 200, formEr
 // Only a draft can be worked on here; a published listing is edited elsewhere.
 function requireDraft(req, res) {
   if (req.listing.status === "draft") return true;
-  req.flash("error", "This listing is already published. You can edit it here.");
+  req.flash(
+    "error",
+    "This listing is already published. You can edit it here.",
+  );
   res.redirect(`/listings/${req.listing._id}/edit`);
   return false;
 }
@@ -95,7 +106,9 @@ module.exports.resume = (req, res) => {
   if (req.listing.status !== "draft") {
     return res.redirect(`/listings/${req.listing._id}`);
   }
-  res.redirect(stepUrl(req.listing._id, wizard.firstIncompleteStep(req.listing)));
+  res.redirect(
+    stepUrl(req.listing._id, wizard.firstIncompleteStep(req.listing)),
+  );
 };
 
 module.exports.showStep = (req, res) => {
@@ -140,7 +153,13 @@ module.exports.saveStep = async (req, res) => {
 
   const { value, errors } = validateStep(n, req.body);
   if (!value) {
-    return renderStep(res, { listing, n, values: req.body, errors, status: 400 });
+    return renderStep(res, {
+      listing,
+      n,
+      values: req.body,
+      errors,
+      status: 400,
+    });
   }
 
   let geometry;
@@ -180,19 +199,62 @@ module.exports.saveStep = async (req, res) => {
   res.redirect(stepUrl(listing._id, n + 1));
 };
 
-// Only a draft whose five steps are all finished (and still valid) goes public.
+// Publish a draft (or re-publish an unpublished listing). The Host Readiness
+// Checklist (src/services/readiness.js) decides; the page showed the same one.
 module.exports.publish = async (req, res) => {
   const listing = req.listing;
-  if (listing.status !== "draft") {
+  if (listing.deletedAt)
+    throw new NotFoundError("That listing does not exist.");
+  if (listing.status === "published") {
+    req.flash("success", "This listing is already published.");
     return res.redirect(`/listings/${listing._id}`);
   }
-  if (!wizard.isStepComplete(listing, wizard.REVIEW_STEP)) {
+  if (
+    listing.status === "draft" &&
+    !wizard.isStepComplete(listing, wizard.REVIEW_STEP)
+  ) {
     const target = wizard.firstIncompleteStep(listing);
     req.flash("error", `Finish step ${target} before you publish.`);
     return res.redirect(stepUrl(listing._id, target));
   }
-  listing.status = "published";
-  await listing.save();
+  try {
+    await lifecycle.publishListing(listing);
+  } catch (err) {
+    if (err instanceof lifecycle.NotReadyError) {
+      req.flash("error", err.message);
+      const first = err.failed[0];
+      return res.redirect(
+        listing.status === "draft"
+          ? stepUrl(listing._id, first.step)
+          : statusUrl(listing._id),
+      );
+    }
+    throw err;
+  }
   req.flash("success", "Your listing is published.");
   res.redirect(`/listings/${listing._id}`);
+};
+
+module.exports.unpublish = async (req, res) => {
+  const { changed } = await lifecycle.unpublishListing(req.listing);
+  req.flash(
+    "success",
+    changed
+      ? "Your listing is unpublished. Guests can no longer see it."
+      : "This listing was already unpublished.",
+  );
+  res.redirect(statusUrl(req.listing._id));
+};
+
+// The listing's state, its checklist and what the host can do next.
+module.exports.status = (req, res) => {
+  const listing = req.listing;
+  if (listing.deletedAt)
+    throw new NotFoundError("That listing does not exist.");
+  res.render("host/status.ejs", {
+    listing,
+    readiness: evaluateReadiness(listing),
+    pageTitle: `Status of ${listing.title}`,
+    pageDescription: "Publish, unpublish or delete your listing.",
+  });
 };

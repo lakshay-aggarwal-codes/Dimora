@@ -21,7 +21,12 @@
 const mongoose = require("mongoose");
 const StayNightModel = require("../models/stayNight");
 const { ConflictError } = require("../utils/errors");
-const { isDateOnly, addDays, formatDateOnly } = require("../utils/dates");
+const {
+  isDateOnly,
+  addDays,
+  formatDateOnly,
+  todayIn,
+} = require("../utils/dates");
 
 // A booking is at most 90 nights; a host block may be longer (a season).
 const MAX_NIGHTS_PER_CALL = 366;
@@ -78,7 +83,9 @@ function createLedgerService({
 
   function normalizeSource(source) {
     if (!source || !SOURCE_KINDS.includes(source.kind)) {
-      throw new TypeError(`source.kind must be one of ${SOURCE_KINDS.join(", ")}`);
+      throw new TypeError(
+        `source.kind must be one of ${SOURCE_KINDS.join(", ")}`,
+      );
     }
     return { kind: source.kind, id: requireId(source.id, "source.id") };
   }
@@ -101,9 +108,7 @@ function createLedgerService({
     Boolean(row.holdExpiresAt) && row.holdExpiresAt.getTime() < now.getTime();
 
   async function conflictError(listing, nights, now) {
-    const rows = await model
-      .find({ listing, date: { $in: nights } })
-      .lean();
+    const rows = await model.find({ listing, date: { $in: nights } }).lean();
     const taken = rows
       .filter((row) => !isStale(row, now))
       .map((row) => row.date)
@@ -189,7 +194,12 @@ function createLedgerService({
    * valid check-in/check-out pair.
    * @returns {Promise<Array<{from: Date, to: Date, nights: number}>>}
    */
-  async function availableRanges(listingId, from, to, { now = new Date() } = {}) {
+  async function availableRanges(
+    listingId,
+    from,
+    to,
+    { now = new Date() } = {},
+  ) {
     const listing = requireId(listingId, "listingId");
     if (!isDateOnly(from) || !isDateOnly(to)) {
       throw new TypeError("from and to must be date-only Dates (00:00:00Z)");
@@ -226,7 +236,31 @@ function createLedgerService({
     return ranges;
   }
 
-  return { reserveNights, releaseNights, availableRanges };
+  /**
+   * Is any night of this listing, from today (in the listing's time zone)
+   * onward, held by a reservation? A request whose hold has expired does not
+   * count, and neither does a host block.
+   */
+  async function hasUpcomingReservation(
+    listingId,
+    { now = new Date(), timeZone } = {},
+  ) {
+    const listing = requireId(listingId, "listingId");
+    const row = await model.exists({
+      listing,
+      "source.kind": "reservation",
+      date: { $gte: todayIn(timeZone || undefined, now) },
+      $or: [{ holdExpiresAt: null }, { holdExpiresAt: { $gt: now } }],
+    });
+    return Boolean(row);
+  }
+
+  return {
+    reserveNights,
+    releaseNights,
+    availableRanges,
+    hasUpcomingReservation,
+  };
 }
 
 function nightsOf(a, b) {

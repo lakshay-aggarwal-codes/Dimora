@@ -363,6 +363,9 @@ describeDb("listing create / edit / delete", () => {
     const deleted = await agent.delete(`/listings/${created._id}`);
     expect(deleted.status).toBe(302);
     expect(deleted.headers.location).toBe("/listings");
-    expect(await Listing.findById(created._id)).toBeNull();
+    // soft delete (P04-T05): the row stays, but nobody can see the listing
+    const stored = await Listing.findById(created._id);
+    expect(stored.deletedAt).toBeInstanceOf(Date);
+    expect((await agent.get(`/listings/${created._id}`)).status).toBe(302);
   });
 });
