@@ -1228,3 +1228,99 @@
   flex-wrap: wrap;
   gap: var(--space-2);
 }
+
+/* ---- Profile pages (P02-T03) ---- */
+.avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-sm {
+  width: 2rem;
+  height: 2rem;
+}
+
+.avatar-lg {
+  width: 6rem;
+  height: 6rem;
+  font-size: var(--font-size-xl);
+}
+
+.avatar-initial {
+  background-color: var(--color-primary-subtle);
+  color: var(--color-text);
+  font-weight: var(--font-weight-bold);
+}
+
+.profile-head,
+.profile-photo-edit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.profile-name {
+  margin-bottom: var(--space-1);
+  overflow-wrap: anywhere;
+}
+
+.profile-username,
+.profile-since {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.profile-section {
+  margin: var(--space-5) 0;
+}
+
+.profile-bio {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.profile-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  margin: 0;
+}
+
+.profile-stats dt {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-regular);
+}
+
+.profile-stats dd {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.profile-reviews {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.profile-review-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+  font-weight: var(--font-weight-bold);
+}
+
+.profile-review-text {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

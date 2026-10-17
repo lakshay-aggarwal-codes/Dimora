@@ -27,6 +27,7 @@ const imagesRouter = require("./routes/images");
 const hostRouter = require("./routes/host");
 const reviewRouter = require("./routes/review");
 const useRouter = require("./routes/user");
+const profileRouter = require("./routes/profile");
 const pagesRouter = require("./routes/pages");
 const {
   assignCspNonce,
@@ -167,6 +168,7 @@ function createApp({
   app.use("/listings/:id/reviews", reviewRouter);
   app.use("/", pagesRouter);
   app.use("/", useRouter);
+  app.use("/", profileRouter);
 
   app.all("/{*splat}", (req, res, next) => {
     next(new NotFoundError());

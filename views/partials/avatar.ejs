@@ -1,0 +1,14 @@
+<%#
+    A round profile picture, or the first letter of the name when there is none.
+    Locals: avatarUrl (string or null), name (for the letter), size ("sm" | "lg",
+    default "sm"). Decorative: the name is always written next to it.
+%>
+<%
+    const avatarSize = typeof size !== "undefined" && size === "lg" ? "lg" : "sm";
+    const initial = String(typeof name !== "undefined" && name ? name : "?").trim().charAt(0).toUpperCase() || "?";
+%>
+<% if (typeof avatarUrl !== "undefined" && avatarUrl) { %>
+<img class="avatar avatar-<%= avatarSize %>" src="<%= imageUrl(avatarUrl, 'avatar') %>" alt="" loading="lazy">
+<% } else { %>
+<span class="avatar avatar-<%= avatarSize %> avatar-initial" aria-hidden="true"><%= initial %></span>
+<% } %>

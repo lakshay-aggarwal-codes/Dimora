@@ -1,0 +1,54 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    A member's public profile. Locals: profile (src/services/profile.js: display
+    name, username, avatar, bio, member since, counts, recent reviews), isOwn.
+    It never receives an email address.
+%>
+<div class="row mt-3">
+    <div class="col-12 col-md-10 col-lg-8 mx-auto">
+        <header class="profile-head">
+            <%- include("../partials/avatar.ejs", { avatarUrl: profile.avatarUrl, name: profile.displayName, size: "lg" }) %>
+            <div>
+                <h1 class="h3 profile-name"><%= profile.displayName %></h1>
+                <p class="profile-username">@<%= profile.username %></p>
+                <% if (profile.memberSince) { %><p class="profile-since">Member since <%= profile.memberSince %></p><% } %>
+            </div>
+        </header>
+
+        <% if (isOwn) { %>
+        <p><a class="btn btn-outline-dark btn-sm" href="/account/profile">Edit your profile</a></p>
+        <% } %>
+
+        <% if (profile.bio) { %>
+        <section aria-labelledby="about-heading" class="profile-section">
+            <h2 id="about-heading" class="h5">About</h2>
+            <p class="profile-bio"><%= profile.bio %></p>
+        </section>
+        <% } %>
+
+        <section aria-labelledby="activity-heading" class="profile-section">
+            <h2 id="activity-heading" class="h5">Activity</h2>
+            <dl class="profile-stats">
+                <div><dt>Listings</dt><dd><%= profile.listingCount %></dd></div>
+                <div><dt>Reviews written</dt><dd><%= profile.reviewCount %></dd></div>
+            </dl>
+        </section>
+
+        <% if (profile.reviews.length) { %>
+        <section aria-labelledby="reviews-heading" class="profile-section">
+            <h2 id="reviews-heading" class="h5">Recent reviews</h2>
+            <ul class="profile-reviews">
+                <% profile.reviews.forEach((review) => { %>
+                <li>
+                    <p class="profile-review-head">
+                        <a href="/listings/<%= review.listingId %>"><%= review.listingTitle %></a>
+                        <span>Rated <%= review.rating %> out of 5</span>
+                    </p>
+                    <% if (review.excerpt) { %><p class="profile-review-text"><%= review.excerpt %></p><% } %>
+                </li>
+                <% }) %>
+            </ul>
+        </section>
+        <% } %>
+    </div>
+</div>

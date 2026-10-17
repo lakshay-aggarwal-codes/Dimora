@@ -13,6 +13,7 @@ const PRESETS = Object.freeze({
   thumb: "w_200,h_150,c_fill,f_auto,q_auto", // gallery thumbnails
   full: "w_1600,f_auto,q_auto", // the full-screen viewer
   edit: "w_250,f_auto,q_auto", // the host's photo manager
+  avatar: "w_256,h_256,c_fill,g_auto,f_auto,q_auto", // profile pictures (square)
 });
 
 const UPLOAD = /^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.*)$/;

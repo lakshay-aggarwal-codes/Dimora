@@ -1,0 +1,42 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    Edit your own profile. Locals: account ({ id, avatarUrl, displayName }),
+    values, errors, formError, limits. The form is multipart (photo), so its CSRF
+    token is in the URL. There is no email field: the email is private and is
+    never shown on the public page.
+%>
+<div class="row mt-3">
+    <div class="col-12 col-md-10 col-lg-8 mx-auto">
+        <h1 class="h3">Edit your profile</h1>
+        <p><a href="/users/<%= account.id %>">See your public profile</a></p>
+
+        <% if (formError) { %>
+        <div class="alert alert-danger" role="alert"><%= formError %></div>
+        <% } else if (Object.keys(errors).length) { %>
+        <div class="alert alert-danger" role="alert">Please fix the highlighted fields.</div>
+        <% } %>
+
+        <form method="POST" enctype="multipart/form-data" novalidate
+            action="/account/profile?_method=PUT&_csrf=<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+            <div class="profile-photo-edit">
+                <%- include("../partials/avatar.ejs", { avatarUrl: account.avatarUrl, name: account.displayName, size: "lg" }) %>
+                <div>
+                    <label for="avatar" class="form-label">Profile photo</label>
+                    <input id="avatar" name="avatar" class="form-control" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="avatar-hint">
+                    <div id="avatar-hint" class="form-text">PNG, JPEG or WebP, up to <%= limits.avatarMb %> MB. Leave empty to keep your current photo.</div>
+                    <% if (account.avatarUrl) { %>
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" name="removeAvatar" id="removeAvatar" value="on">
+                        <label class="form-check-label" for="removeAvatar">Remove my photo</label>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <%- include("../partials/form-field.ejs", { id: "displayName", label: "Display name", value: values.displayName, error: errors.displayName, hint: "Shown on your profile instead of your username. Leave empty to use your username.", attrs: { maxlength: limits.name } }) %>
+            <%- include("../partials/form-field.ejs", { id: "bio", type: "textarea", label: "About you", value: values.bio, error: errors.bio, hint: "Up to " + limits.bio + " characters. This is public.", attrs: { rows: 5, maxlength: limits.bio } }) %>
+
+            <button type="submit" class="btn btn-dark">Save profile</button>
+        </form>
+    </div>
+</div>
