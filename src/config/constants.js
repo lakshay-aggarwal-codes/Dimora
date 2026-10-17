@@ -24,21 +24,24 @@ const CANCELLATION_POLICIES = [
   { value: "strict", label: "Strict" },
 ];
 
+// `group` is only for showing amenities in sections on the listing page.
+const AMENITY_GROUPS = ["Essentials", "Facilities", "Safety", "Good to know"];
+
 const AMENITIES = [
-  { value: "wifi", label: "Wi-Fi" },
-  { value: "kitchen", label: "Kitchen" },
-  { value: "washer", label: "Washing machine" },
-  { value: "air_conditioning", label: "Air conditioning" },
-  { value: "heating", label: "Heating" },
-  { value: "free_parking", label: "Free parking" },
-  { value: "tv", label: "TV" },
-  { value: "workspace", label: "Dedicated workspace" },
-  { value: "pool", label: "Pool" },
-  { value: "gym", label: "Gym" },
-  { value: "balcony", label: "Balcony or terrace" },
-  { value: "pets_allowed", label: "Pets allowed" },
-  { value: "smoke_alarm", label: "Smoke alarm" },
-  { value: "first_aid_kit", label: "First aid kit" },
+  { value: "wifi", label: "Wi-Fi", group: "Essentials" },
+  { value: "kitchen", label: "Kitchen", group: "Essentials" },
+  { value: "washer", label: "Washing machine", group: "Essentials" },
+  { value: "air_conditioning", label: "Air conditioning", group: "Essentials" },
+  { value: "heating", label: "Heating", group: "Essentials" },
+  { value: "tv", label: "TV", group: "Essentials" },
+  { value: "workspace", label: "Dedicated workspace", group: "Essentials" },
+  { value: "free_parking", label: "Free parking", group: "Facilities" },
+  { value: "pool", label: "Pool", group: "Facilities" },
+  { value: "gym", label: "Gym", group: "Facilities" },
+  { value: "balcony", label: "Balcony or terrace", group: "Facilities" },
+  { value: "smoke_alarm", label: "Smoke alarm", group: "Safety" },
+  { value: "first_aid_kit", label: "First aid kit", group: "Safety" },
+  { value: "pets_allowed", label: "Pets allowed", group: "Good to know" },
 ];
 
 const values = (list) => list.map((item) => item.value);
@@ -48,6 +51,7 @@ module.exports = {
   ROOM_TYPES,
   CANCELLATION_POLICIES,
   AMENITIES,
+  AMENITY_GROUPS,
   PROPERTY_TYPE_VALUES: values(PROPERTY_TYPES),
   ROOM_TYPE_VALUES: values(ROOM_TYPES),
   CANCELLATION_POLICY_VALUES: values(CANCELLATION_POLICIES),

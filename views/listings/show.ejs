@@ -1,6 +1,5 @@
 <% layout("/layouts/boilerPlate")%>
     <%
-        const ownerName = listing.owner && listing.owner.username;
         const nightlyMinor = listing.pricing && listing.pricing.nightlyMinor;
         const hasPrice = Number.isInteger(nightlyMinor);
         // "Preview as a guest" hides everything only the host sees.
@@ -9,6 +8,31 @@
         const canDeleteListing = !guestPreview && can("listing:delete", listing);
         const place = [listing.location, listing.country].filter(Boolean).join(", ");
         const reviews = Array.isArray(listing.reviews) ? listing.reviews : [];
+        const summary = typeof ratingSummary !== "undefined" && ratingSummary ? ratingSummary : { average: null, count: 0 };
+        const labels = typeof facts !== "undefined" && facts ? facts : {};
+        const cap = listing.capacity || {};
+        const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+        const isCount = (n) => Number.isFinite(n) && n >= 0;
+        const keyFacts = [
+            isCount(cap.guests) ? { icon: "fa-user-group", text: plural(cap.guests, "guest") } : null,
+            isCount(cap.bedrooms) ? { icon: "fa-door-open", text: cap.bedrooms === 0 ? "Studio" : plural(cap.bedrooms, "bedroom") } : null,
+            isCount(cap.beds) ? { icon: "fa-bed", text: plural(cap.beds, "bed") } : null,
+            isCount(cap.bathrooms) ? { icon: "fa-bath", text: plural(cap.bathrooms, "bathroom") } : null
+        ].filter(Boolean);
+        const kind = [labels.roomType, labels.propertyType].filter(Boolean).join(" · ");
+        const host = listing.owner || null;
+        const hostName = host && (host.displayName || host.username);
+        const hostInitial = hostName ? Array.from(hostName)[0].toUpperCase() : "";
+        const memberSince = host && host.createdAt && !Number.isNaN(new Date(host.createdAt).getTime()) ? new Date(host.createdAt).getUTCFullYear() : null;
+        const amenitySections = typeof amenityGroups !== "undefined" && Array.isArray(amenityGroups) ? amenityGroups : [];
+        const rulesText = typeof listing.houseRules === "string" ? listing.houseRules.trim() : "";
+        const knowRows = [
+            listing.checkInTime ? ["Check-in", `from ${listing.checkInTime}`] : null,
+            listing.checkOutTime ? ["Check-out", `by ${listing.checkOutTime}`] : null,
+            Number.isInteger(listing.minNights) && Number.isInteger(listing.maxNights) ? ["Length of stay", listing.minNights === listing.maxNights ? plural(listing.minNights, "night") : `${listing.minNights} to ${plural(listing.maxNights, "night")}`] : null,
+            labels.cancellation ? ["Cancellation", labels.cancellation] : null,
+            typeof listing.instantBook === "boolean" ? ["Booking", listing.instantBook ? "Instant book" : "The host approves each request"] : null
+        ].filter(Boolean);
     %>
     <article class="listing-detail mt-3">
         <% if (guestPreview) { %>
@@ -25,6 +49,12 @@
         <div class="mb-3">
             <h1><%= listing.title %></h1>
             <% if (place) { %><p class="detail-place"><%= place %></p><% } %>
+            <% if (kind || summary.count > 0) { %>
+            <p class="detail-meta">
+                <% if (kind) { %><span><%= kind %></span><% } %>
+                <% if (summary.count > 0) { %><a class="detail-rating" href="#reviews-heading"><%- include("../partials/rating.ejs", { rating: summary.average, count: summary.count }) %></a><% } %>
+            </p>
+            <% } %>
         </div>
 
         <div class="row g-4">
@@ -32,13 +62,59 @@
             <div class="col-12 col-lg-7">
                 <%- include("../partials/gallery.ejs", { images: gallery, title: listing.title }) %>
 
+                <% if (keyFacts.length > 0) { %>
+                <ul class="key-facts" aria-label="Key facts">
+                    <% keyFacts.forEach((fact) => { %>
+                    <li><i class="fa-solid <%= fact.icon %>" aria-hidden="true"></i> <%= fact.text %></li>
+                    <% }) %>
+                </ul>
+                <% } %>
+
                 <section aria-labelledby="about-heading" class="mt-4">
                     <h2 id="about-heading" class="h4">About this place</h2>
-                    <% if (ownerName) { %>
-                        <p class="text-body-secondary">Owned by <i><%= ownerName %></i></p>
-                    <% } %>
                     <p class="detail-description"><%= listing.description %></p>
                 </section>
+
+                <% if (hostName) { %>
+                <section aria-labelledby="host-heading" class="host-card mt-4">
+                    <span class="host-avatar" aria-hidden="true"><%= hostInitial %></span>
+                    <div>
+                        <h2 id="host-heading" class="h5 mb-0">Hosted by <%= hostName %></h2>
+                        <% if (memberSince) { %><p class="mb-0 text-body-secondary">Member since <%= memberSince %></p><% } %>
+                    </div>
+                </section>
+                <% } %>
+
+                <% if (amenitySections.length > 0) { %>
+                <section aria-labelledby="amenities-heading" class="mt-4">
+                    <h2 id="amenities-heading" class="h4">What this place offers</h2>
+                    <% amenitySections.forEach((section) => { %>
+                    <h3 class="h6 amenity-group-title"><%= section.group %></h3>
+                    <ul class="amenity-list">
+                        <% section.items.forEach((label) => { %><li><%= label %></li><% }) %>
+                    </ul>
+                    <% }) %>
+                </section>
+                <% } %>
+
+                <% if (knowRows.length > 0 || rulesText || listing.noSpecialRules === true) { %>
+                <section aria-labelledby="rules-heading" class="mt-4">
+                    <h2 id="rules-heading" class="h4">Things to know</h2>
+                    <% if (knowRows.length > 0) { %>
+                    <dl class="know-list">
+                        <% knowRows.forEach(([term, value]) => { %>
+                        <dt><%= term %></dt><dd><%= value %></dd>
+                        <% }) %>
+                    </dl>
+                    <% } %>
+                    <% if (rulesText) { %>
+                    <h3 class="h6">House rules</h3>
+                    <p class="detail-description"><%= rulesText %></p>
+                    <% } else if (listing.noSpecialRules === true) { %>
+                    <p class="text-body-secondary">The host has no special house rules.</p>
+                    <% } %>
+                </section>
+                <% } %>
             </div>
 
             <!-- Price, actions and map -->
@@ -53,6 +129,11 @@
                             Price not available
                         <% } %>
                     </p>
+
+                    <%# P08-T02 puts the date picker, the quote and the book button here. %>
+                    <div class="booking-slot" id="booking-slot" data-booking-slot>
+                        <p class="mb-0 text-body-secondary">Online booking is not open yet.</p>
+                    </div>
 
                     <% if (canEditListing || canDeleteListing) { %>
                     <div class="detail-actions">
@@ -72,6 +153,7 @@
 
                 <section aria-labelledby="map-heading" class="mt-4">
                     <h2 id="map-heading" class="h4">Where you'll be</h2>
+                    <% if (place) { %><p><%= place %></p><% } %>
                     <% if (typeof mapPoint !== 'undefined' && mapPoint) { %>
                         <div id="map" data-token="<%= mapPublicToken %>" data-lng="<%= mapPoint.lng %>"
                             data-lat="<%= mapPoint.lat %>" data-title="<%= listing.title %>"></div>
@@ -85,6 +167,9 @@
         <!-- Reviews: full width below -->
         <section aria-labelledby="reviews-heading" class="mt-5">
             <h2 id="reviews-heading" class="h4">Reviews</h2>
+            <% if (summary.count > 0) { %>
+            <p class="review-summary"><%- include("../partials/rating.ejs", { rating: summary.average, count: summary.count }) %></p>
+            <% } %>
 
             <% if (currUser) { %>
             <form method="post" action="/listings/<%= listing.id %>/reviews" novalidate class="needs-validation detail-review-form">
@@ -148,3 +233,7 @@
     </article>
 
     <script src="/js/map.js"></script>
+
+    <% if (typeof structuredData !== "undefined" && structuredData) { %>
+    <script type="application/ld+json"><%- structuredData %></script>
+    <% } %>

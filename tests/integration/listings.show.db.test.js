@@ -34,7 +34,7 @@ describeDb("listing detail page (database)", () => {
     const res = await createAgent().get(`/listings/${listing._id}`);
     expect(res.status).toBe(200);
     expect(res.text).toContain("Orphaned Villa");
-    expect(res.text).not.toContain("Owned by");
+    expect(res.text).not.toContain("Hosted by");
 
     // Logged in, the owner check (owner._id.equals) must not crash either.
     const { agent } = await loggedIn();

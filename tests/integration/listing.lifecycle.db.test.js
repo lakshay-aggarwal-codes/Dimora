@@ -161,7 +161,7 @@ describeDb("listing lifecycle", () => {
         listing.title,
       );
       expect((await visitor.get("/")).text).not.toContain(listing.title);
-      expect((await visitor.get(`/listings/${listing._id}`)).status).toBe(302);
+      expect((await visitor.get(`/listings/${listing._id}`)).status).toBe(404);
       const own = await agent.get(`/listings/${listing._id}`);
       expect(own.status).toBe(200);
       expect(own.text).toContain("only you can see it");
@@ -273,7 +273,7 @@ describeDb("listing lifecycle", () => {
       expect((await createAgent().get(`/listings/${listing._id}`)).status).toBe(
         302,
       );
-      expect((await agent.get(`/listings/${listing._id}`)).status).toBe(302); // gone for the owner too
+      expect((await agent.get(`/listings/${listing._id}`)).status).toBe(404); // gone for the owner too
       expect((await agent.get(status(listing))).status).toBe(404);
     });
 

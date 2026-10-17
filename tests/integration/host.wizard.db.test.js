@@ -410,7 +410,7 @@ describeDb("listing wizard", () => {
       expect(direct.status).toBe(302);
       expect(direct.headers.location).toBe("/listings");
       const { agent: stranger } = await host();
-      expect((await stranger.get(`/listings/${draft._id}`)).status).toBe(302);
+      expect((await stranger.get(`/listings/${draft._id}`)).status).toBe(404);
     });
 
     test("the host can preview their own draft", async () => {

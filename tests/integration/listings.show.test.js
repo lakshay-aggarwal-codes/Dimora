@@ -53,7 +53,7 @@ describe("detail page", () => {
   test("regression D-05: a listing with no owner renders without a 500", async () => {
     const { res } = await showPage({ owner: undefined });
     expect(res.status).toBe(200);
-    expect(res.text).not.toContain("Owned by");
+    expect(res.text).not.toContain("Hosted by");
     expect(res.text).not.toContain("/edit");
   });
 
@@ -90,10 +90,17 @@ describe("detail page", () => {
     expect(value).toBe("&#34;&gt;&lt;script&gt;alert(1)&lt;/script&gt;");
   });
 
-  test("a missing listing redirects to the index with a message", async () => {
+  test("a missing listing is a 404 page (P04-T07)", async () => {
     stubFindById(null);
     const res = await createAgent().get("/listings/507f1f77bcf86cd799439011");
-    expect(res.status).toBe(302);
-    expect(res.headers.location).toBe("/listings");
+    expect(res.status).toBe(404);
+  });
+
+  test("something that is not an id is the same 404 (no database call)", async () => {
+    const find = stubFindById(null);
+    for (const id of ["abc", "123", "%3Cscript%3E", "undefined"]) {
+      expect((await createAgent().get(`/listings/${id}`)).status).toBe(404);
+    }
+    expect(find).not.toHaveBeenCalled();
   });
 });

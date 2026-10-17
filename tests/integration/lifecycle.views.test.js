@@ -132,12 +132,11 @@ describe("who sees what", () => {
     ).toBe(404);
   });
 
-  test("a draft: visitors are sent away; the preview is a 404, not a hint that it exists", async () => {
+  test("a draft is a 404 for visitors, and so is its preview", async () => {
     const doc = make({ status: "draft" });
     stubFindById(doc);
     const plain = await createAgent().get(`/listings/${doc._id}`);
-    expect(plain.status).toBe(302);
-    expect(plain.headers.location).toBe("/listings");
+    expect(plain.status).toBe(404);
     const preview = await createAgent().get(`/listings/${doc._id}?preview=1`);
     expect(preview.status).toBe(404);
     expect(preview.text).not.toContain(doc.title);
@@ -146,14 +145,14 @@ describe("who sees what", () => {
   test("an unpublished listing looks missing to visitors", async () => {
     const doc = make({ status: "unpublished" });
     stubFindById(doc);
-    expect((await createAgent().get(`/listings/${doc._id}`)).status).toBe(302);
+    expect((await createAgent().get(`/listings/${doc._id}`)).status).toBe(404);
   });
 
   test("a deleted listing is gone for visitors even if it was published", async () => {
     const doc = make({ status: "published" });
     doc.deletedAt = new Date();
     stubFindById(doc);
-    expect((await createAgent().get(`/listings/${doc._id}`)).status).toBe(302);
+    expect((await createAgent().get(`/listings/${doc._id}`)).status).toBe(404);
     expect(
       (await createAgent().get(`/listings/${doc._id}?preview=1`)).status,
     ).toBe(404);
