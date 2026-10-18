@@ -8,6 +8,7 @@
         const currentPage = typeof page === "number" ? page : 1;
         const pageCount = typeof totalPages === "number" ? totalPages : 1;
         const isFiltered = typeof filtered !== "undefined" ? filtered : false;
+        const hasSuggestions = typeof suggestions !== "undefined" && suggestions !== null;
         const todayText = typeof today === "string" && today ? today : undefined;
         const hidden = typeof hiddenFields === "function" ? hiddenFields : () => [];
     %>
@@ -117,9 +118,37 @@
         title: isFiltered ? "No stays match your search" : "No stays yet",
         message: isFiltered ? "Try other dates, a different place or fewer filters." : "Check back soon, new places are added all the time.",
         icon: "fa-house",
-        actionHref: isFiltered ? "/listings" : "/host/listings/new",
-        actionLabel: isFiltered ? "Clear search" : "List your place"
+        actionHref: isFiltered ? (hasSuggestions && !suggestions.hasAnyStays ? "/host/listings/new" : "/listings") : "/host/listings/new",
+        actionLabel: isFiltered ? (hasSuggestions ? (suggestions.hasAnyStays ? "Clear all filters" : "List your place") : "Clear search") : "List your place"
     }) %>
+
+    <% if (hasSuggestions && suggestions.filterSuggestions.length) { %>
+    <section class="suggestions" aria-labelledby="suggest-filters-heading">
+        <h2 id="suggest-filters-heading" class="h5">Try this instead</h2>
+        <ul class="suggestion-list">
+            <% suggestions.filterSuggestions.forEach((item) => { %>
+            <li>
+                <a href="<%= item.url %>"><%= item.label %></a>
+                <span class="suggestion-count"><%= item.count %> <%= item.count === 1 ? "stay" : "stays" %></span>
+            </li>
+            <% }) %>
+        </ul>
+    </section>
+    <% } %>
+
+    <% if (hasSuggestions && suggestions.destinations.length) { %>
+    <section class="suggestions" aria-labelledby="suggest-places-heading">
+        <h2 id="suggest-places-heading" class="h5">Popular destinations</h2>
+        <ul class="suggestion-list">
+            <% suggestions.destinations.forEach((item) => { %>
+            <li>
+                <a href="<%= item.url %>"><%= item.label %></a>
+                <span class="suggestion-count"><%= item.count %> <%= item.count === 1 ? "stay" : "stays" %></span>
+            </li>
+            <% }) %>
+        </ul>
+    </section>
+    <% } %>
     <% } %>
 
     <!-- All listing cards: one column on phones, two from md, three from lg -->

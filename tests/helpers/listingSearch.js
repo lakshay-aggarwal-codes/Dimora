@@ -12,6 +12,9 @@ function stubListingSearch(listings, { total } = {}) {
     sort: jest.fn(() => chain),
     skip: jest.fn(() => chain),
     limit: jest.fn(() => chain),
+    // the empty-result suggestions look up popular destinations (P05-T05)
+    select: jest.fn(() => chain),
+    lean: jest.fn(() => chain),
     then: (resolve, reject) => Promise.resolve(listings).then(resolve, reject),
   };
   const find = jest.spyOn(Listing, "find").mockReturnValue(chain);

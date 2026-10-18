@@ -8,6 +8,7 @@
 const Listing = require("../models/listing");
 const ledger = require("../services/ledger");
 const { buildFilter } = require("../services/search");
+const { suggestForEmptyResults } = require("../services/suggestions");
 const { parseListingQuery } = require("../validation/searchQuery");
 const { formatDateOnly, todayIn, DEFAULT_TIMEZONE } = require("../utils/dates");
 
@@ -20,8 +21,9 @@ module.exports.index = async (req, res) => {
   const parsed = parseListingQuery(req.query, { now });
 
   const filter = buildFilter(parsed.searchParams);
+  let taken = [];
   if (parsed.stay) {
-    const taken = await ledger.unavailableListingIds(
+    taken = await ledger.unavailableListingIds(
       parsed.stay.checkIn,
       parsed.stay.checkOut,
       { now },
@@ -40,6 +42,13 @@ module.exports.index = async (req, res) => {
   const pageState = { ...parsed.state };
   delete pageState.page;
   const filtered = Object.keys(pageState).length > 0;
+
+  // A search that found nothing gets suggestions (P05-T05): at most 5 more queries.
+  const suggestions =
+    total === 0 && filtered
+      ? await suggestForEmptyResults({ Listing, parsed, takenIds: taken })
+      : undefined;
+
   res.render("listings/index.ejs", {
     allListings: listings,
     state: { ...pageState, ...(page > 1 ? { page } : {}) },
@@ -50,6 +59,7 @@ module.exports.index = async (req, res) => {
     page,
     totalPages,
     filtered,
+    suggestions,
     today: formatDateOnly(todayIn(DEFAULT_TIMEZONE, now)),
     pageTitle: filtered ? "Search results" : "Explore stays",
     pageDescription: "Browse places to stay on Dimora.",

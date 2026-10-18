@@ -1282,3 +1282,22 @@
 .results-clear {
   margin-left: var(--space-3);
 }
+
+/* ---- Suggestions for an empty search (P05-T05) ---- */
+.suggestions {
+  margin: var(--space-5) 0;
+}
+
+.suggestion-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.suggestion-count {
+  margin-left: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
