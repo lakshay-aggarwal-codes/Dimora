@@ -1,0 +1,754 @@
+[
+ {
+  "name": "1 weekday night, defaults",
+  "input": {
+   "nightly": 250000,
+   "checkIn": "2026-11-10",
+   "checkOut": "2026-11-11"
+  },
+  "expected": {
+   "nights": 1,
+   "subtotalMinor": 250000,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 25000,
+   "taxMinor": 45000,
+   "totalMinor": 320000,
+   "avgPerNightMinor": 250000,
+   "lineCodes": [
+    "nights",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "1 Friday night with a weekend price",
+  "input": {
+   "nightly": 250000,
+   "weekend": 300000,
+   "checkIn": "2026-11-13",
+   "checkOut": "2026-11-14"
+  },
+  "expected": {
+   "nights": 1,
+   "subtotalMinor": 300000,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 30000,
+   "taxMinor": 54000,
+   "totalMinor": 384000,
+   "avgPerNightMinor": 300000,
+   "lineCodes": [
+    "weekend_nights",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "1 Saturday night, no weekend price",
+  "input": {
+   "nightly": 250000,
+   "checkIn": "2026-11-14",
+   "checkOut": "2026-11-15"
+  },
+  "expected": {
+   "nights": 1,
+   "subtotalMinor": 250000,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 25000,
+   "taxMinor": 45000,
+   "totalMinor": 320000,
+   "avgPerNightMinor": 250000,
+   "lineCodes": [
+    "weekend_nights",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "1 Sunday night is a weekday",
+  "input": {
+   "nightly": 250000,
+   "weekend": 300000,
+   "checkIn": "2026-11-15",
+   "checkOut": "2026-11-16"
+  },
+  "expected": {
+   "nights": 1,
+   "subtotalMinor": 250000,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 25000,
+   "taxMinor": 45000,
+   "totalMinor": 320000,
+   "avgPerNightMinor": 250000,
+   "lineCodes": [
+    "nights",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "Thursday to Monday, mixed, with cleaning",
+  "input": {
+   "nightly": 250000,
+   "weekend": 300000,
+   "cleaning": 50000,
+   "checkIn": "2026-11-12",
+   "checkOut": "2026-11-16"
+  },
+  "expected": {
+   "nights": 4,
+   "subtotalMinor": 1100000,
+   "cleaningMinor": 50000,
+   "serviceFeeMinor": 115000,
+   "taxMinor": 207000,
+   "totalMinor": 1472000,
+   "avgPerNightMinor": 275000,
+   "lineCodes": [
+    "nights",
+    "weekend_nights",
+    "cleaning",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "a full week",
+  "input": {
+   "nightly": 180000,
+   "weekend": 220000,
+   "cleaning": 30000,
+   "checkIn": "2026-11-02",
+   "checkOut": "2026-11-09"
+  },
+  "expected": {
+   "nights": 7,
+   "subtotalMinor": 1340000,
+   "cleaningMinor": 30000,
+   "serviceFeeMinor": 137000,
+   "taxMinor": 246600,
+   "totalMinor": 1753600,
+   "avgPerNightMinor": 191429,
+   "lineCodes": [
+    "nights",
+    "weekend_nights",
+    "cleaning",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "weekend only, two nights",
+  "input": {
+   "nightly": 100000,
+   "weekend": 150000,
+   "checkIn": "2026-11-13",
+   "checkOut": "2026-11-15"
+  },
+  "expected": {
+   "nights": 2,
+   "subtotalMinor": 300000,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 30000,
+   "taxMinor": 54000,
+   "totalMinor": 384000,
+   "avgPerNightMinor": 150000,
+   "lineCodes": [
+    "weekend_nights",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "across a month end",
+  "input": {
+   "nightly": 199900,
+   "cleaning": 19900,
+   "checkIn": "2026-10-29",
+   "checkOut": "2026-11-03"
+  },
+  "expected": {
+   "nights": 5,
+   "subtotalMinor": 999500,
+   "cleaningMinor": 19900,
+   "serviceFeeMinor": 101940,
+   "taxMinor": 183492,
+   "totalMinor": 1304832,
+   "avgPerNightMinor": 199900,
+   "lineCodes": [
+    "nights",
+    "weekend_nights",
+    "cleaning",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "across New Year",
+  "input": {
+   "nightly": 320000,
+   "weekend": 380000,
+   "cleaning": 40000,
+   "checkIn": "2026-12-30",
+   "checkOut": "2027-01-04"
+  },
+  "expected": {
+   "nights": 5,
+   "subtotalMinor": 1720000,
+   "cleaningMinor": 40000,
+   "serviceFeeMinor": 176000,
+   "taxMinor": 316800,
+   "totalMinor": 2252800,
+   "avgPerNightMinor": 344000,
+   "lineCodes": [
+    "nights",
+    "weekend_nights",
+    "cleaning",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "a leap day (2028)",
+  "input": {
+   "nightly": 275000,
+   "checkIn": "2028-02-27",
+   "checkOut": "2028-03-02"
+  },
+  "expected": {
+   "nights": 4,
+   "subtotalMinor": 1100000,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 110000,
+   "taxMinor": 198000,
+   "totalMinor": 1408000,
+   "avgPerNightMinor": 275000,
+   "lineCodes": [
+    "nights",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "not a leap year",
+  "input": {
+   "nightly": 275000,
+   "checkIn": "2027-02-27",
+   "checkOut": "2027-03-02"
+  },
+  "expected": {
+   "nights": 3,
+   "subtotalMinor": 825000,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 82500,
+   "taxMinor": 148500,
+   "totalMinor": 1056000,
+   "avgPerNightMinor": 275000,
+   "lineCodes": [
+    "nights",
+    "weekend_nights",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "90 nights (the longest allowed)",
+  "input": {
+   "nightly": 150000,
+   "weekend": 175000,
+   "cleaning": 25000,
+   "checkIn": "2027-01-04",
+   "checkOut": "2027-04-04"
+  },
+  "expected": {
+   "nights": 90,
+   "subtotalMinor": 14150000,
+   "cleaningMinor": 25000,
+   "serviceFeeMinor": 1417500,
+   "taxMinor": 2551500,
+   "totalMinor": 18144000,
+   "avgPerNightMinor": 157222,
+   "lineCodes": [
+    "nights",
+    "weekend_nights",
+    "cleaning",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "no cleaning fee, no weekend price",
+  "input": {
+   "nightly": 125000,
+   "checkIn": "2026-12-01",
+   "checkOut": "2026-12-04"
+  },
+  "expected": {
+   "nights": 3,
+   "subtotalMinor": 375000,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 37500,
+   "taxMinor": 67500,
+   "totalMinor": 480000,
+   "avgPerNightMinor": 125000,
+   "lineCodes": [
+    "nights",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "cleaning fee only matters once",
+  "input": {
+   "nightly": 125000,
+   "cleaning": 75000,
+   "checkIn": "2026-12-01",
+   "checkOut": "2026-12-02"
+  },
+  "expected": {
+   "nights": 1,
+   "subtotalMinor": 125000,
+   "cleaningMinor": 75000,
+   "serviceFeeMinor": 20000,
+   "taxMinor": 36000,
+   "totalMinor": 256000,
+   "avgPerNightMinor": 125000,
+   "lineCodes": [
+    "nights",
+    "cleaning",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "an odd price: 999.99 rupees",
+  "input": {
+   "nightly": 99999,
+   "checkIn": "2026-12-01",
+   "checkOut": "2026-12-04"
+  },
+  "expected": {
+   "nights": 3,
+   "subtotalMinor": 299997,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 30000,
+   "taxMinor": 53999,
+   "totalMinor": 383996,
+   "avgPerNightMinor": 99999,
+   "lineCodes": [
+    "nights",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "an odd price with an odd cleaning fee",
+  "input": {
+   "nightly": 123457,
+   "weekend": 234567,
+   "cleaning": 3333,
+   "checkIn": "2026-12-03",
+   "checkOut": "2026-12-08"
+  },
+  "expected": {
+   "nights": 5,
+   "subtotalMinor": 839505,
+   "cleaningMinor": 3333,
+   "serviceFeeMinor": 84284,
+   "taxMinor": 151711,
+   "totalMinor": 1078833,
+   "avgPerNightMinor": 167901,
+   "lineCodes": [
+    "nights",
+    "weekend_nights",
+    "cleaning",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "the minimum price: 1 paisa a night (fees round to 0)",
+  "input": {
+   "nightly": 1,
+   "checkIn": "2026-12-01",
+   "checkOut": "2026-12-03"
+  },
+  "expected": {
+   "nights": 2,
+   "subtotalMinor": 2,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 0,
+   "taxMinor": 0,
+   "totalMinor": 2,
+   "avgPerNightMinor": 1,
+   "lineCodes": [
+    "nights"
+   ]
+  }
+ },
+ {
+  "name": "9 paise: half-up at the edges",
+  "input": {
+   "nightly": 9,
+   "checkIn": "2026-12-01",
+   "checkOut": "2026-12-02"
+  },
+  "expected": {
+   "nights": 1,
+   "subtotalMinor": 9,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 1,
+   "taxMinor": 2,
+   "totalMinor": 12,
+   "avgPerNightMinor": 9,
+   "lineCodes": [
+    "nights",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "5 paise tax rounds up",
+  "input": {
+   "nightly": 5,
+   "serviceFeeBps": 0,
+   "taxSlabs": [
+    {
+     "upToMinor": null,
+     "rateBps": 1000
+    }
+   ],
+   "checkIn": "2026-12-01",
+   "checkOut": "2026-12-02"
+  },
+  "expected": {
+   "nights": 1,
+   "subtotalMinor": 5,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 0,
+   "taxMinor": 1,
+   "totalMinor": 6,
+   "avgPerNightMinor": 5,
+   "lineCodes": [
+    "nights",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "a very expensive stay (1 crore a night, 90 nights)",
+  "input": {
+   "nightly": 1000000000,
+   "weekend": 1100000000,
+   "cleaning": 500000000,
+   "checkIn": "2027-01-04",
+   "checkOut": "2027-04-04"
+  },
+  "expected": {
+   "nights": 90,
+   "subtotalMinor": 92600000000,
+   "cleaningMinor": 500000000,
+   "serviceFeeMinor": 9310000000,
+   "taxMinor": 16758000000,
+   "totalMinor": 119168000000,
+   "avgPerNightMinor": 1028888889,
+   "lineCodes": [
+    "nights",
+    "weekend_nights",
+    "cleaning",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "service fee 0",
+  "input": {
+   "nightly": 250000,
+   "serviceFeeBps": 0,
+   "checkIn": "2026-11-10",
+   "checkOut": "2026-11-12"
+  },
+  "expected": {
+   "nights": 2,
+   "subtotalMinor": 500000,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 0,
+   "taxMinor": 90000,
+   "totalMinor": 590000,
+   "avgPerNightMinor": 250000,
+   "lineCodes": [
+    "nights",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "service fee 2.5 percent",
+  "input": {
+   "nightly": 250000,
+   "cleaning": 10000,
+   "serviceFeeBps": 250,
+   "checkIn": "2026-11-10",
+   "checkOut": "2026-11-13"
+  },
+  "expected": {
+   "nights": 3,
+   "subtotalMinor": 750000,
+   "cleaningMinor": 10000,
+   "serviceFeeMinor": 19000,
+   "taxMinor": 136800,
+   "totalMinor": 915800,
+   "avgPerNightMinor": 250000,
+   "lineCodes": [
+    "nights",
+    "cleaning",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "tax slab 0 percent (no tax line)",
+  "input": {
+   "nightly": 80000,
+   "taxSlabs": [
+    {
+     "upToMinor": null,
+     "rateBps": 0
+    }
+   ],
+   "checkIn": "2026-11-10",
+   "checkOut": "2026-11-12"
+  },
+  "expected": {
+   "nights": 2,
+   "subtotalMinor": 160000,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 16000,
+   "taxMinor": 0,
+   "totalMinor": 176000,
+   "avgPerNightMinor": 80000,
+   "lineCodes": [
+    "nights",
+    "service_fee"
+   ]
+  }
+ },
+ {
+  "name": "two slabs: average below the limit",
+  "input": {
+   "nightly": 100000,
+   "taxSlabs": [
+    {
+     "upToMinor": 100000,
+     "rateBps": 1200
+    },
+    {
+     "upToMinor": null,
+     "rateBps": 1800
+    }
+   ],
+   "checkIn": "2026-11-10",
+   "checkOut": "2026-11-12"
+  },
+  "expected": {
+   "nights": 2,
+   "subtotalMinor": 200000,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 20000,
+   "taxMinor": 24000,
+   "totalMinor": 244000,
+   "avgPerNightMinor": 100000,
+   "lineCodes": [
+    "nights",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "two slabs: average just above the limit",
+  "input": {
+   "nightly": 100001,
+   "taxSlabs": [
+    {
+     "upToMinor": 100000,
+     "rateBps": 1200
+    },
+    {
+     "upToMinor": null,
+     "rateBps": 1800
+    }
+   ],
+   "checkIn": "2026-11-10",
+   "checkOut": "2026-11-12"
+  },
+  "expected": {
+   "nights": 2,
+   "subtotalMinor": 200002,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 20000,
+   "taxMinor": 36000,
+   "totalMinor": 256002,
+   "avgPerNightMinor": 100001,
+   "lineCodes": [
+    "nights",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "slab chosen by the average of weekday and weekend prices",
+  "input": {
+   "nightly": 90000,
+   "weekend": 130000,
+   "taxSlabs": [
+    {
+     "upToMinor": 100000,
+     "rateBps": 1200
+    },
+    {
+     "upToMinor": null,
+     "rateBps": 1800
+    }
+   ],
+   "checkIn": "2026-11-12",
+   "checkOut": "2026-11-16"
+  },
+  "expected": {
+   "nights": 4,
+   "subtotalMinor": 440000,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 44000,
+   "taxMinor": 79200,
+   "totalMinor": 563200,
+   "avgPerNightMinor": 110000,
+   "lineCodes": [
+    "nights",
+    "weekend_nights",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "inclusive prices: tax is inside",
+  "input": {
+   "nightly": 118000,
+   "cleaning": 11800,
+   "taxMode": "inclusive",
+   "checkIn": "2026-11-10",
+   "checkOut": "2026-11-12"
+  },
+  "expected": {
+   "nights": 2,
+   "subtotalMinor": 236000,
+   "cleaningMinor": 11800,
+   "serviceFeeMinor": 24780,
+   "taxMinor": 37800,
+   "totalMinor": 272580,
+   "avgPerNightMinor": 118000,
+   "lineCodes": [
+    "nights",
+    "cleaning",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "inclusive with an odd amount",
+  "input": {
+   "nightly": 99999,
+   "weekend": 123457,
+   "taxMode": "inclusive",
+   "serviceFeeBps": 750,
+   "checkIn": "2026-11-12",
+   "checkOut": "2026-11-15"
+  },
+  "expected": {
+   "nights": 3,
+   "subtotalMinor": 346913,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 26018,
+   "taxMinor": 52919,
+   "totalMinor": 372931,
+   "avgPerNightMinor": 115638,
+   "lineCodes": [
+    "nights",
+    "weekend_nights",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "different weekend days (Sat and Sun nights)",
+  "input": {
+   "nightly": 200000,
+   "weekend": 260000,
+   "weekendDays": [
+    6,
+    0
+   ],
+   "checkIn": "2026-11-12",
+   "checkOut": "2026-11-17"
+  },
+  "expected": {
+   "nights": 5,
+   "subtotalMinor": 1120000,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 112000,
+   "taxMinor": 201600,
+   "totalMinor": 1433600,
+   "avgPerNightMinor": 224000,
+   "lineCodes": [
+    "nights",
+    "weekend_nights",
+    "service_fee",
+    "tax"
+   ]
+  }
+ },
+ {
+  "name": "no weekend days at all",
+  "input": {
+   "nightly": 200000,
+   "weekend": 260000,
+   "weekendDays": [],
+   "checkIn": "2026-11-12",
+   "checkOut": "2026-11-17"
+  },
+  "expected": {
+   "nights": 5,
+   "subtotalMinor": 1000000,
+   "cleaningMinor": 0,
+   "serviceFeeMinor": 100000,
+   "taxMinor": 180000,
+   "totalMinor": 1280000,
+   "avgPerNightMinor": 200000,
+   "lineCodes": [
+    "nights",
+    "service_fee",
+    "tax"
+   ]
+  }
+ }
+]

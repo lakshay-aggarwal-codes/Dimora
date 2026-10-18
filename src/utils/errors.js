@@ -55,6 +55,17 @@ class InvalidTransitionError extends ConflictError {
   }
 }
 
+// The pricing service cannot give a price for this listing (no valid nightly
+// price, an unsupported currency...). 422: the request is fine, the listing is not.
+class QuoteRefusedError extends AppError {
+  constructor(
+    message = "This listing cannot be priced right now.",
+    options,
+  ) {
+    super(422, message, { code: "quote_refused", ...options });
+  }
+}
+
 module.exports = {
   AppError,
   ValidationError,
@@ -62,4 +73,5 @@ module.exports = {
   NotFoundError,
   ConflictError,
   InvalidTransitionError,
+  QuoteRefusedError,
 };

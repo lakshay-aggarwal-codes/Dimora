@@ -26,7 +26,7 @@ function normaliseToken(value) {
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/[^\p{L}\p{N}\p{M}\s]/gu, " ") // keep vowel signs of Indic scripts
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 100);

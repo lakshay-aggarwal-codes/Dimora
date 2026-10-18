@@ -1,6 +1,5 @@
-// Money for display (P03-T03). Amounts are integers in MINOR units (paise for
-// INR): never floats, never strings. Prices in the database move to paise in
-// P04-T01/P08-T01, which will add the arithmetic helpers to this module.
+// Money (P03-T03 display, P08-T01 arithmetic). Amounts are integers in MINOR
+// units (paise for INR): never floats, never strings (ADR-002).
 const formatters = new Map();
 
 function formatterFor(currency, fractionDigits) {
@@ -43,4 +42,88 @@ function formatMoney(minor, currency = "INR") {
   return formatterFor(currency, whole ? 0 : digits).format(minor / divisor);
 }
 
-module.exports = { formatMoney };
+// ---------------------------------------------------------------------------
+// Arithmetic (P08-T01). Everything here works on integers in minor units and
+// never touches a float. Intermediate products can exceed 2^53, so they are
+// computed with BigInt and converted back (with a check) only at the end.
+//
+// ROUNDING RULE (the only one in the app): a fraction of a paisa is rounded
+// half up, i.e. 0.5 paisa and above goes up, below goes down. Amounts are never
+// negative here, so "up" means away from zero too.
+//   percentOf(1, 5000)   (50% of 1 paisa)  -> 1
+//   percentOf(1, 4999)   (49.99%)          -> 0
+//   percentOf(999, 1800) (18% of 9.99)     -> 180   (179.82 rounds to 180)
+// ---------------------------------------------------------------------------
+
+const MAX_BPS = 10000; // 100 %
+
+/** Throws TypeError unless `value` is a non-negative safe integer. */
+function assertMinor(value, name = "amount") {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) {
+    throw new TypeError(`${name} must be a non-negative integer in minor units`);
+  }
+  return value;
+}
+
+function toSafe(big, name) {
+  const n = Number(big);
+  if (!Number.isSafeInteger(n)) {
+    throw new RangeError(`${name} is too large`);
+  }
+  return n;
+}
+
+/** round-half-up of amount * numerator / denominator, all integers, exactly. */
+function mulDivRound(amount, numerator, denominator) {
+  assertMinor(amount, "amount");
+  assertMinor(numerator, "numerator");
+  if (typeof denominator !== "number" || !Number.isSafeInteger(denominator) || denominator < 1) {
+    throw new TypeError("denominator must be a positive integer");
+  }
+  const d = BigInt(denominator);
+  const exact = BigInt(amount) * BigInt(numerator);
+  return toSafe((exact * 2n + d) / (2n * d), "result");
+}
+
+/**
+ * `basisPoints` hundredths of a percent of `amount`: 1800 = 18 %, 250 = 2.5 %.
+ * Basis points keep rates as integers too.
+ */
+function percentOf(amount, basisPoints) {
+  assertMinor(amount, "amount");
+  if (!Number.isInteger(basisPoints) || basisPoints < 0 || basisPoints > MAX_BPS) {
+    throw new TypeError(`basisPoints must be an integer from 0 to ${MAX_BPS}`);
+  }
+  return mulDivRound(amount, basisPoints, MAX_BPS);
+}
+
+/** amount / divisor, rounded half up (the average of an integer total). */
+function divideRound(amount, divisor) {
+  return mulDivRound(amount, 1, divisor);
+}
+
+/** amount x count (a whole number of nights, say), checked for overflow. */
+function multiplyMinor(amount, count) {
+  assertMinor(amount, "amount");
+  assertMinor(count, "count");
+  return toSafe(BigInt(amount) * BigInt(count), "result");
+}
+
+/** Sum of amounts, checked for overflow. An empty list is 0. */
+function sumMinor(amounts) {
+  if (!Array.isArray(amounts)) throw new TypeError("sumMinor expects an array");
+  let total = 0n;
+  for (const amount of amounts) total += BigInt(assertMinor(amount, "amount"));
+  return toSafe(total, "sum");
+}
+
+module.exports = {
+  formatMoney,
+  assertMinor,
+  percentOf,
+  divideRound,
+  mulDivRound,
+  multiplyMinor,
+  sumMinor,
+  MAX_BPS,
+};

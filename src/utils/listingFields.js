@@ -4,6 +4,7 @@
 
 /** Whole or fractional rupees -> integer paise. Returns null if not a number. */
 function rupeesToMinor(rupees) {
+  // An empty or blank string is "nothing typed", not zero rupees.
   if (typeof rupees === "string" && rupees.trim() === "") return null;
   const n = typeof rupees === "string" ? Number(rupees.trim()) : rupees;
   if (typeof n !== "number" || !Number.isFinite(n) || n < 0) return null;

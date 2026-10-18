@@ -18,6 +18,8 @@ async function deleteStaleDrafts(
   Listing,
   { now = new Date(), days = DEFAULT_DAYS, destroy } = {},
 ) {
+  // Built with no argument and then set: application code makes dates from
+  // values only in src/utils/dates.js (see tests/unit/noUserDate.test.js).
   const cutoff = new Date();
   cutoff.setTime(now.getTime() - days * DAY_MS);
   const stale = await Listing.find({

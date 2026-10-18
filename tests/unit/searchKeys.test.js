@@ -14,7 +14,13 @@ describe("normaliseToken", () => {
     expect(normaliseToken("ZÜRICH")).toBe("zurich");
     expect(normaliseToken("St. John's")).toBe("st john s");
     expect(normaliseToken("Jaipur-Rural")).toBe("jaipur rural");
-    expect(normaliseToken("पुणे")).toBe("पुणे".normalize("NFKD").toLowerCase().replace(/[\u0300-\u036f]/g, ""));
+    // Other scripts keep their vowel signs (they are combining marks, not letters).
+    for (const word of ["पुणे", "मुंबई", "கோவை"]) {
+      const key = normaliseToken(word);
+      expect(key).toBe(word.normalize("NFKD"));
+      expect(key.includes(" ")).toBe(false);
+    }
+    expect(normaliseToken("नई  दिल्ली")).toBe("नई दिल्ली".normalize("NFKD"));
   });
 
   test("anything that is not a string, and blanks, give an empty string", () => {
