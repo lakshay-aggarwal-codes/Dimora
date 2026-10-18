@@ -20,6 +20,7 @@ const { can } = require("./policies");
 const { fullTitle, metaDescription } = require("./utils/pageMeta");
 const { formatMoney } = require("./utils/money");
 const pagination = require("./utils/pagination");
+const { hiddenFields, listingsUrl } = require("./utils/searchUrl");
 const { imageUrl } = require("./utils/imageUrl");
 
 const listingRouter = require("./routes/listing");
@@ -27,7 +28,6 @@ const imagesRouter = require("./routes/images");
 const hostRouter = require("./routes/host");
 const reviewRouter = require("./routes/review");
 const useRouter = require("./routes/user");
-const profileRouter = require("./routes/profile");
 const pagesRouter = require("./routes/pages");
 const {
   assignCspNonce,
@@ -67,7 +67,9 @@ function createApp({
   app.locals.fullTitle = fullTitle;
   app.locals.metaDescription = metaDescription;
   app.locals.imageUrl = imageUrl; // Cloudinary size/format presets for <img>
-  app.locals.pagination = pagination; // used by views/partials/pagination.ejs
+  app.locals.pagination = pagination;
+  app.locals.hiddenFields = hiddenFields; // carries the search state through a form
+  app.locals.listingsUrl = listingsUrl; // /listings?... links that keep the query // used by views/partials/pagination.ejs
 
   app.disable("x-powered-by");
   // Behind one reverse proxy (Render, Railway, nginx...): needed for secure
@@ -168,7 +170,6 @@ function createApp({
   app.use("/listings/:id/reviews", reviewRouter);
   app.use("/", pagesRouter);
   app.use("/", useRouter);
-  app.use("/", profileRouter);
 
   app.all("/{*splat}", (req, res, next) => {
     next(new NotFoundError());

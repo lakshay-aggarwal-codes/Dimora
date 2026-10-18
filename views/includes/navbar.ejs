@@ -25,7 +25,7 @@
                 <div class="navbar-nav search">
                     <form action="/listings" method="GET" role="search">
                         <label class="visually-hidden" for="nav-search">Search destinations</label>
-                        <input class="form-control search-input" id="nav-search" type="search" name="search"
+                        <input class="form-control search-input" id="nav-search" type="search" name="dest"
                             placeholder="Search destinations" autocomplete="off">
                         <button class="btn btn-search" type="submit">
                             <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
@@ -66,8 +66,6 @@
                                         <strong><%= currUser.username %></strong></span>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="/account/profile">My profile</a></li>
-                                <li><a class="dropdown-item" href="/host/listings">My listings</a></li>
                                 <li>
                                     <form action="/logout" method="POST">
                                         <%- include("./csrf.ejs") %>

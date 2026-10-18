@@ -255,11 +255,38 @@ function createLedgerService({
     return Boolean(row);
   }
 
+  /**
+   * Ids of the listings that have at least one night in [from, to) taken: a
+   * reservation, a live hold or a host block. Used by search to leave out
+   * listings that cannot host a stay. An expired hold counts as free.
+   */
+  async function unavailableListingIds(from, to, { now = new Date() } = {}) {
+    if (!isDateOnly(from) || !isDateOnly(to)) {
+      throw new TypeError("from and to must be date-only Dates (00:00:00Z)");
+    }
+    const span = (to.getTime() - from.getTime()) / 86400000;
+    if (span <= 0) throw new TypeError("to must be after from");
+    if (span > MAX_AVAILABILITY_SPAN_DAYS) {
+      throw new TypeError(
+        `the range can cover at most ${MAX_AVAILABILITY_SPAN_DAYS} nights`,
+      );
+    }
+    const rows = await model
+      .find({ date: { $gte: from, $lt: to } }, { listing: 1, holdExpiresAt: 1 })
+      .lean();
+    const ids = new Map();
+    for (const row of rows) {
+      if (!isStale(row, now)) ids.set(String(row.listing), row.listing);
+    }
+    return [...ids.values()];
+  }
+
   return {
     reserveNights,
     releaseNights,
     availableRanges,
     hasUpcomingReservation,
+    unavailableListingIds,
   };
 }
 

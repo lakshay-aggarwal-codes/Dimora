@@ -1,18 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync");
-const {
-  isLoggedIn,
-  authorize,
-  validateListing,
-} = require("../middleware");
+const { isLoggedIn, authorize, validateListing } = require("../middleware");
 const {
   requireImage,
   verifyUploadedImage,
   geocodeListing,
 } = require("../middleware/listing");
+const searchController = require("../controllers/search");
 const listingController = require("../controllers/listing.js");
-const sectionsController = require("../controllers/sections");
 const { upload, uploadToCloudinary } = require("../config/cloudinary");
 
 // The file input in the new/edit forms is named like a nested field.
@@ -23,7 +19,7 @@ const IMAGE_FIELD = "listing[image][url]";
 // never leaves an orphaned image behind.
 router
   .route("/")
-  .get(wrapAsync(listingController.index))
+  .get(wrapAsync(searchController.index))
   .post(
     isLoggedIn,
     authorize("listing:create"),
@@ -36,19 +32,12 @@ router
     wrapAsync(listingController.createListing),
   );
 
-// EDIT - the edit page (a form per section) and one route to save a section.
-// A changed address is looked up and confirmed first (controllers/sections.js).
+// EDIT - Show edit form
 router.get(
   "/:id/edit",
   isLoggedIn,
   authorize("listing:edit"),
-  sectionsController.renderEditForm,
-);
-router.put(
-  "/:id/sections/:key",
-  isLoggedIn,
-  authorize("listing:edit"),
-  wrapAsync(sectionsController.save),
+  wrapAsync(listingController.renderEditForm),
 );
 
 router.get(

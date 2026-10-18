@@ -6,7 +6,7 @@ const ejs = require("ejs");
 const { createAgent } = require("../helpers/agent");
 const { buildListingData } = require("../helpers/factories");
 const Listing = require("../../src/models/listing");
-const { stubListings } = require("../helpers/listingsStub");
+const { stubListingSearch } = require("../helpers/listingSearch");
 
 const INCLUDES = path.join(__dirname, "..", "..", "views", "includes");
 const render = (name, locals) =>
@@ -26,7 +26,7 @@ function stubFindById(doc) {
 afterEach(() => jest.restoreAllMocks());
 
 async function pages() {
-  stubListings([]);
+  stubListingSearch([]);
   const doc = new Listing(
     buildListingData({
       title: "Seaside Cottage",
@@ -201,7 +201,7 @@ describe("page titles and descriptions", () => {
 
 describe("flash messages", () => {
   test("a success message is a polite status with a labelled close button", async () => {
-    stubListings([]);
+    stubListingSearch([]);
     const agent = createAgent();
     const out = await agent.post("/logout");
     expect(out.status).toBe(302);

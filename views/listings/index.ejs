@@ -1,5 +1,17 @@
 <% layout("layouts/boilerPlate") %>
     <%
+        // Defaults let this view be rendered with only `allListings` (older tests).
+        const f = typeof form !== "undefined" ? form : {};
+        const errs = typeof errors !== "undefined" ? errors : {};
+        const filterState = typeof pageState !== "undefined" ? pageState : {};
+        const resultCount = typeof total === "number" ? total : allListings.length;
+        const currentPage = typeof page === "number" ? page : 1;
+        const pageCount = typeof totalPages === "number" ? totalPages : 1;
+        const isFiltered = typeof filtered !== "undefined" ? filtered : false;
+        const todayText = typeof today === "string" && today ? today : undefined;
+        const hidden = typeof hiddenFields === "function" ? hiddenFields : () => [];
+    %>
+    <%
         // One list drives the whole strip. The links go to /listings?category=...;
         // the page does not filter by category until P05-T04.
         const categories = [
@@ -23,7 +35,41 @@
         ];
     %>
 
-    <h1 class="visually-hidden">Explore places to stay</h1>
+    <h1 class="visually-hidden"><%= isFiltered ? "Search results" : "Explore places to stay" %></h1>
+
+    <%# The search form: what the visitor typed comes back even when it was wrong. %>
+    <% const errorList = Object.entries(errs); %>
+    <form method="GET" action="/listings" class="search-panel" role="search" aria-label="Search stays" novalidate>
+        <div class="row g-3">
+            <div class="col-12 col-md-4">
+                <%- include("../partials/form-field.ejs", { id: "dest", name: "dest", label: "Where to?", type: "search", value: f.dest, error: errs.dest, placeholder: "City, state or country", attrs: { maxlength: 100 } }) %>
+            </div>
+            <div class="col-12 col-sm-6 col-md-2">
+                <%- include("../partials/form-field.ejs", { id: "in", name: "in", label: "Check-in", type: "date", value: f.in, error: errs.in, attrs: { min: todayText } }) %>
+            </div>
+            <div class="col-12 col-sm-6 col-md-2">
+                <%- include("../partials/form-field.ejs", { id: "out", name: "out", label: "Check-out", type: "date", value: f.out, error: errs.out, attrs: { min: todayText } }) %>
+            </div>
+            <div class="col-12 col-sm-6 col-md-2">
+                <%- include("../partials/form-field.ejs", { id: "guests", name: "guests", label: "Guests", type: "number", value: f.guests, error: errs.guests, attrs: { min: 1, max: 16, step: 1, inputmode: "numeric" } }) %>
+            </div>
+            <div class="col-12 col-sm-6 col-md-2 search-panel-submit">
+                <button type="submit" class="btn btn-dark w-100">Search</button>
+            </div>
+        </div>
+        <% hidden(filterState, ["dest", "in", "out", "guests"]).forEach(([name, value]) => { %>
+        <input type="hidden" name="<%= name %>" value="<%= value %>">
+        <% }) %>
+    </form>
+
+    <% if (errorList.length > 0) { %>
+    <div class="alert alert-warning" role="alert">
+        <p class="mb-1">Some of your search was not used:</p>
+        <ul class="mb-0">
+            <% errorList.forEach(([name, message]) => { %><li><%= message %></li><% }) %>
+        </ul>
+    </div>
+    <% } %>
 
     <!-- Category links and tax toggle -->
     <div id="filters">
@@ -61,53 +107,23 @@
 
     </div>
 
-    <%
-        // Results bar: how many stays, and the sort choices. Every link keeps the
-        // search and starts again at page 1.
-        const sortHref = (value) =>
-            pagination.pageHref("/listings", Object.assign({}, results.params, { sort: value === "relevance" ? undefined : value }), 1);
-        const firstShown = (results.page - 1) * results.pageSize + 1;
-        const lastShown = Math.min(results.page * results.pageSize, results.total);
-        const filtered = Object.keys(results.params).length > 0;
-    %>
-    <div class="results-bar">
-        <p class="results-count" role="status">
-            <% if (results.total === 0) { %>No stays found
-            <% } else if (results.outOfRange) { %><%= results.total %> <%= results.total === 1 ? "stay" : "stays" %>
-            <% } else if (results.totalPages === 1) { %><%= results.total %> <%= results.total === 1 ? "stay" : "stays" %>
-            <% } else { %>Showing <%= firstShown %>&ndash;<%= lastShown %> of <%= results.total %> stays<% } %>
-        </p>
-        <nav aria-label="Sort results" class="sort-nav">
-            <span id="sort-label" class="sort-label">Sort by</span>
-            <ul class="sort-list" aria-labelledby="sort-label">
-                <% sortOptions.forEach((option) => { %>
-                <li><a class="sort-link<%= results.sort === option.value ? ' is-current' : '' %>" href="<%= sortHref(option.value) %>"<% if (results.sort === option.value) { %> aria-current="true"<% } %>><%= option.label %></a></li>
-                <% }) %>
-            </ul>
-        </nav>
-    </div>
+    <p class="results-count" role="status" aria-live="polite">
+        <% if (resultCount === 0) { %>No stays found<% } else { %><%= resultCount %> <%= resultCount === 1 ? "stay" : "stays" %><% if (filterState.dest) { %> for &ldquo;<%= filterState.dest %>&rdquo;<% } %><% } %>
+        <% if (isFiltered) { %><a class="results-clear" href="/listings">Clear search</a><% } %>
+    </p>
 
-    <% if (results.outOfRange) { %>
+    <% if (resultCount === 0) { %>
     <%- include("../partials/empty-state.ejs", {
-        title: "That page does not exist",
-        message: "There " + (results.totalPages === 1 ? "is only 1 page" : "are only " + results.totalPages + " pages") + " of results.",
-        icon: "fa-book-open",
-        actionHref: pagination.pageHref("/listings", results.params, results.totalPages),
-        actionLabel: "Go to the last page",
-        headingLevel: 2
-    }) %>
-    <% } else if (allListings.length === 0) { %>
-    <%- include("../partials/empty-state.ejs", {
-        title: filtered ? "No stays match your search" : "No stays yet",
-        message: filtered ? "Try fewer filters, or see every stay." : "Be the first to list a place on Dimora.",
+        title: isFiltered ? "No stays match your search" : "No stays yet",
+        message: isFiltered ? "Try other dates, a different place or fewer filters." : "Check back soon, new places are added all the time.",
         icon: "fa-house",
-        actionHref: filtered ? "/listings" : "/host/listings/new",
-        actionLabel: filtered ? "See all stays" : "List your place",
-        headingLevel: 2
+        actionHref: isFiltered ? "/listings" : "/host/listings/new",
+        actionLabel: isFiltered ? "Clear search" : "List your place"
     }) %>
     <% } %>
 
     <!-- All listing cards: one column on phones, two from md, three from lg -->
+    <% if (resultCount > 0) { %>
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-3">
         <% for (const list of allListings) { %>
         <div class="col">
@@ -124,8 +140,9 @@
         </div>
         <% } %>
     </div>
+    <% } %>
 
-    <%- include("../partials/pagination.ejs", { page: results.page, totalPages: results.totalPages, baseUrl: "/listings", query: results.params }) %>
+    <%- include("../partials/pagination.ejs", { page: currentPage, totalPages: pageCount, baseUrl: "/listings", query: filterState }) %>
 
     <script nonce="<%= typeof cspNonce !== 'undefined' ? cspNonce : '' %>">
         // Previous and next category navigation

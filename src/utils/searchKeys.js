@@ -8,19 +8,14 @@ const MAX_KEY = 100;
 const MAX_PARTS = 3;
 const MAX_PART = 60;
 
-/**
- * "  São  Paulo! " -> "sao paulo". Letters, digits and single spaces survive;
- * punctuation and hyphens become spaces ("Île-de-France" -> "ile de france").
- * Latin accents are removed; the combining vowel signs of other scripts are
- * kept ("पुणे" stays "पुणे"), or a Hindi city name would fall apart.
- */
+/** "  São  Paulo! " -> "sao paulo". Only letters, digits and single spaces survive ("Île-de-France" -> "ile de france"). */
 function normaliseToken(value) {
   if (typeof value !== "string") return "";
   return value
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
-    .replace(/[^\p{L}\p{N}\p{M}\s]/gu, " ") // keep vowel signs of Indic scripts
+    .replace(/[^\p{L}\p{M}\p{N}\s]/gu, " ")
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, MAX_KEY);

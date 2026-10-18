@@ -2,14 +2,14 @@
 const { createAgent } = require("../helpers/agent");
 const { testConfig } = require("../helpers/config");
 const Listing = require("../../src/models/listing");
+const { stubListingSearch } = require("../helpers/listingSearch");
 const { buildListingData } = require("../helpers/factories");
-const { stubListings } = require("../helpers/listingsStub");
 
 test("GET /listings renders the index with the listings returned by the model", async () => {
   const doc = new Listing(
     buildListingData({ title: "Seaside Cottage", price: 12500 }),
   );
-  stubListings([doc]);
+  stubListingSearch([doc]);
   const res = await createAgent().get("/listings");
   expect(res.status).toBe(200);
   expect(res.text).toContain("Seaside Cottage");

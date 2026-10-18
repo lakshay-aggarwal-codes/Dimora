@@ -3,8 +3,8 @@
 // request would reach it).
 const { createAgent } = require("../helpers/agent");
 const { testConfig } = require("../helpers/config");
+const { stubListingSearch } = require("../helpers/listingSearch");
 const User = require("../../src/models/user");
-const { stubListings } = require("../helpers/listingsStub");
 
 afterEach(() => {
   jest.restoreAllMocks();
@@ -26,7 +26,9 @@ describe("response headers", () => {
     expect(csp).toContain("https://fonts.gstatic.com");
     expect(csp).toContain("script-src-attr 'none'");
     expect(res.headers["x-content-type-options"]).toBe("nosniff");
-    expect(res.headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+    expect(res.headers["referrer-policy"]).toBe(
+      "strict-origin-when-cross-origin",
+    );
     expect(res.headers["x-powered-by"]).toBeUndefined();
   });
 
@@ -58,7 +60,7 @@ describe("response headers", () => {
 
 describe("CSP nonce", () => {
   test("every inline script and style carries this request's nonce", async () => {
-    stubListings([]);
+    stubListingSearch([]);
     const res = await createAgent().get("/listings");
     expect(res.status).toBe(200);
     const nonce = nonceOf(res);
