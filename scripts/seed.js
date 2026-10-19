@@ -15,7 +15,6 @@ const Review = require("../src/models/review.js");
 const User = require("../src/models/user.js");
 const { data: sampleListings } = require("./seed-data.js");
 const { keysForListing } = require("../src/utils/searchKeys");
-const { classificationFor } = require("./seed-classification.js");
 const {
   rupeesToMinor,
   addressFromLegacy,
@@ -73,8 +72,6 @@ function buildSeedListings(ownerId) {
     return {
       ...item,
       status: "published",
-      // Property type, setting and pool, so the category strip has results.
-      ...classificationFor(item.title),
       pricing: { nightlyMinor: rupeesToMinor(price), currency: "INR" },
       address,
       images: imagesFromCover(item.image),
@@ -131,6 +128,11 @@ async function runSeed({ reset = false } = {}) {
       },
     })),
   );
+
+  // bulkWrite skips the model's validate hook, so the public (approximate)
+  // points are computed by saving each seeded listing once (P06-T02).
+  const needPoint = await Listing.find({ owner: owner._id, publicGeometry: { $exists: false } });
+  for (const doc of needPoint) await doc.save();
 
   return {
     owner,

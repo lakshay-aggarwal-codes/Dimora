@@ -215,3 +215,72 @@ describe("drafts and the wizard fields (P04-T02)", () => {
     expect(found[1].partialFilterExpression).toEqual({ draftToken: { $type: "string" } });
   });
 });
+
+describe("the public (approximate) point (P06-T02)", () => {
+  const { distanceMeters, MIN_OFFSET_M, MAX_OFFSET_M } = require("../../src/utils/geo");
+  const PRECISE = [77.20931, 28.61391];
+
+  test("validating a listing with a precise point sets a public point 300 to 800 m away", async () => {
+    const doc = new Listing(buildListingData({ geometry: { type: "Point", coordinates: PRECISE } }));
+    expect(doc.publicGeometry.coordinates).toBeUndefined();
+    await doc.validate();
+    expect(doc.publicGeometry.type).toBe("Point");
+    const [lng, lat] = Array.from(doc.publicGeometry.coordinates);
+    const d = distanceMeters({ lng: PRECISE[0], lat: PRECISE[1] }, { lng, lat });
+    expect(d).toBeGreaterThanOrEqual(MIN_OFFSET_M);
+    expect(d).toBeLessThanOrEqual(MAX_OFFSET_M);
+    expect([lng, lat]).not.toEqual(PRECISE);
+  });
+
+  test("it is the same on every validation, and does not change when something else does", async () => {
+    const doc = new Listing(buildListingData());
+    await doc.validate();
+    const first = Array.from(doc.publicGeometry.coordinates);
+    doc.title = "A different title";
+    await doc.validate();
+    expect(Array.from(doc.publicGeometry.coordinates)).toEqual(first);
+    expect(doc.isModified("publicGeometry")).toBe(true); // it was set once; unchanged afterwards
+  });
+
+  test("it is recomputed when the precise point moves, with the same offset direction and distance", async () => {
+    const doc = new Listing(buildListingData({ geometry: { type: "Point", coordinates: PRECISE } }));
+    await doc.validate();
+    const before = Array.from(doc.publicGeometry.coordinates);
+    doc.set("geometry.coordinates", [PRECISE[0] + 0.1, PRECISE[1]]);
+    await doc.validate();
+    const after = Array.from(doc.publicGeometry.coordinates);
+    expect(after).not.toEqual(before);
+    const d = distanceMeters({ lng: PRECISE[0] + 0.1, lat: PRECISE[1] }, { lng: after[0], lat: after[1] });
+    expect(d).toBeGreaterThanOrEqual(MIN_OFFSET_M);
+    expect(d).toBeLessThanOrEqual(MAX_OFFSET_M);
+  });
+
+  test("two listings at the same spot get different public points", async () => {
+    const a = new Listing(buildListingData());
+    const b = new Listing(buildListingData());
+    await a.validate();
+    await b.validate();
+    expect(Array.from(a.publicGeometry.coordinates)).not.toEqual(Array.from(b.publicGeometry.coordinates));
+  });
+
+  test("a draft without a point has no public point, and losing the point removes it", async () => {
+    const draft = new Listing({ title: "Draft", status: "draft" });
+    await draft.validate();
+    expect(draft.publicGeometry.type).toBeUndefined();
+
+    const doc = new Listing(buildListingData());
+    await doc.validate();
+    expect(doc.publicGeometry.type).toBe("Point");
+    doc.set("status", "draft");
+    doc.set("geometry.coordinates", []);
+    await doc.validate();
+    expect(doc.publicGeometry.type).toBeUndefined();
+  });
+
+  test("declares the 2dsphere index on the public point only", () => {
+    const geo = Listing.schema.indexes().filter(([spec]) => Object.values(spec).includes("2dsphere"));
+    expect(geo).toHaveLength(1);
+    expect(geo[0][0]).toEqual({ publicGeometry: "2dsphere" });
+    expect(geo[0][1].name).toBe("publicGeometry_2dsphere");
+  });
+});

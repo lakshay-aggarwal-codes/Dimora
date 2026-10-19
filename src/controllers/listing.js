@@ -5,7 +5,7 @@ const { isAdmin } = require("../policies/shared");
 const { getGeocodingClient } = require("../services/geocoding");
 const { deleteImage } = require("../config/cloudinary");
 const { galleryOf, replaceCover } = require("../services/images");
-const { toMapPoint } = require("../utils/geo");
+const { publicPointOf } = require("../utils/geo");
 const { isPublic } = require("../utils/visibility");
 const { softDeleteListing } = require("../services/lifecycle");
 const { evaluateReadiness } = require("../services/readiness");
@@ -92,7 +92,8 @@ module.exports.showListings = async (req, res) => {
   res.render("listings/show.ejs", {
     listing,
     gallery: galleryOf(listing),
-    mapPoint: toMapPoint(listing.geometry),
+    // The public (approximate) point only: the precise one never reaches a page.
+    mapPoint: publicPointOf(listing),
     guestView: preview,
     readiness:
       !isPublic(listing) && can("listing:edit", req.user, listing)

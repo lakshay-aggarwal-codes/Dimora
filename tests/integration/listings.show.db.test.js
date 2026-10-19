@@ -23,7 +23,8 @@ describeDb("listing detail page (database)", () => {
     expect(res.status).toBe(200);
     expect(res.text).toContain("Hill Cabin");
     expect(res.text).toContain(owner.username);
-    expect(res.text).toContain('data-lng="77.209"');
+    expect(res.text).toMatch(/data-lng="-?\d+\.\d+"/);
+    expect(res.text).not.toContain('data-lng="77.209"'); // the approximate point (P06-T02)
   });
 
   test("regression D-05: an owner id that points at no user renders without a 500", async () => {

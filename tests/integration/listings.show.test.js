@@ -3,6 +3,7 @@
 const { createAgent } = require("../helpers/agent");
 const { buildListingData } = require("../helpers/factories");
 const Listing = require("../../src/models/listing");
+const { publicPointOf } = require("../../src/utils/geo");
 
 function stubFindById(doc) {
   const query = {
@@ -27,14 +28,18 @@ afterEach(() => {
 
 describe("detail page", () => {
   test("renders title, price and the map data attributes", async () => {
-    const { res } = await showPage({ title: "Seaside Cottage", price: 12500 });
+    const { res, doc } = await showPage({ title: "Seaside Cottage", price: 12500 });
     expect(res.status).toBe(200);
     expect(res.text).toContain("Seaside Cottage");
     expect(res.text).toContain("12,500");
 
+    // The map is centred on the PUBLIC (approximate) point, never the precise one (P06-T02).
     const tag = mapTag(res.text);
-    expect(tag).toContain('data-lng="77.209"');
-    expect(tag).toContain('data-lat="28.6139"');
+    const point = publicPointOf(doc);
+    expect(tag).toContain(`data-lng="${point.lng}"`);
+    expect(tag).toContain(`data-lat="${point.lat}"`);
+    expect(tag).not.toContain('data-lng="77.209"');
+    expect(tag).not.toContain('data-lat="28.6139"');
     expect(tag).toContain('data-title="Seaside Cottage"');
     expect(tag).toContain('data-token="pk.test-public"');
     expect(res.text).toContain('<script src="/js/map.js"></script>');

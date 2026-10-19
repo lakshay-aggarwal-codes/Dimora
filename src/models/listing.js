@@ -10,12 +10,12 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const Review = require("./review");
 const { keysForListing } = require("../utils/searchKeys");
+const { approximatePoint } = require("../utils/geo");
 
 const STATUSES = ["draft", "published", "unpublished", "suspended"];
 const {
   PROPERTY_TYPE_VALUES: PROPERTY_TYPES,
   ROOM_TYPE_VALUES: ROOM_TYPES,
-  VIBE_VALUES: VIBES,
   CANCELLATION_POLICY_VALUES: CANCELLATION_POLICIES,
 } = require("../config/constants");
 
@@ -105,11 +105,6 @@ const listingSchema = new Schema(
 
     propertyType: { type: String, enum: PROPERTY_TYPES },
     roomType: { type: String, enum: ROOM_TYPES },
-
-    // The setting around the place (beach, mountain, ...). Optional: the host
-    // chooses it in the basics step; the category strip on /listings reads it
-    // (P05-T04). Listings that never set it simply match no vibe category.
-    vibe: { type: String, enum: VIBES },
 
     // Mirror of the cover photo (images[0]), kept in step by the media service
     // (src/services/images.js) because older pages and the cards still read it.
@@ -286,6 +281,29 @@ listingSchema.pre("validate", function () {
   }
 });
 
+// The public point always follows the precise one (P06-T02): same listing, same
+// offset, so it moves only when the address does. Updates that skip save() must
+// set it themselves; migration 007 repairs the rest.
+listingSchema.pre("validate", function () {
+  const coordinates = this.get("geometry.coordinates");
+  const precise = {
+    type: this.get("geometry.type"),
+    coordinates: coordinates ? Array.from(coordinates) : undefined,
+  };
+  const wanted = approximatePoint(precise, this._id);
+  if (!wanted) {
+    if (this.get("publicGeometry.type") !== undefined) this.set("publicGeometry", undefined);
+    return;
+  }
+  const now = this.get("publicGeometry.coordinates");
+  const same =
+    now &&
+    this.get("publicGeometry.type") === "Point" &&
+    now[0] === wanted.coordinates[0] &&
+    now[1] === wanted.coordinates[1];
+  if (!same) this.set("publicGeometry", wanted);
+});
+
 // A stay whose minimum is longer than its maximum can never be booked.
 listingSchema.pre("validate", function () {
   if (
@@ -326,7 +344,8 @@ listingSchema.index(
   { status: 1, countryKey: 1, "pricing.nightlyMinor": 1 },
   { name: "status_1_countryKey_1_pricing.nightlyMinor_1" },
 );
-// 2dsphere(publicGeometry) comes with P06-T02.
+// Map queries (P06-T04) use the PUBLIC point only. Built by migration 007.
+listingSchema.index({ publicGeometry: "2dsphere" }, { name: "publicGeometry_2dsphere" });
 
 // One draft per (host, form): see draftToken. Built by migration 005.
 listingSchema.index(

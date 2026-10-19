@@ -19,6 +19,7 @@ const User = require("./models/user.js");
 const { can } = require("./policies");
 const { fullTitle, metaDescription } = require("./utils/pageMeta");
 const { formatMoney } = require("./utils/money");
+const { configureLocationSecret } = require("./utils/geo");
 const pagination = require("./utils/pagination");
 const { hiddenFields, listingsUrl } = require("./utils/searchUrl");
 const { imageUrl } = require("./utils/imageUrl");
@@ -58,6 +59,7 @@ function createApp({
   logger = createLogger({ level: config.isTest ? "silent" : "info" }),
 } = {}) {
   configureCloudinary(config.cloudinary);
+  configureLocationSecret(config.sessionSecret); // keys the public-location offset (P06-T02)
 
   const app = express();
 
