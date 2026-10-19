@@ -1397,3 +1397,85 @@
   opacity: 0.5;
   transition: opacity var(--duration-base) var(--easing-standard);
 }
+
+/* Search map and list/map toggle (P06-T04) */
+.search-view-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin: var(--space-3) 0 0;
+}
+
+.search-split {
+  display: block;
+}
+
+.search-map-panel {
+  margin-top: var(--space-4);
+}
+
+.search-map-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.search-map-help,
+.search-map-status {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+#search-map {
+  width: 100%;
+  height: 70vh;
+  min-height: var(--size-map-height);
+  border-radius: var(--radius-md);
+}
+
+#search-map.map-unavailable {
+  display: none;
+}
+
+.search-map-popup-title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--font-size-md);
+}
+
+/* A card lit up because the pointer is on its price on the map. */
+.results-region .is-highlighted {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
+}
+
+/* Phones and tablets: either the list or the map, never both. */
+.search-split[data-view="map"] .results-region {
+  display: none;
+}
+
+/* Large screens: the list on the left, the map staying in view on the right. */
+@media (min-width: 992px) {
+  .search-split[data-view="map"] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-4);
+    align-items: start;
+  }
+
+  .search-split[data-view="map"] .results-region {
+    display: block;
+  }
+
+  .search-split[data-view="map"] .results-region .row > .col {
+    width: 50%;
+  }
+
+  .search-split[data-view="map"] .search-map-panel {
+    position: sticky;
+    top: var(--space-4);
+    margin-top: 0;
+  }
+}

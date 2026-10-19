@@ -116,6 +116,12 @@
 
     <p class="search-status" id="search-status" role="status" hidden></p>
 
+    <%# List / map toggle (P06-T04): hidden until searchMap.js confirms Mapbox GL is available. %>
+    <div class="search-view-bar">
+        <button type="button" class="btn btn-outline-dark" id="map-toggle" aria-controls="search-map-panel" aria-pressed="false" hidden>Show map</button>
+    </div>
+
+    <div class="search-split" id="search-split" data-view="list">
     <div id="results" class="results-region">
     <p class="results-count" role="status" aria-live="polite">
         <% if (resultCount === 0) { %>No stays found<% } else { %><%= resultCount %> <%= resultCount === 1 ? "stay" : "stays" %><% if (filterState.dest) { %> for &ldquo;<%= filterState.dest %>&rdquo;<% } %><% } %>
@@ -139,7 +145,7 @@
     <% if (resultCount > 0) { %>
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-3">
         <% for (const list of allListings) { %>
-        <div class="col">
+        <div class="col" data-listing-id="<%= list._id %>">
             <%- include("../partials/listing-card.ejs", { item: {
                 id: list._id,
                 title: list.title,
@@ -158,7 +164,26 @@
     <%- include("../partials/pagination.ejs", { page: currentPage, totalPages: pageCount, baseUrl: "/listings", query: filterState }) %>
     </div>
 
+    <section class="search-map-panel" id="search-map-panel" aria-labelledby="search-map-heading" hidden>
+        <h2 id="search-map-heading" class="visually-hidden">Map of these stays</h2>
+        <p class="search-map-help text-body-secondary">Circles and prices show the approximate area of each stay, not its address. The list shows the same stays.</p>
+        <div class="search-map-tools">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="map-follow">
+                <label class="form-check-label" for="map-follow">Search as I move the map</label>
+            </div>
+            <button type="button" class="btn btn-sm btn-dark" id="map-search-area" hidden>Search this area</button>
+        </div>
+        <p class="search-map-status" id="map-status" role="status" aria-live="polite"></p>
+        <div id="search-map" role="region" aria-label="Map of the stays in these results"
+            data-token="<%= typeof mapPublicToken !== 'undefined' ? mapPublicToken : '' %>"
+            data-endpoint="/api/search/map"
+            data-query="<%= typeof mapQuery !== 'undefined' ? mapQuery : '' %>"></div>
+    </section>
+    </div>
+
     <script src="/js/filters.js"></script>
+    <script src="/js/searchMap.js"></script>
 
     <script nonce="<%= typeof cspNonce !== 'undefined' ? cspNonce : '' %>">
         // Previous and next category navigation
