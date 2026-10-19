@@ -36,6 +36,10 @@ const EARTH_RADIUS_M = 6371008.8;
 const MIN_OFFSET_M = 300;
 const MAX_OFFSET_M = 800;
 const COORDINATE_DECIMALS = 5; // about 1 m
+// Radius of the circle the detail page draws around the public point (P06-T03).
+// It must be larger than MAX_OFFSET_M, so the circle always contains the real
+// home without being centred on it.
+const PUBLIC_AREA_RADIUS_M = 1000;
 // Rounding to 5 decimals can move a point by up to about 1 m, so the step is
 // drawn from [300 + 1, 800 - 1]: the rounded point is still 300 to 800 m away.
 const ROUNDING_MARGIN_M = 1;
@@ -154,4 +158,5 @@ module.exports = {
   offsetFor,
   MIN_OFFSET_M,
   MAX_OFFSET_M,
+  PUBLIC_AREA_RADIUS_M,
 };

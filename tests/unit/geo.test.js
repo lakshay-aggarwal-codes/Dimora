@@ -47,6 +47,7 @@ const {
   offsetFor,
   MIN_OFFSET_M,
   MAX_OFFSET_M,
+  PUBLIC_AREA_RADIUS_M,
 } = require("../../src/utils/geo");
 
 const DELHI = { type: "Point", coordinates: [77.20931, 28.61391] };
@@ -192,5 +193,11 @@ describe("publicPointOf", () => {
     const point = publicPointOf({ get: (path) => values[path] });
     expect(point).not.toBeNull();
     expect(point).not.toEqual({ lng: 77.20931, lat: 28.61391 });
+  });
+});
+
+describe("PUBLIC_AREA_RADIUS_M (P06-T03)", () => {
+  test("is larger than the largest offset, so the drawn circle always contains the real point", () => {
+    expect(PUBLIC_AREA_RADIUS_M).toBeGreaterThan(MAX_OFFSET_M);
   });
 });

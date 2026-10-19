@@ -115,3 +115,16 @@ img {
   height: var(--size-map-height);
   border-radius: var(--radius-md);
 }
+
+/* Detail-page map (P06-T03): text shown when the map cannot be drawn. */
+#map .map-fallback,
+#map.map-unavailable {
+  padding: var(--space-4);
+  color: var(--color-text-muted);
+}
+
+#map.map-unavailable {
+  display: flex;
+  align-items: center;
+  border: 1px dashed currentColor;
+}

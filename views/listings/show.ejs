@@ -156,8 +156,18 @@
                     <h2 id="map-heading" class="h4">Where you'll be</h2>
                     <% if (place) { %><p><%= place %></p><% } %>
                     <% if (typeof mapPoint !== 'undefined' && mapPoint) { %>
-                        <div id="map" data-token="<%= mapPublicToken %>" data-lng="<%= mapPoint.lng %>"
-                            data-lat="<%= mapPoint.lat %>" data-title="<%= listing.title %>"></div>
+                        <p id="map-description" class="visually-hidden">
+                            Map of the approximate area<% if (place) { %> around <%= place %><% } %>.
+                            The shaded circle is about <%= Math.round(((typeof mapRadius !== 'undefined' && mapRadius) || 1000) * 2 / 100) / 10 %> km across and does not mark the exact address.
+                            The exact location is shared after booking.
+                        </p>
+                        <div id="map" role="region" aria-label="Approximate area map" aria-describedby="map-description"
+                            data-token="<%= mapPublicToken %>" data-lng="<%= mapPoint.lng %>"
+                            data-lat="<%= mapPoint.lat %>" data-radius="<%= (typeof mapRadius !== 'undefined' && mapRadius) || 1000 %>"
+                            data-title="<%= listing.title %>">
+                            <p class="map-fallback">Approximate area<% if (place) { %>: <%= place %><% } %>.</p>
+                        </div>
+                        <p class="map-note text-body-secondary mt-2">Exact location shared after booking.</p>
                     <% } else { %>
                         <p class="text-body-secondary">The map is not available for this listing yet.</p>
                     <% } %>

@@ -45,6 +45,21 @@ describe("detail page", () => {
     expect(res.text).toContain('<script src="/js/map.js"></script>');
   });
 
+  test("map is an approximate-area circle with a text fallback and an accessible description (P06-T03)", async () => {
+    const { res } = await showPage({ title: "Seaside Cottage" });
+    const tag = mapTag(res.text);
+    expect(tag).toContain('data-radius="1000"');
+    expect(tag).toContain('role="region"');
+    expect(tag).toContain('aria-describedby="map-description"');
+    // Description for screen readers and the visible note.
+    expect(res.text).toMatch(/id="map-description"[^>]*>[\s\S]*approximate area[\s\S]*does not mark the exact address/i);
+    expect(res.text).toContain("Exact location shared after booking.");
+    // Text shown when the map cannot be drawn (no JS, offline, no WebGL).
+    expect(res.text).toMatch(/<div id="map"[^>]*>\s*<p class="map-fallback">Approximate area/);
+    // No pin wording and no street address in the map markup.
+    expect(res.text).not.toMatch(/data-marker/);
+  });
+
   test("regression D-04: no inline script carries listing data", async () => {
     const { res, doc } = await showPage({ title: "Seaside Cottage" });
     expect(res.text).not.toMatch(/const listing\b/);
