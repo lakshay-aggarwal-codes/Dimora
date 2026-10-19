@@ -8,6 +8,7 @@ const {
   ROOM_TYPE_VALUES,
   AMENITY_VALUES,
 } = require("../config/constants");
+const { CATEGORY_SLUGS } = require("../config/categories");
 
 const MAX_RUPEES = 1000000;
 // Result order and page (P05-T03). The default order is "relevance".
@@ -46,6 +47,16 @@ const searchSchema = Joi.object({
   roomType: oneOrMany(ROOM_TYPE_VALUES, "Room type"),
   amenities: oneOrMany(AMENITY_VALUES, "Amenities"),
   instantBook: Joi.boolean().truthy("1", "true", "on").falsy("0", "false", "off", ""),
+  // One category from the strip (P05-T04); anything else, including a list or an
+  // object, is refused.
+  category: Joi.string()
+    .empty("")
+    .valid(...CATEGORY_SLUGS)
+    .label("Category")
+    .messages({
+      "any.only": "Category is not one of the choices.",
+      "string.base": "Category is not one of the choices.",
+    }),
   sort: Joi.string()
     .empty("")
     .valid(...SORTS)
@@ -87,6 +98,7 @@ const KNOWN = [
   "roomType",
   "amenities",
   "instantBook",
+  "category",
   "sort",
   "page",
 ];

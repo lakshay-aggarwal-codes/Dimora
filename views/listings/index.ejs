@@ -8,32 +8,18 @@
         const currentPage = typeof page === "number" ? page : 1;
         const pageCount = typeof totalPages === "number" ? totalPages : 1;
         const isFiltered = typeof filtered !== "undefined" ? filtered : false;
-        const hasSuggestions = typeof suggestions !== "undefined" && suggestions !== null;
         const todayText = typeof today === "string" && today ? today : undefined;
         const hidden = typeof hiddenFields === "function" ? hiddenFields : () => [];
     %>
     <%
-        // One list drives the whole strip. The links go to /listings?category=...;
-        // the page does not filter by category until P05-T04.
-        const categories = [
-            { slug: "trending", label: "Trending", icon: "fa-fire" },
-            { slug: "farms", label: "Farms", icon: "fa-tractor" },
-            { slug: "mountains", label: "Mountains", icon: "fa-mountain-sun" },
-            { slug: "beaches", label: "Beaches", icon: "fa-umbrella-beach" },
-            { slug: "amazing-pools", label: "Amazing Pools", icon: "fa-person-swimming" },
-            { slug: "desert", label: "Desert", icon: "fa-sun" },
-            { slug: "castles", label: "Castles", icon: "fa-chess-rook" },
-            { slug: "tiny-homes", label: "Tiny Homes", icon: "fa-house-chimney" },
-            { slug: "historical-homes", label: "Historical Homes", icon: "fa-landmark" },
-            { slug: "skiing", label: "Skiing", icon: "fa-person-skiing" },
-            { slug: "design", label: "Design", icon: "fa-palette" },
-            { slug: "lakefront", label: "Lakefront", icon: "fa-water" },
-            { slug: "rooms", label: "Rooms", icon: "fa-bed" },
-            { slug: "iconic-cities", label: "Iconic Cities", icon: "fa-city" },
-            { slug: "camping", label: "Camping", icon: "fa-campground" },
-            { slug: "arctic", label: "Arctic", icon: "fa-snowflake" },
-            { slug: "countryside", label: "Countryside", icon: "fa-tree" }
-        ];
+        // The strip, the chips and the filter panel come from the controller
+        // (P05-T04); categories are rules over real listing fields, see
+        // src/config/categories.js.
+        const categoryItems = typeof categories !== "undefined" ? categories : [];
+        const chipList = typeof chips !== "undefined" ? chips : [];
+        const activeFilterCount = typeof filterCount === "number" ? filterCount : 0;
+        const resetHref = typeof resetFiltersHref === "string" ? resetFiltersHref : "/listings";
+        const hasCategory = typeof activeCategory !== "undefined" && Boolean(activeCategory);
     %>
 
     <h1 class="visually-hidden"><%= isFiltered ? "Search results" : "Explore places to stay" %></h1>
@@ -82,9 +68,9 @@
             </button>
 
             <ul class="filter-container" id="filter-container" role="list">
-                <% for (const category of categories) { %>
+                <% for (const category of categoryItems) { %>
                 <li>
-                    <a class="filter" href="/listings?category=<%= category.slug %>">
+                    <a class="filter<%= category.active ? ' is-active' : '' %>" href="<%= category.href %>"<% if (category.active) { %> aria-current="true"<% } %>>
                         <i class="fa-solid <%= category.icon %>" aria-hidden="true"></i>
                         <span><%= category.label %></span>
                     </a>
@@ -108,6 +94,29 @@
 
     </div>
 
+    <% if (typeof panel !== "undefined") { %>
+    <%- include("../partials/filter-panel.ejs", { panel, errors: errs, filterState, filterCount: activeFilterCount, resetHref, hiddenFields: hidden }) %>
+    <% } %>
+
+    <% if (chipList.length > 0) { %>
+    <nav class="filter-chips" aria-label="Active filters">
+        <ul class="filter-chip-list" role="list">
+            <% chipList.forEach((chip) => { %>
+            <li>
+                <a class="filter-chip" href="<%= chip.href %>">
+                    <span class="visually-hidden">Remove filter: </span>
+                    <span><%= chip.label %></span>
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                </a>
+            </li>
+            <% }) %>
+        </ul>
+    </nav>
+    <% } %>
+
+    <p class="search-status" id="search-status" role="status" hidden></p>
+
+    <div id="results" class="results-region">
     <p class="results-count" role="status" aria-live="polite">
         <% if (resultCount === 0) { %>No stays found<% } else { %><%= resultCount %> <%= resultCount === 1 ? "stay" : "stays" %><% if (filterState.dest) { %> for &ldquo;<%= filterState.dest %>&rdquo;<% } %><% } %>
         <% if (isFiltered) { %><a class="results-clear" href="/listings">Clear search</a><% } %>
@@ -118,36 +127,11 @@
         title: isFiltered ? "No stays match your search" : "No stays yet",
         message: isFiltered ? "Try other dates, a different place or fewer filters." : "Check back soon, new places are added all the time.",
         icon: "fa-house",
-        actionHref: isFiltered ? (hasSuggestions && !suggestions.hasAnyStays ? "/host/listings/new" : "/listings") : "/host/listings/new",
-        actionLabel: isFiltered ? (hasSuggestions ? (suggestions.hasAnyStays ? "Clear all filters" : "List your place") : "Clear search") : "List your place"
+        actionHref: isFiltered ? "/listings" : "/host/listings/new",
+        actionLabel: isFiltered ? "Clear search" : "List your place"
     }) %>
-
-    <% if (hasSuggestions && suggestions.filterSuggestions.length) { %>
-    <section class="suggestions" aria-labelledby="suggest-filters-heading">
-        <h2 id="suggest-filters-heading" class="h5">Try this instead</h2>
-        <ul class="suggestion-list">
-            <% suggestions.filterSuggestions.forEach((item) => { %>
-            <li>
-                <a href="<%= item.url %>"><%= item.label %></a>
-                <span class="suggestion-count"><%= item.count %> <%= item.count === 1 ? "stay" : "stays" %></span>
-            </li>
-            <% }) %>
-        </ul>
-    </section>
-    <% } %>
-
-    <% if (hasSuggestions && suggestions.destinations.length) { %>
-    <section class="suggestions" aria-labelledby="suggest-places-heading">
-        <h2 id="suggest-places-heading" class="h5">Popular destinations</h2>
-        <ul class="suggestion-list">
-            <% suggestions.destinations.forEach((item) => { %>
-            <li>
-                <a href="<%= item.url %>"><%= item.label %></a>
-                <span class="suggestion-count"><%= item.count %> <%= item.count === 1 ? "stay" : "stays" %></span>
-            </li>
-            <% }) %>
-        </ul>
-    </section>
+    <% if (activeFilterCount > 0 || hasCategory) { %>
+    <p class="text-center"><a href="<%= resetHref %>">Remove the filters and category, keep my search</a></p>
     <% } %>
     <% } %>
 
@@ -172,6 +156,9 @@
     <% } %>
 
     <%- include("../partials/pagination.ejs", { page: currentPage, totalPages: pageCount, baseUrl: "/listings", query: filterState }) %>
+    </div>
+
+    <script src="/js/filters.js"></script>
 
     <script nonce="<%= typeof cspNonce !== 'undefined' ? cspNonce : '' %>">
         // Previous and next category navigation

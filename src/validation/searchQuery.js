@@ -7,7 +7,8 @@
 //
 // URL names: dest, in, out, guests, minPrice, maxPrice, type, amenities,
 // minRating, sort, page (and, from the search service, keywords, bedrooms,
-// roomType, instantBook). `destination` and the navbar's old `search` are
+// roomType, instantBook) and `category` (one slug from the category strip,
+// P05-T04). `destination` and the navbar's old `search` are
 // accepted as `dest`; `amenities[]` as `amenities`; `propertyType` as `type`.
 // Unknown names are ignored. A wrong value never stops the page: the valid
 // parameters still search, and the errors are shown next to the form.
@@ -148,6 +149,7 @@ function parseListingQuery(
     roomType: pick(raw, ["roomType"]),
     amenities: pick(raw, ["amenities", "amenities[]"]),
     instantBook: pick(raw, ["instantBook"]),
+    category: pick(raw, ["category"]),
   };
   for (const key of Object.keys(serviceInput)) {
     if (serviceInput[key] === undefined) delete serviceInput[key];
@@ -200,6 +202,13 @@ function parseListingQuery(
     guests: text(["guests"]),
   };
 
+  // What the filter panel's inputs show (strings only, even when invalid).
+  const drawer = {
+    minPrice: text(["minPrice"]),
+    maxPrice: text(["maxPrice"]),
+    bedrooms: text(["bedrooms"]),
+  };
+
   // The search service's names for the filters that were valid.
   const searchParams = {};
   for (const [name, value] of Object.entries(serviceValue))
@@ -208,6 +217,7 @@ function parseListingQuery(
   return {
     state,
     form,
+    drawer,
     errors,
     searchParams,
     stay: stay.checkIn

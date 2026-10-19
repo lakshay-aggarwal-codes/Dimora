@@ -6,6 +6,7 @@ const Joi = require("joi");
 const {
   PROPERTY_TYPE_VALUES,
   ROOM_TYPE_VALUES,
+  VIBE_VALUES,
   CANCELLATION_POLICY_VALUES,
   AMENITY_VALUES,
 } = require("../config/constants");
@@ -72,6 +73,12 @@ const basics = Joi.object({
   description: text("Description", { min: 20, max: 3000 }),
   propertyType: choice("Property type", PROPERTY_TYPE_VALUES),
   roomType: choice("What guests get", ROOM_TYPE_VALUES),
+  // Optional: "" means no setting chosen.
+  vibe: Joi.string()
+    .valid(...VIBE_VALUES)
+    .allow("")
+    .label("Setting")
+    .messages({ "any.only": "Choose a setting from the list." }),
 });
 
 const location = Joi.object({

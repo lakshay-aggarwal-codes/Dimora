@@ -18,6 +18,7 @@ const { NotFoundError, ValidationError } = require("../utils/errors");
 const {
   PROPERTY_TYPES,
   ROOM_TYPES,
+  VIBES,
   CANCELLATION_POLICIES,
   AMENITIES,
 } = require("../config/constants");
@@ -45,7 +46,7 @@ function renderStep(
     values: values ?? (listing ? wizard.formValues(listing, n) : {}),
     errors,
     formError,
-    lists: { PROPERTY_TYPES, ROOM_TYPES, CANCELLATION_POLICIES, AMENITIES },
+    lists: { PROPERTY_TYPES, ROOM_TYPES, VIBES, CANCELLATION_POLICIES, AMENITIES },
     photoList: listing && n === 4 ? galleryOf(listing) : [],
     maxImages: MAX_IMAGES,
     readiness:

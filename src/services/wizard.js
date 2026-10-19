@@ -42,6 +42,7 @@ function formValues(listing, n) {
         description: get(listing, "description"),
         propertyType: get(listing, "propertyType"),
         roomType: get(listing, "roomType"),
+        vibe: get(listing, "vibe"),
       };
     case 2:
       return {
@@ -141,6 +142,8 @@ function applyStep(listing, n, value, { geometry } = {}) {
         description: value.description,
         propertyType: value.propertyType,
         roomType: value.roomType,
+        // An empty choice clears the setting.
+        vibe: value.vibe || undefined,
       });
       break;
     case 2:

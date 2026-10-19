@@ -18,6 +18,17 @@ const ROOM_TYPES = [
   { value: "shared_room", label: "A shared room" },
 ];
 
+// The setting around a place (P05-T04). A host picks one; the category strip on
+// /listings uses it for Beach, Mountains, Lake, Desert, Countryside and City.
+const VIBES = [
+  { value: "beach", label: "Beach" },
+  { value: "mountain", label: "Mountains" },
+  { value: "lake", label: "Lake" },
+  { value: "desert", label: "Desert" },
+  { value: "countryside", label: "Countryside" },
+  { value: "city", label: "City" },
+];
+
 const CANCELLATION_POLICIES = [
   { value: "flexible", label: "Flexible" },
   { value: "moderate", label: "Moderate" },
@@ -49,10 +60,12 @@ const values = (list) => list.map((item) => item.value);
 module.exports = {
   PROPERTY_TYPES,
   ROOM_TYPES,
+  VIBES,
   CANCELLATION_POLICIES,
   AMENITIES,
   AMENITY_GROUPS,
   PROPERTY_TYPE_VALUES: values(PROPERTY_TYPES),
+  VIBE_VALUES: values(VIBES),
   ROOM_TYPE_VALUES: values(ROOM_TYPES),
   CANCELLATION_POLICY_VALUES: values(CANCELLATION_POLICIES),
   AMENITY_VALUES: values(AMENITIES),

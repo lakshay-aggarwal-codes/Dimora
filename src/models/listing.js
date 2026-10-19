@@ -15,6 +15,7 @@ const STATUSES = ["draft", "published", "unpublished", "suspended"];
 const {
   PROPERTY_TYPE_VALUES: PROPERTY_TYPES,
   ROOM_TYPE_VALUES: ROOM_TYPES,
+  VIBE_VALUES: VIBES,
   CANCELLATION_POLICY_VALUES: CANCELLATION_POLICIES,
 } = require("../config/constants");
 
@@ -104,6 +105,11 @@ const listingSchema = new Schema(
 
     propertyType: { type: String, enum: PROPERTY_TYPES },
     roomType: { type: String, enum: ROOM_TYPES },
+
+    // The setting around the place (beach, mountain, ...). Optional: the host
+    // chooses it in the basics step; the category strip on /listings reads it
+    // (P05-T04). Listings that never set it simply match no vibe category.
+    vibe: { type: String, enum: VIBES },
 
     // Mirror of the cover photo (images[0]), kept in step by the media service
     // (src/services/images.js) because older pages and the cards still read it.

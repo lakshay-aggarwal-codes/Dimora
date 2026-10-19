@@ -4,13 +4,22 @@
 // the night ledger (a listing with any taken night in the stay is left out);
 // `page` pages the results. Sorting (`sort`) and the rating filter
 // (`minRating`) are validated and kept in every link, but only start to act in
-// P05-T03 and P12-T02.
+// P05-T03 and P12-T02. The category strip, the filter panel and the chips for
+// the active filters (P05-T04) are built from the same validated state.
 const Listing = require("../models/listing");
 const ledger = require("../services/ledger");
 const { buildFilter } = require("../services/search");
-const { suggestForEmptyResults } = require("../services/suggestions");
 const { parseListingQuery } = require("../validation/searchQuery");
 const { formatDateOnly, todayIn, DEFAULT_TIMEZONE } = require("../utils/dates");
+const {
+  activeChips,
+  filterCount,
+  resetFiltersHref,
+  categoryLinks,
+  PANEL_FIELDS,
+} = require("../utils/filterChips");
+const { getCategory } = require("../config/categories");
+const { PROPERTY_TYPES, ROOM_TYPES, AMENITIES } = require("../config/constants");
 
 const PAGE_SIZE = 12;
 
@@ -21,9 +30,8 @@ module.exports.index = async (req, res) => {
   const parsed = parseListingQuery(req.query, { now });
 
   const filter = buildFilter(parsed.searchParams);
-  let taken = [];
   if (parsed.stay) {
-    taken = await ledger.unavailableListingIds(
+    const taken = await ledger.unavailableListingIds(
       parsed.stay.checkIn,
       parsed.stay.checkOut,
       { now },
@@ -42,24 +50,27 @@ module.exports.index = async (req, res) => {
   const pageState = { ...parsed.state };
   delete pageState.page;
   const filtered = Object.keys(pageState).length > 0;
-
-  // A search that found nothing gets suggestions (P05-T05): at most 5 more queries.
-  const suggestions =
-    total === 0 && filtered
-      ? await suggestForEmptyResults({ Listing, parsed, takenIds: taken })
-      : undefined;
-
   res.render("listings/index.ejs", {
     allListings: listings,
     state: { ...pageState, ...(page > 1 ? { page } : {}) },
     pageState,
     form: parsed.form,
     errors: parsed.errors,
+    chips: activeChips(pageState),
+    filterCount: filterCount(pageState),
+    resetFiltersHref: resetFiltersHref(pageState),
+    categories: categoryLinks(pageState),
+    activeCategory: getCategory(pageState.category),
+    panel: {
+      values: pageState,
+      typed: parsed.drawer,
+      fields: PANEL_FIELDS,
+      lists: { PROPERTY_TYPES, ROOM_TYPES, AMENITIES },
+    },
     total,
     page,
     totalPages,
     filtered,
-    suggestions,
     today: formatDateOnly(todayIn(DEFAULT_TIMEZONE, now)),
     pageTitle: filtered ? "Search results" : "Explore stays",
     pageDescription: "Browse places to stay on Dimora.",

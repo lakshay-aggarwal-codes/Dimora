@@ -120,11 +120,15 @@ describe("listings page", () => {
   test("categories are links; the grid starts at one column", async () => {
     stubListingSearch([new Listing(buildListingData())]);
     const html = (await createAgent().get("/listings")).text;
-    expect(count(html, /<a class="filter" href="\/listings\?category=/g)).toBe(
-      17,
+    // "All stays" and the 12 categories of P05-T04; All is the current one.
+    expect(
+      count(html, /<a class="filter(?: is-active)?" href="\/listings(?:\?category=[a-z-]+)?"/g),
+    ).toBe(13);
+    expect(html).toContain(
+      '<a class="filter is-active" href="/listings" aria-current="true">',
     );
     expect(html).toContain(
-      '<a class="filter" href="/listings?category=trending">',
+      '<a class="filter" href="/listings?category=beach">',
     );
     expect(html).toContain(
       '<a class="filter" href="/listings?category=amazing-pools">',

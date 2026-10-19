@@ -9,6 +9,8 @@
 //   propertyType / roomType   any of
 //   amenities    all of
 //   instantBook  true = only instant-book listings
+//   category     one slug from src/config/categories.js (P05-T04); added as one
+//                more condition, so it narrows the other filters, never widens
 //
 // `sort` and `page` (P05-T03) are handled by searchPage below; the URL names and
 // forms are P05-T02.
@@ -16,6 +18,7 @@ const { parseSearchParams, DEFAULT_SORT } = require("../validation/search");
 const { publicListingFilter } = require("../utils/visibility");
 const { destinationParts, escapeRegex } = require("../utils/searchKeys");
 const { rupeesToMinor } = require("../utils/listingFields");
+const { categoryClause } = require("../config/categories");
 
 const PAGE_SIZE = 12;
 const DEFAULT_LIMIT = 24;
@@ -59,6 +62,9 @@ function buildFilter(params = {}) {
     filter.amenities = { $all: params.amenities };
   }
   if (params.instantBook === true) filter.instantBook = true;
+
+  const category = categoryClause(params.category);
+  if (category) filter.$and = [...(filter.$and || []), category];
 
   return filter;
 }

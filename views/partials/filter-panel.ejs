@@ -1,0 +1,75 @@
+<%#
+    The filter panel on /listings (P05-T04): a GET form inside <details>, so it
+    opens, submits and resets without JavaScript. Locals: panel ({ values: the
+    valid state, typed: what was typed in the number boxes, fields: the names
+    this form owns, lists }), errors, filterState, filterCount, resetHref,
+    hiddenFields (helper). Everything the form does not own travels as hidden
+    inputs, so searching again never loses the place, dates, guests, category
+    or sort; submitting goes back to page 1 (no `page` is sent).
+%>
+<%
+    const values = panel.values || {};
+    const typed = panel.typed || {};
+    const lists = panel.lists || {};
+    const errs = typeof errors !== "undefined" && errors ? errors : {};
+    const asList = (value) => (Array.isArray(value) ? value : value === undefined ? [] : [value]);
+    const hasPanelError = panel.fields.some((name) => errs[name]);
+    const checkboxGroups = [
+        { name: "type", legend: "Property type", items: lists.PROPERTY_TYPES || [] },
+        { name: "roomType", legend: "What guests get", items: lists.ROOM_TYPES || [] },
+        { name: "amenities", legend: "Amenities", items: lists.AMENITIES || [] }
+    ];
+%>
+<details class="filter-panel" id="filter-panel"<% if (hasPanelError) { %> open<% } %>>
+    <summary class="filter-panel-toggle">
+        <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+        <span>Filters</span>
+        <% if (filterCount > 0) { %><span class="filter-count" aria-hidden="true"><%= filterCount %></span><span class="visually-hidden"><%= filterCount %> active</span><% } %>
+    </summary>
+
+    <form method="GET" action="/listings" class="filter-panel-form" aria-label="Filters" data-loading-form novalidate>
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <%- include("./form-field.ejs", { id: "minPrice", name: "minPrice", label: "Lowest price a night (₹)", type: "number", value: typed.minPrice, error: errs.minPrice, attrs: { min: 0, max: 1000000, step: 1, inputmode: "numeric" } }) %>
+            </div>
+            <div class="col-6 col-md-3">
+                <%- include("./form-field.ejs", { id: "maxPrice", name: "maxPrice", label: "Highest price a night (₹)", type: "number", value: typed.maxPrice, error: errs.maxPrice, attrs: { min: 0, max: 1000000, step: 1, inputmode: "numeric" } }) %>
+            </div>
+            <div class="col-6 col-md-3">
+                <%- include("./form-field.ejs", { id: "bedrooms", name: "bedrooms", label: "Bedrooms (at least)", type: "number", value: typed.bedrooms, error: errs.bedrooms, attrs: { min: 0, max: 50, step: 1, inputmode: "numeric" } }) %>
+            </div>
+            <div class="col-6 col-md-3 filter-panel-instant">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="instantBook" value="true" id="instantBook"<% if (values.instantBook === true) { %> checked<% } %>>
+                    <label class="form-check-label" for="instantBook">Instant book only</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-1">
+            <% checkboxGroups.forEach((group) => { %>
+            <div class="col-12 col-md-4">
+                <fieldset class="filter-group">
+                    <legend class="filter-group-legend"><%= group.legend %></legend>
+                    <% if (errs[group.name]) { %><div class="form-error" id="<%= group.name %>-error"><%= errs[group.name] %></div><% } %>
+                    <% group.items.forEach((item) => { %>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="<%= group.name %>" value="<%= item.value %>" id="<%= group.name %>-<%= item.value %>"<% if (asList(values[group.name]).includes(item.value)) { %> checked<% } %>>
+                        <label class="form-check-label" for="<%= group.name %>-<%= item.value %>"><%= item.label %></label>
+                    </div>
+                    <% }) %>
+                </fieldset>
+            </div>
+            <% }) %>
+        </div>
+
+        <% hiddenFields(filterState, panel.fields).forEach(([name, value]) => { %>
+        <input type="hidden" name="<%= name %>" value="<%= value %>">
+        <% }) %>
+
+        <div class="filter-panel-actions">
+            <button type="submit" class="btn btn-dark">Show stays</button>
+            <a class="btn btn-outline-secondary" href="<%= resetHref %>">Reset filters</a>
+        </div>
+    </form>
+</details>
