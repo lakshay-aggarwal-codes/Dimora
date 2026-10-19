@@ -1,0 +1,25 @@
+<%#
+  Guest date picker (P07-T04). Locals: datePicker { url, rules, initialIn, initialOut }.
+  public/js/date-picker.js builds the calendar; without JavaScript only the notice shows.
+%>
+<div class="date-picker" data-date-picker hidden
+    data-availability-url="<%= datePicker.url %>"
+    data-today="<%= datePicker.rules.today %>"
+    data-latest-check-in="<%= datePicker.rules.latestCheckIn %>"
+    data-min-nights="<%= datePicker.rules.minNights %>"
+    data-max-nights="<%= datePicker.rules.maxNights %>"
+    data-initial-in="<%= datePicker.initialIn || '' %>"
+    data-initial-out="<%= datePicker.initialOut || '' %>">
+    <h3 id="dates-heading" class="h6">Choose your dates</h3>
+    <p class="small text-body-secondary mb-2">
+        Stay <%= datePicker.rules.minNights %> to <%= datePicker.rules.maxNights %> night<%= datePicker.rules.maxNights === 1 ? "" : "s" %>.
+        Crossed-out dates are not available.
+    </p>
+    <input type="hidden" name="checkIn" value="">
+    <input type="hidden" name="checkOut" value="">
+    <div data-date-picker-mount role="group" aria-labelledby="dates-heading"></div>
+    <p class="dp-status small mb-1" data-date-status role="status"></p>
+    <p class="dp-summary mb-1" data-date-summary aria-live="polite"></p>
+    <button type="button" class="btn btn-sm btn-link p-0" data-date-clear>Clear dates</button>
+</div>
+<noscript><p class="small text-body-secondary">Turn on JavaScript to choose dates.</p></noscript>

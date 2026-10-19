@@ -1398,84 +1398,104 @@
   transition: opacity var(--duration-base) var(--easing-standard);
 }
 
-/* Search map and list/map toggle (P06-T04) */
-.search-view-bar {
+/* ---- Guest date picker (P07-T04) ---- */
+.date-picker {
+  margin-bottom: var(--space-3);
+}
+
+.dp-nav {
   display: flex;
-  justify-content: flex-end;
-  margin: var(--space-3) 0 0;
-}
-
-.search-split {
-  display: block;
-}
-
-.search-map-panel {
-  margin-top: var(--space-4);
-}
-
-.search-map-tools {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-2);
   margin-bottom: var(--space-2);
 }
 
-.search-map-help,
-.search-map-status {
-  margin: 0 0 var(--space-2);
-  font-size: var(--font-size-sm);
+.dp-months {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
 }
 
-#search-map {
+/* One month on a phone, two from a tablet up. */
+@media (min-width: 768px) {
+  .dp-months {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .dp-months .dp-month + .dp-month {
+    display: none;
+  }
+}
+
+.dp-month {
   width: 100%;
-  height: 70vh;
-  min-height: var(--size-map-height);
-  border-radius: var(--radius-md);
+  border-collapse: collapse;
+  table-layout: fixed;
 }
 
-#search-map.map-unavailable {
+.dp-title {
+  caption-side: top;
+  padding-bottom: var(--space-1);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  color: var(--color-text);
+}
+
+.dp-month th {
+  padding: var(--space-1) 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.dp-month td {
+  padding: 1px;
+  text-align: center;
+}
+
+.dp-day {
+  width: 100%;
+  min-height: 2.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+}
+
+.dp-day:hover:not([aria-disabled="true"]) {
+  background-color: var(--color-surface-sunken);
+  border-color: var(--color-border);
+}
+
+.dp-day[aria-disabled="true"] {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.dp-day--taken {
+  text-decoration: line-through;
+}
+
+.dp-day--today {
+  border-color: var(--color-border);
+  font-weight: var(--font-weight-medium);
+}
+
+.dp-day--range {
+  background-color: var(--color-surface-sunken);
+}
+
+.dp-day--selected,
+.dp-day--selected:hover {
+  background-color: var(--color-text);
+  border-color: var(--color-text);
+  color: var(--color-surface);
+}
+
+.dp-status:empty {
   display: none;
-}
-
-.search-map-popup-title {
-  margin: 0 0 var(--space-1);
-  font-size: var(--font-size-md);
-}
-
-/* A card lit up because the pointer is on its price on the map. */
-.results-region .is-highlighted {
-  outline: 3px solid var(--color-primary);
-  outline-offset: 2px;
-  border-radius: var(--radius-md);
-}
-
-/* Phones and tablets: either the list or the map, never both. */
-.search-split[data-view="map"] .results-region {
-  display: none;
-}
-
-/* Large screens: the list on the left, the map staying in view on the right. */
-@media (min-width: 992px) {
-  .search-split[data-view="map"] {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: var(--space-4);
-    align-items: start;
-  }
-
-  .search-split[data-view="map"] .results-region {
-    display: block;
-  }
-
-  .search-split[data-view="map"] .results-region .row > .col {
-    width: 50%;
-  }
-
-  .search-split[data-view="map"] .search-map-panel {
-    position: sticky;
-    top: var(--space-4);
-    margin-top: 0;
-  }
 }

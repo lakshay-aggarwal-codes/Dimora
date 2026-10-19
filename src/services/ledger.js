@@ -4,6 +4,7 @@
 //   reserveNights(listingId, nights, source, holdExpiresAt?, { now }?)
 //   releaseNights(sourceId)
 //   availableRanges(listingId, from, to, { now }?)
+//   unavailableDates(listingId, from, to, { now }?)
 //
 // Booking works by inserting one row per night with `insertMany(...,
 // { ordered: true })`. The unique (listing, date) index rejects a night that is
@@ -237,6 +238,43 @@ function createLedgerService({
   }
 
   /**
+   * The nights of one listing that cannot be booked inside [from, to): held by
+   * a reservation, a live hold or a host block, oldest first. An expired hold
+   * counts as free. Only dates come back (never who or why), so the public
+   * availability API cannot leak a guest and shows a block and a reservation
+   * identically (P07-T04).
+   * @returns {Promise<Date[]>}
+   */
+  async function unavailableDates(
+    listingId,
+    from,
+    to,
+    { now = new Date() } = {},
+  ) {
+    const listing = requireId(listingId, "listingId");
+    if (!isDateOnly(from) || !isDateOnly(to)) {
+      throw new TypeError("from and to must be date-only Dates (00:00:00Z)");
+    }
+    const span = (to.getTime() - from.getTime()) / 86400000;
+    if (span <= 0) throw new TypeError("to must be after from");
+    if (span > MAX_AVAILABILITY_SPAN_DAYS) {
+      throw new TypeError(
+        `the range can cover at most ${MAX_AVAILABILITY_SPAN_DAYS} nights`,
+      );
+    }
+    const rows = await model
+      .find(
+        { listing, date: { $gte: from, $lt: to } },
+        { date: 1, holdExpiresAt: 1 },
+      )
+      .lean();
+    return rows
+      .filter((row) => !isStale(row, now))
+      .map((row) => row.date)
+      .sort((a, b) => a.getTime() - b.getTime());
+  }
+
+  /**
    * Is any night of this listing, from today (in the listing's time zone)
    * onward, held by a reservation? A request whose hold has expired does not
    * count, and neither does a host block.
@@ -285,6 +323,7 @@ function createLedgerService({
     reserveNights,
     releaseNights,
     availableRanges,
+    unavailableDates,
     hasUpcomingReservation,
     unavailableListingIds,
   };

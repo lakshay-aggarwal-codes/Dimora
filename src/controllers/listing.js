@@ -5,9 +5,11 @@ const { isAdmin } = require("../policies/shared");
 const { getGeocodingClient } = require("../services/geocoding");
 const { deleteImage } = require("../config/cloudinary");
 const { galleryOf, replaceCover } = require("../services/images");
-const { publicPointOf, PUBLIC_AREA_RADIUS_M } = require("../utils/geo");
+const { publicPointOf } = require("../utils/geo");
 const { isPublic } = require("../utils/visibility");
 const { softDeleteListing } = require("../services/lifecycle");
+const { stayRulesFor } = require("../services/availability");
+const { todayIn, tryParseDateOnly, formatDateOnly } = require("../utils/dates");
 const { evaluateReadiness } = require("../services/readiness");
 const { NotFoundError, ConflictError } = require("../utils/errors");
 const {
@@ -52,6 +54,23 @@ module.exports.renderNewForm = (req, res) => {
   });
 };
 
+// What the date picker on the detail page needs. The dates in `?in=&out=` (from
+// a search) pre-fill it, but only real YYYY-MM-DD strings are used; the script
+// re-checks them against the availability data.
+function datePickerFor(listing, query) {
+  const rules = stayRulesFor(listing, { today: todayIn() });
+  const read = (value) => {
+    const date = typeof value === "string" ? tryParseDateOnly(value) : null;
+    return date ? formatDateOnly(date) : "";
+  };
+  return {
+    url: `/api/listings/${listing._id}/availability`,
+    rules,
+    initialIn: read(query.in),
+    initialOut: read(query.out),
+  };
+}
+
 module.exports.showListings = async (req, res) => {
   const { id } = req.params;
 
@@ -94,8 +113,8 @@ module.exports.showListings = async (req, res) => {
     gallery: galleryOf(listing),
     // The public (approximate) point only: the precise one never reaches a page.
     mapPoint: publicPointOf(listing),
-    mapRadius: PUBLIC_AREA_RADIUS_M,
     guestView: preview,
+    datePicker: datePickerFor(listing, req.query),
     readiness:
       !isPublic(listing) && can("listing:edit", req.user, listing)
         ? evaluateReadiness(listing)
