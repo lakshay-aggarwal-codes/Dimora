@@ -4,6 +4,20 @@ const { isAdmin } = require("../policies/shared");
 const { NotFoundError } = require("../utils/errors");
 
 /**
+ * Thrown by an auditedMutation handler when it refuses to act (a rule is
+ * broken, the form is incomplete) BEFORE changing anything. The wrapper shows
+ * `message` as a flash error and redirects to `redirectTo`; no audit row is
+ * written because nothing happened.
+ */
+class AdminRefusal extends Error {
+  constructor(message, redirectTo = "/admin") {
+    super(message);
+    this.name = "AdminRefusal";
+    this.redirectTo = redirectTo;
+  }
+}
+
+/**
  * router.use(adminGuard) for the whole area. Anyone who is not an active admin
  * (visitors included) gets the ordinary 404 page, so /admin does not reveal
  * that it exists.
@@ -35,7 +49,16 @@ function adminGuard(req, res, next) {
  */
 function auditedMutation(handler) {
   async function run(req, res) {
-    const result = await handler(req, res);
+    let result;
+    try {
+      result = await handler(req, res);
+    } catch (err) {
+      if (err instanceof AdminRefusal && !res.headersSent) {
+        req.flash("error", err.message);
+        return res.redirect(err.redirectTo);
+      }
+      throw err;
+    }
     if (res.headersSent) {
       throw new Error("auditedMutation: the handler responded itself; return { audit, ... } instead");
     }
@@ -60,4 +83,4 @@ function auditedMutation(handler) {
   return auditedMutationMiddleware;
 }
 
-module.exports = { adminGuard, auditedMutation };
+module.exports = { adminGuard, auditedMutation, AdminRefusal };

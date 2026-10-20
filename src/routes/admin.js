@@ -4,7 +4,7 @@
 // There is deliberately no route that edits or deletes an audit row.
 const express = require("express");
 const wrapAsync = require("../utils/wrapAsync");
-const { adminGuard } = require("../middleware/admin");
+const { adminGuard, auditedMutation } = require("../middleware/admin");
 const controller = require("../controllers/admin");
 
 const router = express.Router();
@@ -12,5 +12,10 @@ router.use(adminGuard);
 
 router.get("/", controller.index);
 router.get("/audit", wrapAsync(controller.auditLog));
+
+router.get("/users", wrapAsync(controller.users));
+router.get("/users/:id", wrapAsync(controller.user));
+router.post("/users/:id/suspend", auditedMutation(controller.suspendUser));
+router.post("/users/:id/reinstate", auditedMutation(controller.reinstateUser));
 
 module.exports = router;

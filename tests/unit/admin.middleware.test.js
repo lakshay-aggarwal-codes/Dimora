@@ -1,7 +1,7 @@
 // P14-T01: adminGuard and auditedMutation, no app and no database.
 const { ObjectId } = require("mongoose").Types;
 const audit = require("../../src/services/audit");
-const { adminGuard, auditedMutation } = require("../../src/middleware/admin");
+const { adminGuard, auditedMutation, AdminRefusal } = require("../../src/middleware/admin");
 const { NotFoundError } = require("../../src/utils/errors");
 
 afterEach(() => jest.restoreAllMocks());
@@ -152,5 +152,26 @@ describe("auditedMutation", () => {
     );
     expect(err).toBeUndefined();
     expect(req.auditRecorded).toBe(1);
+  });
+
+  test("a refusal flashes the message, redirects and writes no audit row", async () => {
+    const record = jest.spyOn(audit, "record");
+    const req = makeReq();
+    const res = makeRes();
+    const { err } = await run(
+      auditedMutation(async () => {
+        throw new AdminRefusal("You cannot suspend your own account.", "/admin/users/1");
+      }),
+      req,
+      res,
+    );
+    expect(err).toBeUndefined();
+    expect(req.flash).toHaveBeenCalledWith("error", "You cannot suspend your own account.");
+    expect(res.redirect).toHaveBeenCalledWith("/admin/users/1");
+    expect(record).not.toHaveBeenCalled();
+  });
+
+  test("a refusal defaults to the admin home page", () => {
+    expect(new AdminRefusal("No.").redirectTo).toBe("/admin");
   });
 });

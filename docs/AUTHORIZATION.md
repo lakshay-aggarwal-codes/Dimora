@@ -42,3 +42,4 @@ Policies are pure functions `(user, resource) => boolean` (no database, no reque
 - Admin rights come only from `npm run make-admin -- <email>`; no page, form or API sets `role`.
 - Every admin route that changes data is wrapped in `auditedMutation`; the handler returns `{ audit, redirectTo | respond, flash }` and the wrapper writes exactly one `AuditLog` row, then answers. `tests/unit/admin.routes.test.js` fails if a non-GET admin route is not wrapped.
 - The audit log is append-only in the model and read-only in the UI; there is no route that edits or deletes a row.
+- User management (P14-T02): an admin cannot suspend their own account or the last active admin; a suspension needs a written reason, which is stored in the audit log. Suspended accounts are denied everything by the policies and cannot log in; their sessions are deleted at the moment of suspension.

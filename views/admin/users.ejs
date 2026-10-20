@@ -1,0 +1,75 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    User search (P14-T02). Locals: result { rows, page, totalPages, total, q, status }.
+    Everything is printed escaped. Email addresses are shown to admins only.
+%>
+<%
+    const STATUS_VARIANT = { active: "success", suspended: "danger", deleted: "neutral" };
+    const keep = {};
+    if (result.q) keep.q = result.q;
+    if (result.status) keep.status = result.status;
+%>
+<div class="row mt-3">
+    <div class="col-12">
+        <p class="mb-1"><a href="/admin">&larr; Admin</a></p>
+        <h1 class="h3">Users</h1>
+
+        <form class="row g-2 align-items-end mb-3" action="/admin/users" method="GET" role="search">
+            <div class="col-12 col-md-6">
+                <label class="form-label" for="user-q">Username, email or display name</label>
+                <input class="form-control" id="user-q" type="search" name="q" maxlength="100" value="<%= result.q %>">
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label" for="user-status">Status</label>
+                <select class="form-select" id="user-status" name="status">
+                    <option value="">Any</option>
+                    <% ["active", "suspended", "deleted"].forEach((s) => { %>
+                    <option value="<%= s %>" <%= result.status === s ? "selected" : "" %>><%= s %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <button class="btn btn-dark w-100" type="submit">Search</button>
+            </div>
+        </form>
+
+        <p class="text-muted"><%= result.total %> <%= result.total === 1 ? "account" : "accounts" %>.</p>
+
+        <% if (!result.rows.length) { %>
+        <%- include("../partials/empty-state.ejs", {
+            title: "No accounts match",
+            message: "Try a shorter search or another status.",
+            icon: "fa-users",
+            headingLevel: 2
+        }) %>
+        <% } else { %>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <caption class="visually-hidden">Accounts</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Username</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Role</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Joined (UTC)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% result.rows.forEach((u) => { %>
+                    <tr>
+                        <td><a href="/admin/users/<%= String(u._id) %>"><%= u.username %></a>
+                            <% if (u.displayName && u.displayName !== u.username) { %><span class="text-muted small d-block"><%= u.displayName %></span><% } %></td>
+                        <td><%= u.email %></td>
+                        <td><%= u.role || "member" %></td>
+                        <td><%- include("../partials/badge.ejs", { text: u.status || "active", variant: STATUS_VARIANT[u.status || "active"] }) %></td>
+                        <td><%= u.createdAt ? u.createdAt.toISOString().slice(0, 10) : "" %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <%- include("../partials/pagination.ejs", { page: result.page, totalPages: result.totalPages, baseUrl: "/admin/users", query: keep }) %>
+        <% } %>
+    </div>
+</div>

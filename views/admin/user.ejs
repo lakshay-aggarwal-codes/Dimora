@@ -1,0 +1,80 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    One account (P14-T02). Locals: summary { user, activity, reservations,
+    history }, isSelf. Everything is printed escaped.
+%>
+<%
+    const u = summary.user;
+    const status = u.status || "active";
+    const STATUS_VARIANT = { active: "success", suspended: "danger", deleted: "neutral" };
+    const L = summary.activity.listings;
+    const day = (d) => (d ? d.toISOString().slice(0, 10) : "");
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-9">
+        <p class="mb-1"><a href="/admin/users">&larr; Users</a></p>
+        <h1 class="h3"><%= u.username %>
+            <%- include("../partials/badge.ejs", { text: status, variant: STATUS_VARIANT[status] }) %></h1>
+
+        <dl class="row">
+            <dt class="col-sm-3">Email</dt><dd class="col-sm-9"><%= u.email %></dd>
+            <dt class="col-sm-3">Display name</dt><dd class="col-sm-9"><%= u.displayName || "" %></dd>
+            <dt class="col-sm-3">Role</dt><dd class="col-sm-9"><%= u.role || "member" %></dd>
+            <dt class="col-sm-3">Joined (UTC)</dt><dd class="col-sm-9"><%= day(u.createdAt) %></dd>
+        </dl>
+
+        <h2 class="h5">Activity</h2>
+        <ul>
+            <li>Listings: <%= L.total %> (<%= L.published %> published, <%= L.draft %> draft, <%= L.unpublished %> unpublished, <%= L.suspended %> suspended)</li>
+            <li>Reviews written: <%= summary.activity.reviewsWritten %></li>
+            <li>Reservations: pending <%= summary.reservations.pending %>, confirmed <%= summary.reservations.confirmed %></li>
+        </ul>
+
+        <% if (status === "active" && !isSelf) { %>
+        <h2 class="h5">Suspend this account</h2>
+        <p class="text-muted">The person is logged out and cannot log in. Their published listings are hidden. The reason is written to the audit log.</p>
+        <form action="/admin/users/<%= String(u._id) %>/suspend" method="POST" class="mb-4">
+            <%- include("../includes/csrf.ejs") %>
+            <label class="form-label" for="suspend-reason">Reason (required)</label>
+            <textarea class="form-control mb-2" id="suspend-reason" name="reason" rows="3" minlength="5" maxlength="500" required></textarea>
+            <button class="btn btn-danger" type="submit">Suspend account</button>
+        </form>
+        <% } else if (status === "active" && isSelf) { %>
+        <p class="text-muted">You cannot suspend your own account.</p>
+        <% } else if (status === "suspended") { %>
+        <h2 class="h5">Reinstate this account</h2>
+        <p class="text-muted">The person can log in again and their hidden listings are published again. The reason is written to the audit log.</p>
+        <form action="/admin/users/<%= String(u._id) %>/reinstate" method="POST" class="mb-4">
+            <%- include("../includes/csrf.ejs") %>
+            <label class="form-label" for="reinstate-reason">Reason (required)</label>
+            <textarea class="form-control mb-2" id="reinstate-reason" name="reason" rows="3" minlength="5" maxlength="500" required></textarea>
+            <button class="btn btn-dark" type="submit">Reinstate account</button>
+        </form>
+        <% } %>
+
+        <h2 class="h5">Admin history</h2>
+        <% if (!summary.history.length) { %>
+        <p class="text-muted">No administrative action has been taken on this account.</p>
+        <% } else { %>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <caption class="visually-hidden">Latest administrative actions on this account</caption>
+                <thead>
+                    <tr><th scope="col">When (UTC)</th><th scope="col">Who</th><th scope="col">Action</th><th scope="col">Reason</th></tr>
+                </thead>
+                <tbody>
+                    <% summary.history.forEach((row) => { %>
+                    <tr>
+                        <td><%= row.createdAt.toISOString().replace("T", " ").slice(0, 19) %></td>
+                        <td><%= row.actor ? row.actor.username : (row.actorLabel || "system") %></td>
+                        <td><code><%= row.action %></code></td>
+                        <td><%= row.reason || "" %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <p><a href="/admin/audit">Full audit log</a></p>
+        <% } %>
+    </div>
+</div>

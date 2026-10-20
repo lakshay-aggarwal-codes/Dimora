@@ -267,6 +267,12 @@ const listingSchema = new Schema(
 
     // Soft delete: the row stays, the pages stop showing it (P04-T05).
     deletedAt: { type: Date },
+
+    // Set when the listing went from published to suspended only because its
+    // host's account was suspended (P14-T02). Reinstating the host restores
+    // exactly these listings; a listing suspended by moderation (P14-T03) does
+    // not carry the flag and stays suspended.
+    hiddenByOwnerSuspension: { type: Boolean },
   },
   { timestamps: true },
 );
