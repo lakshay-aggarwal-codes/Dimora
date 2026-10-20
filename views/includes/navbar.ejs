@@ -65,6 +65,9 @@
                                     <span class="dropdown-item-text small">Signed in as
                                         <strong><%= currUser.username %></strong></span>
                                 </li>
+                                <% if (typeof can === "function" && can("admin:access")) { %>
+                                <li><a class="dropdown-item" href="/admin">Admin</a></li>
+                                <% } %>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form action="/logout" method="POST">

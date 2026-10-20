@@ -1,0 +1,52 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    Read-only audit log. Locals: log { rows, page, totalPages, total }.
+    Everything is printed escaped, including the JSON details.
+%>
+<div class="row mt-3">
+    <div class="col-12">
+        <p class="mb-1"><a href="/admin">&larr; Admin</a></p>
+        <h1 class="h3">Audit log</h1>
+        <p class="text-muted">Newest first. Entries cannot be edited or deleted.
+            <%= log.total %> <%= log.total === 1 ? "entry" : "entries" %>.</p>
+
+        <% if (!log.rows.length) { %>
+        <%- include("../partials/empty-state.ejs", {
+            title: "Nothing has been logged yet",
+            message: "Administrative actions will appear here.",
+            icon: "fa-clipboard-list",
+            headingLevel: 2
+        }) %>
+        <% } else { %>
+        <div class="table-responsive">
+            <table class="table align-middle audit-table">
+                <caption class="visually-hidden">Administrative actions, newest first</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">When (UTC)</th>
+                        <th scope="col">Who</th>
+                        <th scope="col">Action</th>
+                        <th scope="col">Target</th>
+                        <th scope="col">Reason</th>
+                        <th scope="col">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% log.rows.forEach((row) => { %>
+                    <tr>
+                        <% const when = row.createdAt.toISOString(); %>
+                        <td><time datetime="<%= when %>"><%= when.replace("T", " ").slice(0, 19) %></time></td>
+                        <td><%= row.actor ? (row.actor.username || "(unknown)") : (row.actorLabel || "system") %></td>
+                        <td><code><%= row.action %></code></td>
+                        <td><%= row.targetType %><% if (row.targetId) { %> <code><%= String(row.targetId) %></code><% } %></td>
+                        <td><%= row.reason || "" %></td>
+                        <td><% if (row.details) { %><code><%= JSON.stringify(row.details) %></code><% } %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <%- include("../partials/pagination.ejs", { page: log.page, totalPages: log.totalPages, baseUrl: "/admin/audit", query: {} }) %>
+        <% } %>
+    </div>
+</div>

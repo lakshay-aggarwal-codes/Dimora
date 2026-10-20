@@ -31,6 +31,7 @@ const reviewRouter = require("./routes/review");
 const useRouter = require("./routes/user");
 const pagesRouter = require("./routes/pages");
 const apiRouter = require("./routes/api");
+const adminRouter = require("./routes/admin");
 const {
   assignCspNonce,
   securityHeaders,
@@ -168,6 +169,7 @@ function createApp({
   app.post("/signup", limiters.signup);
 
   app.use("/api", apiRouter);
+  app.use("/admin", adminRouter);
   app.use("/host", hostRouter);
   app.use("/listings/:id/images", imagesRouter);
   app.use("/listings", listingRouter);

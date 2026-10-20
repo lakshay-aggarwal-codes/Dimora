@@ -52,6 +52,7 @@ const MATRIX = [
     },
   ],
   ["review:delete", review, { "review author": true, admin: true }],
+  ["admin:access", undefined, { admin: true }],
 ];
 
 describe("authorization matrix", () => {

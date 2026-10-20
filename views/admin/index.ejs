@@ -1,0 +1,15 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    Admin landing page (P14-T01). Only reachable by an active admin
+    (src/middleware/admin.js). More tools arrive with P14-T02..T05.
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-8">
+        <h1 class="h3">Admin</h1>
+        <p>Every action taken here is written to the audit log. Admin rights are given only with
+            <code>npm run make-admin</code>; nothing on the site can grant them.</p>
+        <ul class="list-unstyled">
+            <li><a class="btn btn-outline-dark" href="/admin/audit">Audit log</a></li>
+        </ul>
+    </div>
+</div>

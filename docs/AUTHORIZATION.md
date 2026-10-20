@@ -24,9 +24,10 @@ Policies are pure functions `(user, resource) => boolean` (no database, no reque
 | Action | Allowed |
 |---|---|
 | `listing:create`, `review:create` | any active member |
-| `listing:edit` | the listing's owner (also guards the host availability calendar, `/host/listings/:id/calendar...`; admins cannot change a host's calendar) |
+| `listing:edit` | the listing's owner |
 | `listing:delete` | the owner, or an admin |
 | `review:delete` | the review's author, or an admin (the review must belong to the listing in the URL) |
+| `admin:access` | an active admin (P14-T01). The `/admin` area uses `adminGuard` (`src/middleware/admin.js`): everyone else, visitors included, gets the ordinary 404 so the area does not reveal itself |
 
 "Active" = `status` is `active` (accounts without a `status` count as active). Suspended and deleted accounts can do nothing. A listing without an owner (old data) can be removed only by an admin; a review without an author likewise.
 
@@ -35,3 +36,9 @@ Policies are pure functions `(user, resource) => boolean` (no database, no reque
 1. Write the function in `src/policies/<resource>.js` and register it in `src/policies/index.js`.
 2. Add a loader in `src/middleware/authorize.js` if the action needs a resource (and a message).
 3. Add rows to `tests/unit/policies.test.js` (it fails if an action is registered but missing from the matrix) and to `tests/integration/authz.db.test.js`.
+
+## Admin area (P14-T01)
+
+- Admin rights come only from `npm run make-admin -- <email>`; no page, form or API sets `role`.
+- Every admin route that changes data is wrapped in `auditedMutation`; the handler returns `{ audit, redirectTo | respond, flash }` and the wrapper writes exactly one `AuditLog` row, then answers. `tests/unit/admin.routes.test.js` fails if a non-GET admin route is not wrapped.
+- The audit log is append-only in the model and read-only in the UI; there is no route that edits or deletes a row.
