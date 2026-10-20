@@ -3,6 +3,7 @@
 //
 //   reserveNights(listingId, nights, source, holdExpiresAt?, { now }?)
 //   releaseNights(sourceId)
+//   confirmNights(sourceId)
 //   availableRanges(listingId, from, to, { now }?)
 //   unavailableDates(listingId, from, to, { now }?)
 //
@@ -190,6 +191,20 @@ function createLedgerService({
   }
 
   /**
+   * A pending request was accepted: its nights no longer expire. Safe to call
+   * twice.
+   * @returns {Promise<{confirmed: number}>}
+   */
+  async function confirmNights(sourceId) {
+    requireId(sourceId, "sourceId");
+    const result = await model.updateMany(
+      { "source.id": sourceId },
+      { $unset: { holdExpiresAt: 1 } },
+    );
+    return { confirmed: result.modifiedCount || 0 };
+  }
+
+  /**
    * Free stretches inside [from, to): runs of consecutive nights nobody holds
    * (an expired hold counts as free). `to` is exclusive, so a range is a
    * valid check-in/check-out pair.
@@ -322,6 +337,7 @@ function createLedgerService({
   return {
     reserveNights,
     releaseNights,
+    confirmNights,
     availableRanges,
     unavailableDates,
     hasUpcomingReservation,

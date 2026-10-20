@@ -66,6 +66,18 @@ class QuoteRefusedError extends AppError {
   }
 }
 
+// The price the guest saw is no longer the price: carries the new quote so the
+// checkout page can show the difference and ask again (P07-T05, P08-T03).
+class PriceChangedError extends ConflictError {
+  constructor(quote, message) {
+    super(
+      message || "The price has changed. Please review the new total.",
+      { code: "price_changed" },
+    );
+    this.quote = quote;
+  }
+}
+
 module.exports = {
   AppError,
   ValidationError,
@@ -74,4 +86,5 @@ module.exports = {
   ConflictError,
   InvalidTransitionError,
   QuoteRefusedError,
+  PriceChangedError,
 };
