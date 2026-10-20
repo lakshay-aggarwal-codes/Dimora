@@ -24,7 +24,7 @@ Policies are pure functions `(user, resource) => boolean` (no database, no reque
 | Action | Allowed |
 |---|---|
 | `listing:create`, `review:create` | any active member |
-| `listing:edit` | the listing's owner |
+| `listing:edit` | the listing's owner (also guards the host availability calendar, `/host/listings/:id/calendar...`; admins cannot change a host's calendar) |
 | `listing:delete` | the owner, or an admin |
 | `review:delete` | the review's author, or an admin (the review must belong to the listing in the URL) |
 

@@ -200,6 +200,55 @@ function assertBookableDates({ checkIn, checkOut, today }) {
   return nights;
 }
 
+// ---- Calendar months (P07-T03): a month grid needs the first day of a month,
+// month-to-month steps and the weekday of a date, all in UTC like the rest. ----
+
+// "YYYY-MM": the only month format accepted from a URL.
+const MONTH_KEY = /^([1-9]\d{3})-(0[1-9]|1[0-2])$/;
+
+/** First day of the month given as "YYYY-MM" (a date-only Date), or null. */
+function parseMonthKey(value) {
+  if (typeof value !== "string") return null;
+  const match = MONTH_KEY.exec(value);
+  if (!match) return null;
+  return new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, 1));
+}
+
+/** "YYYY-MM" for a date-only Date. */
+function formatMonthKey(date) {
+  assertDateOnly(date, "date");
+  return date.toISOString().slice(0, 7);
+}
+
+/** The first day of the month that contains `date`. */
+function startOfMonth(date) {
+  assertDateOnly(date, "date");
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
+}
+
+/** The first day of the month `months` months after (or before) `date`'s month. */
+function addMonths(date, months) {
+  assertDateOnly(date, "date");
+  if (!Number.isInteger(months)) {
+    throw new TypeError(`months must be an integer; got ${String(months)}`);
+  }
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1),
+  );
+}
+
+/** Number of days in the month that contains `date`. */
+function daysInMonth(date) {
+  const first = startOfMonth(date);
+  return (addMonths(first, 1).getTime() - first.getTime()) / MS_PER_DAY;
+}
+
+/** Weekday with Monday = 0 ... Sunday = 6. */
+function isoWeekday(date) {
+  assertDateOnly(date, "date");
+  return (date.getUTCDay() + 6) % 7;
+}
+
 module.exports = {
   DEFAULT_TIMEZONE,
   BOOKING_WINDOW,
@@ -217,4 +266,10 @@ module.exports = {
   todayIn,
   bookingWindow,
   assertBookableDates,
+  parseMonthKey,
+  formatMonthKey,
+  startOfMonth,
+  addMonths,
+  daysInMonth,
+  isoWeekday,
 };

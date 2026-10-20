@@ -1,8 +1,10 @@
-// /host/listings/... (mounted in src/app.js): the listing wizard.
+// /host/listings/... (mounted in src/app.js): the listing wizard, the status
+// page and the availability calendar.
 const express = require("express");
 const wrapAsync = require("../utils/wrapAsync");
 const { isLoggedIn, authorize } = require("../middleware");
 const controller = require("../controllers/host");
+const availability = require("../controllers/availability");
 
 const router = express.Router();
 const mayCreate = [isLoggedIn, authorize("listing:create")];
@@ -31,6 +33,23 @@ router.post(
   "/listings/:id/unpublish",
   ...mayEdit,
   wrapAsync(controller.unpublish),
+);
+
+// Availability calendar (P07-T03): only the listing's host.
+router.get(
+  "/listings/:id/calendar",
+  ...mayEdit,
+  wrapAsync(availability.show),
+);
+router.post(
+  "/listings/:id/calendar/blocks",
+  ...mayEdit,
+  wrapAsync(availability.block),
+);
+router.post(
+  "/listings/:id/calendar/unblock",
+  ...mayEdit,
+  wrapAsync(availability.unblock),
 );
 
 module.exports = router;

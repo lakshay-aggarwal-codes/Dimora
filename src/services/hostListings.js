@@ -36,6 +36,7 @@ function formatDay(date) {
 function actionsFor({ id, status, canPublish }) {
   const base = `/host/listings/${id}`;
   const statusLink = { kind: "link", label: "Status and checklist", href: `${base}/status` };
+  const calendarLink = { kind: "link", label: "Calendar", href: `${base}/calendar` };
   switch (status) {
     case "draft":
       return [{ kind: "link", label: "Continue", href: base, primary: true }, statusLink];
@@ -43,12 +44,14 @@ function actionsFor({ id, status, canPublish }) {
       return [
         { kind: "link", label: "View", href: `/listings/${id}`, primary: true },
         { kind: "link", label: "Edit", href: `/listings/${id}/edit` },
+        calendarLink,
         statusLink,
         { kind: "post", label: "Unpublish", href: `${base}/unpublish` },
       ];
     case "unpublished":
       return [
         { kind: "link", label: "Edit", href: `/listings/${id}/edit`, primary: !canPublish },
+        calendarLink,
         statusLink,
         ...(canPublish
           ? [{ kind: "post", label: "Publish", href: `${base}/publish`, primary: true }]

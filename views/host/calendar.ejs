@@ -1,0 +1,136 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    Availability calendar (P07-T03). Locals: listing, calendar (monthView in
+    src/services/availability.js), runs (upcoming blocked stretches),
+    truncated, errors ({ block, unblock }), values (form values after an
+    error), noteMaxLength. Everything works without JavaScript. The state of
+    a night is always written in words, never colour alone.
+%>
+<%
+    const base = "/host/listings/" + listing._id;
+    const monthHref = (key) => base + "/calendar?month=" + key;
+    const blockError = errors && errors.block;
+    const unblockError = errors && errors.unblock;
+    const form = values || {};
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-10 mx-auto">
+        <p class="mb-1"><a href="/host/listings">My listings</a></p>
+        <h1 class="h3">Availability: <%= listing.title %></h1>
+        <p class="text-muted">Each date is the night that starts that day. Block the nights you cannot host. Nights a guest has reserved cannot be blocked, and a blocked night cannot be booked.</p>
+
+        <section class="cal" aria-labelledby="cal-month">
+            <div class="cal-nav">
+                <% if (calendar.prevKey) { %>
+                <a class="btn btn-sm btn-outline-dark" href="<%= monthHref(calendar.prevKey) %>">Previous month</a>
+                <% } else { %>
+                <span class="btn btn-sm btn-outline-dark disabled" aria-disabled="true">Previous month</span>
+                <% } %>
+                <h2 id="cal-month" class="h5 cal-month"><%= calendar.label %></h2>
+                <% if (calendar.nextKey) { %>
+                <a class="btn btn-sm btn-outline-dark" href="<%= monthHref(calendar.nextKey) %>">Next month</a>
+                <% } else { %>
+                <span class="btn btn-sm btn-outline-dark disabled" aria-disabled="true">Next month</span>
+                <% } %>
+            </div>
+
+            <div class="table-responsive">
+                <table class="cal-grid">
+                    <caption class="visually-hidden">Nights in <%= calendar.label %> for <%= listing.title %>: <%= calendar.counts.blocked %> blocked, <%= calendar.counts.reserved %> reserved, <%= calendar.counts.requested %> awaiting your answer</caption>
+                    <thead>
+                        <tr>
+                            <% calendar.weekdays.forEach((weekday) => { %>
+                            <th scope="col" abbr="<%= weekday.long %>"><%= weekday.short %></th>
+                            <% }) %>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% calendar.weeks.forEach((week) => { %>
+                        <tr>
+                            <% week.forEach((cell) => { %>
+                            <% if (!cell) { %>
+                            <td class="cal-cell cal-empty"></td>
+                            <% } else { %>
+                            <td class="cal-cell cal-<%= cell.state %><%= cell.past ? ' cal-past' : '' %><%= cell.today ? ' cal-today' : '' %>"<% if (cell.today) { %> aria-current="date"<% } %>>
+                                <span class="cal-day" aria-hidden="true"><%= cell.day %></span>
+                                <% if (cell.stateLabel) { %><span class="cal-state" aria-hidden="true"><%= cell.stateLabel %></span><% } %>
+                                <span class="visually-hidden"><%= cell.srLabel %></span>
+                            </td>
+                            <% } %>
+                            <% }) %>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <ul class="cal-legend">
+                <li><span class="cal-swatch cal-blocked" aria-hidden="true"></span> Blocked by you</li>
+                <li><span class="cal-swatch cal-reserved" aria-hidden="true"></span> Reserved by a guest</li>
+                <li><span class="cal-swatch cal-requested" aria-hidden="true"></span> Request awaiting your answer</li>
+                <li><span class="cal-swatch cal-today" aria-hidden="true"></span> Today</li>
+            </ul>
+        </section>
+
+        <section class="cal-panel" aria-labelledby="block-heading">
+            <h2 id="block-heading" class="h5">Block nights</h2>
+            <% if (blockError) { %>
+            <div class="alert alert-danger" role="alert"><%= blockError %></div>
+            <% } %>
+            <form method="POST" action="<%= base %>/calendar/blocks">
+                <%- include("../includes/csrf.ejs") %>
+                <input type="hidden" name="month" value="<%= calendar.monthKey %>">
+                <div class="row">
+                    <div class="col-12 col-md-6"><%- include("../partials/form-field.ejs", { id: "block-from", name: "from", type: "date", label: "First night", value: form.from, required: true, attrs: { min: calendar.todayIso, max: calendar.latestIso } }) %></div>
+                    <div class="col-12 col-md-6"><%- include("../partials/form-field.ejs", { id: "block-through", name: "through", type: "date", label: "Last night", value: form.through, required: true, hint: "Use the same date for a single night.", attrs: { min: calendar.todayIso, max: calendar.latestIso } }) %></div>
+                </div>
+                <%- include("../partials/form-field.ejs", { id: "block-note", name: "note", label: "Note (only you see it)", value: form.note, hint: "Optional, for example: family visit.", attrs: { maxlength: noteMaxLength } }) %>
+                <button type="submit" class="btn btn-dark">Block these nights</button>
+            </form>
+        </section>
+
+        <section class="cal-panel" aria-labelledby="blocked-heading">
+            <h2 id="blocked-heading" class="h5">Your upcoming blocks</h2>
+            <% if (!runs.length) { %>
+            <p class="text-muted">You have not blocked any upcoming nights.</p>
+            <% } else { %>
+            <ul class="cal-blocks">
+                <% runs.forEach((run) => { %>
+                <li class="cal-block">
+                    <div>
+                        <strong><%= run.fromLabel %><% if (run.fromIso !== run.throughIso) { %> to <%= run.throughLabel %><% } %></strong>
+                        <span class="text-muted">(<%= run.nightsLabel %>)</span>
+                        <% if (run.note) { %><span class="cal-note"><%= run.note %></span><% } %>
+                    </div>
+                    <form method="POST" action="<%= base %>/calendar/unblock">
+                        <%- include("../includes/csrf.ejs") %>
+                        <input type="hidden" name="month" value="<%= calendar.monthKey %>">
+                        <input type="hidden" name="from" value="<%= run.fromIso %>">
+                        <input type="hidden" name="through" value="<%= run.throughIso %>">
+                        <button type="submit" class="btn btn-sm btn-outline-dark">Unblock<span class="visually-hidden">: <%= run.fromLabel %><% if (run.fromIso !== run.throughIso) { %> to <%= run.throughLabel %><% } %></span></button>
+                    </form>
+                </li>
+                <% }) %>
+            </ul>
+            <% if (truncated) { %><p class="text-muted">Only the first <%= runs.length %> blocks are listed.</p><% } %>
+            <% } %>
+
+            <details class="cal-unblock"<% if (unblockError) { %> open<% } %>>
+                <summary>Unblock only some dates</summary>
+                <% if (unblockError) { %>
+                <div class="alert alert-danger" role="alert"><%= unblockError %></div>
+                <% } %>
+                <form method="POST" action="<%= base %>/calendar/unblock">
+                    <%- include("../includes/csrf.ejs") %>
+                    <input type="hidden" name="month" value="<%= calendar.monthKey %>">
+                    <div class="row">
+                        <div class="col-12 col-md-6"><%- include("../partials/form-field.ejs", { id: "unblock-from", name: "from", type: "date", label: "First night", value: form.unblockFrom, required: true, attrs: { min: calendar.todayIso, max: calendar.latestIso } }) %></div>
+                        <div class="col-12 col-md-6"><%- include("../partials/form-field.ejs", { id: "unblock-through", name: "through", type: "date", label: "Last night", value: form.unblockThrough, required: true, attrs: { min: calendar.todayIso, max: calendar.latestIso } }) %></div>
+                    </div>
+                    <p class="form-text">Only nights you blocked are freed. Reserved nights stay as they are.</p>
+                    <button type="submit" class="btn btn-outline-dark">Unblock these nights</button>
+                </form>
+            </details>
+        </section>
+    </div>
+</div>

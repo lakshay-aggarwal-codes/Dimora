@@ -55,15 +55,23 @@ describe("actionsFor", () => {
     expect(actions[0]).toMatchObject({ href: "/host/listings/L1", primary: true });
   });
 
-  test("a published listing can be viewed, edited, checked and unpublished (a POST)", () => {
+  test("a published listing can be viewed, edited, scheduled, checked and unpublished (a POST)", () => {
     const actions = one("published", true);
     expect(labels(actions)).toEqual([
       "link:View",
       "link:Edit",
+      "link:Calendar",
       "link:Status and checklist",
       "post:Unpublish",
     ]);
-    expect(actions[3].href).toBe("/host/listings/L1/unpublish");
+    expect(actions[2].href).toBe("/host/listings/L1/calendar");
+    expect(actions[4].href).toBe("/host/listings/L1/unpublish");
+  });
+
+  test("a draft and a suspended listing have no calendar", () => {
+    expect(labels(one("draft")).join()).not.toContain("Calendar");
+    expect(labels(one("suspended")).join()).not.toContain("Calendar");
+    expect(labels(one("unpublished", true))).toContain("link:Calendar");
   });
 
   test("an unpublished listing offers Publish only when the checklist is complete", () => {

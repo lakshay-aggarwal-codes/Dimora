@@ -3,9 +3,9 @@
 //
 //   reserveNights(listingId, nights, source, holdExpiresAt?, { now }?)
 //   releaseNights(sourceId)
-//   confirmNights(sourceId)
 //   availableRanges(listingId, from, to, { now }?)
-//   unavailableDates(listingId, from, to, { now }?)
+//   nightsInRange(listingId, from, to, { now }?)       (P07-T03: calendar)
+//   releaseBlockedNights(listingId, from, to)          (P07-T03: unblock)
 //
 // Booking works by inserting one row per night with `insertMany(...,
 // { ordered: true })`. The unique (listing, date) index rejects a night that is
@@ -191,20 +191,6 @@ function createLedgerService({
   }
 
   /**
-   * A pending request was accepted: its nights no longer expire. Safe to call
-   * twice.
-   * @returns {Promise<{confirmed: number}>}
-   */
-  async function confirmNights(sourceId) {
-    requireId(sourceId, "sourceId");
-    const result = await model.updateMany(
-      { "source.id": sourceId },
-      { $unset: { holdExpiresAt: 1 } },
-    );
-    return { confirmed: result.modifiedCount || 0 };
-  }
-
-  /**
    * Free stretches inside [from, to): runs of consecutive nights nobody holds
    * (an expired hold counts as free). `to` is exclusive, so a range is a
    * valid check-in/check-out pair.
@@ -252,21 +238,7 @@ function createLedgerService({
     return ranges;
   }
 
-  /**
-   * The nights of one listing that cannot be booked inside [from, to): held by
-   * a reservation, a live hold or a host block, oldest first. An expired hold
-   * counts as free. Only dates come back (never who or why), so the public
-   * availability API cannot leak a guest and shows a block and a reservation
-   * identically (P07-T04).
-   * @returns {Promise<Date[]>}
-   */
-  async function unavailableDates(
-    listingId,
-    from,
-    to,
-    { now = new Date() } = {},
-  ) {
-    const listing = requireId(listingId, "listingId");
+  function assertSpan(from, to) {
     if (!isDateOnly(from) || !isDateOnly(to)) {
       throw new TypeError("from and to must be date-only Dates (00:00:00Z)");
     }
@@ -277,16 +249,64 @@ function createLedgerService({
         `the range can cover at most ${MAX_AVAILABILITY_SPAN_DAYS} nights`,
       );
     }
+  }
+
+  /**
+   * Every occupied night of one listing inside [from, to), oldest first, as
+   * { date, source: { kind, id }, holdExpiresAt }. An expired hold is left out
+   * (it no longer blocks anyone). The calendar reads this; it carries no
+   * guest information, only who owns the night.
+   */
+  async function nightsInRange(
+    listingId,
+    from,
+    to,
+    { now = new Date() } = {},
+  ) {
+    const listing = requireId(listingId, "listingId");
+    assertSpan(from, to);
     const rows = await model
-      .find(
-        { listing, date: { $gte: from, $lt: to } },
-        { date: 1, holdExpiresAt: 1 },
-      )
+      .find({ listing, date: { $gte: from, $lt: to } })
       .lean();
     return rows
       .filter((row) => !isStale(row, now))
-      .map((row) => row.date)
-      .sort((a, b) => a.getTime() - b.getTime());
+      .map((row) => ({
+        date: row.date,
+        source: { kind: row.source.kind, id: row.source.id },
+        holdExpiresAt: row.holdExpiresAt || null,
+      }))
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+  }
+
+  /**
+   * Frees the HOST-BLOCKED nights of one listing inside [from, to). Only rows
+   * with source.kind "block" are touched: a reserved or held night is never
+   * released here. Also reports which blocks have no night left, so the
+   * caller can drop their records.
+   * @returns {Promise<{released: number, emptiedSourceIds: any[]}>}
+   */
+  async function releaseBlockedNights(listingId, from, to) {
+    const listing = requireId(listingId, "listingId");
+    assertSpan(from, to);
+    const filter = {
+      listing,
+      "source.kind": "block",
+      date: { $gte: from, $lt: to },
+    };
+    const rows = await model.find(filter).lean();
+    if (rows.length === 0) return { released: 0, emptiedSourceIds: [] };
+
+    const sourceIds = new Map();
+    for (const row of rows) sourceIds.set(String(row.source.id), row.source.id);
+
+    const { deletedCount } = await model.deleteMany(filter);
+
+    const emptiedSourceIds = [];
+    for (const id of sourceIds.values()) {
+      const left = await model.exists({ "source.id": id });
+      if (!left) emptiedSourceIds.push(id);
+    }
+    return { released: deletedCount, emptiedSourceIds };
   }
 
   /**
@@ -337,9 +357,9 @@ function createLedgerService({
   return {
     reserveNights,
     releaseNights,
-    confirmNights,
     availableRanges,
-    unavailableDates,
+    nightsInRange,
+    releaseBlockedNights,
     hasUpcomingReservation,
     unavailableListingIds,
   };

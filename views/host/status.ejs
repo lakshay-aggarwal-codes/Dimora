@@ -18,6 +18,9 @@
             <a class="btn btn-outline-dark" href="/host/listings/<%= listing._id %>">Carry on with the steps</a>
             <% } %>
             <a class="btn btn-outline-dark" href="/listings/<%= listing._id %>?preview=1">Preview as a guest</a>
+            <% if (listing.status === "published" || listing.status === "unpublished") { %>
+            <a class="btn btn-outline-dark" href="/host/listings/<%= listing._id %>/calendar">Availability calendar</a>
+            <% } %>
 
             <% if (listing.status !== "published") { %>
             <form method="POST" action="/host/listings/<%= listing._id %>/publish">

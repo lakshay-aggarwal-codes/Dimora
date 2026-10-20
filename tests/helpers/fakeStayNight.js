@@ -84,6 +84,13 @@ class FakeStayNight {
     return { deletedCount: before - this.rows.length };
   }
 
+  // Like Model.exists: the first matching row, or null.
+  async exists(filter) {
+    await Promise.resolve();
+    const row = this.rows.find((r) => matches(r, filter));
+    return row ? { _id: row._id } : null;
+  }
+
   find(filter) {
     const rows = this.rows.filter((row) => matches(row, filter));
     return { lean: async () => rows.map((row) => ({ ...row })) };
