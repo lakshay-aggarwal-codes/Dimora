@@ -129,6 +129,10 @@ function createErrorHandler({ isProduction, logger }) {
 
     if (wantsJson(req)) {
       const body = { error: { status, code, message, requestId } };
+      // Per-field messages of a validation error (P08-T02), already written for users.
+      if (status < 500 && err && err.fields && typeof err.fields === "object") {
+        body.error.fields = err.fields;
+      }
       if (detail) body.error.detail = detail;
       return res.status(status).json(body);
     }

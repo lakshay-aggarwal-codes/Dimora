@@ -63,11 +63,22 @@ function datePickerFor(listing, query) {
     const date = typeof value === "string" ? tryParseDateOnly(value) : null;
     return date ? formatDateOnly(date) : "";
   };
+  // The booking panel (P08-T02): how many guests the select offers and which
+  // one starts selected (`?guests=`, kept inside 1..capacity).
+  const capacity = Number.isInteger(rules.capacity) && rules.capacity >= 1 ? rules.capacity : 1;
+  const wanted =
+    typeof query.guests === "string" && /^\d{1,3}$/.test(query.guests) ? Number(query.guests) : 2;
   return {
     url: `/api/listings/${listing._id}/availability`,
     rules,
     initialIn: read(query.in),
     initialOut: read(query.out),
+    quote: {
+      url: `/api/listings/${listing._id}/quote`,
+      checkoutUrl: `/listings/${listing._id}/checkout`,
+      capacity,
+      guests: Math.min(Math.max(wanted, 1), capacity),
+    },
   };
 }
 

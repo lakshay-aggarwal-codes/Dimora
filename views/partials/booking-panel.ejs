@@ -1,0 +1,23 @@
+<%#
+  Booking panel (P08-T02): guests, the live price breakdown and the Reserve
+  button. Locals: datePicker { quote { url, checkoutUrl, capacity, guests } }.
+  public/js/booking-panel.js fills it when the dates change; without
+  JavaScript the panel stays hidden (the date picker needs it too).
+%>
+<div class="booking-panel" data-booking-panel hidden
+    data-quote-url="<%= datePicker.quote.url %>"
+    data-checkout-url="<%= datePicker.quote.checkoutUrl %>">
+    <div class="mb-3">
+        <label for="quote-guests" class="form-label">Guests</label>
+        <select id="quote-guests" class="form-select" data-quote-guests>
+            <% for (let n = 1; n <= datePicker.quote.capacity; n += 1) { %>
+            <option value="<%= n %>"<% if (n === datePicker.quote.guests) { %> selected<% } %>><%= n %> guest<%= n === 1 ? "" : "s" %></option>
+            <% } %>
+        </select>
+    </div>
+    <div class="quote-result" data-quote-result aria-live="polite" aria-atomic="true">
+        <p class="small text-body-secondary mb-0">Choose your dates to see the price.</p>
+    </div>
+    <a class="btn btn-dark w-100 mt-3 disabled" role="button" aria-disabled="true" tabindex="-1" data-reserve>Reserve</a>
+    <p class="small text-body-secondary mt-2 mb-0">You will not be charged yet.</p>
+</div>

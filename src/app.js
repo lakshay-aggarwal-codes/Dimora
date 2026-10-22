@@ -168,6 +168,7 @@ function createApp({
   app.post("/login", limiters.login);
   app.post("/signup", limiters.signup);
 
+  app.use("/api/listings/:id/quote", limiters.quote);
   app.use("/api", apiRouter);
   app.use("/admin", adminRouter);
   app.use("/host", hostRouter);

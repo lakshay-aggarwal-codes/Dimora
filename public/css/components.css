@@ -1532,3 +1532,42 @@
   margin-bottom: var(--space-3);
   cursor: pointer;
 }
+
+/* Booking panel (P08-T02) */
+.booking-panel {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.quote-result {
+  min-height: 3rem;
+}
+
+.quote-lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quote-lines li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+}
+
+.quote-total {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+  font-weight: 600;
+}
+
+.quote-problems {
+  margin: 0;
+  padding-left: var(--space-4);
+}

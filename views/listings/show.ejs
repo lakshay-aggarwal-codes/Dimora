@@ -131,12 +131,13 @@
                         <% } %>
                     </p>
 
-                    <%# P08-T02 adds the quote and the book button below the date picker. %>
                     <div class="booking-slot" id="booking-slot" data-booking-slot>
                         <% if (typeof datePicker !== "undefined" && datePicker) { %>
                             <%- include("../partials/date-picker.ejs", { datePicker }) %>
+                            <%- include("../partials/booking-panel.ejs", { datePicker }) %>
+                        <% } else { %>
+                            <p class="mb-0 text-body-secondary">Online booking is not open yet.</p>
                         <% } %>
-                        <p class="mb-0 text-body-secondary">Online booking is not open yet.</p>
                     </div>
 
                     <% if (canEditListing || canDeleteListing) { %>
@@ -239,6 +240,7 @@
     <script src="/js/map.js"></script>
     <% if (typeof datePicker !== "undefined" && datePicker) { %>
     <script src="/js/date-picker.js"></script>
+    <script src="/js/booking-panel.js"></script>
     <% } %>
 
     <% if (typeof structuredData !== "undefined" && structuredData) { %>

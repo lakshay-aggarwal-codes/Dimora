@@ -77,10 +77,18 @@ function tooManyAttempts(req, res, next) {
   );
 }
 
+function tooManyQuotes(req, res, next) {
+  next(
+    new AppError(429, "Too many price checks. Please wait a minute and try again.", {
+      code: "rate_limited",
+    }),
+  );
+}
+
 /**
  * Created per app (not at module load) so every test app starts with empty
  * counters. Login: 5 failed attempts per 15 minutes per IP (a successful
- * login is not counted). Signup: 10 per hour per IP.
+ * login is not counted). Signup: 10 per hour per IP. Quote: 60 per minute per IP.
  */
 function createAuthLimiters() {
   const common = {
@@ -98,6 +106,8 @@ function createAuthLimiters() {
       requestWasSuccessful: (req) => Boolean(req.user),
     }),
     signup: rateLimit({ ...common, windowMs: 60 * 60 * 1000, limit: 10 }),
+    // Price checks (P08-T02): a guest picking dates makes a few per minute.
+    quote: rateLimit({ ...common, handler: tooManyQuotes, windowMs: 60 * 1000, limit: 60 }),
   };
 }
 
