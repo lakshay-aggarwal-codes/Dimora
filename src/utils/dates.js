@@ -15,7 +15,8 @@ const DEFAULT_TIMEZONE = "Asia/Kolkata";
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 // Booking-window limits shared by search, quotes and booking. Host-set advance
-// notice and same-day cut-offs are added by P07-T06 on top of these.
+// notice and the same-day cut-off (P07-T06) are added on top of these by
+// src/services/bookingRules.js.
 const BOOKING_WINDOW = Object.freeze({
   MIN_ADVANCE_DAYS: 0, // earliest check-in = today (listing time zone)
   MAX_HORIZON_DAYS: 365, // latest check-in = today + 365 days
@@ -163,6 +164,32 @@ function todayIn(timeZone = DEFAULT_TIMEZONE, now = new Date()) {
   return new Date(Date.UTC(get("year"), get("month") - 1, get("day")));
 }
 
+/** The instant `ms` milliseconds after `instant` (holds, expiries). */
+function instantAfter(instant, ms) {
+  if (!(instant instanceof Date) || !Number.isFinite(instant.getTime())) {
+    throw new TypeError("instant must be a valid Date");
+  }
+  return new Date(instant.getTime() + ms);
+}
+
+/**
+ * The wall clock in an IANA time zone at instant `now`: the calendar date (a
+ * date-only Date) and the minutes since local midnight (0..1439). Booking
+ * rules that depend on the time of day (P07-T06) use it, so a rule reads the
+ * place's clock, not the server's.
+ */
+function wallClockIn(timeZone = DEFAULT_TIMEZONE, now = new Date()) {
+  const date = todayIn(timeZone, now); // validates both arguments
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hourCycle: "h23",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).formatToParts(now);
+  const get = (type) => Number(parts.find((p) => p.type === type).value);
+  return { date, minutes: (get("hour") % 24) * 60 + get("minute") };
+}
+
 /** First and last allowed check-in date for a given "today". */
 function bookingWindow(today) {
   assertDateOnly(today, "today");
@@ -264,6 +291,8 @@ module.exports = {
   nightsBetween,
   eachNight,
   todayIn,
+  instantAfter,
+  wallClockIn,
   bookingWindow,
   assertBookableDates,
   parseMonthKey,

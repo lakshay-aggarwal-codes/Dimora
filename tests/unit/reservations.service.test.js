@@ -340,3 +340,54 @@ describe("invariant checker", () => {
     expect(findViolations([], [row(1, { source: { kind: "block", id: "b1" } })])).toEqual([]);
   });
 });
+
+describe("create: booking rules (P07-T06)", () => {
+  // 15:00 on 20 Oct 2026 in Kolkata.
+  const LATE = new Date("2026-10-20T09:30:00Z");
+  const stay = (over = {}) => ({ in: "2026-10-21", out: "2026-10-23", guests: 2, ...over });
+  async function bookAt(now, over, extra) {
+    const ctx = setup(extra);
+    const promise = ctx.service.create({ guest: GUEST, listing: ctx.listing._id, idempotencyKey: key(), ...stay(over) }, { now });
+    return { ctx, promise };
+  }
+  async function refusedWith(code, now, over, extra) {
+    const { ctx, promise } = await bookAt(now, over, extra);
+    await expect(promise).rejects.toMatchObject({ statusCode: 400, code });
+    expect(ctx.Reservation.docs).toHaveLength(0);
+    expect(ctx.ledger.rows).toHaveLength(0);
+  }
+
+  test("not enough notice: 400 with its own code, nothing held", () =>
+    refusedWith("advance_notice", LATE, {}, { advanceNoticeHours: 24 })); // 14:00 tomorrow is 23 h away
+  test("enough notice is accepted", async () => {
+    const { ctx, promise } = await bookAt(LATE, { in: "2026-10-22", out: "2026-10-24" }, { advanceNoticeHours: 24 });
+    const { reservation } = await promise;
+    expect(reservation.status).toBe("pending");
+    ctx.consistent();
+  });
+  test("same-day booking after the cut-off: 400 and nothing held", () =>
+    refusedWith("same_day_cutoff", LATE, { in: "2026-10-20", out: "2026-10-21" }, { sameDayCutoffTime: "14:00" }));
+  test("same-day booking before the cut-off is accepted", async () => {
+    const { ctx, promise } = await bookAt(LATE, { in: "2026-10-20", out: "2026-10-21" });
+    await expect(promise).resolves.toMatchObject({ created: true });
+    ctx.consistent();
+  });
+  test("each other rule keeps its own code", async () => {
+    await refusedWith("over_capacity", LATE, { guests: 9 });
+    await refusedWith("below_min_nights", LATE, { out: "2026-10-22" }, { minNights: 2 });
+    await refusedWith("above_max_nights", LATE, { out: "2026-11-30" });
+    await refusedWith("check_in_past", LATE, { in: "2026-10-19", out: "2026-10-21" });
+    await refusedWith("check_in_too_far", LATE, { in: "2027-10-21", out: "2027-10-23" });
+    await refusedWith("check_out_not_after_check_in", LATE, { out: "2026-10-21" });
+  });
+  test("a replayed booking is not re-judged by the rules", async () => {
+    const ctx = setup();
+    const k = key();
+    const first = await ctx.service.create({ guest: GUEST, listing: ctx.listing._id, idempotencyKey: k, ...stay() }, { now: LATE });
+    const strict = { advanceNoticeHours: 168 };
+    Object.assign(ctx.listing, strict); // the host tightens the rules afterwards
+    const again = await ctx.service.create({ guest: GUEST, listing: ctx.listing._id, idempotencyKey: k, ...stay() }, { now: LATE });
+    expect(again.created).toBe(false);
+    expect(again.reservation._id).toBe(first.reservation._id);
+  });
+});

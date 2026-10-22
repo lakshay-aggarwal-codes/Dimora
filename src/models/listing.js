@@ -210,6 +210,17 @@ const listingSchema = new Schema(
     minNights: { type: Number, default: 1, min: 1, max: 365, validate: integer },
     maxNights: { type: Number, default: 30, min: 1, max: 365, validate: integer },
 
+    // Booking rules set by the host (P07-T06; src/services/bookingRules.js).
+    // Notice is measured before the check-in moment, in the listing's time
+    // zone. The cut-off is the time of day (listing zone) after which a stay
+    // starting today can no longer be booked.
+    advanceNoticeHours: { type: Number, default: 0, min: 0, max: 168, validate: integer },
+    sameDayCutoffTime: {
+      type: String,
+      default: "20:00",
+      match: [TIME_PATTERN, "Same-day cut-off must look like 20:00"],
+    },
+
     instantBook: { type: Boolean, default: false },
     cancellationPolicy: {
       type: String,

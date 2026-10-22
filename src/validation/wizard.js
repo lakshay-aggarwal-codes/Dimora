@@ -68,6 +68,32 @@ const time = (label) =>
       "string.pattern.base": `${label} must look like 14:00.`,
     });
 
+// Optional booking-rule fields (P07-T06): a blank field means the default, so
+// a form posted without them (or an older client) keeps working.
+const optionalWhole = (label, min, max, fallback) =>
+  Joi.number()
+    .integer()
+    .min(min)
+    .max(max)
+    .empty("")
+    .default(fallback)
+    .label(label)
+    .messages({
+      "number.base": `${label} must be a number.`,
+      "number.integer": `${label} must be a whole number.`,
+      "number.min": `${label} must be at least ${min}.`,
+      "number.max": `${label} must be at most ${max}.`,
+    });
+
+const optionalTime = (label, fallback) =>
+  Joi.string()
+    .trim()
+    .pattern(TIME)
+    .empty("")
+    .default(fallback)
+    .label(label)
+    .messages({ "string.pattern.base": `${label} must look like 20:00.` });
+
 const basics = Joi.object({
   title: text("Title", { min: 5, max: 100 }),
   description: text("Description", { min: 20, max: 3000 }),
@@ -124,6 +150,8 @@ const pricing = Joi.object({
   cleaningFee: rupees("Cleaning fee", 0, 1000000, { required: false }),
   minNights: whole("Minimum nights", 1, 365),
   maxNights: whole("Maximum nights", 1, 365),
+  advanceNoticeHours: optionalWhole("Advance notice", 0, 168, 0),
+  sameDayCutoffTime: optionalTime("Same-day cut-off", "20:00"),
   checkInTime: time("Check-in time"),
   checkOutTime: time("Check-out time"),
   cancellationPolicy: choice("Cancellation policy", CANCELLATION_POLICY_VALUES),

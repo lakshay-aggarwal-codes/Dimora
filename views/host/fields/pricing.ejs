@@ -12,6 +12,10 @@
         <div class="col-6 col-md-3"><%- include("../../partials/form-field.ejs", { id: "checkInTime", label: "Check-in time", value: values.checkInTime, error: errors.checkInTime, required: true, hint: "24-hour, like 14:00.", attrs: { maxlength: 5, pattern: "([01][0-9]|2[0-3]):[0-5][0-9]" } }) %></div>
         <div class="col-6 col-md-3"><%- include("../../partials/form-field.ejs", { id: "checkOutTime", label: "Check-out time", value: values.checkOutTime, error: errors.checkOutTime, required: true, hint: "24-hour, like 11:00.", attrs: { maxlength: 5, pattern: "([01][0-9]|2[0-3]):[0-5][0-9]" } }) %></div>
     </div>
+    <div class="row">
+        <div class="col-12 col-md-6"><%- include("../../partials/form-field.ejs", { id: "advanceNoticeHours", type: "number", label: "Advance notice (hours)", value: values.advanceNoticeHours, error: errors.advanceNoticeHours, hint: "How long before check-in a guest must book. 0 for none, up to 168 (7 days).", attrs: { min: 0, max: 168, step: 1 } }) %></div>
+        <div class="col-12 col-md-6"><%- include("../../partials/form-field.ejs", { id: "sameDayCutoffTime", label: "Same-day booking closes at", value: values.sameDayCutoffTime, error: errors.sameDayCutoffTime, hint: "24-hour, like 20:00. After this time guests cannot book a stay that starts today.", placeholder: "20:00", attrs: { maxlength: 5, pattern: "([01][0-9]|2[0-3]):[0-5][0-9]" } }) %></div>
+    </div>
     <%- include("../../partials/form-field.ejs", { id: "cancellationPolicy", type: "select", label: "Cancellation policy", value: values.cancellationPolicy, error: errors.cancellationPolicy, required: true, options: lists.CANCELLATION_POLICIES }) %>
     <div class="form-check mb-3">
         <input class="form-check-input" type="checkbox" name="instantBook" id="instantBook" value="on"<% if (values.instantBook === true || values.instantBook === "on") { %> checked<% } %>>

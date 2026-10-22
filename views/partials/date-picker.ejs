@@ -14,6 +14,9 @@
     <p class="small text-body-secondary mb-2">
         Stay <%= datePicker.rules.minNights %> to <%= datePicker.rules.maxNights %> night<%= datePicker.rules.maxNights === 1 ? "" : "s" %>.
         Crossed-out dates are not available.
+        <% if (datePicker.rules.advanceNoticeHours > 0) { %>
+        The host needs <%= datePicker.rules.advanceNoticeHours %> hour<%= datePicker.rules.advanceNoticeHours === 1 ? "" : "s" %> notice before check-in.
+        <% } %>
     </p>
     <input type="hidden" name="checkIn" value="">
     <input type="hidden" name="checkOut" value="">

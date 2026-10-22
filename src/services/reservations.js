@@ -6,7 +6,7 @@
 // create() order, which is what keeps the ledger and the reservations
 // consistent (ADR-004):
 //   1. validate input; a repeated idempotency key returns the original
-//   2. load the listing; rules; quote; compare the price the guest saw
+//   2. load the listing; booking rules (bookingRules.js); quote; compare the price the guest saw
 //   3. hold every night in the ledger (the database refuses a second owner)
 //   4. check the listing is still public (a host may unpublish meanwhile)
 //   5. insert the reservation; if that fails, release the nights
@@ -24,8 +24,8 @@ const {
   isDateOnly,
   todayIn,
   eachNight,
-  assertBookableDates,
   formatDateOnly,
+  instantAfter,
 } = require("../utils/dates");
 const {
   ValidationError,
@@ -35,7 +35,7 @@ const {
   PriceChangedError,
 } = require("../utils/errors");
 const { isPublic } = require("../utils/visibility");
-const { stayRulesFor, stayProblems } = require("./availability");
+const { bookingProblems } = require("./bookingRules");
 const { assertTransition, releasesNights } = require("./stateMachine");
 
 const PENDING_HOLD_MS = 24 * 60 * 60 * 1000;
@@ -164,17 +164,12 @@ function createReservationService({
       throw new ForbiddenError("You cannot book your own listing.");
     }
 
-    // Rules (P07-T06 extends these): booking window, stay length, capacity.
-    const today = todayIn(listing.timezone || DEFAULT_TIMEZONE, now);
-    assertBookableDates({ checkIn, checkOut, today });
-    const rules = stayRulesFor(listing, { today });
-    const problems = stayProblems({ checkIn, checkOut, rules });
-    if (problems.length) throw new ValidationError(problems[0]);
-    const capacity = listing.capacity && listing.capacity.guests;
-    if (Number.isInteger(capacity) && guests > capacity) {
-      throw new ValidationError(
-        `This place hosts at most ${capacity} guest${capacity === 1 ? "" : "s"}.`,
-      );
+    // Booking rules (P07-T06): one module decides dates, stay length,
+    // capacity, advance notice and the same-day cut-off, each with its own
+    // message and code. The first problem is the one the guest sees.
+    const problems = bookingProblems({ listing, checkIn, checkOut, guests, now });
+    if (problems.length) {
+      throw new ValidationError(problems[0].message, { code: problems[0].code });
     }
 
     const quote = pricing.quote({ listing, checkIn, checkOut, guests });
@@ -184,7 +179,7 @@ function createReservationService({
 
     const instant = Boolean(listing.instantBook);
     const status = instant ? "confirmed" : "pending";
-    const holdExpiresAt = instant ? null : new Date(now.getTime() + PENDING_HOLD_MS);
+    const holdExpiresAt = instant ? null : instantAfter(now, PENDING_HOLD_MS);
     const _id = newId();
 
     try {

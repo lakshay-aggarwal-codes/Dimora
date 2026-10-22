@@ -165,3 +165,32 @@ test("steps 4 and 6 have no form", () => {
   expect(() => validateStep(4, {})).toThrow(/No form/);
   expect(() => validateStep(6, {})).toThrow(/No form/);
 });
+
+describe("step 5: booking rules (P07-T06)", () => {
+  test("left blank (or absent), the defaults apply", () => {
+    for (const extra of [{}, { advanceNoticeHours: "", sameDayCutoffTime: "" }]) {
+      const { value, errors } = validateStep(5, pricing(extra));
+      expect(errors).toEqual({});
+      expect(value.advanceNoticeHours).toBe(0);
+      expect(value.sameDayCutoffTime).toBe("20:00");
+    }
+  });
+  test("host values are accepted as the form sends them (strings)", () => {
+    const { value } = validateStep(5, pricing({ advanceNoticeHours: "48", sameDayCutoffTime: "18:30" }));
+    expect(value.advanceNoticeHours).toBe(48);
+    expect(value.sameDayCutoffTime).toBe("18:30");
+  });
+  test.each([
+    ["advanceNoticeHours", "-1"],
+    ["advanceNoticeHours", "169"],
+    ["advanceNoticeHours", "1.5"],
+    ["advanceNoticeHours", "soon"],
+    ["sameDayCutoffTime", "8pm"],
+    ["sameDayCutoffTime", "24:00"],
+    ["sameDayCutoffTime", "20:60"],
+  ])("%s = %j is refused with a message on that field", (field, bad) => {
+    const { value, errors } = validateStep(5, pricing({ [field]: bad }));
+    expect(value).toBeUndefined();
+    expect(Object.keys(errors)).toEqual([field]);
+  });
+});

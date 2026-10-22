@@ -6,6 +6,8 @@
 //   availableRanges(listingId, from, to, { now }?)
 //   nightsInRange(listingId, from, to, { now }?)       (P07-T03: calendar)
 //   releaseBlockedNights(listingId, from, to)          (P07-T03: unblock)
+//   unavailableDates(listingId, from, to, { now }?)    (P07-T04: public availability API)
+//   confirmNights(sourceId)                            (P07-T05: accepting a request)
 //
 // Booking works by inserting one row per night with `insertMany(...,
 // { ordered: true })`. The unique (listing, date) index rejects a night that is
@@ -279,6 +281,57 @@ function createLedgerService({
   }
 
   /**
+   * The nights of one listing that cannot be booked inside [from, to): held by
+   * a reservation, a live hold or a host block, oldest first. An expired hold
+   * counts as free. Only dates come back (never who or why), so the public
+   * availability API cannot leak a guest and shows a block and a reservation
+   * identically (P07-T04).
+   * @returns {Promise<Date[]>}
+   */
+  async function unavailableDates(
+    listingId,
+    from,
+    to,
+    { now = new Date() } = {},
+  ) {
+    const listing = requireId(listingId, "listingId");
+    if (!isDateOnly(from) || !isDateOnly(to)) {
+      throw new TypeError("from and to must be date-only Dates (00:00:00Z)");
+    }
+    const span = (to.getTime() - from.getTime()) / 86400000;
+    if (span <= 0) throw new TypeError("to must be after from");
+    if (span > MAX_AVAILABILITY_SPAN_DAYS) {
+      throw new TypeError(
+        `the range can cover at most ${MAX_AVAILABILITY_SPAN_DAYS} nights`,
+      );
+    }
+    const rows = await model
+      .find(
+        { listing, date: { $gte: from, $lt: to } },
+        { date: 1, holdExpiresAt: 1 },
+      )
+      .lean();
+    return rows
+      .filter((row) => !isStale(row, now))
+      .map((row) => row.date)
+      .sort((a, b) => a.getTime() - b.getTime());
+  }
+
+  /**
+   * Accepting a request removes the hold from its nights, so they no longer
+   * expire (P07-T05). Only rows of this reservation are touched.
+   * @returns {Promise<{confirmed: number}>}
+   */
+  async function confirmNights(sourceId) {
+    requireId(sourceId, "sourceId");
+    const { modifiedCount } = await model.updateMany(
+      { "source.id": sourceId },
+      { $unset: { holdExpiresAt: 1 } },
+    );
+    return { confirmed: modifiedCount };
+  }
+
+  /**
    * Frees the HOST-BLOCKED nights of one listing inside [from, to). Only rows
    * with source.kind "block" are touched: a reserved or held night is never
    * released here. Also reports which blocks have no night left, so the
@@ -360,6 +413,8 @@ function createLedgerService({
     availableRanges,
     nightsInRange,
     releaseBlockedNights,
+    unavailableDates,
+    confirmNights,
     hasUpcomingReservation,
     unavailableListingIds,
   };
