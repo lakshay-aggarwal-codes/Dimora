@@ -90,11 +90,10 @@ const reservationSchema = new Schema(
   { timestamps: true },
 );
 
-reservationSchema.pre("validate", function (next) {
+reservationSchema.pre("validate", function () {
   if (this.checkIn && this.checkOut && this.checkOut <= this.checkIn) {
     this.invalidate("checkOut", "Check-out must be after check-in.");
   }
-  next();
 });
 
 reservationSchema.index({ guest: 1, createdAt: -1 });

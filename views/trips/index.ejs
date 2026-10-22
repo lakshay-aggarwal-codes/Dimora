@@ -1,0 +1,59 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    A guest's bookings in four tabs (P09-T01). Locals (src/services/trips.js
+    listTrips): tab, tabs [{ key, label, count }], items, page, totalPages, total.
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-10 mx-auto">
+        <h1 class="h3 mb-3">Your trips</h1>
+
+        <nav aria-label="Trip status">
+            <ul class="nav nav-tabs trip-tabs">
+                <% tabs.forEach((t) => { %>
+                <li class="nav-item">
+                    <a class="nav-link<%= t.key === tab ? ' active' : '' %>" href="/trips?tab=<%= t.key %>"<% if (t.key === tab) { %> aria-current="page"<% } %>>
+                        <%= t.label %> <span class="badge text-bg-light trip-count"><%= t.count %></span>
+                    </a>
+                </li>
+                <% }) %>
+            </ul>
+        </nav>
+
+        <% if (items.length === 0) { %>
+            <%
+                const empty = {
+                    upcoming: ["No upcoming trips", "When a host confirms your booking it shows up here."],
+                    pending: ["Nothing waiting for a host", "Requests you send to hosts wait here until they answer."],
+                    past: ["No past trips yet", "Stays you have completed are kept here."],
+                    cancelled: ["Nothing cancelled", "Declined, expired and cancelled bookings appear here."],
+                }[tab];
+            %>
+            <%- include("../partials/empty-state.ejs", { title: empty[0], message: empty[1], icon: "fa-suitcase-rolling", actionHref: "/listings", actionLabel: "Explore places", headingLevel: 2 }) %>
+        <% } else { %>
+        <ul class="trip-list list-unstyled mt-3">
+            <% items.forEach((trip) => { %>
+            <li class="trip-card">
+                <a class="trip-card-link" href="/trips/<%= trip.id %>">
+                    <% if (trip.coverUrl) { %>
+                    <img class="trip-cover" src="<%= trip.coverUrl %>" alt="" loading="lazy" width="120" height="90">
+                    <% } else { %>
+                    <span class="trip-cover trip-cover-empty" aria-hidden="true"></span>
+                    <% } %>
+                    <span class="trip-body">
+                        <span class="trip-title"><%= trip.listingTitle %></span>
+                        <% if (trip.city) { %><span class="trip-city"><%= trip.city %></span><% } %>
+                        <span class="trip-dates"><%= trip.checkIn %> – <%= trip.checkOut %> · <%= trip.nights %> night<%= trip.nights === 1 ? "" : "s" %> · <%= trip.guests %> guest<%= trip.guests === 1 ? "" : "s" %></span>
+                        <% if (trip.holdsUntil) { %><span class="trip-hold">The host has until <%= trip.holdsUntil %> to answer.</span><% } %>
+                    </span>
+                    <span class="trip-side">
+                        <span class="badge text-bg-<%= trip.tone %>"><%= trip.statusLabel %></span>
+                        <% if (trip.totalMinor !== null) { %><span class="trip-total"><%= formatMoney(trip.totalMinor, trip.currency) %></span><% } %>
+                    </span>
+                </a>
+            </li>
+            <% }) %>
+        </ul>
+        <%- include("../partials/pagination.ejs", { page, totalPages, baseUrl: "/trips", query: { tab: tab === "upcoming" ? undefined : tab } }) %>
+        <% } %>
+    </div>
+</div>

@@ -1,0 +1,95 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    One booking's confirmation page (P09-T01). Local: trip (src/services/trips.js
+    describeTrip). The service decides what is revealed (host contact and exact
+    address only once confirmed); this view only prints it. Everything is
+    escaped. The page prints cleanly (print styles in components.css).
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-9 mx-auto trip-page">
+        <p class="no-print"><a href="/trips<%= trip.tab === 'upcoming' ? '' : '?tab=' + trip.tab %>">&larr; Your trips</a></p>
+
+        <header class="trip-head">
+            <p class="trip-reference mb-1">Booking <strong><%= trip.reference %></strong></p>
+            <h1 class="h3 mb-2"><%= trip.listing.title %></h1>
+            <p class="mb-2"><span class="badge text-bg-<%= trip.tone %>"><%= trip.statusLabel %></span>
+                <% if (trip.listing.city) { %><span class="text-body-secondary ms-2"><%= trip.listing.city %></span><% } %></p>
+            <% if (trip.guestName) { %><p class="mb-2">Guest: <strong><%= trip.guestName %></strong></p><% } %>
+            <p class="no-print">
+                <% if (trip.listing.url) { %><a class="btn btn-outline-dark btn-sm" href="<%= trip.listing.url %>">View the listing</a><% } %>
+                <button type="button" class="btn btn-outline-dark btn-sm" data-print>Print</button>
+            </p>
+        </header>
+
+        <% if (trip.status === "pending") { %>
+        <div class="alert alert-warning" role="status">
+            The host has not answered yet<% if (trip.holdsUntil) { %> and has until <strong><%= trip.holdsUntil %></strong><% } %>.
+            The dates are held for you meanwhile. If the host does not answer in time the request expires and the dates are released.
+        </div>
+        <% } else if (trip.status === "confirmed" && trip.instantBook) { %>
+        <div class="alert alert-success" role="status">This place confirms bookings instantly, so your stay is confirmed.</div>
+        <% } else if (trip.status === "confirmed") { %>
+        <div class="alert alert-success" role="status">The host accepted your request. Your stay is confirmed.</div>
+        <% } %>
+
+        <section class="trip-section" aria-labelledby="trip-stay">
+            <h2 class="h5" id="trip-stay">Your stay</h2>
+            <dl class="trip-facts">
+                <div><dt>Check-in</dt><dd><%= trip.checkInWeekday %>, <%= trip.checkIn %><% if (trip.checkInTime) { %> · from <%= trip.checkInTime %><% } %></dd></div>
+                <div><dt>Check-out</dt><dd><%= trip.checkOutWeekday %>, <%= trip.checkOut %><% if (trip.checkOutTime) { %> · by <%= trip.checkOutTime %><% } %></dd></div>
+                <div><dt>Length</dt><dd><%= trip.nights %> night<%= trip.nights === 1 ? "" : "s" %></dd></div>
+                <div><dt>Guests</dt><dd><%= trip.guests %></dd></div>
+            </dl>
+        </section>
+
+        <section class="trip-section" aria-labelledby="trip-where">
+            <h2 class="h5" id="trip-where">Where</h2>
+            <% if (trip.revealed && trip.address) { %>
+            <address class="mb-1">
+                <% trip.address.forEach((part, i) => { %><%= part %><% if (i < trip.address.length - 1) { %><br><% } %><% }) %>
+            </address>
+            <% if (trip.mapUrl) { %><p class="no-print mb-0"><a href="<%= trip.mapUrl %>" target="_blank" rel="noopener noreferrer">Open the exact spot on a map</a></p><% } %>
+            <% } else if (trip.revealed) { %>
+            <p class="mb-0 text-body-secondary">The host has not added a street address. Ask them for directions.</p>
+            <% } else { %>
+            <p class="mb-0 text-body-secondary">The exact address is shared once the booking is confirmed.</p>
+            <% } %>
+        </section>
+
+        <% if (trip.hostContact) { %>
+        <section class="trip-section" aria-labelledby="trip-host">
+            <h2 class="h5" id="trip-host">Your host</h2>
+            <p class="mb-0"><a href="<%= trip.hostContact.profileUrl %>"><%= trip.hostContact.name %></a><% if (trip.hostContact.email) { %> · <a href="mailto:<%= trip.hostContact.email %>"><%= trip.hostContact.email %></a><% } %></p>
+        </section>
+        <% } %>
+
+        <section class="trip-section" aria-labelledby="trip-price">
+            <h2 class="h5" id="trip-price">Price</h2>
+            <ul class="quote-lines">
+                <% trip.lines.forEach((line) => { %>
+                <li><span><%= line.label %></span><span><%= line.amount %></span></li>
+                <% }) %>
+            </ul>
+            <div class="quote-total"><span>Total for <%= trip.nights %> night<%= trip.nights === 1 ? "" : "s" %></span><span><%= trip.totalText %></span></div>
+            <% if (trip.avgPerNightText) { %><p class="small text-body-secondary mt-2 mb-0"><%= trip.avgPerNightText %> per night on average. <%= trip.taxNote %></p><% } %>
+            <p class="small text-body-secondary mt-1 mb-0">These are the amounts agreed when you booked. Dimora does not take payment yet: nothing has been charged (payments are simulated).</p>
+        </section>
+
+        <section class="trip-section" aria-labelledby="trip-rules">
+            <h2 class="h5" id="trip-rules">House rules</h2>
+            <% if (trip.noSpecialRules) { %>
+            <p class="mb-0 text-body-secondary">The host listed no special rules.</p>
+            <% } else { %>
+            <p class="mb-0 trip-rules-text"><%= trip.houseRules %></p>
+            <% } %>
+        </section>
+
+        <% if (trip.cancellation) { %>
+        <section class="trip-section" aria-labelledby="trip-cancel">
+            <h2 class="h5" id="trip-cancel">Cancellation terms: <%= trip.cancellation.label %></h2>
+            <p class="mb-0"><%= trip.cancellation.terms %></p>
+        </section>
+        <% } %>
+    </div>
+</div>
+<script src="/js/trips.js"></script>

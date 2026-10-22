@@ -35,6 +35,18 @@ const CANCELLATION_POLICIES = [
   { value: "strict", label: "Strict" },
 ];
 
+// What each cancellation policy says on a booking (P09-T01). Plain-language
+// wording shown to guests; the refund rules that enforce it are P09-T03, which
+// must keep these sentences and the code in step.
+const CANCELLATION_TERMS = Object.freeze({
+  flexible:
+    "Free cancellation until 24 hours before check-in. After that, the first night is not refunded.",
+  moderate:
+    "Free cancellation until 5 days before check-in. After that, the first night and half of the remaining nights are not refunded.",
+  strict:
+    "Free cancellation within 48 hours of booking if check-in is at least 14 days away. After that, half of the stay is refunded until 7 days before check-in, and nothing after.",
+});
+
 // `group` is only for showing amenities in sections on the listing page.
 const AMENITY_GROUPS = ["Essentials", "Facilities", "Safety", "Good to know"];
 
@@ -62,6 +74,7 @@ module.exports = {
   ROOM_TYPES,
   VIBES,
   CANCELLATION_POLICIES,
+  CANCELLATION_TERMS,
   AMENITIES,
   AMENITY_GROUPS,
   PROPERTY_TYPE_VALUES: values(PROPERTY_TYPES),

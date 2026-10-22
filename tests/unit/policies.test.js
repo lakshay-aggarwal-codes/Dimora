@@ -7,6 +7,7 @@ const { sameId, idOf } = require("../../src/policies/shared");
 
 const ownerId = new ObjectId();
 const authorId = new ObjectId();
+const guestId = new ObjectId();
 
 const user = (extra) => ({ _id: new ObjectId(), role: "member", ...extra });
 
@@ -15,15 +16,18 @@ const people = {
   "other member": user(),
   "listing owner": { _id: ownerId, role: "member", status: "active" },
   "review author": { _id: authorId, role: "member", status: "active" },
+  "guest of the booking": { _id: guestId, role: "member", status: "active" },
   admin: user({ role: "admin", status: "active" }),
   "legacy user (no status field)": user(),
   "suspended owner": { _id: ownerId, role: "member", status: "suspended" },
+  "suspended guest": { _id: guestId, role: "member", status: "suspended" },
   "suspended admin": user({ role: "admin", status: "suspended" }),
   "deleted owner": { _id: ownerId, role: "member", status: "deleted" },
 };
 
 const listing = { owner: ownerId };
 const review = { author: authorId };
+const reservation = { guest: guestId, host: ownerId };
 
 // [action, resource, { person: expected }] - people not listed must be denied.
 const MATRIX = [
@@ -34,6 +38,7 @@ const MATRIX = [
       "other member": true,
       "listing owner": true,
       "review author": true,
+      "guest of the booking": true,
       admin: true,
       "legacy user (no status field)": true,
     },
@@ -47,11 +52,21 @@ const MATRIX = [
       "other member": true,
       "listing owner": true,
       "review author": true,
+      "guest of the booking": true,
       admin: true,
       "legacy user (no status field)": true,
     },
   ],
   ["review:delete", review, { "review author": true, admin: true }],
+  [
+    "reservation:view",
+    reservation,
+    {
+      "listing owner": true, // the host of the booking
+      "guest of the booking": true,
+      admin: true,
+    },
+  ],
   ["admin:access", undefined, { admin: true }],
 ];
 
@@ -117,5 +132,23 @@ describe("policy edge cases", () => {
     expect(sameId(null, ownerId)).toBe(false);
     expect(sameId(ownerId, String(ownerId))).toBe(true);
     expect(idOf(undefined)).toBeNull();
+  });
+});
+
+describe("reservation:view edge cases (P09-T01)", () => {
+  const me = people["guest of the booking"];
+  test("guest and host may be ObjectIds, populated documents or strings", () => {
+    expect(can("reservation:view", me, { guest: { _id: guestId }, host: ownerId })).toBe(true);
+    expect(can("reservation:view", me, { guest: String(guestId), host: ownerId })).toBe(true);
+    expect(can("reservation:view", people["listing owner"], { guest: guestId, host: { _id: ownerId } })).toBe(true);
+  });
+  test("a booking without a guest or host is visible only to an admin", () => {
+    expect(can("reservation:view", me, { guest: null, host: null })).toBe(false);
+    expect(can("reservation:view", people["other member"], { host: undefined })).toBe(false);
+    expect(can("reservation:view", people.admin, { guest: null, host: null })).toBe(true);
+  });
+  test("a missing booking is denied, not a crash", () => {
+    expect(can("reservation:view", people.admin, null)).toBe(false);
+    expect(can("reservation:view", me, undefined)).toBe(false);
   });
 });

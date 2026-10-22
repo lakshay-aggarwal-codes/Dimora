@@ -32,6 +32,7 @@ const useRouter = require("./routes/user");
 const pagesRouter = require("./routes/pages");
 const apiRouter = require("./routes/api");
 const adminRouter = require("./routes/admin");
+const tripsRouter = require("./routes/trips");
 const {
   assignCspNonce,
   securityHeaders,
@@ -177,6 +178,7 @@ function createApp({
   app.use("/listings/:id/reviews", reviewRouter);
   app.use("/", pagesRouter);
   app.use("/", useRouter);
+  app.use("/", tripsRouter);
 
   app.all("/{*splat}", (req, res, next) => {
     next(new NotFoundError());

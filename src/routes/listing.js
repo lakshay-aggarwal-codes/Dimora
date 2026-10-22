@@ -9,6 +9,7 @@ const {
 } = require("../middleware/listing");
 const searchController = require("../controllers/search");
 const listingController = require("../controllers/listing.js");
+const sectionsController = require("../controllers/sections");
 const { upload, uploadToCloudinary } = require("../config/cloudinary");
 
 // The file input in the new/edit forms is named like a nested field.
@@ -37,7 +38,15 @@ router.get(
   "/:id/edit",
   isLoggedIn,
   authorize("listing:edit"),
-  wrapAsync(listingController.renderEditForm),
+  wrapAsync(sectionsController.renderEditForm),
+);
+
+// Edit one section at a time (P04-T04); a changed address needs confirming.
+router.put(
+  "/:id/sections/:key",
+  isLoggedIn,
+  authorize("listing:edit"),
+  wrapAsync(sectionsController.save),
 );
 
 router.get(

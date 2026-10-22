@@ -10,6 +10,7 @@
 const listing = require("./listing");
 const review = require("./review");
 const admin = require("./admin");
+const reservation = require("./reservation");
 const { isAdmin, hasRole } = require("./shared");
 
 const POLICIES = {
@@ -18,6 +19,7 @@ const POLICIES = {
   "listing:delete": listing.delete,
   "review:create": review.create,
   "review:delete": review.delete,
+  "reservation:view": reservation.view,
   "admin:access": admin.access,
 };
 
