@@ -59,7 +59,7 @@ describe("sorting", () => {
     const sortLinks = [...text.matchAll(/class="sort-link[^"]*" href="([^"]+)"/g)].map((m) => m[1].replace(/&amp;/g, "&"));
     expect(sortLinks).toHaveLength(5);
     for (const link of sortLinks) {
-      expect(link).toContain("destination=Goa");
+      expect(link).toContain("dest=Goa");
       expect(link).toContain("guests=2");
       expect(link).not.toContain("page=");
     }
@@ -79,9 +79,9 @@ describe("pagination", () => {
     stubListings(docs(12), { total: 40 });
     const { text } = await get("?destination=Goa&sort=newest&page=2");
     const links = hrefs(text.slice(text.indexOf('aria-label="Pagination"')));
-    expect(links.some((l) => l === "/listings?destination=Goa&sort=newest")).toBe(true); // page 1
-    expect(links.some((l) => l === "/listings?destination=Goa&sort=newest&page=3")).toBe(true);
-    expect(links.some((l) => l === "/listings?destination=Goa&sort=newest&page=4")).toBe(true);
+    expect(links.some((l) => l === "/listings?dest=Goa&sort=newest")).toBe(true); // page 1
+    expect(links.some((l) => l === "/listings?dest=Goa&sort=newest&page=3")).toBe(true);
+    expect(links.some((l) => l === "/listings?dest=Goa&sort=newest&page=4")).toBe(true);
     expect(text).toMatch(/aria-current="page"><span class="visually-hidden">Page <\/span>2</);
   });
 
@@ -97,7 +97,7 @@ describe("pagination", () => {
     expect(res.status).toBe(200);
     expect(res.text).toContain("That page does not exist");
     expect(res.text).toContain("There are only 3 pages of results.");
-    expect(hrefs(res.text)).toContain("/listings?destination=Goa&page=3");
+    expect(hrefs(res.text)).toContain("/listings?dest=Goa&page=3");
     expect(res.text).toContain("Go to the last page");
     expect(res.text).not.toContain("listing-card");
     expect(find).not.toHaveBeenCalled(); // the list itself is not even fetched

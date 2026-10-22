@@ -141,7 +141,7 @@ describe("category strip", () => {
 
   test("categories are links inside a labelled nav, not clickable divs", () => {
     expect(index).toMatch(/<nav class="filter-nav" aria-label="Categories">/);
-    expect(index).toMatch(/<a class="filter<%= category\.active[^>]*href="<%= category\.href %>"/);
+    expect(index).toMatch(/<a class="filter<%= category\.active(?:<%[\s\S]*?%>|[^>])*href="<%= category\.href %>"/);
     expect(index).not.toMatch(/<div class="filter"/);
   });
 

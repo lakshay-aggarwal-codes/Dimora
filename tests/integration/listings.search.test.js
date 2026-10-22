@@ -189,15 +189,17 @@ describe("paging", () => {
     ).toBe(true);
   });
 
-  test("a page past the end shows the last page; page 0 or text shows page 1 with a message", async () => {
+  test("a page past the end is explained with a link to the last page; page 0 or text shows page 1 with a message", async () => {
     const { chain } = stubListingSearch(docs(3), { total: 30 });
-    await get("/listings?page=99");
-    expect(chain.skip).toHaveBeenLastCalledWith(PAGE_SIZE * 2); // 30 results = 3 pages
-    chain.skip.mockClear();
+    const past = await get("/listings?page=99");
+    expect(past.status).toBe(200);
+    expect(past.text).toContain("That page does not exist");
+    expect(chain.skip).not.toHaveBeenCalled(); // the list is not fetched (task 37)
     const res = await get("/listings?page=0");
     expect(chain.skip).toHaveBeenLastCalledWith(0);
     expect(res.text).toContain("Page must be a whole number from 1.");
   });
+
 
   test("a single page has no pagination", async () => {
     stubListingSearch(docs(5));

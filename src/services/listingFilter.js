@@ -8,20 +8,22 @@ const { parseListingQuery } = require("../validation/searchQuery");
 
 /**
  * @param {object} query req.query
- * @returns {Promise<{ parsed: object, filter: object }>}
+ * @returns {Promise<{ parsed: object, filter: object, takenIds: Array }>}
  */
 async function listingFilterFor(query, { now = new Date() } = {}) {
   const parsed = parseListingQuery(query, { now });
   const filter = buildFilter(parsed.searchParams);
+  let takenIds = [];
   if (parsed.stay) {
     const taken = await ledger.unavailableListingIds(
       parsed.stay.checkIn,
       parsed.stay.checkOut,
       { now },
     );
+    takenIds = taken;
     if (taken.length > 0) filter._id = { $nin: taken };
   }
-  return { parsed, filter };
+  return { parsed, filter, takenIds };
 }
 
 module.exports = { listingFilterFor };

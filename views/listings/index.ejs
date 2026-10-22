@@ -123,26 +123,71 @@
 
     <div class="search-split" id="search-split" data-view="list">
     <div id="results" class="results-region">
-    <p class="results-count" role="status" aria-live="polite">
-        <% if (resultCount === 0) { %>No stays found<% } else { %><%= resultCount %> <%= resultCount === 1 ? "stay" : "stays" %><% if (filterState.dest) { %> for &ldquo;<%= filterState.dest %>&rdquo;<% } %><% } %>
+    <%
+        const destText = filterState.dest ? " for &ldquo;" + String(filterState.dest).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") + "&rdquo;" : "";
+        const stayWord = resultCount === 1 ? "stay" : "stays";
+        const range = typeof showing !== "undefined" ? showing : null;
+        const isOut = typeof outOfRange !== "undefined" && outOfRange;
+        const sortItems = typeof sortLinks !== "undefined" ? sortLinks : [];
+        const sugg = typeof suggestions !== "undefined" ? suggestions : null;
+    %>
+    <p class="results-count" role="status">
+        <% if (resultCount === 0) { %>No stays found<% } else if (range) { %>Showing <%- range.from %>&ndash;<%- range.to %> of <%= resultCount %> stays<%- destText %><% } else { %><%= resultCount %> <%= stayWord %><%- destText %><% } %>
         <% if (isFiltered) { %><a class="results-clear" href="/listings">Clear search</a><% } %>
     </p>
 
-    <% if (resultCount === 0) { %>
+    <% if (resultCount > 0 && !isOut && sortItems.length > 0) { %>
+    <nav class="sort-bar" aria-label="Sort results">
+        <span class="sort-label">Sort by</span>
+        <% sortItems.forEach((option) => { %>
+        <a class="sort-link<%= option.current ? ' is-current' : '' %>" href="<%= option.href %>"<% if (option.current) { %> aria-current="true"<% } %>><%= option.label %></a>
+        <% }) %>
+    </nav>
+    <% } %>
+
+    <% if (isOut) { %>
+    <%- include("../partials/empty-state.ejs", {
+        title: "That page does not exist",
+        message: pageCount === 1 ? "There is only 1 page of results." : "There are only " + pageCount + " pages of results.",
+        icon: "fa-house",
+        actionHref: typeof lastPageHref === "string" ? lastPageHref : "/listings",
+        actionLabel: "Go to the last page"
+    }) %>
+    <% } else if (resultCount === 0) { %>
     <%- include("../partials/empty-state.ejs", {
         title: isFiltered ? "No stays match your search" : "No stays yet",
         message: isFiltered ? "Try other dates, a different place or fewer filters." : "Check back soon, new places are added all the time.",
         icon: "fa-house",
-        actionHref: isFiltered ? "/listings" : "/host/listings/new",
-        actionLabel: isFiltered ? "Clear search" : "List your place"
+        actionHref: isFiltered ? (sugg ? (sugg.hasAnyStays ? "/listings" : "/host/listings/new") : "/listings") : "/host/listings/new",
+        actionLabel: isFiltered ? (sugg ? (sugg.hasAnyStays ? "Clear all filters" : "List your place") : "Clear search") : "List your place"
     }) %>
+    <% if (sugg && sugg.filterSuggestions.length > 0) { %>
+    <section class="suggestions" aria-labelledby="suggest-filters">
+        <h2 class="suggestions-title" id="suggest-filters">Try this instead</h2>
+        <ul class="suggestions-list" role="list">
+            <% sugg.filterSuggestions.forEach((item) => { %>
+            <li><a href="<%= item.url %>"><%= item.label %></a> <span class="suggestion-count"><%= item.count %> <%= item.count === 1 ? "stay" : "stays" %></span></li>
+            <% }) %>
+        </ul>
+    </section>
+    <% } %>
+    <% if (sugg && sugg.destinations.length > 0) { %>
+    <section class="suggestions" aria-labelledby="suggest-places">
+        <h2 class="suggestions-title" id="suggest-places">Popular destinations</h2>
+        <ul class="suggestions-list" role="list">
+            <% sugg.destinations.forEach((item) => { %>
+            <li><a href="<%= item.url %>"><%= item.label %></a> <span class="suggestion-count"><%= item.count %> <%= item.count === 1 ? "stay" : "stays" %></span></li>
+            <% }) %>
+        </ul>
+    </section>
+    <% } %>
     <% if (activeFilterCount > 0 || hasCategory) { %>
     <p class="text-center"><a href="<%= resetHref %>">Remove the filters and category, keep my search</a></p>
     <% } %>
     <% } %>
 
     <!-- All listing cards: one column on phones, two from md, three from lg -->
-    <% if (resultCount > 0) { %>
+    <% if (resultCount > 0 && !isOut) { %>
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-3">
         <% for (const list of allListings) { %>
         <div class="col" data-listing-id="<%= list._id %>">
