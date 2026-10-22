@@ -72,13 +72,21 @@ describe("every state-changing route rejects a request without a token", () => {
   const request = require("supertest");
   const start = (method, url) => request(app)[method.toLowerCase()](url);
 
+  // The booking form is the one exception (P08-T03): a request without a valid
+  // token is not a dead-end 403 but a redirect back to the GET checkout page
+  // (the session may simply have ended). It books nothing; see
+  // tests/integration/checkout.test.js for the details.
+  const RECOVERED = "/listings/:id/checkout";
   const cases = [];
+  const recovered = [];
   for (const route of routes) {
     const methods = route.methods.includes("_ALL")
       ? MUTATING
       : route.methods.filter((m) => MUTATING.includes(m));
-    for (const method of methods)
-      cases.push([method, concretePath(route.path), route.path]);
+    for (const method of methods) {
+      const target = route.path === RECOVERED ? recovered : cases;
+      target.push([method, concretePath(route.path), route.path]);
+    }
   }
 
   test("the route table covers the known state-changing routes", () => {
@@ -95,7 +103,23 @@ describe("every state-changing route rejects a request without a token", () => {
     ]) {
       expect(seen).toContain(expected);
     }
+    expect(recovered.map(([m, , p]) => `${m} ${p}`)).toEqual([
+      "POST /listings/:id/checkout",
+    ]);
   });
+
+  test.each(recovered)(
+    "%s %s (%s) -> redirect to the checkout page, not a booking, with no token or a wrong one",
+    async (method, url) => {
+      for (const token of [undefined, "wrong"]) {
+        let req = start(method, url);
+        if (token) req = req.set("X-CSRF-Token", token);
+        const res = await req.type("form").send({});
+        expect(res.status).toBe(302);
+        expect(res.headers.location).toBe(url);
+      }
+    },
+  );
 
   test.each(cases)("%s %s (%s) -> 403 without a token", async (method, url) => {
     const res = await start(method, url).type("form").send({});

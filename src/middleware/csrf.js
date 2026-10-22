@@ -54,7 +54,13 @@ function submittedToken(req) {
   return undefined;
 }
 
-function csrfProtection() {
+/**
+ * @param {object} [options]
+ * @param {(req, res) => boolean} [options.onInvalid] called when the token is
+ *   missing or wrong; return true if it already answered the request (the
+ *   checkout form's "session ended" redirect, P08-T03), false for the 403
+ */
+function csrfProtection({ onInvalid } = {}) {
   return function csrfProtectionMiddleware(req, res, next) {
     const expected = getToken(req);
     res.locals.csrfToken = expected || "";
@@ -64,6 +70,7 @@ function csrfProtection() {
     if (!expected || !tokensMatch(expected, submittedToken(req))) {
       if (req.log)
         req.log.warn({ event: "csrf_rejected" }, "csrf token rejected");
+      if (onInvalid && onInvalid(req, res)) return undefined;
       return next(new ForbiddenError(MESSAGE, { code: "csrf_invalid" }));
     }
 

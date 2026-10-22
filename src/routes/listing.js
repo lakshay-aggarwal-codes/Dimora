@@ -9,7 +9,7 @@ const {
 } = require("../middleware/listing");
 const searchController = require("../controllers/search");
 const listingController = require("../controllers/listing.js");
-const sectionsController = require("../controllers/sections");
+const checkoutController = require("../controllers/checkout");
 const { upload, uploadToCloudinary } = require("../config/cloudinary");
 
 // The file input in the new/edit forms is named like a nested field.
@@ -38,16 +38,16 @@ router.get(
   "/:id/edit",
   isLoggedIn,
   authorize("listing:edit"),
-  wrapAsync(sectionsController.renderEditForm),
+  wrapAsync(listingController.renderEditForm),
 );
 
-// Edit one section at a time (P04-T04); a changed address needs confirming.
-router.put(
-  "/:id/sections/:key",
-  isLoggedIn,
-  authorize("listing:edit"),
-  wrapAsync(sectionsController.save),
-);
+// Checkout (P08-T03): the guest reviews the stay and the final price, then
+// books. Both need a login; a guest who is logged out is sent back here after
+// logging in.
+router
+  .route("/:id/checkout")
+  .get(isLoggedIn, wrapAsync(checkoutController.show))
+  .post(isLoggedIn, wrapAsync(checkoutController.submit));
 
 router.get(
   "/new",

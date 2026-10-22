@@ -1,0 +1,109 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+  Checkout (P08-T03). Local: checkout (the view model of services/checkout.js).
+  Every value is written with the escaping tag; the amounts are integers in minor units
+  formatted by formatMoney. The form carries the stay, the total the guest is
+  confirming and an idempotency key; the server checks the price again.
+%>
+<%
+    const c = checkout;
+    const money = (minor) => formatMoney(minor, c.currency);
+    const backHref = `/listings/${c.listing.id}?in=${encodeURIComponent(c.stay.in)}&out=${encodeURIComponent(c.stay.out)}&guests=${encodeURIComponent(c.stay.guests)}`;
+    const verb = c.instant ? "Confirm booking" : "Send request";
+%>
+<section class="checkout mt-3" aria-labelledby="checkout-heading">
+    <p class="mb-2"><a href="<%= backHref %>">&larr; Back to the listing</a></p>
+    <h1 id="checkout-heading" class="h2 mb-3">Confirm your stay</h1>
+
+    <div class="alert alert-warning" role="note" data-simulation-banner>
+        <strong>Simulation.</strong> Dimora is a college project: no card is charged, no host is paid and no real stay is arranged. Do not enter any card details.
+    </div>
+
+    <% if (c.change) { %>
+    <div class="alert alert-danger" role="alert" data-price-changed>
+        <strong>The price has changed.</strong>
+        It was <%= money(c.change.previousTotalMinor) %> and is now <%= money(c.change.newTotalMinor) %>
+        (<%= money(Math.abs(c.change.differenceMinor)) %> <%= c.change.differenceMinor > 0 ? "more" : "less" %>).
+        Nothing has been booked. Check the lines marked "changed" and confirm the new total to continue.
+    </div>
+    <% } %>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="checkout-listing d-flex gap-3 mb-4">
+                <% if (c.listing.coverUrl) { %>
+                <img class="checkout-cover" src="<%= imageUrl(c.listing.coverUrl, 'thumb') %>" alt="" width="200" height="150">
+                <% } %>
+                <div>
+                    <h2 class="h5 mb-1"><a href="/listings/<%= c.listing.id %>"><%= c.listing.title %></a></h2>
+                    <% if (c.listing.place) { %><p class="text-body-secondary mb-0"><%= c.listing.place %></p><% } %>
+                </div>
+            </div>
+
+            <h2 class="h5">Your stay</h2>
+            <dl class="know-list" data-stay>
+                <dt>Check-in</dt><dd><%= c.stay.inLabel %><% if (c.listing.checkInTime) { %>, from <%= c.listing.checkInTime %><% } %></dd>
+                <dt>Check-out</dt><dd><%= c.stay.outLabel %><% if (c.listing.checkOutTime) { %>, by <%= c.listing.checkOutTime %><% } %></dd>
+                <dt>Nights</dt><dd><%= c.stay.nights %></dd>
+                <dt>Guests</dt><dd><%= c.stay.guestsLabel %></dd>
+            </dl>
+
+            <h2 class="h5 mt-4">How booking works</h2>
+            <% if (c.instant) { %>
+            <p data-booking-mode="instant">This is an <strong>instant book</strong> listing: your booking is confirmed as soon as you confirm below. The nights are yours straight away.</p>
+            <% } else { %>
+            <p data-booking-mode="request">The host approves each request. When you send it, these nights are held for you for <strong>24 hours</strong> while the host answers. If the host accepts, the booking is confirmed. If they decline or do not answer in time, the request ends and the nights are released.</p>
+            <% } %>
+
+            <h2 class="h5 mt-4">Cancellation policy: <%= c.policy.label %></h2>
+            <p data-cancellation><%= c.policy.text %></p>
+
+            <h2 class="h5 mt-4">House rules</h2>
+            <% if (c.listing.houseRules) { %>
+            <p class="detail-description"><%= c.listing.houseRules %></p>
+            <% } else if (c.listing.noSpecialRules) { %>
+            <p>The host has no special house rules.</p>
+            <% } else { %>
+            <p>The host has not listed any house rules.</p>
+            <% } %>
+        </div>
+
+        <div class="col-lg-5">
+            <form class="checkout-card" method="POST" action="/listings/<%= c.listing.id %>/checkout" data-checkout-form>
+                <%- include("../includes/csrf.ejs") %>
+                <input type="hidden" name="in" value="<%= c.stay.in %>">
+                <input type="hidden" name="out" value="<%= c.stay.out %>">
+                <input type="hidden" name="guests" value="<%= c.stay.guests %>">
+                <input type="hidden" name="expectedTotalMinor" value="<%= c.expectedTotalMinor %>">
+                <input type="hidden" name="previousLines" value="<%= c.encodedLines %>">
+                <input type="hidden" name="idempotencyKey" value="<%= c.idempotencyKey %>">
+
+                <h2 class="h5">Price details</h2>
+                <ul class="quote-lines" data-price-lines>
+                    <% c.lines.forEach((line) => { %>
+                    <li<% if (line.changed) { %> class="quote-line-changed" data-changed<% } %>>
+                        <span><%= line.label %><% if (line.changed) { %> <span class="dim-badge dim-badge-warning">changed</span><% } %></span>
+                        <span><%= money(line.amountMinor) %></span>
+                    </li>
+                    <% }) %>
+                </ul>
+                <p class="quote-total" data-total>
+                    <span>Total (<%= c.currency %>)</span>
+                    <span><%= money(c.totalMinor) %></span>
+                </p>
+                <% if (c.taxIncluded) { %><p class="small text-body-secondary">Taxes are already part of the price above.</p><% } %>
+
+                <% if (c.change) { %>
+                <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" id="confirm-change" name="confirmChange" value="yes" required>
+                    <label class="form-check-label" for="confirm-change">I have seen the new total of <%= money(c.totalMinor) %> and want to continue.</label>
+                </div>
+                <% } %>
+
+                <button type="submit" class="btn btn-dark w-100 mt-3" data-submit-once><%= verb %></button>
+                <p class="small text-body-secondary mt-2 mb-0">You will not be charged: payments are simulated.</p>
+            </form>
+        </div>
+    </div>
+</section>
+<script src="/js/checkout.js"></script>
