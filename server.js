@@ -28,6 +28,22 @@ require("./src/controllers/listing").initGeocoding();
 const app = createApp({ config });
 const PORT = config.port;
 
+// Housekeeping (P07-T07): started once the database is connected.
+function startHousekeeping() {
+  if (!config.sweeper.enabled) {
+    console.log("Sweeper disabled (SWEEPER_ENABLED=false)");
+    return;
+  }
+  const { createLogger } = require("./src/config/logger");
+  const { createSweeper, startSweeper } = require("./src/services/sweeper");
+  const logger = createLogger();
+  startSweeper({
+    runOnce: createSweeper({ logger }).runOnce,
+    intervalMs: config.sweeper.intervalMs,
+    logger,
+  });
+}
+
 async function main() {
   await mongoose.connect(config.mongodbUri);
 }
@@ -35,6 +51,7 @@ async function main() {
 main()
   .then(() => {
     console.log("Connected to DB");
+    startHousekeeping();
 
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);

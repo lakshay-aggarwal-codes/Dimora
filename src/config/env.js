@@ -24,6 +24,8 @@ const KEYS = [
   "MAPBOX_GEOCODING_PERMANENT",
   "APP_BASE_URL",
   "DNS_SERVERS",
+  "SWEEPER_ENABLED",
+  "SWEEPER_INTERVAL_SECONDS",
 ];
 
 // Secrets that were committed to the repository or are obvious placeholders.
@@ -80,6 +82,10 @@ const schema = Joi.object({
     .when("NODE_ENV", { is: "production", then: Joi.required() })
     .messages({ "string.uriCustomScheme": "APP_BASE_URL must start with http:// or https://" }),
   DNS_SERVERS: Joi.string().optional(),
+  // Housekeeping job (P07-T07): expires unanswered booking requests, completes
+  // finished stays, removes orphaned ledger rows and old drafts.
+  SWEEPER_ENABLED: Joi.boolean().default(true),
+  SWEEPER_INTERVAL_SECONDS: Joi.number().integer().min(5).max(3600).default(60),
 });
 
 function isPlaceholder(value) {
@@ -181,6 +187,10 @@ function validateEnv(source = process.env) {
     }),
     appBaseUrl: value.APP_BASE_URL || `http://localhost:${port}`,
     dnsServers,
+    sweeper: Object.freeze({
+      enabled: value.SWEEPER_ENABLED !== false,
+      intervalMs: value.SWEEPER_INTERVAL_SECONDS * 1000,
+    }),
     warnings: Object.freeze(warnings),
   });
 }

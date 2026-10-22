@@ -101,5 +101,9 @@ reservationSchema.index({ guest: 1, createdAt: -1 });
 reservationSchema.index({ host: 1, status: 1 });
 reservationSchema.index({ listing: 1, checkIn: 1 });
 reservationSchema.index({ guest: 1, idempotencyKey: 1 }, { unique: true });
+// The sweeper (P07-T07) looks for requests past their hold and for stays whose
+// check-out has passed.
+reservationSchema.index({ status: 1, holdExpiresAt: 1 });
+reservationSchema.index({ status: 1, checkOut: 1 });
 
 module.exports = mongoose.model("Reservation", reservationSchema);

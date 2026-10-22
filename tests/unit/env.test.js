@@ -207,3 +207,26 @@ test("error output lists problems but never echoes secret values", () => {
   assert.ok(!text.includes("leaky-user"));
   assert.ok(!text.includes("hunter2-secret-value"));
 });
+
+test("the sweeper is on by default, every 60 seconds", () => {
+  const cfg = validateEnv(VALID);
+  assert.equal(cfg.sweeper.enabled, true);
+  assert.equal(cfg.sweeper.intervalMs, 60000);
+});
+
+test("the sweeper can be paused and its interval set", () => {
+  const cfg = validateEnv({ ...VALID, SWEEPER_ENABLED: "false", SWEEPER_INTERVAL_SECONDS: "30" });
+  assert.equal(cfg.sweeper.enabled, false);
+  assert.equal(cfg.sweeper.intervalMs, 30000);
+});
+
+test("a nonsense sweeper interval is refused", () => {
+  for (const value of ["0", "2", "99999", "soon", "1.5"]) {
+    assert.match(
+      problemsOf({ ...VALID, SWEEPER_INTERVAL_SECONDS: value }).join("\n"),
+      /SWEEPER_INTERVAL_SECONDS/,
+      value,
+    );
+  }
+  assert.match(problemsOf({ ...VALID, SWEEPER_ENABLED: "maybe" }).join("\n"), /SWEEPER_ENABLED/);
+});

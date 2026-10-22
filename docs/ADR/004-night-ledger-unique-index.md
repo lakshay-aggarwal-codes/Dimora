@@ -53,3 +53,14 @@ Measured results (to be filled in from a real MongoDB run; the sandbox that wrot
 | Time for 50 contenders on 3 nights (local mongod) | same | _not yet recorded_ |
 
 If any run shows two owners of a night or a request that holds only part of its nights, this ADR is revised before P07-T05 builds on it.
+
+## Sweeper (P07-T07)
+
+`src/services/sweeper.js` is the "sweeper" this ADR promised. One pass, every minute (`npm run sweep` runs it by hand):
+
+1. **Expire** `pending` reservations whose `holdExpiresAt` is in the past, through `reservations.transition(..., "expired", { actor: "system" })`, so the nights are released by the same code path as every other release.
+2. **Complete** `confirmed` reservations whose check-out date has passed in the listing's own time zone (`listingSnapshot.timezone`). Their past ledger rows are kept ("past rows kept", above).
+3. **Delete orphan ledger rows**: rows whose reservation is missing or has released its nights (declined, expired, cancelled), and `block` rows with no `AvailabilityBlock` record. **Only rows older than 10 minutes are judged**, because booking writes the ledger rows first and the owner a moment later; a row without an owner is normal for a few milliseconds. The scan is a rolling window (1000 rows per pass, resuming after the last `_id`), so one pass never reads the whole collection.
+4. **Delete drafts** untouched for 90 days (`src/services/drafts.js`), at most once an hour per instance.
+
+Several instances are safe without a lock: steps 1 and 2 are compare-and-set transitions (the loser gets a 409 and counts it as "skipped"), step 3 deletes by row `_id` and a repeat deletes nothing, step 4 re-checks each draft in its own delete.
