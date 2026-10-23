@@ -1,5 +1,6 @@
 const Listing = require("../models/listing.js");
 const reviewService = require("../services/reviews");
+const { summarizeRatings } = require("../utils/ratings");
 const { can } = require("../policies");
 const { searchPage } = require("../services/search");
 const { isAdmin } = require("../policies/shared");
@@ -66,9 +67,14 @@ function datePickerFor(listing, query) {
   };
   // The booking panel (P08-T02): how many guests the select offers and which
   // one starts selected (`?guests=`, kept inside 1..capacity).
-  const capacity = Number.isInteger(rules.capacity) && rules.capacity >= 1 ? rules.capacity : 1;
+  const capacity =
+    Number.isInteger(rules.capacity) && rules.capacity >= 1
+      ? rules.capacity
+      : 1;
   const wanted =
-    typeof query.guests === "string" && /^\d{1,3}$/.test(query.guests) ? Number(query.guests) : 2;
+    typeof query.guests === "string" && /^\d{1,3}$/.test(query.guests)
+      ? Number(query.guests)
+      : 2;
   return {
     url: `/api/listings/${listing._id}/availability`,
     rules,
@@ -81,6 +87,28 @@ function datePickerFor(listing, query) {
       guests: Math.min(Math.max(wanted, 1), capacity),
     },
   };
+}
+
+/** A copy of a listing's reviews, newest first. */
+function newestFirst(reviews) {
+  const when = (review) => {
+    if (
+      review &&
+      review.createdAt &&
+      typeof review.createdAt.getTime === "function"
+    ) {
+      const t = review.createdAt.getTime();
+      if (!Number.isNaN(t)) return t;
+    }
+    const id =
+      review && review._id && typeof review._id.getTimestamp === "function"
+        ? review._id.getTimestamp()
+        : null;
+    return id ? id.getTime() : 0;
+  };
+  return (Array.isArray(reviews) ? [...reviews] : []).sort(
+    (a, b) => when(b) - when(a),
+  );
 }
 
 module.exports.showListings = async (req, res) => {
@@ -131,9 +159,25 @@ module.exports.showListings = async (req, res) => {
         })
       : null;
 
+  // Reviews newest first; a review without a date (written before timestamps)
+  // is dated by its id. The summary is the stored totals (one atomic update per
+  // review, services/ratings.js); a listing that has none yet is counted from
+  // the reviews it holds.
+  const reviewList = newestFirst(listing.reviews);
+  const ratingSummary =
+    listing.ratingCount > 0
+      ? {
+          average:
+            Math.round((listing.ratingSum / listing.ratingCount) * 10) / 10,
+          count: listing.ratingCount,
+        }
+      : summarizeRatings(reviewList);
+
   res.render("listings/show.ejs", {
     listing,
     reviewable,
+    reviewList,
+    ratingSummary,
     gallery: galleryOf(listing),
     // The public (approximate) point only: the precise one never reaches a page.
     mapPoint: publicPointOf(listing),

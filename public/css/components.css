@@ -1619,7 +1619,8 @@
 
 .trip-city,
 .trip-dates,
-.trip-hold {
+.trip-hold,
+.trip-review-prompt {
   font-size: 0.9rem;
   color: var(--color-text-muted);
 }

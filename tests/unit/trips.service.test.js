@@ -467,13 +467,26 @@ describe("describeTrip", () => {
   test("a declined request carries the host's reason from the status history", () => {
     const history = [
       { from: null, to: "pending", actor: "guest", at: NOW },
-      { from: "pending", to: "declined", actor: "host", at: NOW, note: "Repairs that week" },
+      {
+        from: "pending",
+        to: "declined",
+        actor: "host",
+        at: NOW,
+        note: "Repairs that week",
+      },
     ];
-    expect(trip({ status: "declined", statusHistory: history }).declineReason).toBe("Repairs that week");
-    expect(trip({ status: "declined", statusHistory: history.slice(0, 1) }).declineReason).toBe("");
+    expect(
+      trip({ status: "declined", statusHistory: history }).declineReason,
+    ).toBe("Repairs that week");
+    expect(
+      trip({ status: "declined", statusHistory: history.slice(0, 1) })
+        .declineReason,
+    ).toBe("");
     expect(trip({ status: "declined" }).declineReason).toBe("");
     // a reason is never shown for any other status
-    expect(trip({ status: "confirmed", statusHistory: history }).declineReason).toBe("");
+    expect(
+      trip({ status: "confirmed", statusHistory: history }).declineReason,
+    ).toBe("");
   });
 
   test("payment is stated as simulated", () => {
@@ -568,5 +581,143 @@ describe("listTrips", () => {
         })
       ).tab,
     ).toBe("upcoming");
+  });
+});
+
+describe("review prompts (P12-T02)", () => {
+  const done = (extra) =>
+    trips.reviewPromptOf(reservation({ status: "completed", ...extra }), {
+      now: NOW,
+      reviewed: false,
+      windowDays: 30,
+    });
+  test("a completed stay inside the window is open; reviewed is done; outside the window nothing", () => {
+    expect(done({ checkOut: d("2026-10-10") })).toBe("open");
+    expect(
+      trips.reviewPromptOf(reservation({ status: "completed" }), {
+        now: NOW,
+        reviewed: true,
+        windowDays: 30,
+      }),
+    ).toBe("done");
+    expect(done({ checkOut: d("2026-09-01") })).toBeNull();
+    expect(done({ checkOut: d("2026-09-20") })).toBe("open"); // 30 days later is 20 Oct: still the last day
+    expect(done({ checkOut: d("2026-09-19") })).toBeNull();
+  });
+  test("a stay that is not completed has no prompt", () => {
+    for (const status of [
+      "pending",
+      "confirmed",
+      "declined",
+      "expired",
+      "cancelled_by_guest",
+      "cancelled_by_host",
+    ]) {
+      expect(
+        trips.reviewPromptOf(reservation({ status }), {
+          now: NOW,
+          reviewed: false,
+          windowDays: 30,
+        }),
+      ).toBeNull();
+    }
+  });
+  test("describeRow carries it", () => {
+    const row = trips.describeRow(
+      reservation({ status: "completed", checkOut: d("2026-10-10") }),
+      { now: NOW, reviewed: false, windowDays: 30 },
+    );
+    expect(row.reviewPrompt).toBe("open");
+    expect(
+      trips.describeRow(reservation(), { now: NOW }).reviewPrompt,
+    ).toBeNull();
+  });
+
+  test("listTrips asks once which finished stays are reviewed, and not at all when none finished", async () => {
+    const finished = reservation({
+      _id: new ObjectId(),
+      status: "completed",
+      checkOut: d("2026-10-10"),
+    });
+    const reviewedStay = reservation({
+      _id: new ObjectId(),
+      status: "completed",
+      checkOut: d("2026-10-11"),
+    });
+    const find = jest.fn(() => ({
+      select: () => ({ lean: async () => [{ reservation: reviewedStay._id }] }),
+    }));
+    const model = {
+      countDocuments: async () => 2,
+      find: () => {
+        const q = {
+          sort: () => q,
+          skip: () => q,
+          limit: () => q,
+          lean: async () => [finished, reviewedStay],
+        };
+        return q;
+      },
+    };
+    const result = await trips.listTrips(
+      { ReservationModel: model, ReviewModel: { find } },
+      guestId,
+      { tab: "past", now: NOW },
+    );
+    expect(find).toHaveBeenCalledTimes(1);
+    expect(find.mock.calls[0][0].reservation.$in.map(String).sort()).toEqual(
+      [String(finished._id), String(reviewedStay._id)].sort(),
+    );
+    expect(result.items.map((i) => i.reviewPrompt)).toEqual(["open", "done"]);
+
+    const untouched = jest.fn();
+    const upcoming = {
+      countDocuments: async () => 1,
+      find: () => {
+        const q = {
+          sort: () => q,
+          skip: () => q,
+          limit: () => q,
+          lean: async () => [reservation()],
+        };
+        return q;
+      },
+    };
+    await trips.listTrips(
+      { ReservationModel: upcoming, ReviewModel: { find: untouched } },
+      guestId,
+      { tab: "upcoming", now: NOW },
+    );
+    expect(untouched).not.toHaveBeenCalled();
+  });
+});
+
+describe("describeReview", () => {
+  test("open and closed carry the last day; done carries the review", () => {
+    expect(
+      trips.describeReview({ state: "open", until: d("2026-12-10") }),
+    ).toEqual({ state: "open", until: "10 Dec 2026" });
+    expect(
+      trips.describeReview({ state: "closed", until: d("2026-12-10") }).state,
+    ).toBe("closed");
+    expect(
+      trips.describeReview({
+        state: "done",
+        review: { rating: 4, comment: "Nice", legacy: false },
+      }),
+    ).toEqual({
+      state: "done",
+      until: null,
+      rating: 4,
+      comment: "Nice",
+      legacy: false,
+    });
+  });
+  test("nothing given means none", () => {
+    expect(trips.describeReview(undefined)).toEqual({
+      state: "none",
+      until: null,
+    });
+    expect(trips.describeReview({ state: "none" }).state).toBe("none");
   });
 });

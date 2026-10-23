@@ -25,6 +25,7 @@ const {
   isAfter,
 } = require("../utils/dates");
 const { isActiveUser, sameId } = require("../policies/shared");
+const ratings = require("./ratings");
 
 const DEFAULT_WINDOW_DAYS = 30;
 const COMMENT_MAX = 2000;
@@ -147,11 +148,15 @@ function createReviewService({
       }
       throw err;
     }
-    // The listing page still reads listing.reviews; P12-T02 moves it to a query.
-    await ListingModel.updateOne(
-      { _id: reservation.listing },
-      { $push: { reviews: review._id } },
-    );
+    // One atomic update adds the review to the listing's list and to its rating
+    // totals (services/ratings.js). If it fails, the review is taken back so a
+    // review never exists without being counted.
+    try {
+      await ratings.addReview(ListingModel, reservation.listing, review);
+    } catch (err) {
+      await ReviewModel.deleteOne({ _id: review._id }).catch(() => {});
+      throw err;
+    }
     return review;
   }
 
@@ -197,7 +202,63 @@ function createReviewService({
       : null;
   }
 
-  return { submit, findReviewable };
+  /**
+   * Delete a review and take it out of the listing's list and totals. Only the
+   * request that really deleted it changes the totals, so deleting twice at
+   * once subtracts once. Who may delete is the route's `review:delete` policy.
+   * @returns {Promise<object|null>} the deleted review, or null if it was already gone
+   */
+  async function remove({ listingId, reviewId }) {
+    const removed = await ReviewModel.findOneAndDelete({ _id: reviewId });
+    if (!removed) return null;
+    try {
+      await ratings.removeReview(ListingModel, listingId, removed);
+    } catch (err) {
+      // The review is gone but the totals were not changed: repair them from the reviews.
+      await ratings
+        .recomputeRatings({ ListingModel, ReviewModel }, listingId)
+        .catch(() => {});
+      throw err;
+    }
+    return removed;
+  }
+
+  /**
+   * What the booking page shows about reviewing a stay:
+   *   "open"   completed, inside the window, not reviewed (the form)
+   *   "done"   already reviewed (the review)
+   *   "closed" completed, not reviewed, the window has passed
+   *   "none"   anything else (not the guest, not completed yet)
+   * @returns {Promise<{state: string, review?: object, until?: Date}>}
+   */
+  async function stateFor({
+    user,
+    reservation,
+    now = new Date(),
+    windowDays: days = windowDays,
+  }) {
+    if (
+      !isActiveUser(user) ||
+      !reservation ||
+      !sameId(reservation.guest, user._id) ||
+      reservation.status !== "completed"
+    ) {
+      return { state: "none" };
+    }
+    const review = await ReviewModel.findOne({
+      reservation: reservation._id,
+    }).lean();
+    if (review) return { state: "done", review };
+    const snap = reservation.listingSnapshot || {};
+    const until = windowEnd(reservation, days);
+    const open = !isAfter(
+      todayIn(snap.timezone || DEFAULT_TIMEZONE, now),
+      until,
+    );
+    return { state: open ? "open" : "closed", until };
+  }
+
+  return { submit, remove, findReviewable, stateFor };
 }
 
 module.exports = {

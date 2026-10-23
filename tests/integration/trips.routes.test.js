@@ -14,6 +14,7 @@ const { fullTitle, metaDescription } = require("../../src/utils/pageMeta");
 const pagination = require("../../src/utils/pagination");
 const { hiddenFields, listingsUrl } = require("../../src/utils/searchUrl");
 const { parseDateOnly } = require("../../src/utils/dates");
+const reviewService = require("../../src/services/reviews");
 
 afterEach(() => jest.restoreAllMocks());
 
@@ -270,6 +271,121 @@ describe("GET /trips/:id", () => {
     expect(res.status).toBe(200);
     expect(res.text).toContain("Sea &lt;script&gt;");
     expect(res.text).not.toContain("View the listing");
+  });
+});
+
+describe("GET /trips/:id: reviewing the stay (P12-T02)", () => {
+  const stay = (extra) => bookingDoc({ status: "completed", ...extra });
+
+  test("open: the review form for this stay, nothing pre-selected, unique ids", async () => {
+    const doc = stay();
+    stubFind(doc);
+    jest
+      .spyOn(reviewService, "stateFor")
+      .mockResolvedValue({ state: "open", until: parseDateOnly("2026-12-10") });
+    const res = await request(app(guest)).get(`/trips/${doc._id}`);
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("Your review");
+    expect(res.text).toContain(`action="/listings/${doc.listing._id}/reviews"`);
+    expect(res.text).toContain(`name="review[reservation]" value="${doc._id}"`);
+    expect(res.text).toContain("until 10 Dec 2026");
+    const radios = res.text.match(/<input type="radio"[^>]*>/g) || [];
+    expect(radios).toHaveLength(5);
+    for (const radio of radios) {
+      expect(radio).toMatch(/\brequired\b/);
+      expect(radio).not.toMatch(/\bchecked\b/);
+    }
+    expect(res.text).toContain('id="trip-rate1"');
+    expect(res.text).not.toContain('id="first-rate1"');
+  });
+
+  test("done: the review is shown, escaped, with no form", async () => {
+    const doc = stay();
+    stubFind(doc);
+    jest
+      .spyOn(reviewService, "stateFor")
+      .mockResolvedValue({
+        state: "done",
+        review: { rating: 4, comment: "Lovely <b>stay</b>" },
+      });
+    const res = await request(app(guest)).get(`/trips/${doc._id}`);
+    expect(res.text).toContain("You rated this stay 4 out of 5");
+    expect(res.text).toContain("Lovely &lt;b&gt;stay&lt;/b&gt;");
+    expect(res.text).not.toContain("Submit review");
+  });
+
+  test("closed: says when the time ended", async () => {
+    const doc = stay();
+    stubFind(doc);
+    jest
+      .spyOn(reviewService, "stateFor")
+      .mockResolvedValue({
+        state: "closed",
+        until: parseDateOnly("2026-12-10"),
+      });
+    const res = await request(app(guest)).get(`/trips/${doc._id}`);
+    expect(res.text).toContain(
+      "The time to review this stay ended on 10 Dec 2026.",
+    );
+    expect(res.text).not.toContain("Submit review");
+  });
+
+  test("a booking that is not completed has no review section, and its state is not even asked for the host", async () => {
+    const doc = bookingDoc();
+    stubFind(doc);
+    const ask = jest
+      .spyOn(reviewService, "stateFor")
+      .mockResolvedValue({ state: "none" });
+    expect(
+      (await request(app(guest)).get(`/trips/${doc._id}`)).text,
+    ).not.toContain("Your review");
+    ask.mockClear();
+    const asHost = await request(app(host)).get(`/trips/${doc._id}`);
+    expect(asHost.status).toBe(200);
+    expect(ask).not.toHaveBeenCalled();
+    expect(asHost.text).not.toContain("Your review");
+  });
+});
+
+describe("GET /trips: the review prompt (P12-T02)", () => {
+  test("a finished stay without a review says so; a reviewed one says so too", async () => {
+    const midnight = (daysAgo) => {
+      const t = new Date(Date.now() - daysAgo * 86400000);
+      return new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate()));
+    };
+    const open = bookingDoc({
+      _id: new ObjectId(),
+      status: "completed",
+      checkOut: midnight(5), checkIn: midnight(8),
+    });
+    const reviewed = bookingDoc({
+      _id: new ObjectId(),
+      status: "completed",
+      checkOut: midnight(6), checkIn: midnight(9),
+    });
+    let n = 0;
+    jest
+      .spyOn(Reservation, "countDocuments")
+      .mockImplementation(async () => [0, 0, 2, 0][n++ % 4]);
+    jest.spyOn(Reservation, "find").mockImplementation(() => {
+      const q = {
+        sort: () => q,
+        skip: () => q,
+        limit: () => q,
+        lean: async () => [open, reviewed],
+      };
+      return q;
+    });
+    const Review = require("../../src/models/review");
+    jest
+      .spyOn(Review, "find")
+      .mockImplementation(() => ({
+        select: () => ({ lean: async () => [{ reservation: reviewed._id }] }),
+      }));
+    const res = await request(app(guest)).get("/trips?tab=past");
+    expect(res.text).toContain("How was your stay?");
+    expect(res.text).toContain("Write a review");
+    expect(res.text).toContain("You reviewed this stay.");
   });
 });
 

@@ -15,9 +15,13 @@ const {
   CANCELLATION_POLICIES,
   CANCELLATION_TERMS,
 } = require("../config/constants");
-const { DEFAULT_TIMEZONE, todayIn, formatDateOnly } = require("../utils/dates");
-const { RULE_TEXT } = require("../config/cancellation");
-const { cancelOffer } = require("./cancellations");
+const {
+  DEFAULT_TIMEZONE,
+  todayIn,
+  formatDateOnly,
+  isAfter,
+} = require("../utils/dates");
+const { windowEnd, DEFAULT_WINDOW_DAYS } = require("./reviews");
 
 const TABS = Object.freeze([
   { key: "upcoming", label: "Upcoming" },
@@ -188,39 +192,31 @@ const isDocument = (value) =>
   typeof value === "object" &&
   typeof value.toHexString !== "function";
 
+/** What the booking page shows about reviewing: a form, the review, or why not. */
+function describeReview(review) {
+  const state = review && review.state ? review.state : "none";
+  const out = {
+    state,
+    until: review && review.until ? formatStayDate(review.until) : null,
+  };
+  if (state === "done" && review.review) {
+    out.rating = review.review.rating;
+    out.comment = review.review.comment || "";
+    out.legacy = Boolean(review.review.legacy);
+  }
+  return out;
+}
+
 /** The note the host left when declining (status history), or "". */
 function declineReasonOf(reservation) {
   if (reservation.status !== "declined") return "";
-  const history = Array.isArray(reservation.statusHistory) ? reservation.statusHistory : [];
-  const entry = [...history].reverse().find((h) => h && h.to === "declined" && h.note);
+  const history = Array.isArray(reservation.statusHistory)
+    ? reservation.statusHistory
+    : [];
+  const entry = [...history]
+    .reverse()
+    .find((h) => h && h.to === "declined" && h.note);
   return entry ? String(entry.note) : "";
-}
-
-/**
- * How a cancelled booking ended (P09-T03): who cancelled, the reason they gave
- * and the refund that was worked out (recorded, simulated: no money moves).
- */
-function cancelledInfo(reservation, { formatMoney, currency }) {
-  if (
-    reservation.status !== "cancelled_by_guest" &&
-    reservation.status !== "cancelled_by_host"
-  )
-    return null;
-  const refund = reservation.refund;
-  const hasRefund = refund && Number.isSafeInteger(refund.amountMinor);
-  return {
-    by: reservation.status === "cancelled_by_host" ? "host" : "guest",
-    reason: reservation.cancelReason ? String(reservation.cancelReason) : "",
-    refund: hasRefund
-      ? {
-          amountText: formatMoney(refund.amountMinor, currency),
-          keptText: formatMoney(refund.retainedMinor || 0, currency),
-          full: refund.amountMinor === refund.totalMinor,
-          none: refund.amountMinor === 0,
-          ruleText: RULE_TEXT[refund.rule] || "",
-        }
-      : null,
-  };
 }
 
 const idText = (value) => String(value && value._id ? value._id : value);
@@ -236,7 +232,10 @@ function policyInfo(policy) {
 }
 
 /** One row of a tab. */
-function describeRow(reservation, { now = new Date() } = {}) {
+function describeRow(
+  reservation,
+  { now = new Date(), reviewed = false, windowDays = DEFAULT_WINDOW_DAYS } = {},
+) {
   const snap = reservation.listingSnapshot || {};
   const info = statusInfo(reservation, { viewerIsGuest: true, now });
   const price = reservation.pricingSnapshot || {};
@@ -260,7 +259,20 @@ function describeRow(reservation, { now = new Date() } = {}) {
       reservation.status === "pending" && reservation.holdExpiresAt
         ? formatInstant(reservation.holdExpiresAt, snap.timezone)
         : null,
+    reviewPrompt: reviewPromptOf(reservation, { now, reviewed, windowDays }),
   };
+}
+
+/** "open" = this stay can be reviewed now, "done" = it was, null = not applicable. */
+function reviewPromptOf(reservation, { now, reviewed, windowDays }) {
+  if (reservation.status !== "completed") return null;
+  if (reviewed) return "done";
+  const snap = reservation.listingSnapshot || {};
+  const closed = isAfter(
+    todayIn(snap.timezone || DEFAULT_TIMEZONE, now),
+    windowEnd(reservation, windowDays),
+  );
+  return closed ? null : "open";
 }
 
 /**
@@ -268,9 +280,12 @@ function describeRow(reservation, { now = new Date() } = {}) {
  * @param {{ ReservationModel?: object }} deps
  */
 async function listTrips(
-  { ReservationModel = require("../models/reservation") } = {},
+  {
+    ReservationModel = require("../models/reservation"),
+    ReviewModel = require("../models/review"),
+  } = {},
   guestId,
-  { tab, page, now = new Date() } = {},
+  { tab, page, now = new Date(), windowDays = DEFAULT_WINDOW_DAYS } = {},
 ) {
   const key = parseTab(tab);
   const context = { now, today: todayIn(DEFAULT_TIMEZONE, now) };
@@ -292,13 +307,30 @@ async function listTrips(
           .skip((current - 1) * PAGE_SIZE)
           .limit(PAGE_SIZE)
           .lean();
+  // Which finished stays on this page already have a review (one query).
+  const finished = rows
+    .filter((r) => r.status === "completed")
+    .map((r) => r._id);
+  const reviewed = new Set();
+  if (finished.length > 0) {
+    const found = await ReviewModel.find({ reservation: { $in: finished } })
+      .select("reservation")
+      .lean();
+    for (const review of found) reviewed.add(String(review.reservation));
+  }
   return {
     tab: key,
     tabs: TABS.map((t) => ({ ...t, count: countOf[t.key] })),
     page: current,
     totalPages,
     total,
-    items: rows.map((r) => describeRow(r, { now })),
+    items: rows.map((r) =>
+      describeRow(r, {
+        now,
+        reviewed: reviewed.has(String(r._id)),
+        windowDays,
+      }),
+    ),
   };
 }
 
@@ -310,11 +342,12 @@ async function listTrips(
  * What is shown only after confirmation (host contact, exact address) is
  * decided here, from the status, never by the view.
  * @param {object} reservation
- * @param {{ viewerRole: "guest"|"host"|"admin", formatMoney: Function, now?: Date }} options
+ * @param {{ viewerRole: "guest"|"host"|"admin", formatMoney: Function, now?: Date,
+ *           review?: { state: string, review?: object, until?: Date } }} options
  */
 function describeTrip(
   reservation,
-  { viewerRole, formatMoney, now = new Date() },
+  { viewerRole, formatMoney, now = new Date(), review = { state: "none" } },
 ) {
   const snap = reservation.listingSnapshot || {};
   const price = reservation.pricingSnapshot || {};
@@ -414,12 +447,7 @@ function describeTrip(
     address,
     mapUrl,
     declineReason: declineReasonOf(reservation),
-    cancelled: cancelledInfo(reservation, { formatMoney, currency }),
-    // The cancel button and what it would refund, for the guest only (the host
-    // cancels from the booking requests page).
-    cancel: viewerIsGuest
-      ? cancelOffer(reservation, { actor: "guest", now, formatMoney, formatInstant })
-      : null,
+    review: describeReview(review),
     paymentSimulated: true,
   };
 }
@@ -439,4 +467,6 @@ module.exports = {
   referenceOf,
   formatStayDate,
   formatInstant,
+  reviewPromptOf,
+  describeReview,
 };

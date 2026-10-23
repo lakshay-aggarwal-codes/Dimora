@@ -25,7 +25,8 @@ const pageViews = [
 const read = (file) => fs.readFileSync(file, "utf8");
 const count = (text, re) => (text.match(re) || []).length;
 // An opening tag; its attributes may contain <%= ... %>, whose `>` must not end it.
-const openTag = (name) => new RegExp(`<${name}\\b(?:<%[\\s\\S]*?%>|[^>])*>`, "g");
+const openTag = (name) =>
+  new RegExp(`<${name}\\b(?:<%[\\s\\S]*?%>|[^>])*>`, "g");
 
 describe("page layouts are responsive", () => {
   test.each(pageViews.map((f) => [rel(f), f]))(
@@ -85,7 +86,9 @@ describe("forms and images are labelled", () => {
       const ids = new Set(
         [...source.matchAll(/\sid="([^"<%]+)"/g)].map((m) => m[1]),
       );
-      for (const [, target] of source.matchAll(/<label\b[^>]*\sfor="([^"]+)"/g)) {
+      for (const [, target] of source.matchAll(
+        /<label\b[^>]*\sfor="([^"]+)"/g,
+      )) {
         expect({ file: name, for: target, exists: ids.has(target) }).toEqual({
           file: name,
           for: target,
@@ -99,9 +102,15 @@ describe("forms and images are labelled", () => {
     "%s: every written-out form control has an id (so its label works)",
     (name, file) => {
       const source = read(file);
-      for (const [tag] of source.matchAll(openTag("(?:input|textarea|select)"))) {
+      for (const [tag] of source.matchAll(
+        openTag("(?:input|textarea|select)"),
+      )) {
         if (/type="hidden"/.test(tag)) continue;
-        expect({ file: name, tag: tag.slice(0, 60), hasId: /\sid="/.test(tag) }).toEqual({
+        expect({
+          file: name,
+          tag: tag.slice(0, 60),
+          hasId: /\sid="/.test(tag),
+        }).toEqual({
           file: name,
           tag: tag.slice(0, 60),
           hasId: true,
@@ -113,7 +122,11 @@ describe("forms and images are labelled", () => {
   test("every <img> in the views has an alt attribute", () => {
     for (const file of allViews) {
       for (const [tag] of read(file).matchAll(openTag("img"))) {
-        expect({ file: rel(file), tag: tag.slice(0, 50), alt: /\salt=/.test(tag) }).toEqual({
+        expect({
+          file: rel(file),
+          tag: tag.slice(0, 50),
+          alt: /\salt=/.test(tag),
+        }).toEqual({
           file: rel(file),
           tag: tag.slice(0, 50),
           alt: true,
@@ -130,9 +143,19 @@ describe("forms and images are labelled", () => {
     }
   });
 
-  test("the star rating is a fieldset with a legend", () => {
-    const show = read(path.join(VIEWS, "listings", "show.ejs"));
-    expect(show).toMatch(/<fieldset class="starability-slot"[^>]*>\s*<legend/);
+  test("the star rating is a fieldset with a legend (one shared partial, P12-T02)", () => {
+    const partial = read(path.join(VIEWS, "partials", "review-form.ejs"));
+    expect(partial).toMatch(
+      /<fieldset class="starability-slot"[^\n]*>\s*<legend/,
+    );
+    for (const page of [
+      ["listings", "show.ejs"],
+      ["trips", "show.ejs"],
+    ]) {
+      expect(read(path.join(VIEWS, ...page))).toMatch(
+        /partials\/review-form\.ejs/,
+      );
+    }
   });
 });
 
@@ -141,7 +164,9 @@ describe("category strip", () => {
 
   test("categories are links inside a labelled nav, not clickable divs", () => {
     expect(index).toMatch(/<nav class="filter-nav" aria-label="Categories">/);
-    expect(index).toMatch(/<a class="filter<%= category\.active(?:<%[\s\S]*?%>|[^>])*href="<%= category\.href %>"/);
+    expect(index).toMatch(
+      /<a class="filter<%= category\.active[^>]*href="<%= category\.href %>"/,
+    );
     expect(index).not.toMatch(/<div class="filter"/);
   });
 

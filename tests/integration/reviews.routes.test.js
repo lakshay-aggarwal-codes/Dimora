@@ -74,13 +74,11 @@ function app(user, flashes = []) {
   a.use("/listings/:id/reviews", reviewRouter);
   // eslint-disable-next-line no-unused-vars
   a.use((err, req, res, next) =>
-    res
-      .status(err.statusCode || 500)
-      .json({
-        status: err.statusCode || 500,
-        code: err.code,
-        message: err.message,
-      }),
+    res.status(err.statusCode || 500).json({
+      status: err.statusCode || 500,
+      code: err.code,
+      message: err.message,
+    }),
   );
   return a;
 }
@@ -259,12 +257,10 @@ describe("POST /listings/:id/reviews: the service decides", () => {
 describe("the review part of the listing page", () => {
   test("a guest with a stay to review sees the form with the reservation inside, nothing pre-selected", async () => {
     stubListing(listingDoc());
-    const find = jest
-      .spyOn(reviewService, "findReviewable")
-      .mockResolvedValue({
-        reservationId: RESERVATION_ID,
-        reviewUntil: new Date(),
-      });
+    const find = jest.spyOn(reviewService, "findReviewable").mockResolvedValue({
+      reservationId: RESERVATION_ID,
+      reviewUntil: new Date(),
+    });
     const res = await request(app(guest)).get(`/listings/${LISTING_ID}`);
     expect(res.status).toBe(200);
     expect(find).toHaveBeenCalledWith(
@@ -348,5 +344,84 @@ describe("the review part of the listing page", () => {
     expect(res.text.indexOf("Posted before bookings")).toBeLessThan(
       res.text.indexOf("New one"),
     );
+  });
+});
+
+describe("the listing page: newest first, summary from the stored totals (P12-T02)", () => {
+  const rv = (n, createdAt, extra = {}) => ({
+    _id: `64b0f0f0f0f0f0f0f0f0e00${n}`,
+    rating: 3,
+    comment: `Review number ${n}`,
+    createdAt,
+    author: { _id: "64b0f0f0f0f0f0f0f0f0ffff", username: `guest${n}` },
+    ...extra,
+  });
+
+  test("reviews are listed newest first, whatever order they are stored in", async () => {
+    stubListing(
+      listingDoc({
+        reviews: [
+          rv(1, new Date("2026-01-05")),
+          rv(2, new Date("2026-03-05")),
+          rv(3, new Date("2026-02-05")),
+        ],
+      }),
+    );
+    const text = (await request(app(undefined)).get(`/listings/${LISTING_ID}`))
+      .text;
+    const at = (n) => text.indexOf(`Review number ${n}`);
+    expect(at(2)).toBeGreaterThan(-1);
+    expect(at(2)).toBeLessThan(at(3));
+    expect(at(3)).toBeLessThan(at(1));
+    expect(text).toContain("Mar 2026");
+  });
+
+  test("a review without a date is dated by its id and sorts with the rest", async () => {
+    stubListing(
+      listingDoc({
+        reviews: [rv(1, undefined), rv(2, new Date("2090-01-01"))],
+      }),
+    );
+    const text = (await request(app(undefined)).get(`/listings/${LISTING_ID}`))
+      .text;
+    expect(text.indexOf("Review number 2")).toBeLessThan(
+      text.indexOf("Review number 1"),
+    );
+  });
+
+  test("the summary is the stored total and count, not the reviews that happen to be loaded", async () => {
+    stubListing(
+      listingDoc({
+        ratingSum: 47,
+        ratingCount: 10,
+        ratingAvg: 4.7,
+        reviews: [rv(1, new Date("2026-01-05"))],
+      }),
+    );
+    const text = (await request(app(undefined)).get(`/listings/${LISTING_ID}`))
+      .text;
+    expect(text).toContain("Rated 4.7 out of 5 from 10 reviews");
+  });
+
+  test("a listing with no totals yet is counted from its reviews", async () => {
+    stubListing(
+      listingDoc({
+        reviews: [
+          rv(1, new Date("2026-01-05"), { rating: 4 }),
+          rv(2, new Date("2026-01-06"), { rating: 5 }),
+        ],
+      }),
+    );
+    const text = (await request(app(undefined)).get(`/listings/${LISTING_ID}`))
+      .text;
+    expect(text).toContain("Rated 4.5 out of 5 from 2 reviews");
+  });
+
+  test("no reviews: no summary, a plain sentence", async () => {
+    stubListing(listingDoc());
+    const text = (await request(app(undefined)).get(`/listings/${LISTING_ID}`))
+      .text;
+    expect(text).toContain("No reviews yet.");
+    expect(text).not.toContain("review-summary");
   });
 });

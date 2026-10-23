@@ -1,4 +1,3 @@
-const Review = require("../models/review.js");
 const Listing = require("../models/listing.js");
 const reviewService = require("../services/reviews");
 const { publicListingFilter } = require("../utils/visibility");
@@ -29,9 +28,10 @@ module.exports.createReview = async (req, res) => {
 };
 
 module.exports.destroyreview = async (req, res) => {
-  let { id, reviewId } = req.params;
-  await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
-  await Review.findByIdAndDelete(reviewId);
+  const { id, reviewId } = req.params;
+  // One service call: deletes the review and updates the listing's list and
+  // rating totals together (P12-T02).
+  await reviewService.remove({ listingId: id, reviewId });
   req.flash("success", "Review Deleted");
   res.redirect(`/listings/${id}`);
 };

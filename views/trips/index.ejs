@@ -44,6 +44,7 @@
                         <% if (trip.city) { %><span class="trip-city"><%= trip.city %></span><% } %>
                         <span class="trip-dates"><%= trip.checkIn %> – <%= trip.checkOut %> · <%= trip.nights %> night<%= trip.nights === 1 ? "" : "s" %> · <%= trip.guests %> guest<%= trip.guests === 1 ? "" : "s" %></span>
                         <% if (trip.holdsUntil) { %><span class="trip-hold">The host has until <%= trip.holdsUntil %> to answer.</span><% } %>
+                        <% if (trip.reviewPrompt === "open") { %><span class="trip-review-prompt">How was your stay? <strong>Write a review</strong></span><% } else if (trip.reviewPrompt === "done") { %><span class="trip-hold">You reviewed this stay.</span><% } %>
                     </span>
                     <span class="trip-side">
                         <span class="badge text-bg-<%= trip.tone %>"><%= trip.statusLabel %></span>

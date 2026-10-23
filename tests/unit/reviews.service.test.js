@@ -14,6 +14,7 @@ const {
   ConflictError,
 } = require("../../src/utils/errors");
 const { parseDateOnly, formatDateOnly } = require("../../src/utils/dates");
+const { applyPipeline } = require("../helpers/pipelineEval");
 
 const d = (s) => parseDateOnly(s);
 const GUEST = { _id: new ObjectId(), status: "active", role: "member" };
@@ -181,9 +182,11 @@ describe("a completed stay can be reviewed", () => {
       legacy: false,
       listingSnapshot: { title: "Sea house", city: "Goa" },
     });
-    expect(t.pushes).toEqual([
-      [{ _id: LISTING_ID }, { $push: { reviews: review._id } }],
-    ]);
+    // one atomic update: the list and the totals together (services/ratings.js)
+    expect(t.pushes).toHaveLength(1);
+    expect(t.pushes[0][0]).toEqual({ _id: LISTING_ID });
+    expect(JSON.stringify(t.pushes[0][1])).toContain("ratingSum");
+    expect(review._id).toBeDefined();
   });
 });
 
@@ -402,5 +405,182 @@ describe("findReviewable (does the page offer the form?)", () => {
     expect(
       await find(setup([stay({ guest: HOST._id })]), { user: HOST }),
     ).toBeNull();
+  });
+});
+
+// ---- P12-T02: totals, deleting, and what the booking page shows ----
+
+function withListing(reservations = [stay()], options = {}) {
+  const t = setup(reservations, options);
+  const state = {
+    doc: {
+      _id: LISTING_ID,
+      reviews: [],
+      ratingSum: 0,
+      ratingCount: 0,
+      ratingAvg: 0,
+    },
+    fail: false,
+  };
+  t.ListingModel.updateOne.mockImplementation(async (filter, update) => {
+    if (state.fail) throw new Error("listing update failed");
+    t.pushes.push([filter, update]);
+    state.doc = applyPipeline(state.doc, update);
+    return { matchedCount: 1 };
+  });
+  t.state = state;
+  // findOneAndDelete / deleteOne / findOne on the fake review model
+  t.ReviewModel.findOneAndDelete = jest.fn(async (filter) => {
+    await Promise.resolve();
+    const i = t.reviews.findIndex((r) => String(r._id) === String(filter._id));
+    return i === -1 ? null : t.reviews.splice(i, 1)[0];
+  });
+  t.ReviewModel.deleteOne = jest.fn(async (filter) => {
+    const i = t.reviews.findIndex((r) => String(r._id) === String(filter._id));
+    if (i !== -1) t.reviews.splice(i, 1);
+  });
+  t.ReviewModel.findOne = jest.fn((filter) => ({
+    lean: async () =>
+      t.reviews.find(
+        (r) => String(r.reservation) === String(filter.reservation),
+      ) || null,
+  }));
+  return t;
+}
+
+describe("totals follow every review (P12-T02)", () => {
+  test("writing a review updates the list and the totals together", async () => {
+    const t = withListing();
+    const r = await t.submit({ rating: "4" });
+    expect(t.state.doc).toMatchObject({
+      ratingSum: 4,
+      ratingCount: 1,
+      ratingAvg: 4,
+    });
+    expect(t.state.doc.reviews.map(String)).toEqual([String(r._id)]);
+  });
+
+  test("if the listing update fails the review is taken back (never a review that is not counted)", async () => {
+    const t = withListing();
+    t.state.fail = true;
+    await expect(t.submit()).rejects.toThrow("listing update failed");
+    expect(t.reviews).toHaveLength(0);
+    // and the guest can try again
+    t.state.fail = false;
+    expect((await t.submit()).rating).toBe(5);
+  });
+
+  test("two stays reviewed give the average of both", async () => {
+    const first = stay();
+    const second = stay({
+      checkOut: d("2026-11-15"),
+      checkIn: d("2026-11-12"),
+    });
+    const t = withListing([first, second]);
+    await t.submit({ reservationId: String(first._id), rating: "5" });
+    await t.submit({ reservationId: String(second._id), rating: "2" });
+    expect(t.state.doc).toMatchObject({
+      ratingSum: 7,
+      ratingCount: 2,
+      ratingAvg: 3.5,
+    });
+  });
+});
+
+describe("remove", () => {
+  test("deleting a review takes it out of the list and the totals", async () => {
+    const t = withListing();
+    const r = await t.submit({ rating: "3" });
+    const removed = await t.service.remove({
+      listingId: String(LISTING_ID),
+      reviewId: r._id,
+    });
+    expect(String(removed._id)).toBe(String(r._id));
+    expect(t.state.doc).toMatchObject({
+      ratingSum: 0,
+      ratingCount: 0,
+      ratingAvg: 0,
+      reviews: [],
+    });
+  });
+
+  test("deleting the same review twice at once subtracts once", async () => {
+    const t = withListing();
+    const keep = stay({ checkOut: d("2026-11-15"), checkIn: d("2026-11-12") });
+    t.reservations.push(keep);
+    await t.submit({ rating: "5" });
+    const gone = await t.submit({
+      reservationId: String(keep._id),
+      rating: "1",
+    });
+    const results = await Promise.all([
+      t.service.remove({ listingId: String(LISTING_ID), reviewId: gone._id }),
+      t.service.remove({ listingId: String(LISTING_ID), reviewId: gone._id }),
+    ]);
+    expect(results.filter(Boolean)).toHaveLength(1);
+    expect(t.state.doc).toMatchObject({
+      ratingSum: 5,
+      ratingCount: 1,
+      ratingAvg: 5,
+    });
+  });
+
+  test("a review that is already gone changes nothing", async () => {
+    const t = withListing();
+    expect(
+      await t.service.remove({
+        listingId: String(LISTING_ID),
+        reviewId: new ObjectId(),
+      }),
+    ).toBeNull();
+    expect(t.pushes).toHaveLength(0);
+  });
+
+  test("deleting frees the stay to be reviewed again inside the window", async () => {
+    const t = withListing();
+    const r = await t.submit();
+    await t.service.remove({ listingId: String(LISTING_ID), reviewId: r._id });
+    expect((await t.submit({ comment: "Second try" })).comment).toBe(
+      "Second try",
+    );
+    expect(t.state.doc.ratingCount).toBe(1);
+  });
+});
+
+describe("stateFor (the booking page)", () => {
+  const state = (t, over = {}) =>
+    t.service.stateFor({
+      user: GUEST,
+      reservation: t.reservations[0],
+      now: NOW,
+      ...over,
+    });
+  test("open: completed, in the window, no review", async () => {
+    const out = await state(withListing());
+    expect(out.state).toBe("open");
+    expect(formatDateOnly(out.until)).toBe("2026-12-10");
+  });
+  test("done: carries the review", async () => {
+    const t = withListing();
+    await t.submit({ rating: "4", comment: "Great" });
+    const out = await state(t);
+    expect(out.state).toBe("done");
+    expect(out.review).toMatchObject({ rating: 4, comment: "Great" });
+  });
+  test("closed: completed, no review, the window has passed", async () => {
+    expect(
+      (await state(withListing(), { now: new Date("2027-02-01T00:00:00Z") }))
+        .state,
+    ).toBe("closed");
+  });
+  test.each([
+    ["not completed", { reservation: stay({ status: "confirmed" }) }],
+    ["somebody else's", { user: OTHER }],
+    ["the host looking", { user: HOST }],
+    ["signed out", { user: undefined }],
+    ["suspended", { user: { ...GUEST, status: "suspended" } }],
+    ["no reservation", { reservation: null }],
+  ])("none: %s", async (_n, over) => {
+    expect((await state(withListing(), over)).state).toBe("none");
   });
 });

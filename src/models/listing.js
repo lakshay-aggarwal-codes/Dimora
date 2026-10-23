@@ -242,7 +242,9 @@ const listingSchema = new Schema(
     // The old rupee price, kept as it was stored before migration 003.
     legacyPrice: { type: Number },
 
-    // Denormalised from reviews; recomputed by the review code (P12-T02).
+    // Denormalised from reviews (P12-T02): changed only by services/ratings.js,
+    // in one atomic update together with `reviews`. ratingAvg = sum / count.
+    ratingSum: { type: Number, default: 0, min: 0, validate: integer },
     ratingAvg: { type: Number, default: 0, min: 0, max: 5 },
     ratingCount: { type: Number, default: 0, min: 0, validate: integer },
 

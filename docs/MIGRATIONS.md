@@ -64,6 +64,7 @@ module.exports = {
 | `004-listing-images-v2.js` | Listing photos: in every `images[]` entry `filename` is renamed `publicId`, an `_id` is added (photo routes identify a photo by it), `alt` is added, `order` is set to the array position. Skips photos already upgraded; deletes nothing except the renamed `filename` key. Manual `down` puts `filename` back. |
 | `005-listing-wizard.js` | Listings: builds the unique partial index `owner_1_draftToken_1`, so the first wizard step submitted twice makes one draft. No data changes. Manual `down` drops it. |
 | `008-review-model-v2.js` | Reviews (ADR-010): `legacy: true` on every review without a reservation, `listing` filled from the listing that holds it, `createdAt`/`updatedAt` from the `_id` where missing, the misspelt `crestedAt` removed, indexes `reservation_1_unique` (partial, unique), `listing_1_createdAt_-1`, `author_1_createdAt_-1`. Deletes nothing. A review no listing holds keeps no `listing`. Run `migrate:dry` first: it prints the counts. |
+| `009-listing-rating-sums.js` | Listings (P12-T02): `ratingSum`, and `ratingCount`/`ratingAvg` made to agree with the reviews each listing holds (only whole 1 to 5 ratings count). Listings already right are not written. After it, `services/ratings.js` keeps the numbers right with one atomic update per review. Run `migrate:dry` first: it prints how many listings would change. |
 
 ### 002 and duplicate emails
 
