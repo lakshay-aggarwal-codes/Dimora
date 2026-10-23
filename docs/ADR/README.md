@@ -13,3 +13,4 @@ Decisions that shape the whole codebase. Each record states context, decision, c
 | [007](007-maps-provider.md) | Maps provider: keep Mapbox, two tokens | Accepted (limits to be confirmed by owner) | P06-T01 |
 | [008](008-market-defaults.md) | Market defaults: India, INR, Asia/Kolkata | Accepted | P19-T02 |
 | [009](009-simulated-payments.md) | Payments are simulated and labelled | Accepted | P16-T02 |
+| [010](010-reviews-belong-to-stays.md) | Reviews belong to completed stays; older reviews are labelled | Accepted | P12-T02, P12-T05 |

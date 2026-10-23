@@ -63,6 +63,7 @@ module.exports = {
 | `003-listing-model-v2.js` | Listings: `status` "published" for every existing listing, `pricing.nightlyMinor` = old rupee `price` x 100 (old value kept in `legacyPrice`, `price` removed), `address.city/country` guessed from `location/country`, `images[]` from the old `image`, defaults for the new fields, rating aggregates from the existing reviews, `createdAt/updatedAt`, `needsReview`, and four indexes. Never deletes a listing. |
 | `004-listing-images-v2.js` | Listing photos: in every `images[]` entry `filename` is renamed `publicId`, an `_id` is added (photo routes identify a photo by it), `alt` is added, `order` is set to the array position. Skips photos already upgraded; deletes nothing except the renamed `filename` key. Manual `down` puts `filename` back. |
 | `005-listing-wizard.js` | Listings: builds the unique partial index `owner_1_draftToken_1`, so the first wizard step submitted twice makes one draft. No data changes. Manual `down` drops it. |
+| `008-review-model-v2.js` | Reviews (ADR-010): `legacy: true` on every review without a reservation, `listing` filled from the listing that holds it, `createdAt`/`updatedAt` from the `_id` where missing, the misspelt `crestedAt` removed, indexes `reservation_1_unique` (partial, unique), `listing_1_createdAt_-1`, `author_1_createdAt_-1`. Deletes nothing. A review no listing holds keeps no `listing`. Run `migrate:dry` first: it prints the counts. |
 
 ### 002 and duplicate emails
 

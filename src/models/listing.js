@@ -16,7 +16,6 @@ const STATUSES = ["draft", "published", "unpublished", "suspended"];
 const {
   PROPERTY_TYPE_VALUES: PROPERTY_TYPES,
   ROOM_TYPE_VALUES: ROOM_TYPES,
-  VIBE_VALUES: VIBES,
   CANCELLATION_POLICY_VALUES: CANCELLATION_POLICIES,
 } = require("../config/constants");
 
@@ -106,9 +105,6 @@ const listingSchema = new Schema(
 
     propertyType: { type: String, enum: PROPERTY_TYPES },
     roomType: { type: String, enum: ROOM_TYPES },
-    // The setting a host chose (beach, mountain, ...). Optional, no default;
-    // the category strip on /listings filters on it (P05-T04).
-    vibe: { type: String, enum: VIBES },
 
     // Mirror of the cover photo (images[0]), kept in step by the media service
     // (src/services/images.js) because older pages and the cards still read it.
@@ -378,9 +374,15 @@ listingSchema.index(
   },
 );
 
+// Deleting a listing removes the reviews written before bookings existed. A
+// review of a real stay (it has a reservation) is kept: it stays attached to
+// the listing's id and to the snapshot taken when it was written (P12-T01).
 listingSchema.post("findOneAndDelete", async (listing) => {
   if (listing) {
-    await Review.deleteMany({ _id: { $in: listing.reviews } });
+    await Review.deleteMany({
+      _id: { $in: listing.reviews },
+      reservation: { $exists: false },
+    });
   }
 });
 

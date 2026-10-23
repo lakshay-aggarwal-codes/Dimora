@@ -32,13 +32,13 @@ const useRouter = require("./routes/user");
 const pagesRouter = require("./routes/pages");
 const apiRouter = require("./routes/api");
 const adminRouter = require("./routes/admin");
+const tripsRouter = require("./routes/trips");
 const {
   assignCspNonce,
   securityHeaders,
   createAuthLimiters,
 } = require("./middleware/security");
 const { csrfProtection } = require("./middleware/csrf");
-const { recoverCheckout } = require("./middleware/checkoutRecovery");
 
 const ROOT_DIR = path.join(__dirname, "..");
 
@@ -65,6 +65,7 @@ function createApp({
   configureLocationSecret(config.sessionSecret); // keys the public-location offset (P06-T02)
 
   const app = express();
+  app.locals.reviewWindowDays = config.reviews ? config.reviews.windowDays : undefined; // P12-T01
 
   app.set("view engine", "ejs");
   app.set("views", path.join(ROOT_DIR, "views"));
@@ -144,7 +145,7 @@ function createApp({
 
   // After the session and the urlencoded parser, before multer and every
   // router: no state-changing route can run without a valid token (P01-T10).
-  app.use(csrfProtection({ onInvalid: recoverCheckout }));
+  app.use(csrfProtection());
 
   app.use(passport.initialize());
   app.use(passport.session());
@@ -178,6 +179,7 @@ function createApp({
   app.use("/listings/:id/reviews", reviewRouter);
   app.use("/", pagesRouter);
   app.use("/", useRouter);
+  app.use("/", tripsRouter);
 
   app.all("/{*splat}", (req, res, next) => {
     next(new NotFoundError());

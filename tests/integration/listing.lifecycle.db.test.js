@@ -198,7 +198,11 @@ describeDb("listing lifecycle", () => {
       const res = await guest.agent
         .post(`/listings/${listing._id}/reviews`)
         .type("form")
-        .send({ "review[rating]": "5", "review[comment]": "Nice" });
+        .send({
+          "review[reservation]": "64b0f0f0f0f0f0f0f0f0abcd", // no such stay
+          "review[rating]": "5",
+          "review[comment]": "Nice",
+        });
       expect(res.status).toBe(404);
       expect(await Review.countDocuments()).toBe(0);
     });

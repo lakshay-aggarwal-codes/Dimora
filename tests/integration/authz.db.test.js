@@ -167,7 +167,7 @@ describeDb("object-level authorization (database)", () => {
       const res = await w.stranger.agent
         .post(`${showPath(w)}/reviews`)
         .type("form")
-        .send("review[rating]=4&review[comment]=Nice");
+        .send("review[reservation]=64b0f0f0f0f0f0f0f0f0abcd&review[rating]=4&review[comment]=Nice");
       expect(res.status).toBe(403);
       expect(await Review.countDocuments({ author: w.stranger.user._id })).toBe(0);
     });

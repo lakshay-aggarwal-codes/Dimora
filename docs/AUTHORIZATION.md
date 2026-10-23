@@ -23,7 +23,10 @@ Policies are pure functions `(user, resource) => boolean` (no database, no reque
 
 | Action | Allowed |
 |---|---|
-| `listing:create`, `review:create` | any active member |
+| `listing:create` | any active member |
+| `review:create` | any active member may reach the route; whether they may review *this stay* is decided by `services/reviews.js` (completed stay, author is the guest, not the host, inside the window, one per stay; ADR-010) |
+| `reservation:view` | the booking's guest, its host, or an admin (an active account) |
+| `reservation:respond` | only the booking's host: accept or decline a request; admins cannot answer for a host |
 | `listing:edit` | the listing's owner |
 | `listing:delete` | the owner, or an admin |
 | `review:delete` | the review's author, or an admin (the review must belong to the listing in the URL) |

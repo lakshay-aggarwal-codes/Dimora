@@ -1,20 +1,12 @@
 const Listing = require("../models/listing.js");
+const reviewService = require("../services/reviews");
 const { can } = require("../policies");
 const { searchPage } = require("../services/search");
 const { isAdmin } = require("../policies/shared");
 const { getGeocodingClient } = require("../services/geocoding");
 const { deleteImage } = require("../config/cloudinary");
 const { galleryOf, replaceCover } = require("../services/images");
-const mongoose = require("mongoose");
-const { publicPointOf, PUBLIC_AREA_RADIUS_M } = require("../utils/geo");
-const { groupAmenities } = require("../utils/amenities");
-const { summarizeRatings } = require("../utils/ratings");
-const { listingJsonLd } = require("../utils/structuredData");
-const {
-  PROPERTY_TYPES,
-  ROOM_TYPES,
-  CANCELLATION_POLICIES,
-} = require("../config/constants");
+const { publicPointOf } = require("../utils/geo");
 const { isPublic } = require("../utils/visibility");
 const { softDeleteListing } = require("../services/lifecycle");
 const { stayRulesFor } = require("../services/bookingRules");
@@ -91,16 +83,8 @@ function datePickerFor(listing, query) {
   };
 }
 
-const labelOf = (list, value) =>
-  (list.find((item) => item.value === value) || {}).label || "";
-
 module.exports.showListings = async (req, res) => {
   const { id } = req.params;
-  // Something that is not an id is the same 404 as a listing that is not
-  // there, and the database is not asked.
-  if (!mongoose.isValidObjectId(id)) {
-    throw new NotFoundError("That listing does not exist.");
-  }
 
   const listing = await Listing.findById(id)
     .populate({
@@ -122,7 +106,7 @@ module.exports.showListings = async (req, res) => {
 
   // A deleted listing is gone for everyone. A draft or unpublished one is
   // visible to its host and to admins only; to everyone else it looks exactly
-  // like a listing that does not exist (the normal 404 page).
+  // like a listing that does not exist.
   const visible =
     listing &&
     !listing.deletedAt &&
@@ -130,35 +114,31 @@ module.exports.showListings = async (req, res) => {
       can("listing:edit", req.user, listing) ||
       isAdmin(req.user));
   if (!visible) {
-    throw new NotFoundError("That listing does not exist.");
+    req.flash("error", "Listing you requested for does not exist");
+    return res.redirect("/listings");
   }
-
-  const gallery = galleryOf(listing);
-  const ratingSummary = summarizeRatings(listing.reviews);
-  // Structured data is for what the public can see: never a host's draft or a
-  // preview.
-  const publicPage = isPublic(listing) && !preview;
 
   // Only the validated coordinates reach the page (as data- attributes); the
   // whole listing document is never serialised into a script.
+  // Offer the review form only to a guest with a completed, unreviewed stay
+  // inside the review window (P12-T01). `submit` decides again on the POST.
+  const reviewable =
+    req.user && !preview
+      ? await reviewService.findReviewable({
+          user: req.user,
+          listingId: listing._id,
+          windowDays: req.app.locals.reviewWindowDays,
+        })
+      : null;
+
   res.render("listings/show.ejs", {
     listing,
-    gallery,
+    reviewable,
+    gallery: galleryOf(listing),
     // The public (approximate) point only: the precise one never reaches a page.
     mapPoint: publicPointOf(listing),
-    mapRadius: PUBLIC_AREA_RADIUS_M,
     guestView: preview,
     datePicker: datePickerFor(listing, req.query),
-    ratingSummary,
-    amenityGroups: groupAmenities(listing.amenities),
-    facts: {
-      propertyType: labelOf(PROPERTY_TYPES, listing.propertyType),
-      roomType: labelOf(ROOM_TYPES, listing.roomType),
-      cancellation: labelOf(CANCELLATION_POLICIES, listing.cancellationPolicy),
-    },
-    structuredData: publicPage
-      ? listingJsonLd(listing, { gallery, rating: ratingSummary })
-      : null,
     readiness:
       !isPublic(listing) && can("listing:edit", req.user, listing)
         ? evaluateReadiness(listing)

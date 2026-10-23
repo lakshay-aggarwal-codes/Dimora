@@ -9,6 +9,7 @@ const {
 } = require("../middleware/listing");
 const searchController = require("../controllers/search");
 const listingController = require("../controllers/listing.js");
+const sectionsController = require("../controllers/sections");
 const checkoutController = require("../controllers/checkout");
 const { upload, uploadToCloudinary } = require("../config/cloudinary");
 
@@ -38,7 +39,7 @@ router.get(
   "/:id/edit",
   isLoggedIn,
   authorize("listing:edit"),
-  wrapAsync(listingController.renderEditForm),
+  wrapAsync(sectionsController.renderEditForm),
 );
 
 // Checkout (P08-T03): the guest reviews the stay and the final price, then
@@ -54,6 +55,12 @@ router.get(
   isLoggedIn,
   authorize("listing:create"),
   listingController.renderNewForm,
+);
+router.put(
+  "/:id/sections/:key",
+  isLoggedIn,
+  authorize("listing:edit"),
+  wrapAsync(sectionsController.save),
 );
 
 router

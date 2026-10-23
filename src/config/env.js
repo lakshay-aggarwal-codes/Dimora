@@ -26,6 +26,7 @@ const KEYS = [
   "DNS_SERVERS",
   "SWEEPER_ENABLED",
   "SWEEPER_INTERVAL_SECONDS",
+  "REVIEW_WINDOW_DAYS",
 ];
 
 // Secrets that were committed to the repository or are obvious placeholders.
@@ -86,6 +87,8 @@ const schema = Joi.object({
   // finished stays, removes orphaned ledger rows and old drafts.
   SWEEPER_ENABLED: Joi.boolean().default(true),
   SWEEPER_INTERVAL_SECONDS: Joi.number().integer().min(5).max(3600).default(60),
+  // How many days after check-out a guest may still review the stay (P12-T01).
+  REVIEW_WINDOW_DAYS: Joi.number().integer().min(1).max(365).default(30),
 });
 
 function isPlaceholder(value) {
@@ -191,6 +194,7 @@ function validateEnv(source = process.env) {
       enabled: value.SWEEPER_ENABLED !== false,
       intervalMs: value.SWEEPER_INTERVAL_SECONDS * 1000,
     }),
+    reviews: Object.freeze({ windowDays: value.REVIEW_WINDOW_DAYS }),
     warnings: Object.freeze(warnings),
   });
 }

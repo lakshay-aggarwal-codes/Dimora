@@ -13,12 +13,16 @@ module.exports.listingSchema = Joi.object({
     }).required(),
 });
 
+// A review is for one stay (P12-T01): the form sends the reservation id, a whole
+// rating of 1 to 5 and a comment. Who may review which stay is decided by
+// services/reviews.js, not here.
 module.exports.reviewSchema = Joi.object({
     review: Joi.object({
-        rating: Joi.number().required().min(1).max(5),
-        comment: Joi.string().required(),
+        reservation: Joi.string().hex().length(24).required(),
+        rating: Joi.number().integer().required().min(1).max(5),
+        comment: Joi.string().trim().min(1).max(2000).required(),
     }).required(),
-}); 
+});
 
 // ---- Signup (P02-T02) -------------------------------------------------------
 const { isCommonPassword } = require("./commonPasswords");

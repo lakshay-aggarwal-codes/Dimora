@@ -230,3 +230,14 @@ test("a nonsense sweeper interval is refused", () => {
   }
   assert.match(problemsOf({ ...VALID, SWEEPER_ENABLED: "maybe" }).join("\n"), /SWEEPER_ENABLED/);
 });
+
+test("the review window is 30 days by default and can be set", () => {
+  assert.equal(validateEnv(VALID).reviews.windowDays, 30);
+  assert.equal(validateEnv({ ...VALID, REVIEW_WINDOW_DAYS: "14" }).reviews.windowDays, 14);
+});
+
+test("a review window outside 1 to 365 whole days is refused", () => {
+  for (const bad of ["0", "366", "1.5", "soon"]) {
+    assert.throws(() => validateEnv({ ...VALID, REVIEW_WINDOW_DAYS: bad }), /REVIEW_WINDOW_DAYS/);
+  }
+});

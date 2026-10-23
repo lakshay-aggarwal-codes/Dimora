@@ -3,7 +3,7 @@
 // (see tests/helpers/db.js).
 const { describeDb, useTestDb } = require("../helpers/db");
 const { createAgent, login } = require("../helpers/agent");
-const { createUser, createListing, createReview } = require("../helpers/factories");
+const { createUser, createListing, createReview, createCompletedStay } = require("../helpers/factories");
 const Review = require("../../src/models/review");
 
 async function loggedIn() {
@@ -25,9 +25,10 @@ describeDb("review form, timestamps and navbar (database)", () => {
     expect(res.text).not.toContain('href="/signup');
   });
 
-  test("the review form has a required rating and nothing pre-selected", async () => {
+  test("the review form (for a guest with a completed stay) has a required rating and nothing pre-selected", async () => {
     const listing = await createListing();
-    const { agent } = await loggedIn();
+    const { agent, user } = await loggedIn();
+    await createCompletedStay({ listing, guest: user });
     const res = await agent.get(`/listings/${listing._id}`);
 
     const radios = res.text.match(/<input type="radio"[^>]*>/g) || [];
@@ -36,33 +37,66 @@ describeDb("review form, timestamps and navbar (database)", () => {
       expect(radio).toMatch(/\brequired\b/);
       expect(radio).not.toMatch(/\bchecked\b/);
     }
+    expect(res.text).toContain('name="review[reservation]"');
     expect(res.text).not.toContain("no-rate");
+  });
+
+  test("a signed-in member with no stay sees no review form (P12-T01)", async () => {
+    const listing = await createListing();
+    const { agent } = await loggedIn();
+    const res = await agent.get(`/listings/${listing._id}`);
+    expect(res.text).not.toContain("Submit review");
+    expect(res.text).toContain("Reviews come from guests who stayed here.");
   });
 
   test("regression D-13: a review without a rating is rejected and not stored", async () => {
     const listing = await createListing();
-    const { agent } = await loggedIn();
+    const { agent, user } = await loggedIn();
+    const stay = await createCompletedStay({ listing, guest: user });
     const res = await agent
       .post(`/listings/${listing._id}/reviews`)
       .type("form")
-      .send("review[comment]=Nice place");
+      .send(`review[reservation]=${stay._id}&review[comment]=Nice place`);
     expect(res.status).toBe(400);
     expect(await Review.countDocuments({})).toBe(0);
   });
 
-  test("a review with a rating is stored with createdAt/updatedAt", async () => {
+  test("a review of a completed stay is stored with the stay, createdAt/updatedAt and legacy false; a second one is refused", async () => {
     const listing = await createListing();
-    const { agent } = await loggedIn();
-    const res = await agent
-      .post(`/listings/${listing._id}/reviews`)
-      .type("form")
-      .send("review[rating]=4&review[comment]=Nice place");
-    expect(res.status).toBe(302);
+    const { agent, user } = await loggedIn();
+    const stay = await createCompletedStay({ listing, guest: user });
+    const send = () =>
+      agent
+        .post(`/listings/${listing._id}/reviews`)
+        .type("form")
+        .send(`review[reservation]=${stay._id}&review[rating]=4&review[comment]=Nice place`);
+    expect((await send()).status).toBe(302);
 
     const review = await Review.findOne({});
     expect(review.rating).toBe(4);
+    expect(String(review.reservation)).toBe(String(stay._id));
+    expect(String(review.listing)).toBe(String(listing._id));
+    expect(review.legacy).toBe(false);
     expect(review.createdAt).toBeInstanceOf(Date);
     expect(review.updatedAt).toBeInstanceOf(Date);
+
+    expect((await send()).status).toBe(409);
+    expect(await Review.countDocuments({})).toBe(1);
+  });
+
+  test("a review without a stay is refused (404), and so is somebody else's stay", async () => {
+    const listing = await createListing();
+    const { agent } = await loggedIn();
+    const { user: other } = await createUser();
+    const theirs = await createCompletedStay({ listing, guest: other });
+    for (const reservation of [String(theirs._id), "64b0f0f0f0f0f0f0f0f0abcd"]) {
+      const res = await agent
+        .post(`/listings/${listing._id}/reviews`)
+        .type("form")
+        .send(`review[reservation]=${reservation}&review[rating]=5&review[comment]=Nice`);
+      expect(res.status).toBe(404);
+    }
+    expect(await Review.countDocuments({})).toBe(0);
   });
 
   test("regression D-09: reviews created later get later timestamps", async () => {

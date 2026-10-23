@@ -3,6 +3,7 @@
 const User = require("../../src/models/user");
 const Listing = require("../../src/models/listing");
 const Review = require("../../src/models/review");
+const Reservation = require("../../src/models/reservation");
 
 let seq = 0;
 const next = () => (seq += 1);
@@ -68,10 +69,38 @@ async function createReview({ listing, author, ...overrides } = {}) {
   return review;
 }
 
+/**
+ * A completed stay of `guest` at `listing` (P12-T01), inserted directly: the
+ * reservation service cannot complete a stay that has not happened yet.
+ * Check-out defaults to five days ago, so it is inside the review window.
+ */
+async function createCompletedStay({ listing, guest, ...overrides } = {}) {
+  const day = 24 * 60 * 60 * 1000;
+  const midnight = (offsetDays) => {
+    const d = new Date(Date.now() + offsetDays * day);
+    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  };
+  return Reservation.create({
+    listing: listing._id,
+    guest: guest._id || guest,
+    host: listing.owner && (listing.owner._id || listing.owner),
+    checkIn: midnight(-8),
+    checkOut: midnight(-5),
+    nights: 3,
+    guests: 2,
+    status: "completed",
+    pricingSnapshot: { lines: [], totalMinor: 300000, currency: "INR" },
+    listingSnapshot: { title: listing.title, city: "Goa", timezone: "Asia/Kolkata" },
+    idempotencyKey: `stay-${new Date().getTime()}-${Math.random().toString(36).slice(2, 10)}`,
+    ...overrides,
+  });
+}
+
 module.exports = {
   buildUserData,
   buildListingData,
   createUser,
   createListing,
   createReview,
+  createCompletedStay,
 };

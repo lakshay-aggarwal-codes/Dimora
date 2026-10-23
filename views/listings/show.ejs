@@ -160,13 +160,8 @@
                     <h2 id="map-heading" class="h4">Where you'll be</h2>
                     <% if (place) { %><p><%= place %></p><% } %>
                     <% if (typeof mapPoint !== 'undefined' && mapPoint) { %>
-                        <p id="map-description" class="visually-hidden">The map shows a circle around the approximate area of this stay. It does not mark the exact address.</p>
-                        <div id="map" role="region" aria-label="Map of the approximate area" aria-describedby="map-description"
-                            data-token="<%= mapPublicToken %>" data-lng="<%= mapPoint.lng %>"
-                            data-lat="<%= mapPoint.lat %>" data-radius="<%= typeof mapRadius !== 'undefined' ? mapRadius : 1000 %>" data-title="<%= listing.title %>">
-                            <p class="map-fallback">Approximate area<%= place ? ": " + place : "" %>.</p>
-                        </div>
-                        <p class="text-body-secondary small mt-2">Exact location shared after booking.</p>
+                        <div id="map" data-token="<%= mapPublicToken %>" data-lng="<%= mapPoint.lng %>"
+                            data-lat="<%= mapPoint.lat %>" data-title="<%= listing.title %>"></div>
                     <% } else { %>
                         <p class="text-body-secondary">The map is not available for this listing yet.</p>
                     <% } %>
@@ -181,9 +176,11 @@
             <p class="review-summary"><%- include("../partials/rating.ejs", { rating: summary.average, count: summary.count }) %></p>
             <% } %>
 
-            <% if (currUser) { %>
+            <% if (currUser && typeof reviewable !== "undefined" && reviewable) { %>
             <form method="post" action="/listings/<%= listing.id %>/reviews" novalidate class="needs-validation detail-review-form">
                 <%- include("../includes/csrf.ejs") %>
+                <input type="hidden" name="review[reservation]" value="<%= reviewable.reservationId %>">
+                <p class="small text-body-secondary">You stayed here, so you can review it.</p>
                 <div class="mb-3">
                     <p class="form-label" aria-hidden="true">Rating</p>
                     <fieldset class="starability-slot" aria-describedby="rating-feedback">
@@ -211,6 +208,8 @@
                 </div>
                 <button type="submit" class="btn btn-outline-dark">Submit review</button>
             </form>
+            <% } else if (currUser && !guestPreview) { %>
+            <p class="small text-body-secondary detail-review-note">Reviews come from guests who stayed here. After your stay you can write one.</p>
             <% } %>
 
             <% if (reviews.length > 0) { %>
@@ -225,6 +224,7 @@
                             <span class="visually-hidden">Rated <%= review.rating %> out of 5</span>
                         </p>
                         <p class="review-comment"><%= review.comment %></p>
+                        <% if (review.legacy) { %><p class="review-legacy small text-body-secondary">Posted before bookings existed on Dimora</p><% } %>
                         <% if (can("review:delete", review)) { %>
                         <form class="text-end" method="post"
                             action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=Delete">
