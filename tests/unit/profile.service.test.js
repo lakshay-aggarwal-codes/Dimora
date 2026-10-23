@@ -113,8 +113,18 @@ describe("loadPublicProfile", () => {
       memberSince: "October 2026",
       listingCount: 3,
       reviewCount: 7,
+      hostCancellationCount: 0,
       reviews: [],
     });
+  });
+
+  test("the host cancellation counter is passed on (and is 0 when missing or not a whole number)", async () => {
+    const withCount = await loadPublicProfile(models({ user: { ...USER, hostCancellationCount: 2 } }), ID);
+    expect(withCount.hostCancellationCount).toBe(2);
+    for (const bad of [undefined, null, "3", -1.5, NaN]) {
+      const profile = await loadPublicProfile(models({ user: { ...USER, hostCancellationCount: bad } }), ID);
+      expect(profile.hostCancellationCount).toBe(0);
+    }
   });
 
   test("the listing count asks for published, not deleted listings of this user", async () => {

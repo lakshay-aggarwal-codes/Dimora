@@ -7,32 +7,14 @@
 //   respond({ ... }, { id, user, decision, reason, now })
 //        decision "accept" | "decline"; returns the updated reservation
 const { can } = require("../policies");
-const {
-  ConflictError,
-  NotFoundError,
-  ValidationError,
-} = require("../utils/errors");
+const { ConflictError, NotFoundError } = require("../utils/errors");
 const { DEFAULT_TIMEZONE, todayIn } = require("../utils/dates");
 const { formatMoney } = require("../utils/money");
 const { formatStayDate, formatInstant, referenceOf } = require("./trips");
+const { parseReason, REASON_MAX } = require("../utils/reason");
 
-const REASON_MAX = 500;
 const LIMIT = 50; // per section; a bigger backlog is shown as "showing the first 50"
 const OBJECT_ID = /^[0-9a-f]{24}$/i;
-
-/** A decline reason: optional text up to 500 characters. Too long is refused, never cut. */
-function parseReason(raw) {
-  if (raw === undefined || raw === null) return "";
-  if (typeof raw !== "string")
-    throw new ValidationError("The reason must be text.");
-  const text = raw.trim();
-  if (text.length > REASON_MAX) {
-    throw new ValidationError(
-      `The reason can be at most ${REASON_MAX} characters.`,
-    );
-  }
-  return text;
-}
 
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 

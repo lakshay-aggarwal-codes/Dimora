@@ -21,4 +21,17 @@ function respond(user, reservation) {
   return sameId(reservation.host, user._id);
 }
 
-module.exports = { view, respond };
+/**
+ * Cancel a booking (P09-T03): its guest or its host, nobody else (an admin
+ * cannot cancel for either side). Which side is acting is decided by the
+ * service from who the user is; the state machine says what each side may
+ * cancel.
+ */
+function cancel(user, reservation) {
+  if (!reservation || !isActiveUser(user)) return false;
+  return (
+    sameId(reservation.guest, user._id) || sameId(reservation.host, user._id)
+  );
+}
+
+module.exports = { view, respond, cancel };

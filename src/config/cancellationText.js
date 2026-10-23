@@ -1,17 +1,11 @@
-// What a guest is told about a listing's cancellation policy on the checkout
-// page (P08-T03). These are DESCRIPTIONS only. The refund calculation, with
-// the exact cut-off instants in the listing's time zone, is P09-T03
-// (`refundFor`); it must implement exactly the rules written here (or change
-// them here at the same time), because this is what the guest read before
-// booking.
-const POLICY_TEXT = Object.freeze({
-  flexible:
-    "Free cancellation until 24 hours before check-in. After that, the stay is not refunded.",
-  moderate:
-    "Full refund until 5 days before check-in. From then until 24 hours before check-in, half of the total is refunded. After that, the stay is not refunded.",
-  strict:
-    "Half of the total is refunded if you cancel at least 7 days before check-in. After that, the stay is not refunded.",
-});
+// What a guest is told about a listing's cancellation policy (checkout page,
+// P08-T03; booking page, P09-T01). There is ONE set of sentences:
+// CANCELLATION_TERMS in src/config/constants.js, which describes the refund
+// rules in src/config/cancellation.js that P09-T03 applies. This file only
+// adds the sentence for a listing that states no policy.
+const { CANCELLATION_TERMS } = require("./constants");
+
+const POLICY_TEXT = CANCELLATION_TERMS;
 
 const NO_POLICY_TEXT =
   "This listing does not state a cancellation policy, so no refund is promised.";

@@ -5,7 +5,8 @@
 const mongoose = require("mongoose");
 const { publicListingFilter } = require("../utils/visibility");
 
-const PUBLIC_FIELDS = "username displayName avatar bio createdAt";
+const PUBLIC_FIELDS =
+  "username displayName avatar bio createdAt hostCancellationCount";
 const RECENT_REVIEWS = 5;
 const EXCERPT = 200;
 
@@ -88,6 +89,10 @@ async function loadPublicProfile({ User, Listing, Review }, id) {
     memberSince: formatMonthYear(user.createdAt),
     listingCount,
     reviewCount,
+    // Confirmed bookings this person cancelled as a host (P09-T03).
+    hostCancellationCount: Number.isSafeInteger(user.hostCancellationCount)
+      ? user.hostCancellationCount
+      : 0,
     reviews,
   };
 }

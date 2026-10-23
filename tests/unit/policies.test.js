@@ -69,6 +69,12 @@ const MATRIX = [
   ],
   // Only the host of that booking answers a request: not the guest, not an admin.
   ["reservation:respond", reservation, { "listing owner": true }],
+  // Cancelling (P09-T03): the guest or the host of that booking; an admin cannot cancel for either.
+  [
+    "reservation:cancel",
+    reservation,
+    { "listing owner": true, "guest of the booking": true },
+  ],
   ["admin:access", undefined, { admin: true }],
 ];
 
@@ -152,6 +158,20 @@ describe("reservation:view edge cases (P09-T01)", () => {
   test("a missing booking is denied, not a crash", () => {
     expect(can("reservation:view", people.admin, null)).toBe(false);
     expect(can("reservation:view", me, undefined)).toBe(false);
+  });
+});
+
+describe("reservation:cancel edge cases (P09-T03)", () => {
+  test("either side may be an ObjectId, a populated document or a string", () => {
+    const host = people["listing owner"];
+    const guest = people["guest of the booking"];
+    expect(can("reservation:cancel", host, { host: { _id: ownerId }, guest: guestId })).toBe(true);
+    expect(can("reservation:cancel", guest, { host: ownerId, guest: String(guestId) })).toBe(true);
+    expect(can("reservation:cancel", guest, { host: ownerId, guest: new ObjectId() })).toBe(false);
+  });
+  test("a missing booking is denied to everybody, admin included", () => {
+    expect(can("reservation:cancel", people.admin, undefined)).toBe(false);
+    expect(can("reservation:cancel", people["listing owner"], null)).toBe(false);
   });
 });
 

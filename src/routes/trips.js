@@ -9,5 +9,7 @@ const router = express.Router();
 
 router.get("/trips", isLoggedIn, wrapAsync(controller.index));
 router.get("/trips/:id", isLoggedIn, wrapAsync(controller.show));
+// The guest cancels (P09-T03); the service decides who may and what is refunded.
+router.post("/trips/:id/cancel", isLoggedIn, wrapAsync(controller.cancel));
 
 module.exports = router;

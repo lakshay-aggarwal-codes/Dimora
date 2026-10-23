@@ -21,6 +21,7 @@ const POLICIES = {
   "review:delete": review.delete,
   "reservation:view": reservation.view,
   "reservation:respond": reservation.respond,
+  "reservation:cancel": reservation.cancel,
   "admin:access": admin.access,
 };
 

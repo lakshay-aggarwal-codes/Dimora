@@ -288,9 +288,14 @@ function createReservationService({
    * the caller really is (policy) is checked by the caller.
    * @returns {Promise<object>} the updated reservation
    */
-  async function transition(reservationId, to, { actor, by, reason, now = new Date() } = {}) {
+  async function transition(reservationId, to, { actor, by, reason, refund, expectStatus, now = new Date() } = {}) {
     const current = await ReservationModel.findById(reservationId);
     if (!current) throw new NotFoundError("That reservation does not exist.");
+    // The caller worked something out (a refund) from this status: if the
+    // booking has moved on since, say so instead of applying a stale result.
+    if (expectStatus && current.status !== expectStatus) {
+      throw new ConflictError("That booking changed. Please reload and try again.", { code: "conflict" });
+    }
     assertTransition(current.status, to, actor);
 
     const guard = guardFor(to, current, now);
@@ -300,6 +305,19 @@ function createReservationService({
     if (to === "cancelled_by_guest" || to === "cancelled_by_host") {
       set.cancelledBy = actor;
       if (reason) set.cancelReason = String(reason).slice(0, 500);
+      // The refund is stored by the same compare-and-set that cancels, so a
+      // cancelled booking always has the amount that was worked out for it.
+      if (refund) {
+        set.refund = {
+          amountMinor: refund.refundMinor,
+          retainedMinor: refund.retainedMinor,
+          totalMinor: refund.totalMinor,
+          currency: current.pricingSnapshot && current.pricingSnapshot.currency,
+          policy: refund.policy || undefined,
+          rule: refund.rule,
+          calculatedAt: now,
+        };
+      }
     }
     const entry = { from: current.status, to, at: now, actor, ...(by ? { by } : {}), ...(reason ? { note: String(reason).slice(0, 500) } : {}) };
 

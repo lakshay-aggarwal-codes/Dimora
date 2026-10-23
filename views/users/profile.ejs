@@ -31,6 +31,9 @@
             <dl class="profile-stats">
                 <div><dt>Listings</dt><dd><%= profile.listingCount %></dd></div>
                 <div><dt>Reviews written</dt><dd><%= profile.reviewCount %></dd></div>
+                <% if (profile.hostCancellationCount > 0) { %>
+                <div><dt>Stays cancelled as a host</dt><dd data-host-cancellations><%= profile.hostCancellationCount %></dd></div>
+                <% } %>
             </dl>
         </section>
 

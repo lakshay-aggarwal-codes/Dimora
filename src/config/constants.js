@@ -35,16 +35,22 @@ const CANCELLATION_POLICIES = [
   { value: "strict", label: "Strict" },
 ];
 
-// What each cancellation policy says on a booking (P09-T01). Plain-language
-// wording shown to guests; the refund rules that enforce it are P09-T03, which
-// must keep these sentences and the code in step.
+// What each cancellation policy says on a booking (P09-T01, P09-T03). Plain
+// wording shown to guests at checkout and on the booking page. The refund rules
+// that enforce it are DATA in src/config/cancellation.js: change a sentence and
+// its rule together (tests/unit/refunds.test.js checks the numbers).
+const CANCELLATION_COMMON =
+  " Once the stay has started, nothing is refunded. A request the host has not answered yet can always be cancelled for free, and if the host cancels, you get everything back.";
 const CANCELLATION_TERMS = Object.freeze({
   flexible:
-    "Free cancellation until 24 hours before check-in. After that, the first night is not refunded.",
+    "Free cancellation until 24 hours before check-in. After that, the first night is not refunded." +
+    CANCELLATION_COMMON,
   moderate:
-    "Free cancellation until 5 days before check-in. After that, the first night and half of the remaining nights are not refunded.",
+    "Free cancellation until 5 days before check-in. After that, the first night and half of the remaining nights are not refunded." +
+    CANCELLATION_COMMON,
   strict:
-    "Free cancellation within 48 hours of booking if check-in is at least 14 days away. After that, half of the stay is refunded until 7 days before check-in, and nothing after.",
+    "Free cancellation within 48 hours of booking if check-in is at least 14 days away. After that, half of the stay is refunded until 7 days before check-in, and nothing after." +
+    CANCELLATION_COMMON,
 });
 
 // `group` is only for showing amenities in sections on the listing page.

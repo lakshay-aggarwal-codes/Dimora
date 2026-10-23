@@ -61,6 +61,16 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    // How many confirmed bookings this person cancelled as a HOST (P09-T03).
+    // Only ever incremented, by services/cancellations.js; shown on the
+    // public profile when above zero.
+    hostCancellationCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+      validate: Number.isInteger,
+    },
+
     // null = not verified. Set by the verification flow (P02-T05).
     emailVerifiedAt: {
       type: Date,

@@ -81,6 +81,18 @@ const reservationSchema = new Schema(
 
     cancelReason: { type: String, trim: true, maxlength: 500 },
     cancelledBy: { type: String, enum: ACTORS },
+    // What a cancellation refunds (P09-T03), written in the same update that
+    // changes the status. CALCULATED AND RECORDED only: no money moves
+    // (payments are simulated until P16, which acts on this record).
+    refund: {
+      amountMinor: minor,
+      retainedMinor: minor,
+      totalMinor: minor,
+      currency: { type: String, match: /^[A-Z]{3}$/ },
+      policy: { type: String },
+      rule: { type: String },
+      calculatedAt: { type: Date },
+    },
     paymentStatus: {
       type: String,
       enum: ["none", "simulated_paid", "refunded_simulated"],

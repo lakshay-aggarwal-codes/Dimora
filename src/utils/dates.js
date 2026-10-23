@@ -190,6 +190,62 @@ function wallClockIn(timeZone = DEFAULT_TIMEZONE, now = new Date()) {
   return { date, minutes: (get("hour") % 24) * 60 + get("minute") };
 }
 
+/** "14:00" -> 840 (minutes since local midnight); null for anything else. */
+function parseClockTime(value) {
+  const hit = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(typeof value === "string" ? value : "");
+  return hit ? Number(hit[1]) * 60 + Number(hit[2]) : null;
+}
+
+// How far ahead of UTC a zone's wall clock is at `instant`, in minutes.
+function zoneOffsetMinutes(timeZone, instant) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).formatToParts(instant);
+  const get = (type) => Number(parts.find((p) => p.type === type).value);
+  const asUtc = Date.UTC(
+    get("year"),
+    get("month") - 1,
+    get("day"),
+    get("hour") % 24,
+    get("minute"),
+    get("second"),
+  );
+  return Math.round((asUtc - Math.floor(instant.getTime() / 1000) * 1000) / 60000);
+}
+
+/**
+ * The instant at which the wall clock of `timeZone` shows `minutes` (since
+ * midnight) on the calendar date `date`. Cut-offs such as "24 hours before
+ * check-in" (P09-T03) are counted from it, so they follow the listing's own
+ * clock, daylight saving included. A time that does not exist (the hour
+ * skipped when clocks go forward) is read with the offset from before the
+ * jump; a time that happens twice (clocks go back) is the first occurrence.
+ */
+function zonedInstant(date, minutes, timeZone = DEFAULT_TIMEZONE) {
+  assertDateOnly(date, "date");
+  if (!Number.isInteger(minutes) || minutes < 0 || minutes > 1439) {
+    throw new TypeError("minutes must be a whole number from 0 to 1439");
+  }
+  todayIn(timeZone, date); // validates the zone name (ValidationError)
+  const asIfUtc = date.getTime() + minutes * 60000;
+  let instant = asIfUtc - zoneOffsetMinutes(timeZone, new Date(asIfUtc)) * 60000;
+  // The offset may differ at the instant just found (a DST change in between).
+  const corrected = asIfUtc - zoneOffsetMinutes(timeZone, new Date(instant)) * 60000;
+  if (corrected !== instant) {
+    const again = asIfUtc - zoneOffsetMinutes(timeZone, new Date(corrected)) * 60000;
+    // Keep the earlier of two valid answers (the first occurrence of a repeated hour).
+    instant = again === corrected ? Math.min(instant, corrected) : corrected;
+  }
+  return new Date(instant);
+}
+
 /** First and last allowed check-in date for a given "today". */
 function bookingWindow(today) {
   assertDateOnly(today, "today");
@@ -293,6 +349,8 @@ module.exports = {
   todayIn,
   instantAfter,
   wallClockIn,
+  parseClockTime,
+  zonedInstant,
   bookingWindow,
   assertBookableDates,
   parseMonthKey,

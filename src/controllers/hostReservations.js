@@ -1,6 +1,7 @@
 // /host/reservations: the host's inbox, and accepting or declining a request.
 const { listInbox, respond } = require("../services/hostInbox");
-const { ConflictError } = require("../utils/errors");
+const { cancelBooking } = require("../services/cancellations");
+const { ConflictError, ValidationError } = require("../utils/errors");
 
 async function renderInbox(req, res, { status = 200, error } = {}) {
   const inbox = await listInbox({}, req.user._id);
@@ -47,3 +48,29 @@ module.exports.decline = answer(
   "decline",
   "Request declined. The dates are free again.",
 );
+
+// POST /host/reservations/:id/cancel (P09-T03). A missing reason is shown on
+// the inbox (400); a booking that changed (already cancelled, over, ...) as a 409.
+module.exports.cancel = async (req, res) => {
+  try {
+    await cancelBooking(
+      { logger: req.log },
+      {
+        id: req.params.id,
+        user: req.user,
+        reason: req.body ? req.body.reason : undefined,
+      },
+    );
+  } catch (err) {
+    if (err instanceof ConflictError)
+      return renderInbox(req, res, { status: 409, error: err.message });
+    if (err instanceof ValidationError)
+      return renderInbox(req, res, { status: 400, error: err.message });
+    throw err;
+  }
+  req.flash(
+    "success",
+    "Booking cancelled. The dates are free again, the guest gets a full refund (calculated only: Dimora does not move money yet) and the cancellation is counted on your profile.",
+  );
+  return res.redirect("/host/reservations");
+};

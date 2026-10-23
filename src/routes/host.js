@@ -62,5 +62,11 @@ router.post(
   isLoggedIn,
   wrapAsync(reservations.decline),
 );
+// The host cancels a confirmed stay (P09-T03): reason required, guest refunded in full.
+router.post(
+  "/reservations/:id/cancel",
+  isLoggedIn,
+  wrapAsync(reservations.cancel),
+);
 
 module.exports = router;
