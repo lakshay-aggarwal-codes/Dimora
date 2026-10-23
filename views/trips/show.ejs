@@ -32,6 +32,13 @@
         <div class="alert alert-success" role="status">The host accepted your request. Your stay is confirmed.</div>
         <% } %>
 
+        <% if (trip.status === "declined") { %>
+        <div class="alert alert-secondary" role="status">
+            The host declined this request. The dates were released and nothing was charged.
+            <% if (trip.declineReason) { %><br>Reason from the host: <span class="trip-rules-text"><%= trip.declineReason %></span><% } %>
+        </div>
+        <% } %>
+
         <section class="trip-section" aria-labelledby="trip-stay">
             <h2 class="h5" id="trip-stay">Your stay</h2>
             <dl class="trip-facts">

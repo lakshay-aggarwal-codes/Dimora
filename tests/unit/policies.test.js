@@ -67,6 +67,8 @@ const MATRIX = [
       admin: true,
     },
   ],
+  // Only the host of that booking answers a request: not the guest, not an admin.
+  ["reservation:respond", reservation, { "listing owner": true }],
   ["admin:access", undefined, { admin: true }],
 ];
 
@@ -150,5 +152,20 @@ describe("reservation:view edge cases (P09-T01)", () => {
   test("a missing booking is denied, not a crash", () => {
     expect(can("reservation:view", people.admin, null)).toBe(false);
     expect(can("reservation:view", me, undefined)).toBe(false);
+  });
+});
+
+describe("reservation:respond edge cases (P09-T02)", () => {
+  test("the host may be an ObjectId, a populated document or a string", () => {
+    const host = people["listing owner"];
+    expect(can("reservation:respond", host, { host: ownerId })).toBe(true);
+    expect(can("reservation:respond", host, { host: { _id: ownerId } })).toBe(true);
+    expect(can("reservation:respond", host, { host: String(ownerId) })).toBe(true);
+    expect(can("reservation:respond", host, { host: new ObjectId() })).toBe(false);
+  });
+  test("a booking with no host, or none at all, is denied to everybody, admin included", () => {
+    expect(can("reservation:respond", people.admin, { host: null })).toBe(false);
+    expect(can("reservation:respond", people.admin, undefined)).toBe(false);
+    expect(can("reservation:respond", people["listing owner"], null)).toBe(false);
   });
 });

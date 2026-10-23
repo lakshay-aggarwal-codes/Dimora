@@ -464,6 +464,18 @@ describe("describeTrip", () => {
     ).toBeNull();
   });
 
+  test("a declined request carries the host's reason from the status history", () => {
+    const history = [
+      { from: null, to: "pending", actor: "guest", at: NOW },
+      { from: "pending", to: "declined", actor: "host", at: NOW, note: "Repairs that week" },
+    ];
+    expect(trip({ status: "declined", statusHistory: history }).declineReason).toBe("Repairs that week");
+    expect(trip({ status: "declined", statusHistory: history.slice(0, 1) }).declineReason).toBe("");
+    expect(trip({ status: "declined" }).declineReason).toBe("");
+    // a reason is never shown for any other status
+    expect(trip({ status: "confirmed", statusHistory: history }).declineReason).toBe("");
+  });
+
   test("payment is stated as simulated", () => {
     expect(trip({}).paymentSimulated).toBe(true);
   });

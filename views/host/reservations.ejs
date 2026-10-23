@@ -1,0 +1,85 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    The host's booking requests (P09-T02). Locals (src/services/hostInbox.js
+    listInbox): pending, confirmed, truncated, limit; problem (a message when an
+    answer was refused with a 409). Accept and decline are plain POST forms with
+    the CSRF token; the decline reason sits in a disclosure so no script is needed.
+%>
+<%
+    const guestLine = (g) => g.name + (g.memberSince ? " · member since " + g.memberSince : "") +
+        " · " + (g.previousStays === 0 ? "no earlier stays with you" : g.previousStays + (g.previousStays === 1 ? " earlier stay" : " earlier stays") + " with you");
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-10 mx-auto">
+        <h1 class="h3 mb-3">Booking requests</h1>
+
+        <% if (problem) { %>
+        <div class="alert alert-danger" role="alert"><%= problem %></div>
+        <% } %>
+
+        <section aria-labelledby="inbox-pending" class="mb-5">
+            <h2 class="h5" id="inbox-pending">Waiting for your answer <span class="badge text-bg-light"><%= pending.length %></span></h2>
+            <% if (pending.length === 0) { %>
+            <%- include("../partials/empty-state.ejs", { title: "No requests waiting", message: "When a guest asks to book a place that needs your approval, it appears here.", icon: "fa-inbox", headingLevel: 3 }) %>
+            <% } else { %>
+            <ul class="inbox-list list-unstyled">
+                <% pending.forEach((r) => { %>
+                <li class="inbox-card" id="request-<%= r.id %>">
+                    <div class="inbox-main">
+                        <p class="inbox-title mb-1"><%= r.listingTitle %> <span class="text-body-secondary">· <%= r.reference %></span></p>
+                        <p class="mb-1"><%= r.checkIn %> – <%= r.checkOut %> · <%= r.nights %> night<%= r.nights === 1 ? "" : "s" %> · <%= r.guests %> guest<%= r.guests === 1 ? "" : "s" %><% if (r.guestTotal) { %> · guest total <%= r.guestTotal %><% } %></p>
+                        <p class="small text-body-secondary mb-1"><%= guestLine(r.guest) %></p>
+                        <% if (r.canAnswer) { %>
+                        <p class="inbox-expiry mb-0">Answer within <time data-expires="<%= r.expiresAtMs %>" datetime="<%= r.expiresAtIso %>"><%= r.expiresText %></time> (by <%= r.expiresAt %>).</p>
+                        <% } else { %>
+                        <p class="inbox-expiry mb-0 text-danger-emphasis">This request has expired and can no longer be answered. The dates are being released.</p>
+                        <% } %>
+                    </div>
+                    <% if (r.canAnswer) { %>
+                    <div class="inbox-actions">
+                        <form action="/host/reservations/<%= r.id %>/accept" method="POST">
+                            <%- include("../includes/csrf.ejs") %>
+                            <button type="submit" class="btn btn-dark btn-sm" data-accept>Accept</button>
+                        </form>
+                        <details class="inbox-decline">
+                            <summary class="btn btn-outline-dark btn-sm">Decline…</summary>
+                            <form action="/host/reservations/<%= r.id %>/decline" method="POST" class="mt-2">
+                                <%- include("../includes/csrf.ejs") %>
+                                <label class="form-label small" for="reason-<%= r.id %>">Reason for the guest (optional)</label>
+                                <textarea class="form-control form-control-sm" id="reason-<%= r.id %>" name="reason" rows="3" maxlength="500"></textarea>
+                                <button type="submit" class="btn btn-danger btn-sm mt-2">Decline request</button>
+                            </form>
+                        </details>
+                    </div>
+                    <% } %>
+                </li>
+                <% }) %>
+            </ul>
+            <% } %>
+        </section>
+
+        <section aria-labelledby="inbox-confirmed">
+            <h2 class="h5" id="inbox-confirmed">Confirmed stays <span class="badge text-bg-light"><%= confirmed.length %></span></h2>
+            <% if (confirmed.length === 0) { %>
+            <%- include("../partials/empty-state.ejs", { title: "No confirmed stays coming up", message: "Accepted requests and instant bookings appear here until the stay is over.", icon: "fa-calendar-check", headingLevel: 3 }) %>
+            <% } else { %>
+            <ul class="inbox-list list-unstyled">
+                <% confirmed.forEach((r) => { %>
+                <li class="inbox-card">
+                    <div class="inbox-main">
+                        <p class="inbox-title mb-1"><a href="/trips/<%= r.id %>"><%= r.listingTitle %></a> <span class="text-body-secondary">· <%= r.reference %></span></p>
+                        <p class="mb-1"><%= r.checkIn %> – <%= r.checkOut %> · <%= r.nights %> night<%= r.nights === 1 ? "" : "s" %> · <%= r.guests %> guest<%= r.guests === 1 ? "" : "s" %><% if (r.guestTotal) { %> · guest total <%= r.guestTotal %><% } %></p>
+                        <p class="small text-body-secondary mb-0"><%= guestLine(r.guest) %></p>
+                    </div>
+                </li>
+                <% }) %>
+            </ul>
+            <% } %>
+        </section>
+
+        <% if (truncated) { %>
+        <p class="small text-body-secondary mt-3">Showing the first <%= limit %> of each list.</p>
+        <% } %>
+    </div>
+</div>
+<script src="/js/host-inbox.js"></script>

@@ -186,6 +186,14 @@ const isDocument = (value) =>
   typeof value === "object" &&
   typeof value.toHexString !== "function";
 
+/** The note the host left when declining (status history), or "". */
+function declineReasonOf(reservation) {
+  if (reservation.status !== "declined") return "";
+  const history = Array.isArray(reservation.statusHistory) ? reservation.statusHistory : [];
+  const entry = [...history].reverse().find((h) => h && h.to === "declined" && h.note);
+  return entry ? String(entry.note) : "";
+}
+
 const idText = (value) => String(value && value._id ? value._id : value);
 
 /** A short code a guest and a host can quote: DIM-1A2B3C4D. */
@@ -376,6 +384,7 @@ function describeTrip(
       !viewerIsGuest && guest ? guest.displayName || guest.username : null,
     address,
     mapUrl,
+    declineReason: declineReasonOf(reservation),
     paymentSimulated: true,
   };
 }

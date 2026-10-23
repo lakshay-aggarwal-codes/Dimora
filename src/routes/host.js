@@ -5,6 +5,7 @@ const wrapAsync = require("../utils/wrapAsync");
 const { isLoggedIn, authorize } = require("../middleware");
 const controller = require("../controllers/host");
 const availability = require("../controllers/availability");
+const reservations = require("../controllers/hostReservations");
 
 const router = express.Router();
 const mayCreate = [isLoggedIn, authorize("listing:create")];
@@ -36,11 +37,7 @@ router.post(
 );
 
 // Availability calendar (P07-T03): only the listing's host.
-router.get(
-  "/listings/:id/calendar",
-  ...mayEdit,
-  wrapAsync(availability.show),
-);
+router.get("/listings/:id/calendar", ...mayEdit, wrapAsync(availability.show));
 router.post(
   "/listings/:id/calendar/blocks",
   ...mayEdit,
@@ -50,6 +47,20 @@ router.post(
   "/listings/:id/calendar/unblock",
   ...mayEdit,
   wrapAsync(availability.unblock),
+);
+
+// Booking requests (P09-T02): any signed-in host; the service checks that the
+// booking is theirs.
+router.get("/reservations", isLoggedIn, wrapAsync(reservations.index));
+router.post(
+  "/reservations/:id/accept",
+  isLoggedIn,
+  wrapAsync(reservations.accept),
+);
+router.post(
+  "/reservations/:id/decline",
+  isLoggedIn,
+  wrapAsync(reservations.decline),
 );
 
 module.exports = router;

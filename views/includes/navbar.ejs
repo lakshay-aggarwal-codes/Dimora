@@ -66,6 +66,7 @@
                                         <strong><%= currUser.username %></strong></span>
                                 </li>
                                 <li><a class="dropdown-item" href="/trips"<%- current("/trips") %>>Your trips</a></li>
+                                <li><a class="dropdown-item" href="/host/reservations"<%- current("/host/reservations") %>>Booking requests</a></li>
                                 <% if (typeof can === "function" && can("admin:access")) { %>
                                 <li><a class="dropdown-item" href="/admin">Admin</a></li>
                                 <% } %>
