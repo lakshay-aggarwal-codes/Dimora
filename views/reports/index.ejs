@@ -1,0 +1,23 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    "Your reports" (P12-T04). Locals: reports (services/reports.js listMyReports).
+    Only the reporter's own reports; the status is all that is shown about the outcome.
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-8 mx-auto">
+        <h1 class="h3 mb-3">Your reports</h1>
+        <% if (reports.length === 0) { %>
+        <%- include("../partials/empty-state.ejs", { title: "You have not reported anything", message: "If you see a listing, review or member that breaks the rules, use its Report link and it will show up here.", icon: "fa-flag", headingLevel: 2 }) %>
+        <% } else { %>
+        <ul class="list-unstyled report-list" data-report-list>
+            <% reports.forEach((r) => { %>
+            <li class="report-item mb-3">
+                <p class="mb-1"><strong><%= r.kindLabel %>:</strong> <%= r.target %></p>
+                <p class="mb-1 small">Reason: <%= r.reasonLabel %> · sent <time datetime="<%= r.createdAt.toISOString() %>"><%= r.createdAt.toISOString().slice(0, 10) %></time></p>
+                <p class="mb-0"><span class="badge text-bg-light" data-report-status="<%= r.status %>"><%= r.statusLabel %></span> <span class="small"><%= r.statusNote %></span></p>
+            </li>
+            <% }) %>
+        </ul>
+        <% } %>
+    </div>
+</div>

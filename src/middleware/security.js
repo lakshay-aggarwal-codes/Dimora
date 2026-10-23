@@ -2,7 +2,7 @@
 // limits for the login and signup forms.
 const crypto = require("node:crypto");
 const helmet = require("helmet");
-const { rateLimit } = require("express-rate-limit");
+const { rateLimit, ipKeyGenerator } = require("express-rate-limit");
 const { AppError } = require("../utils/errors");
 
 /** A fresh nonce per request; views put it on every inline <script>/<style>. */
@@ -85,6 +85,14 @@ function tooManyQuotes(req, res, next) {
   );
 }
 
+function tooManyReports(req, res, next) {
+  next(
+    new AppError(429, "You are sending reports very quickly. Please wait a minute and try again.", {
+      code: "rate_limited",
+    }),
+  );
+}
+
 /**
  * Created per app (not at module load) so every test app starts with empty
  * counters. Login: 5 failed attempts per 15 minutes per IP (a successful
@@ -108,6 +116,15 @@ function createAuthLimiters() {
     signup: rateLimit({ ...common, windowMs: 60 * 60 * 1000, limit: 10 }),
     // Price checks (P08-T02): a guest picking dates makes a few per minute.
     quote: rateLimit({ ...common, handler: tooManyQuotes, windowMs: 60 * 1000, limit: 60 }),
+    // Reports (P12-T04): 5 a minute per signed-in member (per IP for anyone
+    // else). The daily cap is counted in the database by services/reports.js.
+    report: rateLimit({
+      ...common,
+      handler: tooManyReports,
+      windowMs: 60 * 1000,
+      limit: 5,
+      keyGenerator: (req) => (req.user && req.user._id ? `user:${req.user._id}` : ipKeyGenerator(req.ip)),
+    }),
   };
 }
 

@@ -75,6 +75,18 @@ const MATRIX = [
     reservation,
     { "listing owner": true, "guest of the booking": true },
   ],
+  // Reporting (P12-T04): any active member, except about their own thing (the resource is { owner }).
+  [
+    "report:create",
+    listing,
+    {
+      "other member": true,
+      "review author": true,
+      "guest of the booking": true,
+      admin: true,
+      "legacy user (no status field)": true,
+    },
+  ],
   ["admin:access", undefined, { admin: true }],
 ];
 
@@ -158,6 +170,27 @@ describe("reservation:view edge cases (P09-T01)", () => {
   test("a missing booking is denied, not a crash", () => {
     expect(can("reservation:view", people.admin, null)).toBe(false);
     expect(can("reservation:view", me, undefined)).toBe(false);
+  });
+});
+
+describe("report:create edge cases (P12-T04)", () => {
+  const member = people["other member"];
+  test("a target without an owner (an old review) can be reported by any active member", () => {
+    expect(can("report:create", member, { owner: null })).toBe(true);
+    expect(can("report:create", member, {})).toBe(true);
+    expect(can("report:create", member, undefined)).toBe(true);
+  });
+  test("the owner may be an id, a populated document or a string; your own is refused in every form", () => {
+    const owner = people["listing owner"];
+    expect(can("report:create", owner, { owner: ownerId })).toBe(false);
+    expect(can("report:create", owner, { owner: { _id: ownerId } })).toBe(false);
+    expect(can("report:create", owner, { owner: String(ownerId) })).toBe(false);
+    expect(can("report:create", member, { owner: String(ownerId) })).toBe(true);
+  });
+  test("nobody who is signed out or not active can report anything", () => {
+    for (const who of ["anonymous", "suspended owner", "suspended guest", "suspended admin", "deleted owner"]) {
+      expect(can("report:create", people[who], { owner: new ObjectId() })).toBe(false);
+    }
   });
 });
 

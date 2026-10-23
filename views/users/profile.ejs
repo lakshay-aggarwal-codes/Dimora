@@ -17,6 +17,8 @@
 
         <% if (isOwn) { %>
         <p><a class="btn btn-outline-dark btn-sm" href="/account/profile">Edit your profile</a></p>
+        <% } else if (typeof currUser === "undefined" || !currUser || can("report:create", { owner: profile.id })) { %>
+        <p class="small"><a href="/reports/new?kind=user&id=<%= profile.id %>" data-report-link>Report this member</a></p>
         <% } %>
 
         <% if (profile.bio) { %>

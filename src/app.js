@@ -29,16 +29,19 @@ const imagesRouter = require("./routes/images");
 const hostRouter = require("./routes/host");
 const reviewRouter = require("./routes/review");
 const useRouter = require("./routes/user");
+const profileRouter = require("./routes/profile");
+const tripsRouter = require("./routes/trips");
+const reportsRouter = require("./routes/reports");
 const pagesRouter = require("./routes/pages");
 const apiRouter = require("./routes/api");
 const adminRouter = require("./routes/admin");
-const tripsRouter = require("./routes/trips");
 const {
   assignCspNonce,
   securityHeaders,
   createAuthLimiters,
 } = require("./middleware/security");
 const { csrfProtection } = require("./middleware/csrf");
+const { recoverCheckout } = require("./middleware/checkoutRecovery");
 
 const ROOT_DIR = path.join(__dirname, "..");
 
@@ -65,7 +68,6 @@ function createApp({
   configureLocationSecret(config.sessionSecret); // keys the public-location offset (P06-T02)
 
   const app = express();
-  app.locals.reviewWindowDays = config.reviews ? config.reviews.windowDays : undefined; // P12-T01
 
   app.set("view engine", "ejs");
   app.set("views", path.join(ROOT_DIR, "views"));
@@ -145,7 +147,7 @@ function createApp({
 
   // After the session and the urlencoded parser, before multer and every
   // router: no state-changing route can run without a valid token (P01-T10).
-  app.use(csrfProtection());
+  app.use(csrfProtection({ onInvalid: recoverCheckout }));
 
   app.use(passport.initialize());
   app.use(passport.session());
@@ -171,15 +173,18 @@ function createApp({
   app.post("/signup", limiters.signup);
 
   app.use("/api/listings/:id/quote", limiters.quote);
+  app.post("/reports", limiters.report); // counts, then lets the reports router answer
   app.use("/api", apiRouter);
   app.use("/admin", adminRouter);
   app.use("/host", hostRouter);
   app.use("/listings/:id/images", imagesRouter);
   app.use("/listings", listingRouter);
   app.use("/listings/:id/reviews", reviewRouter);
+  app.use("/", reportsRouter);
+  app.use("/", profileRouter);
+  app.use("/", tripsRouter);
   app.use("/", pagesRouter);
   app.use("/", useRouter);
-  app.use("/", tripsRouter);
 
   app.all("/{*splat}", (req, res, next) => {
     next(new NotFoundError());
