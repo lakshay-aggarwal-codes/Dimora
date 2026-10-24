@@ -2,3 +2,6 @@ node_modules/
 .env
  
 coverage/
+data/
+# Large local dataset archive
+Dimora_Full_Datasets.zip

@@ -1,0 +1,1545 @@
+{
+  "project": "Dimora",
+  "purpose": "Airbnb-style rental marketplace dataset handoff",
+  "datasets": [
+    {
+      "filename": "airbnb-properties-information.csv",
+      "format": "CSV",
+      "size_bytes": 26181531,
+      "record_count_excluding_header": 1000,
+      "columns": [
+        "name",
+        "price",
+        "image",
+        "description",
+        "category",
+        "availability",
+        "discount",
+        "reviews",
+        "ratings",
+        "seller_info",
+        "breadcrumbs",
+        "location",
+        "lat",
+        "long",
+        "guests",
+        "pets_allowed",
+        "description_items",
+        "category_rating",
+        "house_rules",
+        "details",
+        "highlights",
+        "arrangement_details",
+        "amenities",
+        "images",
+        "available_dates",
+        "url",
+        "final_url",
+        "listing_title",
+        "property_id",
+        "listing_name",
+        "location_details",
+        "description_by_sections",
+        "description_html",
+        "location_details_html",
+        "is_supperhost",
+        "host_number_of_reviews",
+        "host_rating",
+        "hosts_year",
+        "host_response_rate",
+        "is_guest_favorite",
+        "travel_details",
+        "pricing_details",
+        "total_price",
+        "currency"
+      ],
+      "sample_records": [
+        {
+          "name": "Villa in Kecamatan Kuta Utara · ★5.0 · 2 bedrooms · 2 baths",
+          "price": "null",
+          "image": "\"https://a0.muscache.com/pictures/hosting/Hosting-1080105409447417683/original/f6e1bdd5-216f-4b7d-a682-f73b80633384.jpeg\"",
+          "description": "Daloha villa is a mediterranean-inspired dream. This design 2BR villa exalts in the effortless beauty of natural materials and smooth shapes. Raw, minimalist, striking a balance between full and empty, this villa features an unbeatable combination of cultural flavor and low-key luxury.The spaceIndulge in exquisite luxury at Daloha Villa, a sophisticated 2-bedroom with ensuite bathroom haven nestled in Canggu. Explore endless dining, cafes, spas, and beaches just moments away. Relax in your private oasis with a sparkling pool and chic living areas. Enjoy personalized services, daily housekeeping, and a dedicated villa manager for a seamless stay. Experience the epitome of Canggu living at Daloha Villa, a sanctuary where luxury meets convenience.Other things to noteOur housekeeping is working 5 days a week.",
+          "category": "Stays",
+          "availability": "true",
+          "discount": "null",
+          "reviews": "[\"Everything looks good same as pictures, clean also!\",\"Owner was always responsive and helpfull, he helped us with everything, <br/>Villa was nice, only the construction arround was for me a bit disturbing.\",\"The most amazing Villa in Canggu I have ever been 🥹🥹 Thank you Kemal and Novi for the great time I spent there!! I will be back for sure. From the welcome drinks to how easy it was to communicate and request everything I needed during our stay, through the incredible cleanness EVERY DAY 💛 I will always come back to Daloha 🌴\"]",
+          "ratings": "5",
+          "seller_info": "{\"seller_id\":\"5098865\",\"url\":\"https://www.airbnb.com/users/show/5098865\"}",
+          "breadcrumbs": "Kecamatan Kuta Utara, Bali, Indonesia",
+          "location": "Kecamatan Kuta Utara, Bali, Indonesia",
+          "lat": "-8.6332",
+          "long": "115.1568",
+          "guests": "4",
+          "pets_allowed": "true",
+          "description_items": "[\"Entire villa\",\"2 baths\"]",
+          "category_rating": "[{\"name\":\"Cleanliness\",\"value\":\"5.0\"},{\"name\":\"Accuracy\",\"value\":\"5.0\"},{\"name\":\"Check-in\",\"value\":\"5.0\"},{\"name\":\"Communication\",\"value\":\"5.0\"},{\"name\":\"Location\",\"value\":\"4.7\"},{\"name\":\"Value\",\"value\":\"5.0\"}]",
+          "house_rules": "[\"Check-in after 3:00 PM\",\"Checkout before 11:00 AM\",\"4 guests maximum\"]",
+          "details": "[\"4 guests\",\"2 bedrooms\",\"2 baths\"]",
+          "highlights": "[{\"name\":\"Dive right in\",\"value\":\"This is one of the few places in the area with a pool.\"},{\"name\":\"Great communication\",\"value\":\"100% of recent guests rated Kemal 5-star in communication.\"}]",
+          "arrangement_details": "null",
+          "amenities": "[{\"group_name\":\"Bathroom\",\"items\":[{\"name\":\"Hair dryer\",\"value\":\"SYSTEM_HAIRDRYER\"},{\"name\":\"Cleaning products\",\"value\":\"SYSTEM_CLEANING_SUPPLIES\"},{\"name\":\"Shampoo\",\"value\":\"SYSTEM_SHAMPOO\"},{\"name\":\"Conditioner\",\"value\":\"SYSTEM_SHAMPOO\"},{\"name\":\"Body soap\",\"value\":\"SYSTEM_SOAP\"},{\"name\":\"Outdoor shower\",\"value\":\"SYSTEM_SHOWER\"},{\"name\":\"Hot water\",\"value\":\"SYSTEM_HOT_WATER\"},{\"name\":\"Shower gel\",\"value\":\"SYSTEM_SOAP\"}]},{\"group_name\":\"Bedroom and laundry\",\"items\":[{\"name\":\"Essentials\",\"value\":\"Towels, bed sheets, soap, and toilet paper\"},{\"name\":\"Hangers\",\"value\":\"SYSTEM_HANGERS\"},{\"name\":\"Bed linens\",\"value\":\"SYSTEM_BLANKETS\"},{\"name\":\"Room-darkening shades\",\"value\":\"SYSTEM_BLACKOUT_SHADES\"},{\"name\":\"Iron\",\"value\":\"SYSTEM_IRON\"},{\"name\":\"Drying rack for clothing\",\"value\":\"SYSTEM_HANGERS\"},{\"name\":\"Safe\",\"value\":\"SYSTEM_SAFE\"},{\"name\":\"Clothing storage\",\"value\":\"SYSTEM_WARDROBE\"}]},{\"group_name\":\"Heating and cooling\",\"items\":[{\"name\":\"Air conditioning\",\"value\":\"SYSTEM_SNOWFLAKE\"}]},{\"group_name\":\"Home safety\",\"items\":[{\"name\":\"Exterior security cameras on property\",\"value\":\"We have CCTV 24/7 at the entrance of the villa is recording image and sound.\"},{\"name\":\"Fire extinguisher\",\"value\":\"SYSTEM_FIRE_EXTINGUISHER\"}]},{\"group_name\":\"Internet and office\",\"items\":[{\"name\":\"Wifi\",\"value\":\"SYSTEM_WI_FI\"},{\"name\":\"Dedicated workspace\",\"value\":\"SYSTEM_WORKSPACE\"}]},{\"group_name\":\"Kitchen and dining\",\"items\":[{\"name\":\"Kitchen\",\"value\":\"Space where guests can cook their own meals\"},{\"name\":\"Refrigerator\",\"value\":\"SYSTEM_REFRIGERATOR\"},{\"name\":\"Cooking basics\",\"value\":\"Pots and pans, oil, salt and pepper\"},{\"name\":\"Dishes and silverware\",\"value\":\"Bowls, chopsticks, plates, cups, etc.\"},{\"name\":\"Freezer\",\"value\":\"SYSTEM_REFRIGERATOR\"},{\"name\":\"Stove\",\"value\":\"SYSTEM_STOVE\"},{\"name\":\"Hot water kettle\",\"value\":\"SYSTEM_WATER_KETTLE\"},{\"name\":\"Coffee maker\",\"value\":\"SYSTEM_COFFEE_MAKER\"},{\"name\":\"Wine glasses\",\"value\":\"SYSTEM_MAPS_BAR\"},{\"name\":\"Toaster\",\"value\":\"SYSTEM_TOASTER\"},{\"name\":\"Blender\",\"value\":\"SYSTEM_BLENDER\"},{\"name\":\"Rice maker\",\"value\":\"SYSTEM_RICE_COOKER\"},{\"name\":\"Trash compactor\",\"value\":\"SYSTEM_TRASH\"},{\"name\":\"Dining table\",\"value\":\"SYSTEM_DINING_TABLE\"}]},{\"group_name\":\"Location features\",\"items\":[{\"name\":\"Private entrance\",\"value\":\"Separate street or building entrance\"},{\"name\":\"Laundromat nearby\",\"value\":\"SYSTEM_LAUNDRY_SERVICE\"}]},{\"group_name\":\"Outdoor\",\"items\":[{\"name\":\"Patio or balcony\",\"value\":\"SYSTEM_PATIO_BALCONY\"},{\"name\":\"Outdoor furniture\",\"value\":\"SYSTEM_ROOFTOP_DECK\"},{\"name\":\"Sun loungers\",\"value\":\"SYSTEM_SUN_DECK\"}]},{\"group_name\":\"Parking and facilities\",\"items\":[{\"name\":\"Free parking on premises\",\"value\":\"SYSTEM_MAPS_CAR_RENTAL\"},{\"name\":\"Free street parking\",\"value\":\"SYSTEM_MAPS_CAR_RENTAL\"},{\"name\":\"Pool\",\"value\":\"SYSTEM_POOL\"},{\"name\":\"Single level home\",\"value\":\"No stairs in home\"}]},{\"group_name\":\"Services\",\"items\":[{\"name\":\"Pets allowed\",\"value\":\"Assistance animals are always allowed\"},{\"name\":\"Luggage dropoff allowed\",\"value\":\"For guests' convenience when they have early arrival or late departure\"},{\"name\":\"Smoking allowed\",\"value\":\"SYSTEM_SMOKING_ALLOWED\"},{\"name\":\"Long term stays allowed\",\"value\":\"Allow stay for 28 days or more\"},{\"name\":\"Cleaning available during stay\",\"value\":\"SYSTEM_CLEAN\"},{\"name\":\"Host greets you\",\"value\":\"SYSTEM_HOST_OWNERS\"}]},{\"group_name\":\"Not included\",\"items\":[]}]",
+          "images": "[\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/f6e1bdd5-216f-4b7d-a682-f73b80633384.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/fa22902f-e6fa-46b7-94a4-132b3b1c9685.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/5f8c17f9-2668-4c1f-b570-290072ef86df.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/68aa2310-123d-419c-b569-2e7008c79f9c.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/f30b9016-12df-464c-a299-411b4a27304d.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/d316bf9e-4caa-43f9-baf2-e21c62f91299.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/631c21be-fa59-465d-94d2-037d6661fbc8.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/1048ac0f-ce3e-4205-8ebe-22b24fbc6102.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/ef5caddc-4f39-41fc-8811-b29dc05fdc9f.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/84cf00f1-818a-4f45-8673-b84ba46b9c5e.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/32c0be77-fa68-49be-bcb6-cbd547208f0d.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/4e9f4066-c1b0-48aa-888d-4a2ba0d8f3c1.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/17ed52ee-3a6d-4da2-ae2e-f6a0ab262288.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/c7ba72b1-da69-4d49-8003-510f462b6524.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/39596b42-001c-48d5-a458-a4b4139d235c.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/4b5484c0-5c69-43c9-8da7-e11626d65e9d.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/62245190-6324-43d9-aa40-f6deac33b565.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/96d5a7cb-c1ca-4241-a446-c213adb8f5d1.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/3451077f-2452-4228-a6c1-62abec3e7578.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/d8ff30f6-ecce-4542-823c-a57e11ff9c19.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/3b8c52e0-a8de-4920-ad35-48c90bfe9319.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/ceec9e6e-5f25-4f4a-9d42-8fc02e4dc377.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/7c6c85b8-81c8-4748-a11d-43dd3969f421.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/cf63f636-3fc8-481f-a66f-469ae1de6e9b.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/9d8d5c5b-8db7-4480-9faa-b86188481ab1.png\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/6384a6e4-3dff-44dc-8592-49ab30a3d894.png\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/f45cc490-d44c-47cf-b834-b000862fbf2a.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/117e47cb-2ccd-4e1a-93da-26c4609763ac.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/ac48d22d-f808-4fc0-acb3-b79792ece16b.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/8f5305e8-87c2-4fcd-80db-3f250fd4a4a1.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/f6568425-edb6-4527-b1b0-7e18729b6b97.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-1080105409447417683/original/a4780650-9207-49e7-825a-d0566c768915.jpeg\"]",
+          "available_dates": "[\"2024-08-29\",\"2024-08-30\",\"2024-08-31\",\"2024-09-01\",\"2024-09-11\",\"2024-09-12\",\"2024-09-13\",\"2024-09-14\",\"2024-09-15\",\"2024-09-16\",\"2024-09-17\",\"2024-09-18\",\"2024-09-19\",\"2024-09-20\",\"2024-09-21\",\"2024-09-22\",\"2024-09-27\",\"2024-09-28\",\"2024-09-29\",\"2024-09-30\",\"2024-10-01\",\"2024-10-02\",\"2024-10-03\",\"2024-10-04\",\"2024-10-05\",\"2024-10-06\",\"2024-10-07\",\"2024-10-08\",\"2024-10-09\",\"2024-10-10\",\"2024-10-11\",\"2024-10-12\",\"2024-10-13\",\"2024-10-14\",\"2024-10-15\",\"2024-10-16\",\"2024-10-17\",\"2024-10-18\",\"2024-10-19\",\"2024-10-20\",\"2024-10-21\",\"2024-10-22\",\"2024-10-23\",\"2024-10-24\",\"2024-10-25\",\"2024-10-26\",\"2024-10-27\",\"2024-10-28\",\"2024-10-29\",\"2024-10-30\",\"2024-10-31\",\"2024-11-01\",\"2024-11-02\",\"2024-11-03\",\"2024-11-04\",\"2024-11-05\",\"2024-11-06\",\"2024-11-07\",\"2024-11-08\",\"2024-11-09\",\"2024-11-10\",\"2024-11-11\",\"2024-11-12\",\"2024-11-13\",\"2024-11-14\",\"2024-11-15\",\"2024-11-16\",\"2024-11-17\",\"2024-11-18\",\"2024-11-19\",\"2024-11-20\",\"2024-11-21\",\"2024-11-22\",\"2024-11-23\",\"2024-11-24\",\"2024-11-25\",\"2024-11-26\",\"2024-11-27\",\"2024-11-28\",\"2024-11-29\",\"2024-11-30\",\"2024-12-01\",\"2024-12-02\",\"2024-12-03\",\"2024-12-04\",\"2024-12-05\",\"2024-12-06\",\"2024-12-07\",\"2024-12-08\",\"2024-12-09\",\"2024-12-10\",\"2024-12-11\",\"2024-12-12\",\"2024-12-13\",\"2024-12-14\",\"2024-12-15\",\"2024-12-16\",\"2025-01-02\",\"2025-01-03\",\"2025-01-04\",\"2025-01-05\",\"2025-01-06\",\"2025-01-07\",\"2025-01-08\",\"2025-01-09\",\"2025-01-10\",\"2025-01-11\",\"2025-01-12\",\"2025-01-13\",\"2025-01-14\",\"2025-01-15\",\"2025-01-16\",\"2025-01-17\",\"2025-01-18\",\"2025-01-19\",\"2025-01-20\",\"2025-01-21\",\"2025-01-22\",\"2025-01-23\",\"2025-01-24\",\"2025-01-25\",\"2025-01-26\",\"2025-01-27\",\"2025-01-28\",\"2025-01-29\",\"2025-01-30\",\"2025-01-31\",\"2025-02-01\",\"2025-02-02\",\"2025-02-03\",\"2025-02-04\",\"2025-02-05\",\"2025-02-06\",\"2025-02-07\",\"2025-02-08\",\"2025-02-09\",\"2025-02-10\",\"2025-02-11\",\"2025-02-12\",\"2025-02-13\",\"2025-02-14\",\"2025-02-15\",\"2025-02-16\",\"2025-02-17\",\"2025-02-18\",\"2025-02-19\",\"2025-02-20\",\"2025-02-21\",\"2025-02-22\",\"2025-02-23\",\"2025-02-24\",\"2025-02-25\",\"2025-02-26\",\"2025-02-27\",\"2025-02-28\",\"2025-03-01\",\"2025-03-02\",\"2025-03-03\",\"2025-03-04\",\"2025-03-05\",\"2025-03-06\",\"2025-03-07\",\"2025-03-08\",\"2025-03-09\",\"2025-03-10\",\"2025-03-11\",\"2025-03-12\",\"2025-03-13\",\"2025-03-14\",\"2025-03-15\",\"2025-03-16\",\"2025-03-17\",\"2025-03-18\",\"2025-03-19\",\"2025-03-20\",\"2025-03-21\",\"2025-03-22\",\"2025-03-23\",\"2025-03-24\",\"2025-03-25\",\"2025-03-26\",\"2025-03-27\",\"2025-03-28\",\"2025-03-29\",\"2025-03-30\",\"2025-03-31\",\"2025-04-01\",\"2025-04-02\",\"2025-04-03\",\"2025-04-04\",\"2025-04-05\",\"2025-04-06\",\"2025-04-07\",\"2025-04-08\",\"2025-04-09\",\"2025-04-10\",\"2025-04-11\",\"2025-04-12\",\"2025-04-13\",\"2025-04-14\",\"2025-04-15\",\"2025-04-16\",\"2025-04-17\",\"2025-04-18\",\"2025-04-19\",\"2025-04-20\",\"2025-04-21\",\"2025-04-22\",\"2025-04-23\",\"2025-04-24\",\"2025-04-25\",\"2025-04-26\",\"2025-04-27\",\"2025-04-28\",\"2025-04-29\",\"2025-04-30\",\"2025-05-01\",\"2025-05-02\",\"2025-05-03\",\"2025-05-04\",\"2025-05-05\",\"2025-05-06\",\"2025-05-07\",\"2025-05-08\",\"2025-05-09\",\"2025-05-10\",\"2025-05-11\",\"2025-05-12\",\"2025-05-13\",\"2025-05-14\",\"2025-05-15\",\"2025-05-16\",\"2025-05-17\"]",
+          "url": "https://www.airbnb.com/rooms/1080105409447417683?search_mode=regular_search&previous_page_section_name=1000&federated_search_id=5e065bba-02f5-4f1b-9701-ebb9e5ee3314&locale=en&currency=USD",
+          "final_url": "https://www.airbnb.com/rooms/1080105409447417683?search_mode=regular_search&federated_search_id=5e065bba-02f5-4f1b-9701-ebb9e5ee3314&locale=en&currency=USD&enable_auto_translate=true&fbclid=IwAR1cI5YZ4moeZz8LqMffxdVKVvIGpcCzJ-8w7G2Pn1mxCtt7TYypNOahovZ&source_impression_id=p3_1724170467_P3T2aqAEW9G-c_jr#availability-calendar",
+          "listing_title": "Daloha 2BR luxury Villa-private pool in Canggu",
+          "property_id": "1080105409447417683",
+          "listing_name": "Entire villa in Kecamatan Kuta Utara, Indonesia",
+          "location_details": "[]",
+          "description_by_sections": "[{\"title\":null,\"value\":\"Daloha villa is a mediterranean-inspired dream. This design 2BR villa exalts in the effortless beauty of natural materials and smooth shapes. Raw, minimalist, striking a balance between full and empty, this villa features an unbeatable combination of cultural flavor and low-key luxury.\"},{\"title\":\"The space\",\"value\":\"Indulge in exquisite luxury at Daloha Villa, a sophisticated 2-bedroom with ensuite bathroom haven nestled in Canggu. Explore endless dining, cafes, spas, and beaches just moments away. Relax in your private oasis with a sparkling pool and chic living areas. Enjoy personalized services, daily housekeeping, and a dedicated villa manager for a seamless stay. Experience the epitome of Canggu living at Daloha Villa, a sanctuary where luxury meets convenience.\"},{\"title\":\"Other things to note\",\"value\":\"Our housekeeping is working 5 days a week.\"}]",
+          "description_html": "<span class=\"lrl13de atm_kd_19r6f69_24z95b atm_kd_19r6f69_1xbvphn_1oszvuo dir dir-ltr\">Daloha villa is a mediterranean-inspired dream. This design 2BR villa exalts in the effortless beauty of natural materials and smooth shapes. Raw, minimalist, striking a balance between full and empty, this villa features an unbeatable combination of cultural flavor and low-key luxury.<br><br><span class=\"_g5uevq\">The space</span><br>Indulge in exquisite luxury at Daloha Villa, a sophisticated 2-bedroom with ensuite bathroom haven nestled in Canggu. Explore endless dining, cafes, spas, and beaches just moments away. Relax in your private oasis with a sparkling pool and chic living areas. Enjoy personalized services, daily housekeeping, and a dedicated villa manager for a seamless stay. Experience the epitome of Canggu living at Daloha Villa, a sanctuary where luxury meets convenience.<br><br><span class=\"_g5uevq\">Other things to note</span><br>Our housekeeping is working 5 days a week.</span>",
+          "location_details_html": "",
+          "is_supperhost": "false",
+          "host_number_of_reviews": "5",
+          "host_rating": "5",
+          "hosts_year": "5",
+          "host_response_rate": "100",
+          "is_guest_favorite": "false",
+          "travel_details": "{\"check_in\":null,\"check_out\":null,\"num_of_adults\":null,\"num_of_children\":null,\"num_of_infants\":null,\"num_of_pets\":null}",
+          "pricing_details": "{\"airbnb_service_fee\":null,\"cleaning_fee\":null,\"initial_price_per_night\":null,\"num_of_nights\":null,\"price_per_night\":null,\"price_without_fees\":null,\"special_offer\":null,\"taxes\":null}",
+          "total_price": "",
+          "currency": "USD"
+        },
+        {
+          "name": "Villa in Umalas · ★5.0 · 3 bedrooms · 3 beds · 3 baths",
+          "price": "null",
+          "image": "\"https://a0.muscache.com/pictures/miso/Hosting-827920546566245515/original/120429de-218b-4906-9dfb-c7d34548c644.jpeg\"",
+          "description": "Welcome to Villa Kanopi, your stunning 3-bedroom retreat in the heart of Umalas. This brand new modern villa is beautifully designed with tasteful decor and luxurious amenities, perfect for a relaxing vacation with family or friends. Enjoy direct access to the trendy neighborhood of Berawa, which is just a stone's throw away from the villa. Located just a short 7-minute drive from the beach, Villa Kanopi is the ideal place to soak up the sun and enjoy the laid-back vibe of Canggu.The spaceIndulge in the ultimate comfort and luxury in each of our three exquisite bedrooms, where every detail has been carefully considered to ensure a truly relaxing and peaceful stay. With en-suite bathrooms, a smart TV, and a king-size bed with a high-quality mattress, you'll find everything you need for a restful night's sleep. Plus, both air-conditioning and a fan are provided to keep you comfortable, while the automatic curtains offer added convenience and privacy.Relax and unwind in your own private pool with outdoor shower, surrounded by lush tropical gardens. The villa's canopy is the perfect spot to enjoy your morning coffee or a good book in the shade. The spacious enclosed living room is tastefully decorated with an eclectic mix of contemporary designs and natural materials. The large glass windows and doors can be opened to let in the refreshing breeze from the nearby banana field.The living room is equipped with air conditioning, and you'll find the most comfortable sofas to relax and enjoy your stay. Whether you're having great discussions with your family or friends, or watching the huge TV screen with Netflix or YouTube, you'll feel right at home. The open kitchen is fully equipped with a gas stove, oven, microwave, dishwasher, blender, and Nespresso machine, perfect if you want to cook or hire a private chef.The villa is nestled in a quiet gang, yet it's just a short stroll to famous restaurants, shops, and cafes. Don't miss the wonderful French bakery 7am, the famous Bali Direct Store, or the marvelous pizzas of La Fabricca. You can also enjoy high-quality restaurants such as Bonito or Olala, and many other local hotspots.Stay connected with high-speed WiFi (Global Extreme), and rest assured that the villa is fully equipped and staffed with daily cleaning. Come and experience the perfect blend of comfort, luxury, and tranquility at Villa Kanopi. Book your stay now!Guest accessFull access and complete privacyOther things to noteAt Villa Kanopi, we want to ensure that your stay is nothing short of exceptional. That's why we offer a range of amenities and services to cater to your every need. Included in every stay, you'll receive:-A complimentary welcome drink upon arrival-Daily cleaning services, and pool and garden maintenance twice a week to keep your villa in pristine condition-Bath & Pool towels for each guest-Access to high-speed WiFi internet connection and safety boxes in each bedroom for added peace of mindAs part of our exclusive Concierge services, we offer a range of additional services upon request, such as:-Airport transfers-Car rental (with or without driver)-Bike rental-Breakfast-Private cook-Massages at the villa-Pool fence-Laundry-Restaurant bookings-And much moreWe can also help you plan activities during your stay, such as water sports, surf classes, cooking classes, water parks, daily tours to visit temples, landscapes, villages, and more. Don't hesitate to ask us if you want to do something special while enjoying your stay at Villa Kanopi. Our concierge team is here to make your vacation unforgettable.",
+          "category": "Stays",
+          "availability": "true",
+          "discount": "null",
+          "reviews": "[\"the villa kanopi is the absolute hammer. atmospheric, large, great furnished and with one of the best housekeeper wayan you could want. the location is great, close to all the cool places in umalas and you sleep quietly at night and enjoy the beautiful house and pool. a little more sun during the day around the pool would be the only thing we would improve here. the kitchen offers everything the heart desires and the hosts have really thought of every little detail - including Nespresso machine and dishwasher. 5-star stay. here you can book without hesitation.\",\"Our stay was amazing from start to finish. The villa is beautiful & elegantly furnished, exactly as pictured. The host's team was very helpful and responsive in getting our requests fulfilled, i.e. wi-fi issue, laundry and super last minute in-villa spa services. There was a power trip briefly on the first night (which got resolved quickly) and some insects entered the bedroom & living space, but we understood these are fairly common in Bali. Overall, it was an enjoyable experience, and we couldn't find a negative thing to say about the villa. Keep up the wonderful service!\",\"A superbly designed property, we felt comfortable and relaxed as soon as we entered the villa. The little swimming pool is ideal for a quick refresh, and the couches in the living room are a dream for book readers and TV watchers. The location worked very well for us, with plenty of restaurants all around. Watch out for the electronic door look of the property, it took us by surprise a couple of times, but the staff were helpful and responsive.\",\"The best experience with Self Checking & assistance from the Host<br/>Everything was perfect & the service is incredible, the staff prepared every small detail in the villa for a confortable stay.<br/>I recommand for Families to stay here\",\"We had a wonderful stay @ Mr G's Villa. Everything was perfect, the location & the decoration Big thanks to Budi and his team ! we will come back for sure!\",\"The Villa is beautiful, everything is as per the photos. Very comfortable beds, very clean. Bathrooms are immaculate and no drain smells that you sometimes get in Bali bathrooms. We asked for a kettle and toaster during our stay and both were promptly provided. Kids loved the pool and outdoor area. Location is good, a bit further from beach clubs but easy to get a Gojek and access quickly. We loved our stay and would definitely stay again.\",\"A beautiful modern house. A beautiful living room with its well equipped kitchen, The 3 bedrooms were very beautiful and practical and a beautiful outside with its pool not too practical when you have children. I recommend.\",\"The villa is extremelly clean, host is very helpful and friendly. Awesome washroom, spacious living room and felt really cozy. Highly recommended! Thanks for the hospitality. Definitely will coming back. 😍👍\",\"Mr G’s place was aesthetically pleasing and beautiful! Everything was exactly as what you’ve seen in the photos taken. Rooms and living room were clean, spacious and practical! <br/>I would definitely recommend this Villa, and it was perfect for families!<br/>Thank you for hosting us, it was a pleasure staying in this Villa!\"]",
+          "ratings": "5",
+          "seller_info": "{\"seller_id\":\"210639008\",\"url\":\"https://www.airbnb.com/users/show/210639008\"}",
+          "breadcrumbs": "Umalas, Bali, Indonesia",
+          "location": "Umalas, Bali, Indonesia",
+          "lat": "-8.6579",
+          "long": "115.1523",
+          "guests": "6",
+          "pets_allowed": "false",
+          "description_items": "[\"Entire villa\",\"3 beds\",\"3 baths\"]",
+          "category_rating": "[{\"name\":\"Cleanliness\",\"value\":\"5.0\"},{\"name\":\"Accuracy\",\"value\":\"5.0\"},{\"name\":\"Check-in\",\"value\":\"5.0\"},{\"name\":\"Communication\",\"value\":\"5.0\"},{\"name\":\"Location\",\"value\":\"4.8\"},{\"name\":\"Value\",\"value\":\"4.9\"}]",
+          "house_rules": "[\"Check-in after 2:00 PM\",\"Checkout before 12:00 PM\",\"6 guests maximum\"]",
+          "details": "[\"6 guests\",\"3 bedrooms\",\"3 beds\",\"3 baths\"]",
+          "highlights": "[{\"name\":\"Fast wifi\",\"value\":\"At 60 Mbps, you can take video calls and stream videos for your whole group.\"},{\"name\":\"Self check-in\",\"value\":\"You can check in with the building staff.\"},{\"name\":\"The Tropical Door is a Superhost\",\"value\":\"Superhosts are experienced, highly rated Hosts.\"}]",
+          "arrangement_details": "[{\"name\":\"Bedroom 1\",\"value\":\"1 double bed\"},{\"name\":\"Bedroom 2\",\"value\":\"1 double bed\"},{\"name\":\"Bedroom 3\",\"value\":\"1 double bed\"}]",
+          "amenities": "[{\"group_name\":\"Scenic views\",\"items\":[{\"name\":\"Garden view\",\"value\":\"SYSTEM_FLOWER\"},{\"name\":\"Pool view\",\"value\":\"SYSTEM_POOL\"}]},{\"group_name\":\"Bathroom\",\"items\":[{\"name\":\"Hair dryer\",\"value\":\"SYSTEM_HAIRDRYER\"},{\"name\":\"Shampoo\",\"value\":\"SYSTEM_SHAMPOO\"},{\"name\":\"Outdoor shower\",\"value\":\"SYSTEM_SHOWER\"},{\"name\":\"Hot water\",\"value\":\"SYSTEM_HOT_WATER\"},{\"name\":\"Shower gel\",\"value\":\"SYSTEM_SOAP\"}]},{\"group_name\":\"Bedroom and laundry\",\"items\":[{\"name\":\"Essentials\",\"value\":\"Towels, bed sheets, soap, and toilet paper\"},{\"name\":\"Hangers\",\"value\":\"SYSTEM_HANGERS\"},{\"name\":\"Bed linens\",\"value\":\"SYSTEM_BLANKETS\"},{\"name\":\"Safe\",\"value\":\"SYSTEM_SAFE\"},{\"name\":\"Clothing storage\",\"value\":\"SYSTEM_WARDROBE\"}]},{\"group_name\":\"Entertainment\",\"items\":[{\"name\":\"65 inch HDTV with Netflix\",\"value\":\"SYSTEM_TV\"}]},{\"group_name\":\"Heating and cooling\",\"items\":[{\"name\":\"Air conditioning\",\"value\":\"SYSTEM_SNOWFLAKE\"}]},{\"group_name\":\"Internet and office\",\"items\":[{\"name\":\"Fast wifi – 60 Mbps\",\"value\":\"Verified by speed test. Stream 4K videos and join video calls on multiple devices.\"},{\"name\":\"Dedicated workspace\",\"value\":\"SYSTEM_WORKSPACE\"}]},{\"group_name\":\"Kitchen and dining\",\"items\":[{\"name\":\"Kitchen\",\"value\":\"Space where guests can cook their own meals\"},{\"name\":\"Refrigerator\",\"value\":\"SYSTEM_REFRIGERATOR\"},{\"name\":\"Microwave\",\"value\":\"SYSTEM_MICROWAVE\"},{\"name\":\"Cooking basics\",\"value\":\"Pots and pans, oil, salt and pepper\"},{\"name\":\"Dishes and silverware\",\"value\":\"Bowls, chopsticks, plates, cups, etc.\"},{\"name\":\"Dishwasher\",\"value\":\"SYSTEM_DISHWASHER\"},{\"name\":\"Stove\",\"value\":\"SYSTEM_STOVE\"},{\"name\":\"Oven\",\"value\":\"SYSTEM_OVEN\"},{\"name\":\"Coffee maker: Nespresso\",\"value\":\"SYSTEM_COFFEE_MAKER\"},{\"name\":\"Blender\",\"value\":\"SYSTEM_BLENDER\"},{\"name\":\"Dining table\",\"value\":\"SYSTEM_DINING_TABLE\"},{\"name\":\"Coffee\",\"value\":\"SYSTEM_COFFEE_MAKER\"}]},{\"group_name\":\"Location features\",\"items\":[{\"name\":\"Private entrance\",\"value\":\"Separate street or building entrance\"}]},{\"group_name\":\"Parking and facilities\",\"items\":[{\"name\":\"Private outdoor pool - available all year, open 24 hours\",\"value\":\"SYSTEM_POOL\"}]},{\"group_name\":\"Services\",\"items\":[{\"name\":\"Self check-in\",\"value\":\"SYSTEM_KEY\"},{\"name\":\"Building staff\",\"value\":\"Someone is available 24 hours a day to let guests in\"},{\"name\":\"Cleaning available during stay\",\"value\":\"SYSTEM_CLEAN\"}]},{\"group_name\":\"Not included\",\"items\":[]}]",
+          "images": "[\"https://a0.muscache.com/im/pictures/miso/Hosting-827920546566245515/original/120429de-218b-4906-9dfb-c7d34548c644.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/13a93b1f-7fd4-4cf1-ab51-eff940770605.jpeg\",\"https://a0.muscache.com/im/pictures/miso/Hosting-827920546566245515/original/f03cfc9c-3f8e-4789-88a1-7a67bd6db054.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/166dbf2c-76b3-4a75-919e-4aaae3a58fcb.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/a061b9bf-405f-4cd9-a6c5-0ade552adb7d.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/fa2c0867-9475-442b-8f43-284993aa1a98.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/b8e5abfc-d898-408a-a4e8-6f6f814cffaf.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/65dc3e04-788d-4b92-87b2-3272df6100f4.jpeg\",\"https://a0.muscache.com/im/pictures/miso/Hosting-827920546566245515/original/5d4e8931-f8c5-4265-ad9c-688e5bbe70a4.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/c64b060a-a87c-4a30-8e03-f907e1f6534d.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/22003706-3db4-499a-96d7-b390625c4849.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/558bc07c-b6b9-46e6-8ca9-4602bf9b9db7.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/994eca61-fca9-4d22-8276-20bfa2fee022.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/9491cc7f-b645-4e22-888e-a3ee525f72e1.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/ea482c20-3be5-480e-8ee6-6f4789bd15d4.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/130d4ef1-4bc7-48f7-b6ef-53a5e45434d7.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/52799d28-8016-499d-a296-1bd417ff60fd.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/920c9155-1404-4b87-ba73-343fcb7c29f3.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/09559c5b-dbd2-4439-a6ed-54b7d486022e.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/919be3f3-7f20-4021-ba2e-948671b0a5df.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/824d4d68-2bfd-48c3-ac70-052781bc4905.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/37a0770e-4c73-4088-be19-8d5d71c27f56.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/9227d5d8-d7c7-4d80-95b7-31ecfd4d4aa8.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/966b54d5-f4bc-44f4-96b2-704c5d2d7c48.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/8ff1d5ab-6189-4a87-89b9-34fefcece94b.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/7e90a563-7106-46b9-8333-edb89f291678.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/59537c57-28ad-44e0-9651-513f3dc8a3cb.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/79815715-55cd-426a-bb9f-1784f345ae38.jpeg\",\"https://a0.muscache.com/im/pictures/miso/Hosting-827920546566245515/original/28bdc1cf-5b97-46a8-8b77-bc4188f2598f.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/2b8e8be9-9da9-4e48-a00d-f0c65e192e0e.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/edbc696f-9179-48e9-8e3f-dbdb4a9beb75.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/84da19bb-0554-4de7-ab73-c36c92291bb0.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/36f08136-1089-4e0f-a534-4c146c807f5c.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/05078659-01ba-4561-a275-7bb49cdb69ae.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/8a20bfa4-189a-4248-a9fd-bd160e07e832.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/b4538fcb-7917-4196-b7c5-1a536e085dcb.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/db570c97-bd2c-4624-9c02-b36cfb799e2b.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/82b87370-856e-474e-a2be-3d27cfabb116.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/6caaed72-7105-4b5a-bdf5-b17206c6d8db.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/c846e538-d913-4a33-98b6-27df408bec1d.jpeg\",\"https://a0.muscache.com/im/pictures/hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODI3OTIwNTQ2NTY2MjQ1NTE1/original/69d4dc9e-0fb5-444f-83cf-6eda066fdc30.jpeg\",\"https://a0.muscache.com/im/pictures/miso/Hosting-827920546566245515/original/82a09f48-7890-41ad-bd3e-ba82e72f0603.jpeg\"]",
+          "available_dates": "[\"2024-08-31\",\"2024-09-01\",\"2024-09-02\",\"2024-09-03\",\"2024-09-04\",\"2024-09-05\",\"2024-09-06\",\"2024-09-07\",\"2024-09-11\",\"2024-09-12\",\"2024-09-22\",\"2024-09-23\",\"2024-09-24\",\"2024-09-25\",\"2024-09-26\",\"2024-09-27\",\"2024-09-28\",\"2024-09-29\",\"2024-09-30\",\"2024-10-01\",\"2024-10-02\",\"2024-10-03\",\"2024-10-04\",\"2024-10-05\",\"2024-10-06\",\"2024-10-07\",\"2024-10-08\",\"2024-10-09\",\"2024-10-10\",\"2024-10-11\",\"2024-10-12\",\"2024-10-13\",\"2024-10-14\",\"2024-10-15\",\"2024-10-16\",\"2024-10-17\",\"2024-10-18\",\"2024-10-19\",\"2024-10-20\",\"2024-10-21\",\"2024-10-22\",\"2024-10-23\",\"2024-10-24\",\"2024-10-25\",\"2024-10-26\",\"2024-10-27\",\"2024-10-28\",\"2024-10-29\",\"2024-10-30\",\"2024-10-31\",\"2024-11-01\",\"2024-11-02\",\"2024-11-03\",\"2024-11-04\",\"2024-11-05\",\"2024-11-06\",\"2024-11-07\",\"2024-11-08\",\"2024-11-09\",\"2024-11-10\",\"2024-11-11\",\"2024-11-12\",\"2024-11-13\",\"2024-11-14\",\"2024-11-15\",\"2024-11-16\",\"2024-11-17\",\"2024-11-18\",\"2024-11-19\",\"2024-11-20\",\"2024-11-21\",\"2024-11-22\",\"2024-11-23\",\"2024-11-24\",\"2024-11-25\",\"2024-11-26\",\"2024-11-27\",\"2024-11-28\",\"2024-11-29\",\"2024-11-30\",\"2024-12-01\",\"2024-12-02\",\"2024-12-03\",\"2024-12-04\",\"2024-12-05\",\"2024-12-06\",\"2024-12-07\",\"2024-12-08\",\"2024-12-09\",\"2024-12-10\",\"2024-12-11\",\"2024-12-12\",\"2024-12-13\",\"2024-12-14\",\"2024-12-15\",\"2024-12-16\",\"2024-12-17\",\"2024-12-18\",\"2024-12-19\",\"2024-12-20\",\"2024-12-21\",\"2024-12-22\",\"2024-12-23\",\"2024-12-24\",\"2024-12-25\",\"2024-12-26\",\"2024-12-27\",\"2024-12-28\",\"2024-12-29\",\"2024-12-30\",\"2024-12-31\",\"2025-01-01\",\"2025-01-02\"]",
+          "url": "https://www.airbnb.com/rooms/827920546566245515?search_mode=regular_search&previous_page_section_name=1000&federated_search_id=93705534-d15c-4236-b842-5e944d242fee&locale=en&currency=USD",
+          "final_url": "https://www.airbnb.com/rooms/827920546566245515?search_mode=regular_search&federated_search_id=93705534-d15c-4236-b842-5e944d242fee&locale=en&currency=USD&enable_auto_translate=true&fbclid=IwAR2CM-JiglxqOgmI9v_r9UUhPuJukORZrSRLzX1DAoZDiuojP68Evf-NzoY&source_impression_id=p3_1724170469_P3y9oG6VqIG-d8-e#availability-calendar",
+          "listing_title": "Luxurious 3BR Villa with Pool & Quick Beach Access",
+          "property_id": "827920546566245515",
+          "listing_name": "Entire villa in Umalas, Indonesia",
+          "location_details": "[{\"title\":\"Umalas, Bali, Indonesia\",\"value\":null}]",
+          "description_by_sections": "[{\"title\":null,\"value\":\"Welcome to Villa Kanopi, your stunning 3-bedroom retreat in the heart of Umalas. This brand new modern villa is beautifully designed with tasteful decor and luxurious amenities, perfect for a relaxing vacation with family or friends. Enjoy direct access to the trendy neighborhood of Berawa, which is just a stone's throw away from the villa. Located just a short 7-minute drive from the beach, Villa Kanopi is the ideal place to soak up the sun and enjoy the laid-back vibe of Canggu.\"},{\"title\":\"The space\",\"value\":\"Indulge in the ultimate comfort and luxury in each of our three exquisite bedrooms, where every detail has been carefully considered to ensure a truly relaxing and peaceful stay. With en-suite bathrooms, a smart TV, and a king-size bed with a high-quality mattress, you'll find everything you need for a restful night's sleep. Plus, both air-conditioning and a fan are provided to keep you comfortable, while the automatic curtains offer added convenience and privacy.Relax and unwind in your own private pool with outdoor shower, surrounded by lush tropical gardens. The villa's canopy is the perfect spot to enjoy your morning coffee or a good book in the shade. The spacious enclosed living room is tastefully decorated with an eclectic mix of contemporary designs and natural materials. The large glass windows and doors can be opened to let in the refreshing breeze from the nearby banana field.The living room is equipped with air conditioning, and you'll find the most comfortable sofas to relax and enjoy your stay. Whether you're having great discussions with your family or friends, or watching the huge TV screen with Netflix or YouTube, you'll feel right at home. The open kitchen is fully equipped with a gas stove, oven, microwave, dishwasher, blender, and Nespresso machine, perfect if you want to cook or hire a private chef.The villa is nestled in a quiet gang, yet it's just a short stroll to famous restaurants, shops, and cafes. Don't miss the wonderful French bakery 7am, the famous Bali Direct Store, or the marvelous pizzas of La Fabricca. You can also enjoy high-quality restaurants such as Bonito or Olala, and many other local hotspots.Stay connected with high-speed WiFi (Global Extreme), and rest assured that the villa is fully equipped and staffed with daily cleaning. Come and experience the perfect blend of comfort, luxury, and tranquility at Villa Kanopi. Book your stay now!\"},{\"title\":\"Guest access\",\"value\":\"Full access and complete privacy\"},{\"title\":\"Other things to note\",\"value\":\"At Villa Kanopi, we want to ensure that your stay is nothing short of exceptional. That's why we offer a range of amenities and services to cater to your every need. Included in every stay, you'll receive:-\\tA complimentary welcome drink upon arrival-\\tDaily cleaning services, and pool and garden maintenance twice a week to keep your villa in pristine condition-\\tBath & Pool towels for each guest-\\tAccess to high-speed WiFi internet connection and safety boxes in each bedroom for added peace of mindAs part of our exclusive Concierge services, we offer a range of additional services upon request, such as:-\\tAirport transfers-\\tCar rental (with or without driver)-\\tBike rental-\\tBreakfast-\\tPrivate cook-\\tMassages at the villa-\\tPool fence-\\tLaundry-\\tRestaurant bookings-\\tAnd much moreWe can also help you plan activities during your stay, such as water sports, surf classes, cooking classes, water parks, daily tours to visit temples, landscapes, villages, and more. Don't hesitate to ask us if you want to do something special while enjoying your stay at Villa Kanopi. Our concierge team is here to make your vacation unforgettable.\"}]",
+          "description_html": "<span class=\"lrl13de atm_kd_19r6f69_24z95b atm_kd_19r6f69_1xbvphn_1oszvuo dir dir-ltr\">Welcome to Villa Kanopi, your stunning 3-bedroom retreat in the heart of Umalas. This brand new modern villa is beautifully designed with tasteful decor and luxurious amenities, perfect for a relaxing vacation with family or friends. <br>Enjoy direct access to the trendy neighborhood of Berawa, which is just a stone&apos;s throw away from the villa. <br>Located just a short 7-minute drive from the beach, Villa Kanopi is the ideal place to soak up the sun and enjoy the laid-back vibe of Canggu.<br><br><span class=\"_g5uevq\">The space</span><br>Indulge in the ultimate comfort and luxury in each of our three exquisite bedrooms, where every detail has been carefully considered to ensure a truly relaxing and peaceful stay. With en-suite bathrooms, a smart TV, and a king-size bed with a high-quality mattress, you&apos;ll find everything you need for a restful night&apos;s sleep. Plus, both air-conditioning and a fan are provided to keep you comfortable, while the automatic curtains offer added convenience and privacy.<br><br>Relax and unwind in your own private pool with outdoor shower, surrounded by lush tropical gardens. The villa&apos;s canopy is the perfect spot to enjoy your morning coffee or a good book in the shade. The spacious enclosed living room is tastefully decorated with an eclectic mix of contemporary designs and natural materials. The large glass windows and doors can be opened to let in the refreshing breeze from the nearby banana field.<br><br>The living room is equipped with air conditioning, and you&apos;ll find the most comfortable sofas to relax and enjoy your stay. Whether you&apos;re having great discussions with your family or friends, or watching the huge TV screen with Netflix or YouTube, you&apos;ll feel right at home. The open kitchen is fully equipped with a gas stove, oven, microwave, dishwasher, blender, and Nespresso machine, perfect if you want to cook or hire a private chef.<br><br>The villa is nestled in a quiet gang, yet it&apos;s just a short stroll to famous restaurants, shops, and cafes. Don&apos;t miss the wonderful French bakery 7am, the famous Bali Direct Store, or the marvelous pizzas of La Fabricca. You can also enjoy high-quality restaurants such as Bonito or Olala, and many other local hotspots.<br><br>Stay connected with high-speed WiFi (Global Extreme), and rest assured that the villa is fully equipped and staffed with daily cleaning. Come and experience the perfect blend of comfort, luxury, and tranquility at Villa Kanopi. Book your stay now!<br><br><span class=\"_g5uevq\">Guest access</span><br>Full access and complete privacy<br><br><span class=\"_g5uevq\">Other things to note</span><br>At Villa Kanopi, we want to ensure that your stay is nothing short of exceptional. That&apos;s why we offer a range of amenities and services to cater to your every need. Included in every stay, you&apos;ll receive:<br>-\tA complimentary welcome drink upon arrival<br>-\tDaily cleaning services, and pool and garden maintenance twice a week to keep your villa in pristine condition<br>-\tBath &amp; Pool towels for each guest<br>-\tAccess to high-speed WiFi internet connection and safety boxes in each bedroom for added peace of mind<br><br>As part of our exclusive Concierge services, we offer a range of additional services upon request, such as:<br>-\tAirport transfers<br>-\tCar rental (with or without driver)<br>-\tBike rental<br>-\tBreakfast<br>-\tPrivate cook<br>-\tMassages at the villa<br>-\tPool fence<br>-\tLaundry<br>-\tRestaurant bookings<br>-\tAnd much more<br>We can also help you plan activities during your stay, such as water sports, surf classes, cooking classes, water parks, daily tours to visit temples, landscapes, villages, and more. Don&apos;t hesitate to ask us if you want to do something special while enjoying your stay at Villa Kanopi. Our concierge team is here to make your vacation unforgettable.</span>",
+          "location_details_html": "",
+          "is_supperhost": "true",
+          "host_number_of_reviews": "1890",
+          "host_rating": "4.82",
+          "hosts_year": "5",
+          "host_response_rate": "100",
+          "is_guest_favorite": "true",
+          "travel_details": "{\"check_in\":null,\"check_out\":null,\"num_of_adults\":null,\"num_of_children\":null,\"num_of_infants\":null,\"num_of_pets\":null}",
+          "pricing_details": "{\"airbnb_service_fee\":null,\"cleaning_fee\":null,\"initial_price_per_night\":null,\"num_of_nights\":null,\"price_per_night\":null,\"price_without_fees\":null,\"special_offer\":null,\"taxes\":null}",
+          "total_price": "",
+          "currency": "USD"
+        }
+      ]
+    },
+    {
+      "filename": "nyc-listings.csv",
+      "format": "CSV",
+      "size_bytes": 77654490,
+      "record_count_excluding_header": 29918,
+      "columns": [
+        "id",
+        "listing_url",
+        "scrape_id",
+        "last_scraped",
+        "source",
+        "name",
+        "description",
+        "neighborhood_overview",
+        "picture_url",
+        "host_id",
+        "host_url",
+        "host_profile_id",
+        "host_profile_url",
+        "host_name",
+        "host_since",
+        "hosts_time_as_user_years",
+        "hosts_time_as_user_months",
+        "hosts_time_as_host_years",
+        "hosts_time_as_host_months",
+        "host_location",
+        "host_about",
+        "host_response_time",
+        "host_response_rate",
+        "host_acceptance_rate",
+        "host_is_superhost",
+        "host_thumbnail_url",
+        "host_picture_url",
+        "host_neighbourhood",
+        "host_listings_count",
+        "host_total_listings_count",
+        "host_verifications",
+        "host_has_profile_pic",
+        "host_identity_verified",
+        "neighbourhood",
+        "neighbourhood_cleansed",
+        "neighbourhood_group_cleansed",
+        "latitude",
+        "longitude",
+        "property_type",
+        "room_type",
+        "accommodates",
+        "bathrooms",
+        "bathrooms_text",
+        "bedrooms",
+        "beds",
+        "amenities",
+        "price",
+        "price_quote_checkin_date",
+        "price_quote_checkout_date",
+        "price_quote_total_price",
+        "price_quote_price_per_night",
+        "price_quote_raw",
+        "minimum_nights",
+        "maximum_nights",
+        "minimum_minimum_nights",
+        "maximum_minimum_nights",
+        "minimum_maximum_nights",
+        "maximum_maximum_nights",
+        "minimum_nights_avg_ntm",
+        "maximum_nights_avg_ntm",
+        "calendar_updated",
+        "has_availability",
+        "availability_30",
+        "availability_60",
+        "availability_90",
+        "availability_365",
+        "calendar_last_scraped",
+        "number_of_reviews",
+        "number_of_reviews_ltm",
+        "number_of_reviews_l30d",
+        "availability_eoy",
+        "number_of_reviews_ly",
+        "estimated_occupancy_l365d",
+        "estimated_revenue_l365d",
+        "first_review",
+        "last_review",
+        "review_scores_rating",
+        "review_scores_accuracy",
+        "review_scores_cleanliness",
+        "review_scores_checkin",
+        "review_scores_communication",
+        "review_scores_location",
+        "review_scores_value",
+        "license",
+        "instant_bookable",
+        "calculated_host_listings_count",
+        "calculated_host_listings_count_entire_homes",
+        "calculated_host_listings_count_private_rooms",
+        "calculated_host_listings_count_shared_rooms",
+        "reviews_per_month"
+      ],
+      "sample_records": [
+        {
+          "id": "1352055619826961511",
+          "listing_url": "https://www.airbnb.com/rooms/1352055619826961511",
+          "scrape_id": "20260914002229",
+          "last_scraped": "2026-09-14",
+          "source": "",
+          "name": "New 3 bed, 1.5 bath",
+          "description": "This stylish place to stay is perfect for group trips.",
+          "neighborhood_overview": "",
+          "picture_url": "https://a0.muscache.com/pictures/miso/Hosting-1352055619826961511/original/22e6f279-de69-4833-b0ea-f2a13366f9f2.jpeg",
+          "host_id": "677651543",
+          "host_url": "https://www.airbnb.com/users/show/677651543",
+          "host_profile_id": "1470695597007476976",
+          "host_profile_url": "https://www.airbnb.com/users/profile/1470695597007476976",
+          "host_name": "Shamar",
+          "host_since": "",
+          "hosts_time_as_user_years": "1",
+          "hosts_time_as_user_months": "7",
+          "hosts_time_as_host_years": "0",
+          "hosts_time_as_host_months": "3",
+          "host_location": "",
+          "host_about": "",
+          "host_response_time": "",
+          "host_response_rate": "",
+          "host_acceptance_rate": "",
+          "host_is_superhost": "f",
+          "host_thumbnail_url": "",
+          "host_picture_url": "https://a0.muscache.com/im/Portrait/Avatars/v2/blue?im_w=240&im_t=S&im_s=86&im_f=AirbnbCerealLatinMedium.ttf&im_c=0d4daa&script=latin",
+          "host_neighbourhood": "",
+          "host_listings_count": "1",
+          "host_total_listings_count": "",
+          "host_verifications": "None",
+          "host_has_profile_pic": "f",
+          "host_identity_verified": "t",
+          "neighbourhood": "",
+          "neighbourhood_cleansed": "East Flatbush",
+          "neighbourhood_group_cleansed": "Brooklyn",
+          "latitude": "40.640673",
+          "longitude": "-73.9284516",
+          "property_type": "Entire rental unit",
+          "room_type": "Entire home/apt",
+          "accommodates": "4",
+          "bathrooms": "",
+          "bathrooms_text": "1.5 baths",
+          "bedrooms": "3",
+          "beds": "3",
+          "amenities": "[\"Kitchen\", \"Fire extinguisher\", \"Free parking on premises\", \"Air conditioning\", \"Smoke alarm\"]",
+          "price": "",
+          "price_quote_checkin_date": "2026-09-14",
+          "price_quote_checkout_date": "2026-10-14",
+          "price_quote_total_price": "",
+          "price_quote_price_per_night": "",
+          "price_quote_raw": "{\"quote\": {\"taxes\": null, \"currency\": null, \"date_match\": null, \"service_fee\": null, \"total_price\": null, \"cleaning_fee\": null, \"is_available\": null, \"discount_amount\": null, \"price_per_night\": null, \"nightly_subtotal\": null, \"is_monthly_priced\": false, \"discounted_subtotal\": null, \"raw_price_line_items\": null, \"returned_checkin_date\": null, \"requested_checkin_date\": \"2026-09-14\", \"returned_checkout_date\": null, \"requested_checkout_date\": \"2026-10-14\"}}",
+          "minimum_nights": "30",
+          "maximum_nights": "365",
+          "minimum_minimum_nights": "30",
+          "maximum_minimum_nights": "30",
+          "minimum_maximum_nights": "365",
+          "maximum_maximum_nights": "365",
+          "minimum_nights_avg_ntm": "30.0",
+          "maximum_nights_avg_ntm": "365.0",
+          "calendar_updated": "",
+          "has_availability": "",
+          "availability_30": "30",
+          "availability_60": "60",
+          "availability_90": "90",
+          "availability_365": "365",
+          "calendar_last_scraped": "2026-09-14",
+          "number_of_reviews": "0",
+          "number_of_reviews_ltm": "0",
+          "number_of_reviews_l30d": "0",
+          "availability_eoy": "109",
+          "number_of_reviews_ly": "0",
+          "estimated_occupancy_l365d": "0",
+          "estimated_revenue_l365d": "",
+          "first_review": "",
+          "last_review": "",
+          "review_scores_rating": "",
+          "review_scores_accuracy": "",
+          "review_scores_cleanliness": "",
+          "review_scores_checkin": "",
+          "review_scores_communication": "",
+          "review_scores_location": "",
+          "review_scores_value": "",
+          "license": "",
+          "instant_bookable": "",
+          "calculated_host_listings_count": "1",
+          "calculated_host_listings_count_entire_homes": "1",
+          "calculated_host_listings_count_private_rooms": "0",
+          "calculated_host_listings_count_shared_rooms": "0",
+          "reviews_per_month": ""
+        },
+        {
+          "id": "1215930899551057941",
+          "listing_url": "https://www.airbnb.com/rooms/1215930899551057941",
+          "scrape_id": "20260914002229",
+          "last_scraped": "2026-09-14",
+          "source": "",
+          "name": "Queens apartament",
+          "description": "Bring the whole family to this great place with lots of room for fun.",
+          "neighborhood_overview": "",
+          "picture_url": "https://a0.muscache.com/pictures/hosting/Hosting-1215930899551057941/original/27ec00c7-86e8-4475-b8b5-90ad7d34ae76.jpeg",
+          "host_id": "392517036",
+          "host_url": "https://www.airbnb.com/users/show/392517036",
+          "host_profile_id": "1469814056304456331",
+          "host_profile_url": "https://www.airbnb.com/users/profile/1469814056304456331",
+          "host_name": "Roman",
+          "host_since": "",
+          "hosts_time_as_user_years": "5",
+          "hosts_time_as_user_months": "6",
+          "hosts_time_as_host_years": "2",
+          "hosts_time_as_host_months": "0",
+          "host_location": "",
+          "host_about": "",
+          "host_response_time": "",
+          "host_response_rate": "",
+          "host_acceptance_rate": "",
+          "host_is_superhost": "f",
+          "host_thumbnail_url": "",
+          "host_picture_url": "https://a0.muscache.com/im/Portrait/Avatars/v2/orange?im_w=240&im_t=R&im_s=86&im_f=AirbnbCerealLatinMedium.ttf&im_c=8f3400&script=latin",
+          "host_neighbourhood": "",
+          "host_listings_count": "1",
+          "host_total_listings_count": "",
+          "host_verifications": "None",
+          "host_has_profile_pic": "f",
+          "host_identity_verified": "t",
+          "neighbourhood": "",
+          "neighbourhood_cleansed": "Maspeth",
+          "neighbourhood_group_cleansed": "Queens",
+          "latitude": "40.721708148502",
+          "longitude": "-73.90783991664648",
+          "property_type": "Private room in rental unit",
+          "room_type": "Private room",
+          "accommodates": "5",
+          "bathrooms": "",
+          "bathrooms_text": "1 private bath",
+          "bedrooms": "2",
+          "beds": "1",
+          "amenities": "[\"TV\", \"Kitchen\", \"Fire extinguisher\", \"Air conditioning\", \"Dedicated workspace\", \"Free parking on premises\", \"Lock on bedroom door\", \"Washer\", \"Wifi\", \"Smoke alarm\", \"Carbon monoxide alarm\"]",
+          "price": "$164.55",
+          "price_quote_checkin_date": "2026-09-15",
+          "price_quote_checkout_date": "2026-10-16",
+          "price_quote_total_price": "5101.02",
+          "price_quote_price_per_night": "164.55",
+          "price_quote_raw": "{\"quote\": {\"taxes\": null, \"currency\": \"USD\", \"date_match\": null, \"service_fee\": null, \"total_price\": \"5101.019\", \"cleaning_fee\": null, \"is_available\": true, \"discount_amount\": \"1098.79\", \"price_per_night\": \"164.549\", \"nightly_subtotal\": null, \"is_monthly_priced\": true, \"discounted_subtotal\": \"4936.47\", \"raw_price_line_items\": [{\"amount\": \"6035.26\", \"item_type\": \"other\", \"description\": \"Average monthly price\", \"price_string\": \"$6,035.26\"}, {\"amount\": \"-1098.79\", \"item_type\": \"discount_amount\", \"description\": \"Special offer\", \"price_string\": \"-$1,098.79\"}, {\"amount\": \"4936.47\", \"item_type\": \"discounted_subtotal\", \"description\": \"Price after discount\", \"price_string\": \"$4,936.47\"}], \"returned_checkin_date\": null, \"requested_checkin_date\": \"2026-09-15\", \"returned_checkout_date\": null, \"requested_checkout_date\": \"2026-10-16\"}}",
+          "minimum_nights": "31",
+          "maximum_nights": "365",
+          "minimum_minimum_nights": "31",
+          "maximum_minimum_nights": "31",
+          "minimum_maximum_nights": "365",
+          "maximum_maximum_nights": "365",
+          "minimum_nights_avg_ntm": "31.0",
+          "maximum_nights_avg_ntm": "365.0",
+          "calendar_updated": "",
+          "has_availability": "t",
+          "availability_30": "29",
+          "availability_60": "59",
+          "availability_90": "89",
+          "availability_365": "364",
+          "calendar_last_scraped": "2026-09-14",
+          "number_of_reviews": "0",
+          "number_of_reviews_ltm": "0",
+          "number_of_reviews_l30d": "0",
+          "availability_eoy": "108",
+          "number_of_reviews_ly": "0",
+          "estimated_occupancy_l365d": "0",
+          "estimated_revenue_l365d": "0",
+          "first_review": "",
+          "last_review": "",
+          "review_scores_rating": "",
+          "review_scores_accuracy": "",
+          "review_scores_cleanliness": "",
+          "review_scores_checkin": "",
+          "review_scores_communication": "",
+          "review_scores_location": "",
+          "review_scores_value": "",
+          "license": "",
+          "instant_bookable": "",
+          "calculated_host_listings_count": "1",
+          "calculated_host_listings_count_entire_homes": "0",
+          "calculated_host_listings_count_private_rooms": "1",
+          "calculated_host_listings_count_shared_rooms": "0",
+          "reviews_per_month": ""
+        }
+      ]
+    },
+    {
+      "filename": "nyc-reviews.csv",
+      "format": "CSV",
+      "size_bytes": 311633400,
+      "record_count_excluding_header": 999099,
+      "columns": [
+        "listing_id",
+        "id",
+        "date",
+        "reviewer_id",
+        "reviewer_name",
+        "comments"
+      ],
+      "sample_records": [
+        {
+          "listing_id": "2539",
+          "id": "55688172",
+          "date": "2015-12-04",
+          "reviewer_id": "25160947",
+          "reviewer_name": "Peter",
+          "comments": "Great host "
+        },
+        {
+          "listing_id": "2539",
+          "id": "97474898",
+          "date": "2016-08-27",
+          "reviewer_id": "91513326",
+          "reviewer_name": "Liz",
+          "comments": "Nice room for the price. Great neighborhood. John was very accommodating. Bottles of water in the room were a nice touch and very much appreciated."
+        }
+      ]
+    },
+    {
+      "filename": "nyc-calendar.csv",
+      "format": "CSV",
+      "size_bytes": 379063080,
+      "record_count_excluding_header": 10920077,
+      "columns": [
+        "listing_id",
+        "date",
+        "available",
+        "minimum_nights",
+        "maximum_nights"
+      ],
+      "sample_records": [
+        {
+          "listing_id": "23545",
+          "date": "2026-09-15",
+          "available": "f",
+          "minimum_nights": "30",
+          "maximum_nights": "1125"
+        },
+        {
+          "listing_id": "23545",
+          "date": "2026-09-16",
+          "available": "f",
+          "minimum_nights": "30",
+          "maximum_nights": "1125"
+        }
+      ]
+    },
+    {
+      "filename": "nyc-neighbourhoods.csv",
+      "format": "CSV",
+      "size_bytes": 4962,
+      "record_count_excluding_header": 230,
+      "columns": [
+        "neighbourhood_group",
+        "neighbourhood"
+      ],
+      "sample_records": [
+        {
+          "neighbourhood_group": "Bronx",
+          "neighbourhood": "Allerton"
+        },
+        {
+          "neighbourhood_group": "Bronx",
+          "neighbourhood": "Baychester"
+        }
+      ]
+    },
+    {
+      "filename": "listingsAndReviews.json",
+      "format": "NDJSON (one JSON object per line)",
+      "size_bytes": 99656721,
+      "record_count": 5555,
+      "columns": [
+        "_id",
+        "listing_url",
+        "name",
+        "summary",
+        "space",
+        "description",
+        "neighborhood_overview",
+        "notes",
+        "transit",
+        "access",
+        "interaction",
+        "house_rules",
+        "property_type",
+        "room_type",
+        "bed_type",
+        "minimum_nights",
+        "maximum_nights",
+        "cancellation_policy",
+        "last_scraped",
+        "calendar_last_scraped",
+        "first_review",
+        "last_review",
+        "accommodates",
+        "bedrooms",
+        "beds",
+        "number_of_reviews",
+        "bathrooms",
+        "amenities",
+        "price",
+        "security_deposit",
+        "cleaning_fee",
+        "extra_people",
+        "guests_included",
+        "images",
+        "host",
+        "address",
+        "availability",
+        "review_scores",
+        "reviews"
+      ],
+      "sample_records": [
+        {
+          "_id": "10006546",
+          "listing_url": "https://www.airbnb.com/rooms/10006546",
+          "name": "Ribeira Charming Duplex",
+          "summary": "Fantastic duplex apartment with three bedrooms, located in the historic area of Porto, Ribeira (Cube) - UNESCO World Heritage Site. Centenary building fully rehabilitated, without losing their original character.",
+          "space": "Privileged views of the Douro River and Ribeira square, our apartment offers the perfect conditions to discover the history and the charm of Porto. Apartment comfortable, charming, romantic and cozy in the heart of Ribeira. Within walking distance of all the most emblematic places of the city of Porto. The apartment is fully equipped to host 8 people, with cooker, oven, washing machine, dishwasher, microwave, coffee machine (Nespresso) and kettle. The apartment is located in a very typical area of the city that allows to cross with the most picturesque population of the city, welcoming, genuine and happy people that fills the streets with his outspoken speech and contagious with your sincere generosity, wrapped in a only parochial spirit.",
+          "description": "Fantastic duplex apartment with three bedrooms, located in the historic area of Porto, Ribeira (Cube) - UNESCO World Heritage Site. Centenary building fully rehabilitated, without losing their original character. Privileged views of the Douro River and Ribeira square, our apartment offers the perfect conditions to discover the history and the charm of Porto. Apartment comfortable, charming, romantic and cozy in the heart of Ribeira. Within walking distance of all the most emblematic places of the city of Porto. The apartment is fully equipped to host 8 people, with cooker, oven, washing machine, dishwasher, microwave, coffee machine (Nespresso) and kettle. The apartment is located in a very typical area of the city that allows to cross with the most picturesque population of the city, welcoming, genuine and happy people that fills the streets with his outspoken speech and contagious with your sincere generosity, wrapped in a only parochial spirit. We are always available to help guests",
+          "neighborhood_overview": "In the neighborhood of the river, you can find several restaurants as varied flavors, but without forgetting the so traditional northern food. You can also find several bars and pubs to unwind after a day's visit to the magnificent Port. To enjoy the Douro River can board the boats that daily make the ride of six bridges. You can also embark towards Régua, Barca d'Alva, Pinhão, etc and enjoy the Douro Wine Region, World Heritage of Humanity. The Infante's house is a few meters and no doubt it deserves a visit. They abound grocery stores, bakeries, etc. to make your meals. Souvenir shop, wine cellars, etc. to bring some souvenirs.",
+          "notes": "Lose yourself in the narrow streets and staircases zone, have lunch in pubs and typical restaurants, and find the renovated cafes and shops in town. If you like exercise, rent a bicycle in the area and ride along the river to the sea, where it will enter beautiful beaches and terraces for everyone. The area is safe, find the bus stops 1min and metro line 5min. The bustling nightlife is a 10 min walk, where the streets are filled with people and entertainment for all. But Porto is much more than the historical center, here is modern museums, concert halls, clean and cared for beaches and surf all year round. Walk through the Ponte D. Luis and visit the different Caves of Port wine, where you will enjoy the famous port wine. Porto is a spoken city everywhere in the world as the best to be visited and savored by all ... natural beauty, culture, tradition, river, sea, beach, single people, typical food, and we are among those who best receive tourists, confirm! Come visit us and feel at ho",
+          "transit": "Transport: • Metro station and S. Bento railway 5min; • Bus stop a 50 meters; • Lift Guindais (Funicular) 50 meters; • Tuc Tuc-to get around the city; • Buses tourist; • Cycling through the marginal drive; • Cable car in Gaia, overlooking the Port (just cross the bridge).",
+          "access": "We are always available to help guests. The house is fully available to guests. We are always ready to assist guests. when possible we pick the guests at the airport.  This service transfer have a cost per person. We will also have service \"meal at home\" with a diverse menu and the taste of each. Enjoy the moment!",
+          "interaction": "Cot - 10 € / night Dog - € 7,5 / night",
+          "house_rules": "Make the house your home...",
+          "property_type": "House",
+          "room_type": "Entire home/apt",
+          "bed_type": "Real Bed",
+          "minimum_nights": "2",
+          "maximum_nights": "30",
+          "cancellation_policy": "moderate",
+          "last_scraped": {
+            "$date": {
+              "$numberLong": "1550293200000"
+            }
+          },
+          "calendar_last_scraped": {
+            "$date": {
+              "$numberLong": "1550293200000"
+            }
+          },
+          "first_review": {
+            "$date": {
+              "$numberLong": "1451797200000"
+            }
+          },
+          "last_review": {
+            "$date": {
+              "$numberLong": "1547960400000"
+            }
+          },
+          "accommodates": {
+            "$numberInt": "8"
+          },
+          "bedrooms": {
+            "$numberInt": "3"
+          },
+          "beds": {
+            "$numberInt": "5"
+          },
+          "number_of_reviews": {
+            "$numberInt": "51"
+          },
+          "bathrooms": {
+            "$numberDecimal": "1.0"
+          },
+          "amenities": [
+            "TV",
+            "Cable TV",
+            "Wifi",
+            "Kitchen",
+            "Paid parking off premises",
+            "Smoking allowed",
+            "Pets allowed",
+            "Buzzer/wireless intercom",
+            "Heating",
+            "Family/kid friendly",
+            "Washer",
+            "First aid kit",
+            "Fire extinguisher",
+            "Essentials",
+            "Hangers",
+            "Hair dryer",
+            "Iron",
+            "Pack ’n Play/travel crib",
+            "Room-darkening shades",
+            "Hot water",
+            "Bed linens",
+            "Extra pillows and blankets",
+            "Microwave",
+            "Coffee maker",
+            "Refrigerator",
+            "Dishwasher",
+            "Dishes and silverware",
+            "Cooking basics",
+            "Oven",
+            "Stove",
+            "Cleaning before checkout",
+            "Waterfront"
+          ],
+          "price": {
+            "$numberDecimal": "80.00"
+          },
+          "security_deposit": {
+            "$numberDecimal": "200.00"
+          },
+          "cleaning_fee": {
+            "$numberDecimal": "35.00"
+          },
+          "extra_people": {
+            "$numberDecimal": "15.00"
+          },
+          "guests_included": {
+            "$numberDecimal": "6"
+          },
+          "images": {
+            "thumbnail_url": "",
+            "medium_url": "",
+            "picture_url": "https://a0.muscache.com/im/pictures/e83e702f-ef49-40fb-8fa0-6512d7e26e9b.jpg?aki_policy=large",
+            "xl_picture_url": ""
+          },
+          "host": {
+            "host_id": "51399391",
+            "host_url": "https://www.airbnb.com/users/show/51399391",
+            "host_name": "Ana&Gonçalo",
+            "host_location": "Porto, Porto District, Portugal",
+            "host_about": "Gostamos de passear, de viajar, de conhecer pessoas e locais novos, gostamos de desporto e animais! Vivemos na cidade mais linda do mundo!!!",
+            "host_response_time": "within an hour",
+            "host_thumbnail_url": "https://a0.muscache.com/im/pictures/fab79f25-2e10-4f0f-9711-663cb69dc7d8.jpg?aki_policy=profile_small",
+            "host_picture_url": "https://a0.muscache.com/im/pictures/fab79f25-2e10-4f0f-9711-663cb69dc7d8.jpg?aki_policy=profile_x_medium",
+            "host_neighbourhood": "",
+            "host_response_rate": {
+              "$numberInt": "100"
+            },
+            "host_is_superhost": false,
+            "host_has_profile_pic": true,
+            "host_identity_verified": true,
+            "host_listings_count": {
+              "$numberInt": "3"
+            },
+            "host_total_listings_count": {
+              "$numberInt": "3"
+            },
+            "host_verifications": [
+              "email",
+              "phone",
+              "reviews",
+              "jumio",
+              "offline_government_id",
+              "government_id"
+            ]
+          },
+          "address": {
+            "street": "Porto, Porto, Portugal",
+            "suburb": "",
+            "government_area": "Cedofeita, Ildefonso, Sé, Miragaia, Nicolau, Vitória",
+            "market": "Porto",
+            "country": "Portugal",
+            "country_code": "PT",
+            "location": {
+              "type": "Point",
+              "coordinates": [
+                {
+                  "$numberDouble": "-8.61308"
+                },
+                {
+                  "$numberDouble": "41.1413"
+                }
+              ],
+              "is_location_exact": false
+            }
+          },
+          "availability": {
+            "availability_30": {
+              "$numberInt": "28"
+            },
+            "availability_60": {
+              "$numberInt": "47"
+            },
+            "availability_90": {
+              "$numberInt": "74"
+            },
+            "availability_365": {
+              "$numberInt": "239"
+            }
+          },
+          "review_scores": {
+            "review_scores_accuracy": {
+              "$numberInt": "9"
+            },
+            "review_scores_cleanliness": {
+              "$numberInt": "9"
+            },
+            "review_scores_checkin": {
+              "$numberInt": "10"
+            },
+            "review_scores_communication": {
+              "$numberInt": "10"
+            },
+            "review_scores_location": {
+              "$numberInt": "10"
+            },
+            "review_scores_value": {
+              "$numberInt": "9"
+            },
+            "review_scores_rating": {
+              "$numberInt": "89"
+            }
+          },
+          "reviews": [
+            {
+              "_id": "58663741",
+              "date": {
+                "$date": {
+                  "$numberLong": "1451797200000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "51483096",
+              "reviewer_name": "Cátia",
+              "comments": "A casa da Ana e do Gonçalo foram o local escolhido para a passagem de ano com um grupo de amigos. Fomos super bem recebidos com uma grande simpatia e predisposição a ajudar com qualquer coisa que fosse necessário.\r\nA casa era ainda melhor do que parecia nas fotos, totalmente equipada, com mantas, aquecedor e tudo o que pudessemos precisar.\r\nA localização não podia ser melhor! Não há melhor do que acordar de manhã e ao virar da esquina estar a ribeira do Porto."
+            },
+            {
+              "_id": "62413197",
+              "date": {
+                "$date": {
+                  "$numberLong": "1455426000000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "40031996",
+              "reviewer_name": "Théo",
+              "comments": "We are french's students, we traveled some days in Porto, this space was good and we can cooking easly. It was rainning so we eard every time the water fall to the ground in the street when we sleeping. But It was cool and or was well received by Ana et Gonçalo"
+            },
+            {
+              "_id": "68310569",
+              "date": {
+                "$date": {
+                  "$numberLong": "1459742400000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "53859850",
+              "reviewer_name": "Bart",
+              "comments": "We had a spledid time in the old centre of Porto.\r\nThe appartment is very well situated next to the old Ribeira square. It's perfect to have such an appartment to your disposal, you feel home, and have a place to relax between the exploration of this very nice city.\r\nWe thank Ana & Gonçalo, and we hope the appartment is free when we go back next year. Porto is charming original."
+            },
+            {
+              "_id": "69693942",
+              "date": {
+                "$date": {
+                  "$numberLong": "1460433600000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "3135623",
+              "reviewer_name": "Alex",
+              "comments": "Ana and Goncalo were very helpful and accommodating. When they were not available they put us in touch with their nephew who was equally as helpful. The flat was as described, neat and tidy. The weather was quite cold, but thankfully A&G left us with extra blankets and electric heaters to use. Location was great. Outside the flat there was a slight smell of the river/ sewage, but in all honesty it did not come into the flat, and once you go down the road it doesn't carry on. This may also have been down to the very wet weather we had while there. All in all, very happy and would definitely recommend."
+            },
+            {
+              "_id": "71451096",
+              "date": {
+                "$date": {
+                  "$numberLong": "1461556800000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "13187858",
+              "reviewer_name": "Dan",
+              "comments": "The hosts were very accommodating and agreed to meet with my parents as they were arriving before us. Communicated very well and always responded in a very timely manner. You couldn't have asked for a better location of this apartment and the place was identical to the pictures in the in the listing."
+            },
+            {
+              "_id": "73191268",
+              "date": {
+                "$date": {
+                  "$numberLong": "1462593600000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "61434690",
+              "reviewer_name": "Anne",
+              "comments": "THE PLACE TO BE, l'appartement est situé au milieu de la Ribeira , tout peut se faire à pieds c'est l'ideal,l'appartement est très bien agencé et équipé.\r\nNous avons passé un séjour très agréable dans ce duplex avec beaucoup de charme .\r\nAccueil très chaleureux de Ana et Gonçalo, ils ont pris du temps pour nous indiquer tout ce qu'il y avait à faire sur Porto et répondus  à toutes nos interrogations en terme de commodités.. Merci..\r\n"
+            },
+            {
+              "_id": "77438107",
+              "date": {
+                "$date": {
+                  "$numberLong": "1464667200000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "3673216",
+              "reviewer_name": "Chris",
+              "comments": "We had a great time in Porto. Ana’s & Goncalo’s apartment is located right in the heart of the Old Town and is great value for money. You really are at the centre of things and it’s the perfect place to get swept away in the hustle and bustle of Porto. Ana and Goncalo were great hosts."
+            },
+            {
+              "_id": "89637734",
+              "date": {
+                "$date": {
+                  "$numberLong": "1469764800000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "9172374",
+              "reviewer_name": "Leslie",
+              "comments": "Ana and Gonçalo were very welcoming and made a lot of information about Porto's sights available. It was very clean, very beautiful and the location was superb. It does have a lot of restaurants around it, so it could be a bit noisy for us at night but otherwise  great location. We would stay there again. "
+            },
+            {
+              "_id": "96574146",
+              "date": {
+                "$date": {
+                  "$numberLong": "1471924800000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "71985274",
+              "reviewer_name": "Philippe",
+              "comments": "Super appartement très bien placé, au cœur de l'animation de la Ribeira !\r\nNous avons passé un super séjour à Porto !\r\nToutes les informations données par Ana et les documents laissés nous ont bien aidé à organiser notre séjour.  Nous avons (presque) tout fait à pied ! Le parking Ribeira est proche et bien utile pour garer le véhicule.\r\nMerci !!!\r\nPhilippe\r\n"
+            },
+            {
+              "_id": "108444999",
+              "date": {
+                "$date": {
+                  "$numberLong": "1476590400000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "24960918",
+              "reviewer_name": "Hanneke",
+              "comments": "The appartment was great, it is really nice and cosy, and it is situated at a perfect location. Ana and Goncalo were very friendly, they were very helpfull during our stay. We had a great time during our stay in Porto!"
+            },
+            {
+              "_id": "111065376",
+              "date": {
+                "$date": {
+                  "$numberLong": "1477800000000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "74079092",
+              "reviewer_name": "Kati",
+              "comments": "Kävimme majoittajan kanssa viestinvaihtoa ennen lomaa ja he antoivat mukavan vaikutelman. He olivatkin hyvin mukavia ihmisiä. He tulivat lentokentälle vastaan kahdella autolla mikä oli hyvin ystävällistä. He kertoivat myös kaupungista ja sen nähtävyyksistä. Asunnon sijainti oli täydellinen. Se oli myös erittäin romanttinen ja kaunis. Kokemus oli hyvin onnistunut."
+            },
+            {
+              "_id": "111655209",
+              "date": {
+                "$date": {
+                  "$numberLong": "1477972800000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "40413493",
+              "reviewer_name": "Julia",
+              "comments": "Hemos pasado unos días increíbles en Oporto. Llegamos más tarde de lo que habíamos pensado y Ana & Gonçalo nos esperaron pacientemente y nos facilitaron la llegada, además nos recibieron con un regalo de bienvenida!. Nos dieron todo tipo de indicaciones y consejos más que de sobra para disfrutar de los días que estuvimos allí. La ubicación de la casa es inmejorable!! la única pega fue que el soporte de la ducha estaba roto pero como eran pocos días no quisimos molestar a Ana & Gonçalo y no se lo comentamos. "
+            },
+            {
+              "_id": "132811625",
+              "date": {
+                "$date": {
+                  "$numberLong": "1487480400000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "8986056",
+              "reviewer_name": "Joshua",
+              "comments": "Great location, comfortable place, responsive and friendly host! Highly recommended!"
+            },
+            {
+              "_id": "144627907",
+              "date": {
+                "$date": {
+                  "$numberLong": "1492315200000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "113254568",
+              "reviewer_name": "Tracey",
+              "comments": "This house is in the heart of Porto, set back enough to be away from the hustle and bustle but only a few steps up from the river, bars and restaurants. A great place to stay.\nThe house was clean and functional. Ana and Goncalo are perfect hosts with lots of information on places to visit and   eat."
+            },
+            {
+              "_id": "149009243",
+              "date": {
+                "$date": {
+                  "$numberLong": "1493697600000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "11263097",
+              "reviewer_name": "Willem",
+              "comments": "The location of the house is wonderful! You are in the heart of the old city and the Douro ist just a few meters away. Perfect for a first visit to Porto!\nVery cosy and warm house with everything you need.\nGonçalo gives a lot of good tips that will help you to have a perfect stay. Communication is very easy with him."
+            },
+            {
+              "_id": "150518693",
+              "date": {
+                "$date": {
+                  "$numberLong": "1494216000000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "108507776",
+              "reviewer_name": "Fanny",
+              "comments": "We spend a really good time in Porto, the flat is so well situated. The bridge is just next door, the view on the river is amazing, and plenty of restaurants and pubs, transport are just around.\nGonzalo is very kind to wait for us, also lat, for the check in, thank you.\n"
+            },
+            {
+              "_id": "155913947",
+              "date": {
+                "$date": {
+                  "$numberLong": "1496030400000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "30254816",
+              "reviewer_name": "Bridget",
+              "comments": "Thanks for a great stay! 6 of us were in Porto for a long weekend and we had a blast. The apartment was perfect; location and size to accomodate us. The hosts were great, then even picked us up at the airport (for a fee but it was a great service). Thanks again! Bridget."
+            },
+            {
+              "_id": "159692160",
+              "date": {
+                "$date": {
+                  "$numberLong": "1497153600000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "124514204",
+              "reviewer_name": "Oscar",
+              "comments": "Superb location and very nice, big and overall pleasant apartment!"
+            },
+            {
+              "_id": "164881958",
+              "date": {
+                "$date": {
+                  "$numberLong": "1498708800000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "105188418",
+              "reviewer_name": "Steve",
+              "comments": "The apartment provides basic facilities but is good value for money and very well positioned for easy access to restaurants and bars, the Ribeira district and the Port house in Gaia."
+            },
+            {
+              "_id": "166990342",
+              "date": {
+                "$date": {
+                  "$numberLong": "1499227200000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "52660694",
+              "reviewer_name": "Tina",
+              "comments": "Ana und Gonçalo sind sehr hilfsbereite liebe Leute, die  alles tun, damit man sich wohl fühlt. Wenn es etwas zu beanstanden gab, wird das sofort problemlos erledigt. Das Apartment ist charmant, die Möbel schon etwas mitgenommen, aber das passt insgesamt ins Bild von Porto und macht den Reiz aus. Die Lage ist super, genau am Duoro. Es gibt Strassenmusik bis in den späten Abend und auch morgens geht's früh los mit fröhlichen Lärm von der Flusspromenade. Nichts also für Leute, die es ruhig brauchen! Die Lage ist wirklich exklusiv und tröstet über den recht teuren Mietpreis. Im Umfeld gibt es typische Touri-Fallen, wo alles doppelt kostet, aber gleichzeitig findet man auch sehr nette kleine Bars, in der man chillig und günstig frühstücken oder generell lecker essen kann. Die Stadt ist klein genug, um sich schnell zurechtzufinden und groß genug, um immer wieder neues zu entdecken. Wir waren zu dritt (50, 25, 20 Jahre) und haben die Zeit wirklich genossen. "
+            },
+            {
+              "_id": "180030365",
+              "date": {
+                "$date": {
+                  "$numberLong": "1502251200000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "25469637",
+              "reviewer_name": "Mathieu",
+              "comments": "Very well located appartement ideal for a family of 5 who want to make the most of the city center.\nIt may be a bit noisy at night but this is acceptable.\nGlobally we recommend this place."
+            },
+            {
+              "_id": "198679769",
+              "date": {
+                "$date": {
+                  "$numberLong": "1506744000000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "21837853",
+              "reviewer_name": "Ido",
+              "comments": "Great location! The apartment is somewhat basic. We were family with 3 teenagers and had a good time. Also it’s a bit noisy until very late at night."
+            },
+            {
+              "_id": "199885226",
+              "date": {
+                "$date": {
+                  "$numberLong": "1507003200000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "56528632",
+              "reviewer_name": "Amanda",
+              "comments": "This apartment is in the perfect location for being in the middle of the action. There were tons of restaurants close to the apartment and it was a quick walk across the bridge to tour the Port wineries. Be forewarned; if you are looking for a very quiet location, this area may not be for you. However, if you are looking to step outside of your door and start enjoying what Porto has to offer, I recommend this location."
+            },
+            {
+              "_id": "207942636",
+              "date": {
+                "$date": {
+                  "$numberLong": "1509336000000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "102474818",
+              "reviewer_name": "Geneviève",
+              "comments": "Acceuil très très chaleureux de Gonçalo  et Ana lors de notre arrivée très tardive due à un changement d\"'horaire d'avion....appartement super bien situé dans Porto près du Douro, fidèle aux photos mises sur le site....Nous avons adoré ce quartier bien animé  .....Encore merci à Gonçalo et Ana. ...."
+            },
+            {
+              "_id": "209455775",
+              "date": {
+                "$date": {
+                  "$numberLong": "1509854400000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "10371877",
+              "reviewer_name": "Andrea",
+              "comments": "Localização perfeita, muito aconchegante, Ana e Gonçalo são pessoas muito atenciosas e simpáticas!"
+            },
+            {
+              "_id": "223995518",
+              "date": {
+                "$date": {
+                  "$numberLong": "1514869200000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "10184070",
+              "reviewer_name": "Jennifer",
+              "comments": "Perfect position to see everything that Porto has to offer. Ana and Gonçalo were great hosts quick to respond and welcoming. Couldn't recommend a better place to stay in Porto to be able to see the sights and be within walking distance to so many restaurants."
+            },
+            {
+              "_id": "225725834",
+              "date": {
+                "$date": {
+                  "$numberLong": "1515301200000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "156411765",
+              "reviewer_name": "Nathalie",
+              "comments": "Great location!"
+            },
+            {
+              "_id": "230559180",
+              "date": {
+                "$date": {
+                  "$numberLong": "1517115600000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "2524423",
+              "reviewer_name": "Cayetana",
+              "comments": "Probably Ana&Gonzalo´s place is great for summer but definitely not in winter. The house is NOT WARM and ready for a stay in cold and humit season. There is NO HEATING in any of the rooms and living room, only bed covers (not nordic duvet) and small heaters which you have to switch off during the night. Those were not enough during our stay in January even we had sunny days! Moreover we were 5 people in the house without NO HOT WATER enough for all of us. \nThe pictures did not show the reality. Furniture was much older and WiFi signal is only available in the living room, not the rooms.\nOn the other hand, location is great if you want to stay close to the river. Although think about that all restaurants, bars and main tourist attractions are close to Train Station and Clerigos Tower which means 15-20 min uphill walking distance from the house."
+            },
+            {
+              "_id": "232271631",
+              "date": {
+                "$date": {
+                  "$numberLong": "1517720400000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "167219338",
+              "reviewer_name": "Mérex",
+              "comments": "Appartement très cosy! Nous y avons été pour un court séjour à 7 et avons adoré. L'appartement est idéalement situé dans le quartier magnifique de la Ribeira. L'accueil a ete très chaleureux: Nous étions trompé d'adresse car le GPS avaient confondus les rues mais Ana a su nous retrouver pour nous amener à l'appartement.  L'appartement était très  propre et nous avons eu largement tout ce qu'il fallait en linge.\nEncore un Grand merci à eux!"
+            },
+            {
+              "_id": "234847900",
+              "date": {
+                "$date": {
+                  "$numberLong": "1518584400000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "6735587",
+              "reviewer_name": "Andrea",
+              "comments": "ottima ospitalità, la posizione della casa è ottima, vicina ai mezzi di trasporto e alle principali attrazioni della città, torneremo sicuramente. Consigliato!!"
+            },
+            {
+              "_id": "235293831",
+              "date": {
+                "$date": {
+                  "$numberLong": "1518757200000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "130170949",
+              "reviewer_name": "Bogdan",
+              "comments": "Nice apartment in Porto, we enjoy staying in it for a few days. The apartment is comfortable and has a very nice location. Thanks to Ana and Gonsalo for hospitality."
+            },
+            {
+              "_id": "240252220",
+              "date": {
+                "$date": {
+                  "$numberLong": "1520139600000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "153415353",
+              "reviewer_name": "Alison",
+              "comments": "Great location. Good value thanks for the stay"
+            },
+            {
+              "_id": "244738269",
+              "date": {
+                "$date": {
+                  "$numberLong": "1521432000000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "59706237",
+              "reviewer_name": "Marco",
+              "comments": "Me and my friends (7 ppl tot) have booked Gonçalo and Ana’s apartment for our holidays and i think we cannot do a better choice like that.\nThe apartment is situated near Oporto’s riverside, in Ribeira district, at 2 minutes walking to Sao Bento’s station, 10minutes to Lello’s library and clerics’s tower. In less than 10 minutes u’re in Vila Nova De Gaia where u can find the wineries of porto’s wine.\nThe apartment is really spacious and comfortable, perfect for 7 italian people that want to have fun in Oporto.\nSuggested!!!"
+            },
+            {
+              "_id": "246334180",
+              "date": {
+                "$date": {
+                  "$numberLong": "1521950400000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "12047570",
+              "reviewer_name": "Michel",
+              "comments": "L'emplacement et vraiment au coeur de l'animation du vieux Porto. Au pied de l'appartement se trouvent de charmants café avec vue sur le Douro.\nAna&Gonçalo ont été très attentionnés et à l'écoute de nos demandes\nMichel"
+            },
+            {
+              "_id": "259708770",
+              "date": {
+                "$date": {
+                  "$numberLong": "1525147200000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "174003310",
+              "reviewer_name": "Dariusz",
+              "comments": "Great location right next to the Dom Luiz bridge and Douro river and plenty of restaurants. Enough room for about 6 people. Ana was very responsive to any concerns we had. Would stay again."
+            },
+            {
+              "_id": "263239322",
+              "date": {
+                "$date": {
+                  "$numberLong": "1526011200000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "31033799",
+              "reviewer_name": "Margriet",
+              "comments": "The house was supernice and located in the middle of the center. We really enjoyed our stay here!"
+            },
+            {
+              "_id": "264125733",
+              "date": {
+                "$date": {
+                  "$numberLong": "1526184000000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "15554470",
+              "reviewer_name": "Carlos",
+              "comments": "Great Location. Ana & Gonzalo are very nice, flexible, and fast-responsive. Apartment is ok but only one toilet for 3 rooms + sofa-bed."
+            },
+            {
+              "_id": "267283092",
+              "date": {
+                "$date": {
+                  "$numberLong": "1526875200000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "39358900",
+              "reviewer_name": "Gaspard",
+              "comments": "Ana&Gonçalo's apartment was nice, comfy, clean and most of all really well located in the city center!!!\nWe could easily move everywhere in Porto from there and it was perfect for discovering the city!\nAlso, I'd like to mention that Gonçalo was nice and patient with us on the day of the arrival even if we were a bit late.\nI strongly recommend this place!"
+            },
+            {
+              "_id": "269853203",
+              "date": {
+                "$date": {
+                  "$numberLong": "1527480000000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "42864948",
+              "reviewer_name": "James",
+              "comments": "Incredible location, beautiful house. Everything was very easy and we would highly recommend this accommodation. Excellent. "
+            },
+            {
+              "_id": "272277314",
+              "date": {
+                "$date": {
+                  "$numberLong": "1527998400000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "45990306",
+              "reviewer_name": "紫仪",
+              "comments": "good lication good experience"
+            },
+            {
+              "_id": "275044729",
+              "date": {
+                "$date": {
+                  "$numberLong": "1528603200000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "176337667",
+              "reviewer_name": "Sebastian",
+              "comments": "We loved it"
+            },
+            {
+              "_id": "302971185",
+              "date": {
+                "$date": {
+                  "$numberLong": "1533528000000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "52572680",
+              "reviewer_name": "Robby",
+              "comments": "Great location right on the river. Lots of tourists in the area. Easy to get to public transportation. Besides the hot weather, we had a good time. "
+            },
+            {
+              "_id": "320887590",
+              "date": {
+                "$date": {
+                  "$numberLong": "1536465600000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "20965806",
+              "reviewer_name": "Romain",
+              "comments": "Merci à Ana & Gonçalo pour l’accueil !"
+            },
+            {
+              "_id": "325025167",
+              "date": {
+                "$date": {
+                  "$numberLong": "1537243200000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "15097268",
+              "reviewer_name": "Roula",
+              "comments": "-"
+            },
+            {
+              "_id": "331735682",
+              "date": {
+                "$date": {
+                  "$numberLong": "1538539200000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "35313286",
+              "reviewer_name": "Alexander",
+              "comments": "Our stay in Ana and Gancalo’s apartment was lovely. The location was perfect and Gancalo graciously picked us up from the airport. It does get a little loud in the morning but that’s only because the apartment is perfectly located right on the river front. You do have to hold the shower wand when showering but the pressure is good. Overall I would definitely stay in the apartment again!"
+            },
+            {
+              "_id": "334789252",
+              "date": {
+                "$date": {
+                  "$numberLong": "1539144000000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "206502919",
+              "reviewer_name": "Mark",
+              "comments": "It was a wonderful experience, the location is fantastic and the accommodations were outstanding."
+            },
+            {
+              "_id": "347372623",
+              "date": {
+                "$date": {
+                  "$numberLong": "1541912400000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "17503135",
+              "reviewer_name": "Camille",
+              "comments": "Ana’s place is very well located, at 2 min walking distance to the Douro, so that everything is close by! Ana communicated well regarding check in info, and was even flexible regarding check out timing. The description / pictures are relevant; only the bathroom  is not as recent. We appreciated the extra blanket as heaters have to be switched off once u leave the flat, but once they are switched on we had no problem afterwards regarding the temperature of the flat."
+            },
+            {
+              "_id": "354708379",
+              "date": {
+                "$date": {
+                  "$numberLong": "1543726800000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "34178931",
+              "reviewer_name": "Pawel",
+              "comments": "If you want to stay in the heart of Porto for reasonable price this is a good alternative. However, I’d selected again it for group of more than 6 people."
+            },
+            {
+              "_id": "362865132",
+              "date": {
+                "$date": {
+                  "$numberLong": "1545886800000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "208880077",
+              "reviewer_name": "Thomas",
+              "comments": "Very helpful hosts. Cooked traditional Portuguese Christmas dinner for 6. Location is perfect. Right off square that is on river right by famous bridge engineered by protege of Gustav Eifel. Looks like same type structure."
+            },
+            {
+              "_id": "364728730",
+              "date": {
+                "$date": {
+                  "$numberLong": "1546232400000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "91827533",
+              "reviewer_name": "Mr",
+              "comments": "Ana & Goncalo were great on communication, responding instantly to questions.\n5 of us stayed in their home for 3 nights and found the location to be great and central to all the amazing sights Porto has to offer. \nWe found the home to be difficult to heat on our first night, the rooms have heaters but took time to get the room to a comfortable temperature level. But in warmer months Im sure this isn't an issue.\nThe beds are a little hard with one slightly out of shape,  and the shower is fairly basic (hand held) but does the job. Because of the central location some noise can be expected early in the mornings. \nOverall the apartment suited our needs for our short stay and the price is more than reasonable for what we got."
+            },
+            {
+              "_id": "403055315",
+              "date": {
+                "$date": {
+                  "$numberLong": "1547960400000"
+                }
+              },
+              "listing_id": "10006546",
+              "reviewer_id": "15138940",
+              "reviewer_name": "Milo",
+              "comments": "The house was extremely well located and Ana was able to give us some really great tips on locations to have lunch and eat out. The house was perfectly clean and the easily able to accommodate 6 people despite only having one bathroom. The beds and living room were comfortable. \n\nHowever, we always felt somewhat on edge in the house due to the number of signs posted around the kitchen, bedrooms and bathroom about being charged 15€ for all sorts of extras like not washing up or using extra towels and bed linen. Not that this would be particularly unreasonable but it made us feel like we were walking on egg shells in and around the house. \n\nThe hosts were aware that we were a group of six yet one of the beds was not prepared and we ran out of toilet paper well before we were due to check out despite only being there 2 nights. It really wasn't the end of the world but the shower head does not have a wall fitting meaning you had to hold it yourself if you wanted to stand underneath it."
+            }
+          ]
+        },
+        {
+          "_id": "10009999",
+          "listing_url": "https://www.airbnb.com/rooms/10009999",
+          "name": "Horto flat with small garden",
+          "summary": "One bedroom + sofa-bed in quiet and bucolic neighbourhood right next to the Botanical Garden. Small garden, outside shower, well equipped kitchen and bathroom with shower and tub. Easy for transport with many restaurants and basic facilities in the area.",
+          "space": "Lovely one bedroom + sofa-bed in the living room, perfect for two but fits up to four comfortably.  There´s a small outside garden with a shower There´s a well equipped open kitchen with both 110V / 220V wall plugs and one bathroom with shower, tub and even a sauna machine! All newly refurbished!",
+          "description": "One bedroom + sofa-bed in quiet and bucolic neighbourhood right next to the Botanical Garden. Small garden, outside shower, well equipped kitchen and bathroom with shower and tub. Easy for transport with many restaurants and basic facilities in the area. Lovely one bedroom + sofa-bed in the living room, perfect for two but fits up to four comfortably.  There´s a small outside garden with a shower There´s a well equipped open kitchen with both 110V / 220V wall plugs and one bathroom with shower, tub and even a sauna machine! All newly refurbished! I´ll be happy to help you with any doubts, tips or any other information needed during your stay. This charming ground floor flat is located in Horto, a quiet and bucolic neighborhood just next to the Botanical Garden, where most of the descendants of it´s first gardeners still live. You´ll be 30 minutes walk from waterfalls in the rainforest with easy hiking trails! There are nice bars and restaurants as well as basic facilities - pharmacy, b",
+          "neighborhood_overview": "This charming ground floor flat is located in Horto, a quiet and bucolic neighborhood just next to the Botanical Garden, where most of the descendants of it´s first gardeners still live. You´ll be 30 minutes walk from waterfalls in the rainforest with easy hiking trails! There are nice bars and restaurants as well as basic facilities - pharmacy, bakery, small market - in the area.",
+          "notes": "There´s a table in the living room now, that does not show in the photos.",
+          "transit": "Easy access to transport (bus, taxi, car) and easy free parking around. Very close to Gávea, Leblon, Ipanema, Copacabana and Botafogo.",
+          "access": "",
+          "interaction": "I´ll be happy to help you with any doubts, tips or any other information needed during your stay.",
+          "house_rules": "I just hope the guests treat the space as they´re own, with respect to it as well as to my neighbours! Espero apenas que os hóspedes tratem o lugar com carinho e respeito aos vizinhos!",
+          "property_type": "Apartment",
+          "room_type": "Entire home/apt",
+          "bed_type": "Real Bed",
+          "minimum_nights": "2",
+          "maximum_nights": "1125",
+          "cancellation_policy": "flexible",
+          "last_scraped": {
+            "$date": {
+              "$numberLong": "1549861200000"
+            }
+          },
+          "calendar_last_scraped": {
+            "$date": {
+              "$numberLong": "1549861200000"
+            }
+          },
+          "accommodates": {
+            "$numberInt": "4"
+          },
+          "bedrooms": {
+            "$numberInt": "1"
+          },
+          "beds": {
+            "$numberInt": "2"
+          },
+          "number_of_reviews": {
+            "$numberInt": "0"
+          },
+          "bathrooms": {
+            "$numberDecimal": "1.0"
+          },
+          "amenities": [
+            "Wifi",
+            "Wheelchair accessible",
+            "Kitchen",
+            "Free parking on premises",
+            "Smoking allowed",
+            "Hot tub",
+            "Buzzer/wireless intercom",
+            "Family/kid friendly",
+            "Washer",
+            "First aid kit",
+            "Essentials",
+            "Hangers",
+            "Hair dryer",
+            "Iron",
+            "Laptop friendly workspace"
+          ],
+          "price": {
+            "$numberDecimal": "317.00"
+          },
+          "weekly_price": {
+            "$numberDecimal": "1492.00"
+          },
+          "monthly_price": {
+            "$numberDecimal": "4849.00"
+          },
+          "cleaning_fee": {
+            "$numberDecimal": "187.00"
+          },
+          "extra_people": {
+            "$numberDecimal": "0.00"
+          },
+          "guests_included": {
+            "$numberDecimal": "1"
+          },
+          "images": {
+            "thumbnail_url": "",
+            "medium_url": "",
+            "picture_url": "https://a0.muscache.com/im/pictures/5b408b9e-45da-4808-be65-4edc1f29c453.jpg?aki_policy=large",
+            "xl_picture_url": ""
+          },
+          "host": {
+            "host_id": "1282196",
+            "host_url": "https://www.airbnb.com/users/show/1282196",
+            "host_name": "Ynaie",
+            "host_location": "Rio de Janeiro, State of Rio de Janeiro, Brazil",
+            "host_about": "I am an artist and traveling is a major part of my life. I love treating visitors the way I like to be treated when I´m abroad and I'm usually renting my flat while I'm away. I can recommend some cool parties and nights out as well as advise on some hidden secrets of Rio’s nature!",
+            "host_thumbnail_url": "https://a0.muscache.com/im/pictures/9681e3cc-4af1-4046-b294-2881dffb4ff8.jpg?aki_policy=profile_small",
+            "host_picture_url": "https://a0.muscache.com/im/pictures/9681e3cc-4af1-4046-b294-2881dffb4ff8.jpg?aki_policy=profile_x_medium",
+            "host_neighbourhood": "Jardim Botânico",
+            "host_is_superhost": false,
+            "host_has_profile_pic": true,
+            "host_identity_verified": false,
+            "host_listings_count": {
+              "$numberInt": "1"
+            },
+            "host_total_listings_count": {
+              "$numberInt": "1"
+            },
+            "host_verifications": [
+              "email",
+              "phone",
+              "facebook"
+            ]
+          },
+          "address": {
+            "street": "Rio de Janeiro, Rio de Janeiro, Brazil",
+            "suburb": "Jardim Botânico",
+            "government_area": "Jardim Botânico",
+            "market": "Rio De Janeiro",
+            "country": "Brazil",
+            "country_code": "BR",
+            "location": {
+              "type": "Point",
+              "coordinates": [
+                {
+                  "$numberDouble": "-43.23074991429229"
+                },
+                {
+                  "$numberDouble": "-22.966253551739655"
+                }
+              ],
+              "is_location_exact": true
+            }
+          },
+          "availability": {
+            "availability_30": {
+              "$numberInt": "0"
+            },
+            "availability_60": {
+              "$numberInt": "0"
+            },
+            "availability_90": {
+              "$numberInt": "0"
+            },
+            "availability_365": {
+              "$numberInt": "0"
+            }
+          },
+          "review_scores": {},
+          "reviews": []
+        }
+      ]
+    },
+    {
+      "filename": "nyc-listings.csv.gz",
+      "format": "GZIP-compressed CSV backup",
+      "size_bytes": 16005851,
+      "validated": true,
+      "duplicate_of": "nyc-listings.csv"
+    },
+    {
+      "filename": "nyc-reviews.csv.gz",
+      "format": "GZIP-compressed CSV backup",
+      "size_bytes": 120318684,
+      "validated": true,
+      "duplicate_of": "nyc-reviews.csv"
+    },
+    {
+      "filename": "nyc-calendar.csv.gz",
+      "format": "GZIP-compressed CSV backup",
+      "size_bytes": 25603399,
+      "validated": true,
+      "duplicate_of": "nyc-calendar.csv"
+    }
+  ]
+}
