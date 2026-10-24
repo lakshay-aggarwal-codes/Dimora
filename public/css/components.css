@@ -1741,3 +1741,97 @@
     min-width: 0;
   }
 }
+
+/* Host booking calendar, all listings (P13-T02) */
+.ocal {
+  border-collapse: separate;
+  border-spacing: 2px;
+  font-size: var(--font-size-sm);
+}
+
+.ocal th,
+.ocal td {
+  text-align: center;
+}
+
+.ocal-listing {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 11rem;
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--color-surface-raised);
+  text-align: left;
+  font-weight: var(--font-weight-medium);
+}
+
+.ocal-day {
+  min-width: 1.9rem;
+  padding: var(--space-1);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.ocal-weekday,
+.ocal-daynum {
+  display: block;
+  line-height: 1.2;
+}
+
+.ocal-weekend {
+  background-color: var(--color-surface-sunken);
+}
+
+.ocal-today-head {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -2px;
+}
+
+.ocal-cell {
+  height: 2.2rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-raised);
+}
+
+.ocal-link {
+  display: block;
+  padding: var(--space-1) 0;
+  color: inherit;
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+}
+
+.ocal-link:hover,
+.ocal-link:focus-visible {
+  text-decoration: underline;
+}
+
+.ocal-requested {
+  border-color: var(--color-badge-warning-text);
+  background-color: var(--color-badge-warning-bg);
+  color: var(--color-badge-warning-text);
+}
+
+.ocal-booked {
+  border-color: var(--color-badge-primary-text);
+  background-color: var(--color-badge-primary-bg);
+  color: var(--color-badge-primary-text);
+}
+
+.ocal-stayed {
+  border-color: var(--color-border-strong);
+  background-color: var(--color-surface-sunken);
+  color: var(--color-text);
+}
+
+.ocal-blocked {
+  border-color: var(--color-border-strong);
+  background-color: var(--color-badge-neutral-bg);
+  color: var(--color-badge-neutral-text);
+}
+
+.ocal-today {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -2px;
+}

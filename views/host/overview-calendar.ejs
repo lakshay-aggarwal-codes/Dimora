@@ -1,0 +1,77 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    All of a host's listings in one month (P13-T02). Local: calendar
+    (src/services/hostCalendar.js monthOverview). Read only. Every state is
+    written in words for assistive technology; a letter and a colour are only
+    hints. A booked night links to its booking, a blocked night to that
+    listing's availability calendar.
+%>
+<div class="row mt-3">
+    <div class="col-12">
+        <p class="mb-1"><a href="/host/reservations">Booking requests</a> · <a href="/host/listings">My listings</a></p>
+        <h1 class="h3">Booking calendar</h1>
+        <p class="text-body-secondary">Each cell is the night that starts that day.</p>
+
+        <nav class="cal-nav" aria-label="Month">
+            <% if (calendar.prevKey) { %>
+            <a class="btn btn-sm btn-outline-dark" href="/host/calendar?month=<%= calendar.prevKey %>">Previous month</a>
+            <% } else { %>
+            <span class="btn btn-sm btn-outline-dark disabled" aria-disabled="true">Previous month</span>
+            <% } %>
+            <h2 class="h5 cal-month" id="ocal-month"><%= calendar.label %></h2>
+            <% if (calendar.nextKey) { %>
+            <a class="btn btn-sm btn-outline-dark" href="/host/calendar?month=<%= calendar.nextKey %>">Next month</a>
+            <% } else { %>
+            <span class="btn btn-sm btn-outline-dark disabled" aria-disabled="true">Next month</span>
+            <% } %>
+        </nav>
+
+        <% if (calendar.rows.length === 0) { %>
+        <%- include("../partials/empty-state.ejs", { title: "No listings to show", message: "Published and unpublished listings appear here once you have created and published one.", icon: "fa-calendar", actionHref: "/host/listings/new", actionLabel: "Dimora your home", headingLevel: 3 }) %>
+        <% } else { %>
+        <div class="table-responsive ocal-wrap">
+            <table class="ocal" aria-labelledby="ocal-month">
+                <caption class="visually-hidden">Nights in <%= calendar.label %> for each of your listings: <%= calendar.totals.booked %> booked, <%= calendar.totals.requested %> awaiting your answer, <%= calendar.totals.stayed %> completed, <%= calendar.totals.blocked %> blocked</caption>
+                <thead>
+                    <tr>
+                        <th scope="col" class="ocal-listing">Listing</th>
+                        <% calendar.days.forEach((day) => { %>
+                        <th scope="col" class="ocal-day<%= day.weekend ? ' ocal-weekend' : '' %><%= day.today ? ' ocal-today-head' : '' %>"<% if (day.today) { %> aria-current="date"<% } %>>
+                            <span class="visually-hidden"><%= day.weekday.long %> </span><span aria-hidden="true" class="ocal-weekday"><%= day.weekday.short %></span>
+                            <span class="ocal-daynum"><%= day.day %></span>
+                        </th>
+                        <% }) %>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% calendar.rows.forEach((row) => { %>
+                    <tr>
+                        <th scope="row" class="ocal-listing">
+                            <a href="<%= row.listing.calendarUrl %>"><%= row.listing.title %></a>
+                            <% if (row.listing.status !== "published") { %><span class="small text-body-secondary"><%= row.listing.status === "suspended" ? "suspended" : "not published" %></span><% } %>
+                        </th>
+                        <% row.cells.forEach((cell) => { %>
+                        <% if (cell.state === "free") { %>
+                        <td class="ocal-cell ocal-free<%= cell.today ? ' ocal-today' : '' %>"></td>
+                        <% } else { %>
+                        <td class="ocal-cell ocal-<%= cell.state %><%= cell.today ? ' ocal-today' : '' %>">
+                            <% if (cell.href) { %><a class="ocal-link" href="<%= cell.href %>"><span aria-hidden="true"><%= cell.letter %></span><span class="visually-hidden"><%= cell.srLabel %></span></a>
+                            <% } else { %><span aria-hidden="true"><%= cell.letter %></span><span class="visually-hidden"><%= cell.srLabel %></span><% } %>
+                        </td>
+                        <% } %>
+                        <% }) %>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <ul class="cal-legend" aria-label="Legend">
+            <% calendar.legend.forEach((item) => { %>
+            <li><span class="cal-swatch ocal-<%= item.key %>" aria-hidden="true"></span> <strong><%= item.letter %></strong> <%= item.label %> (<%= item.word %>)</li>
+            <% }) %>
+        </ul>
+        <% if (calendar.truncated) { %><p class="small text-body-secondary mt-2">Showing the first <%= calendar.limit %> listings.</p><% } %>
+        <% } %>
+    </div>
+</div>

@@ -6,6 +6,7 @@ const { isLoggedIn, authorize } = require("../middleware");
 const controller = require("../controllers/host");
 const availability = require("../controllers/availability");
 const reservations = require("../controllers/hostReservations");
+const hostCalendar = require("../controllers/hostCalendar");
 
 const router = express.Router();
 const mayCreate = [isLoggedIn, authorize("listing:create")];
@@ -49,6 +50,10 @@ router.post(
   wrapAsync(availability.unblock),
 );
 
+// All listings in one month (P13-T02): any signed-in host; it only reads
+// that host's own listings.
+router.get("/calendar", isLoggedIn, wrapAsync(hostCalendar.show));
+
 // Booking requests (P09-T02): any signed-in host; the service checks that the
 // booking is theirs.
 router.get("/reservations", isLoggedIn, wrapAsync(reservations.index));
@@ -61,12 +66,6 @@ router.post(
   "/reservations/:id/decline",
   isLoggedIn,
   wrapAsync(reservations.decline),
-);
-// The host cancels a confirmed stay (P09-T03): reason required, guest refunded in full.
-router.post(
-  "/reservations/:id/cancel",
-  isLoggedIn,
-  wrapAsync(reservations.cancel),
 );
 
 module.exports = router;
