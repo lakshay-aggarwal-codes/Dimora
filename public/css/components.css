@@ -59,6 +59,28 @@
   cursor: default;
 }
 
+/* Unread count on the bell (P11-T01). The number is also in the link's
+   hidden text, so the badge itself is only a visual. */
+.bell-link {
+  position: relative;
+}
+
+.bell-badge {
+  min-width: 1.25rem;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.25rem;
+  text-align: center;
+}
+
+.bell-badge[hidden] {
+  display: none;
+}
+
 .account-name {
   max-width: 10rem;
   overflow: hidden;
@@ -1836,167 +1858,101 @@
   outline-offset: -2px;
 }
 
-/* ---- Save (heart) button, wishlists (P10-T01) ---- */
-.listing-card-wrap {
-  position: relative;
-  height: 100%;
-}
-
-.listing-card-wrap .save-form {
-  position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
-  z-index: 2;
-}
-
-.save-form {
-  margin: 0;
-}
-
-.save-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border: 1px solid var(--color-border-strong);
-  border-radius: 50%;
-  background-color: var(--color-surface-raised);
-  color: var(--color-text);
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.save-button:hover {
-  background-color: var(--color-surface-sunken);
-}
-
-.save-button:focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 2px;
-}
-
-.save-button.is-saved {
-  color: var(--color-danger);
-}
-
-.detail-title-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.saved-unavailable {
-  background-color: var(--color-surface-sunken);
-}
-
-/* ---- Stay comparison (P10-T03) ---- */
-.compare-controls {
+/* Notifications page (P11-T01) */
+.notification-bar {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-3);
-  align-items: flex-end;
   margin-bottom: var(--space-4);
 }
 
-.compare-help {
-  flex-basis: 100%;
+.notification-list {
   margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.compare-control label {
-  display: block;
-  font-size: 0.875rem;
-}
-
-.compare-control-wide {
-  flex: 1 1 14rem;
-}
-
-.compare-pick {
-  display: inline-flex;
-  gap: var(--space-2);
-  align-items: center;
-  min-height: 2.75rem;
-}
-
-.compare-scroll {
-  overflow-x: auto;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-lg);
-}
-
-.compare-scroll:focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 2px;
-}
-
-.compare-table {
-  width: 100%;
-  min-width: 36rem;
-  border-collapse: separate;
-  border-spacing: 0;
+.notification {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   background-color: var(--color-surface-raised);
 }
 
-.compare-table th,
-.compare-table td {
-  padding: var(--space-3);
-  vertical-align: top;
-  border-bottom: 1px solid var(--color-border-strong);
-  text-align: left;
+.notification + .notification {
+  margin-top: var(--space-3);
 }
 
-.compare-table tbody th[scope="row"],
-.compare-corner {
-  position: sticky;
-  left: 0;
-  z-index: 1;
-  min-width: 8rem;
-  max-width: 11rem;
-  background-color: var(--color-surface-sunken);
-  font-weight: var(--font-weight-medium, 600);
+/* Unread: a stronger edge as well as the word "Unread" in the row. */
+.notification-unread {
+  border-color: var(--color-primary);
+  border-left-width: var(--space-1);
 }
 
-.compare-col {
-  min-width: 12rem;
-  font-weight: normal;
+.notification-main {
+  flex: 1 1 14rem;
+  min-width: 0;
 }
 
-.compare-img {
-  display: block;
-  width: 100%;
-  height: 7rem;
-  margin-bottom: var(--space-2);
-  object-fit: cover;
-  border-radius: var(--radius-md, 8px);
+.notification-title {
+  margin: 0;
+  font-weight: var(--font-weight-medium);
+  overflow-wrap: anywhere;
 }
 
-.compare-title {
-  display: block;
-  font-weight: 600;
+.notification-body {
+  margin: var(--space-1) 0 0;
+  overflow-wrap: anywhere;
 }
 
-.compare-where,
-.compare-sub {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: normal;
-  color: var(--color-text-muted, inherit);
+.notification-time {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
 }
 
-.compare-remove {
-  display: inline-block;
-  margin-top: var(--space-2);
-  font-size: 0.875rem;
+/* Conversation page (P11-T02). Message text is plain text: pre-wrap keeps its
+   line breaks without any HTML. */
+.message-list {
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
 }
 
-.compare-rules {
-  white-space: pre-line;
-  max-width: 16rem;
+.message {
+  max-width: 40rem;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-raised);
 }
 
-.compare-group th {
-  background-color: var(--color-surface-sunken);
+.message + .message {
+  margin-top: var(--space-3);
 }
+
+.message-mine {
+  margin-left: auto;
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-subtle);
+}
+
+.message-meta {
+  margin: 0 0 var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.message-body {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+

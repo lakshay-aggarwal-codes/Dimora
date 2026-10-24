@@ -27,6 +27,8 @@ Policies are pure functions `(user, resource) => boolean` (no database, no reque
 | `review:create` | any active member may reach the route; whether they may review *this stay* is decided by `services/reviews.js` (completed stay, author is the guest, not the host, inside the window, one per stay; ADR-010) |
 | `reservation:view` | the booking's guest, its host, or an admin (an active account) |
 | `reservation:respond` | only the booking's host: accept or decline a request; admins cannot answer for a host |
+| `conversation:start` | any active member except the listing's own host ("Contact host"); the service also needs a public listing and an active host |
+| `conversation:view` / `conversation:send` | only the conversation's guest and host, while their accounts are active. Admins have no access to messages (they reach one only through a report, P12-T04); anyone else gets the ordinary 404 |
 | `listing:edit` | the listing's owner |
 | `listing:delete` | the owner, or an admin |
 | `review:delete` | the review's author, or an admin (the review must belong to the listing in the URL) |

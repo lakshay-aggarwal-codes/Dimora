@@ -52,10 +52,7 @@
         </div>
         <% } %>
         <div class="mb-3">
-            <div class="detail-title-row">
-                <h1><%= listing.title %></h1>
-                <%- include("../partials/save-button.ejs", { listingId: String(listing._id), title: listing.title, saved: typeof savedIds !== "undefined" && savedIds && typeof savedIds.has === "function" && savedIds.has(String(listing._id)) }) %>
-            </div>
+            <h1><%= listing.title %></h1>
             <% if (place) { %><p class="detail-place"><%= place %></p><% } %>
             <% if (kind || summary.count > 0) { %>
             <p class="detail-meta">
@@ -93,6 +90,12 @@
                         <h2 id="host-heading" class="h5 mb-0">Hosted by <%= hostName %></h2>
                         <% if (memberSince) { %><p class="mb-0 text-body-secondary">Member since <%= memberSince %></p><% } %>
                     </div>
+                    <% if (!guestPreview && typeof currUser !== "undefined" && currUser && typeof can === "function" && can("conversation:start", listing)) { %>
+                    <form action="/listings/<%= listing._id %>/contact" method="POST" class="ms-auto">
+                        <%- include("../includes/csrf.ejs") %>
+                        <button type="submit" class="btn btn-sm btn-outline-dark">Contact host</button>
+                    </form>
+                    <% } %>
                 </section>
                 <% } %>
 

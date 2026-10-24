@@ -1,0 +1,45 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    One conversation (P11-T02). Locals: conversation, messages, hasMore,
+    nextBefore (src/services/conversations.js thread). Message text is plain
+    text and always printed escaped; line breaks are kept by CSS, not HTML.
+    The list, unread dots and polling come with P11-T03.
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-8">
+        <p class="mb-1"><a href="/listings/<%= conversation.listingId %>"><%= conversation.listingTitle %></a></p>
+        <h1 class="h3">Conversation with <%= conversation.otherName %></h1>
+        <% if (conversation.reservationId) { %>
+        <p class="text-body-secondary">About <a href="/trips/<%= conversation.reservationId %>">this booking</a>.</p>
+        <% } %>
+
+        <% if (hasMore) { %>
+        <p><a href="/conversations/<%= conversation.id %>?before=<%= nextBefore %>">Show earlier messages</a></p>
+        <% } %>
+
+        <% if (messages.length === 0) { %>
+        <p class="text-body-secondary">No messages yet. Say hello below.</p>
+        <% } else { %>
+        <ol class="message-list" aria-label="Messages, oldest first">
+            <% messages.forEach((m) => { %>
+            <li class="message<%= m.mine ? ' message-mine' : '' %>">
+                <p class="message-meta"><strong><%= m.mine ? "You" : conversation.otherName %></strong> · <time datetime="<%= m.iso %>"><%= m.when %></time></p>
+                <p class="message-body"><%= m.body %></p>
+            </li>
+            <% }) %>
+        </ol>
+        <% } %>
+
+        <% if (conversation.canReply) { %>
+        <form action="/conversations/<%= conversation.id %>/messages" method="POST" class="mt-3">
+            <%- include("../includes/csrf.ejs") %>
+            <label class="form-label" for="message-body">Your message</label>
+            <textarea class="form-control" id="message-body" name="body" rows="3" maxlength="1000" required aria-describedby="message-hint"></textarea>
+            <div class="form-text" id="message-hint">Plain text, up to 1000 characters.</div>
+            <button type="submit" class="btn btn-dark mt-2">Send</button>
+        </form>
+        <% } else { %>
+        <p class="alert alert-secondary mt-3" role="status">You cannot send messages in this conversation right now.</p>
+        <% } %>
+    </div>
+</div>

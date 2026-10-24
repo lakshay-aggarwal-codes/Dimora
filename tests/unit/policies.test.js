@@ -28,6 +28,7 @@ const people = {
 const listing = { owner: ownerId };
 const review = { author: authorId };
 const reservation = { guest: guestId, host: ownerId };
+const conversation = { guest: guestId, host: ownerId };
 
 // [action, resource, { person: expected }] - people not listed must be denied.
 const MATRIX = [
@@ -86,6 +87,29 @@ const MATRIX = [
       admin: true,
       "legacy user (no status field)": true,
     },
+  ],
+  // Messaging (P11-T02). Starting: any active member except the listing's own host (the resource is the listing).
+  [
+    "conversation:start",
+    listing,
+    {
+      "other member": true,
+      "review author": true,
+      "guest of the booking": true,
+      admin: true,
+      "legacy user (no status field)": true,
+    },
+  ],
+  // Reading and writing: only the conversation's guest and host. Not an admin, not anyone else.
+  [
+    "conversation:view",
+    conversation,
+    { "listing owner": true, "guest of the booking": true },
+  ],
+  [
+    "conversation:send",
+    conversation,
+    { "listing owner": true, "guest of the booking": true },
   ],
   ["admin:access", undefined, { admin: true }],
 ];

@@ -23,7 +23,6 @@ const MAPBOX_TILES = "https://*.tiles.mapbox.com";
 const MAPBOX_EVENTS = "https://events.mapbox.com";
 const CLOUDINARY = "https://res.cloudinary.com";
 const UNSPLASH = "https://images.unsplash.com"; // seed data pictures
-const MUSCACHE = "https://a0.muscache.com"; // pictures of imported sample_airbnb listings
 
 /**
  * helmet with a CSP that allows only this site, the CDNs above, Mapbox and
@@ -48,7 +47,6 @@ function securityHeaders({ isProduction = false } = {}) {
           "blob:",
           CLOUDINARY,
           UNSPLASH,
-          MUSCACHE,
           MAPBOX,
           MAPBOX_TILES,
         ],
@@ -87,6 +85,14 @@ function tooManyQuotes(req, res, next) {
   );
 }
 
+function tooManyMessages(req, res, next) {
+  next(
+    new AppError(429, "You are sending messages very quickly. Please wait a minute and try again.", {
+      code: "rate_limited",
+    }),
+  );
+}
+
 function tooManyReports(req, res, next) {
   next(
     new AppError(429, "You are sending reports very quickly. Please wait a minute and try again.", {
@@ -118,6 +124,14 @@ function createAuthLimiters() {
     signup: rateLimit({ ...common, windowMs: 60 * 60 * 1000, limit: 10 }),
     // Price checks (P08-T02): a guest picking dates makes a few per minute.
     quote: rateLimit({ ...common, handler: tooManyQuotes, windowMs: 60 * 1000, limit: 60 }),
+    // Messages and "Contact host" (P11-T02): 20 a minute per signed-in member.
+    message: rateLimit({
+      ...common,
+      handler: tooManyMessages,
+      windowMs: 60 * 1000,
+      limit: 20,
+      keyGenerator: (req) => (req.user && req.user._id ? `user:${req.user._id}` : ipKeyGenerator(req.ip)),
+    }),
     // Reports (P12-T04): 5 a minute per signed-in member (per IP for anyone
     // else). The daily cap is counted in the database by services/reports.js.
     report: rateLimit({
