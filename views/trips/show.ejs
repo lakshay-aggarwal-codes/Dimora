@@ -90,6 +90,7 @@
             <% } else if (trip.review.state === "done") { %>
             <p class="review-rating mb-1"><span aria-hidden="true"><%= trip.review.rating %> &#9733;</span> <span class="visually-hidden">You rated this stay <%= trip.review.rating %> out of 5</span></p>
             <p class="trip-rules-text mb-0"><%= trip.review.comment %></p>
+            <% if (trip.review.hidden) { %><p class="small text-body-secondary mt-2 mb-0">A Dimora moderator has hidden this review, so other guests do not see it.</p><% } %>
             <% } else { %>
             <p class="mb-0 text-body-secondary">The time to review this stay ended on <%= trip.review.until %>.</p>
             <% } %>

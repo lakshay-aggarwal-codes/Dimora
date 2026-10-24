@@ -44,8 +44,8 @@ async function loadPublicProfile({ User, Listing, Review }, id) {
 
   const [listingCount, reviewCount, recent] = await Promise.all([
     Listing.countDocuments({ owner: user._id, ...publicListingFilter() }),
-    Review.countDocuments({ author: user._id }),
-    Review.find({ author: user._id })
+    Review.countDocuments({ author: user._id, status: { $ne: "hidden" } }),
+    Review.find({ author: user._id, status: { $ne: "hidden" } })
       .sort({ createdAt: -1, _id: -1 })
       .limit(RECENT_REVIEWS * 3) // some may be on listings that are not public
       .select("rating comment createdAt")

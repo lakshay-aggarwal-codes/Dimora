@@ -1,10 +1,12 @@
 // /admin pages: the landing page, the read-only audit log (P14-T01), user
-// management (P14-T02) and listing moderation (P14-T03). Reports and
-// reservations arrive with P14-T04..T05.
+// management (P14-T02), listing moderation (P14-T03) and the reports queue with
+// review moderation (P14-T04). Reservations arrive with P14-T05.
 const mongoose = require("mongoose");
 const audit = require("../services/audit");
 const userAdmin = require("../services/userAdmin");
 const moderation = require("../services/listingModeration");
+const reportQueue = require("../services/reportModeration");
+const reviewModeration = require("../services/reviewModeration");
 const { AdminRefusal } = require("../middleware/admin");
 const { NotFoundError } = require("../utils/errors");
 
@@ -166,5 +168,88 @@ module.exports.reviewListing = async (req) => {
     audit: { action: "listing.review", targetType: "listing", targetId: done.listing._id, reason: done.reason || undefined, details: done.details },
     redirectTo: listingBack(id),
     flash: `"${done.listing.title}" is marked as reviewed.`,
+  };
+};
+
+// ---- Reports queue and review moderation (P14-T04) ----
+
+module.exports.reports = async (req, res) => {
+  const result = await reportQueue.listReports({
+    status: text(req.query.status),
+    kind: text(req.query.kind),
+    page: text(req.query.page),
+  });
+  res.render("admin/reports", { pageTitle: "Reports", result });
+};
+
+module.exports.report = async (req, res) => {
+  const page = await reportQueue.getReport(req.params.id);
+  if (!page) throw new NotFoundError("That report does not exist.");
+  res.render("admin/report", { pageTitle: `Report ${page.report.id.slice(-6)}`, page });
+};
+
+function reportBack(id) {
+  return mongoose.isValidObjectId(id) ? `/admin/reports/${id}` : "/admin/reports";
+}
+
+async function refusingReport(back, work) {
+  try {
+    return await work();
+  } catch (err) {
+    if (err instanceof reportQueue.ReportAdminError || err instanceof reviewModeration.ReviewModerationError) {
+      throw new AdminRefusal(err.message, back);
+    }
+    throw err;
+  }
+}
+
+function closeWith(outcome, verb) {
+  return async (req) => {
+    const { id } = req.params;
+    const done = await refusingReport(reportBack(id), () =>
+      reportQueue.closeReport({
+        admin: req.user,
+        id,
+        outcome,
+        note: text(req.body && req.body.note),
+        closeOthers: Boolean(req.body && req.body.closeOthers === "1"),
+      }),
+    );
+    return {
+      audit: { action: `report.${outcome}`, targetType: "report", targetId: done.report._id, reason: done.note, details: done.details },
+      redirectTo: "/admin/reports",
+      flash: done.closedOthers > 0 ? `Report ${verb}, with ${done.closedOthers} other open report${done.closedOthers === 1 ? "" : "s"} about the same thing.` : `Report ${verb}.`,
+    };
+  };
+}
+
+// Wrapped in auditedMutation by src/routes/admin.js.
+module.exports.resolveReport = closeWith("resolve", "resolved");
+module.exports.dismissReport = closeWith("dismiss", "dismissed");
+
+// `from` is the report page the moderator came from (a valid id only).
+const backFrom = (req) => (req.body && typeof req.body.from === "string" ? reportBack(req.body.from) : "/admin/reports");
+
+module.exports.hideReview = async (req) => {
+  const { id } = req.params;
+  const done = await refusingReport(backFrom(req), () =>
+    reviewModeration.hideReview({ admin: req.user, id, reason: text(req.body && req.body.reason) }),
+  );
+  return {
+    audit: { action: "review.hide", targetType: "review", targetId: done.review._id, reason: done.reason, details: done.details },
+    redirectTo: backFrom(req),
+    flash: "The review is hidden and no longer counts in the listing's rating.",
+  };
+};
+
+module.exports.restoreReview = async (req) => {
+  const { id } = req.params;
+  const done = await refusingReport(backFrom(req), () =>
+    reviewModeration.restoreReview({ admin: req.user, id, reason: text(req.body && req.body.reason) }),
+  );
+  return {
+    audit: { action: "review.restore", targetType: "review", targetId: done.review._id, reason: done.reason, details: done.details },
+    redirectTo: backFrom(req),
+    flash: "The review is visible again and counts in the listing's rating.",
   };
 };

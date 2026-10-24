@@ -1,0 +1,79 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    The moderators' reports queue (P14-T04). Locals: result { rows, page,
+    totalPages, total, status, kind, openTotal }. Everything is printed escaped.
+%>
+<%
+    const TABS = [
+        { value: "open", label: "Open" },
+        { value: "resolved", label: "Resolved" },
+        { value: "dismissed", label: "Dismissed" }
+    ];
+    const KINDS = [["", "All"], ["listing", "Listings"], ["review", "Reviews"], ["user", "Members"], ["message", "Messages"]];
+    const STATUS_VARIANT = { open: "warning", resolved: "success", dismissed: "neutral" };
+    const day = (d) => (d ? d.toISOString().slice(0, 10) : "");
+    const query = (extra) => Object.assign({ status: result.status, kind: result.kind || undefined }, extra);
+    const href = (extra) => "/admin/reports?" + new URLSearchParams(Object.entries(query(extra)).filter(([, v]) => v)).toString();
+%>
+<div class="row mt-3">
+    <div class="col-12">
+        <p class="mb-1"><a href="/admin">&larr; Admin</a></p>
+        <h1 class="h3">Reports</h1>
+
+        <nav aria-label="Report status">
+            <ul class="nav nav-pills mb-2">
+                <% TABS.forEach((t) => { %>
+                <li class="nav-item"><a class="nav-link<%= result.status === t.value ? " active" : "" %>"<% if (result.status === t.value) { %> aria-current="page"<% } %> href="<%= href({ status: t.value, page: undefined }) %>"><%= t.label %><% if (t.value === "open") { %> <span class="badge text-bg-light"><%= result.openTotal %></span><% } %></a></li>
+                <% }) %>
+            </ul>
+        </nav>
+        <nav aria-label="Report kind">
+            <ul class="nav nav-pills mb-3 small">
+                <% KINDS.forEach(([value, label]) => { %>
+                <li class="nav-item"><a class="nav-link<%= result.kind === value ? " active" : "" %>"<% if (result.kind === value) { %> aria-current="true"<% } %> href="<%= href({ kind: value || undefined, page: undefined }) %>"><%= label %></a></li>
+                <% }) %>
+            </ul>
+        </nav>
+
+        <p class="text-muted" data-queue-total><%= result.total %> <%= result.total === 1 ? "report" : "reports" %>.</p>
+
+        <% if (!result.rows.length) { %>
+        <%- include("../partials/empty-state.ejs", {
+            title: result.status === "open" ? "No open reports" : "Nothing here yet",
+            message: result.status === "open" ? "Every report has been looked at." : "Reports you close appear here.",
+            icon: "fa-flag",
+            headingLevel: 2
+        }) %>
+        <% } else { %>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <caption class="visually-hidden">Reports</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Report</th>
+                        <th scope="col">About</th>
+                        <th scope="col">Reason</th>
+                        <th scope="col">Reported by</th>
+                        <th scope="col">Status</th>
+                        <th scope="col"><%= result.status === "open" ? "Received (UTC)" : "Closed (UTC)" %></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% result.rows.forEach((r) => { %>
+                    <tr>
+                        <td><a href="/admin/reports/<%= r.id %>">Open report</a>
+                            <% if (r.openOnTarget > 1) { %><span class="small d-block text-muted"><%= r.openOnTarget %> open reports about this</span><% } %></td>
+                        <td><span class="small text-muted"><%= r.kindLabel %></span><br><%= r.target %></td>
+                        <td><%= r.reasonLabel %></td>
+                        <td><%= r.reporter %></td>
+                        <td><%- include("../partials/badge.ejs", { text: r.status, variant: STATUS_VARIANT[r.status] || "neutral" }) %></td>
+                        <td><%= day(result.status === "open" ? r.createdAt : r.resolvedAt) %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <%- include("../partials/pagination.ejs", { page: result.page, totalPages: result.totalPages, baseUrl: "/admin/reports", query: query({}) }) %>
+        <% } %>
+    </div>
+</div>

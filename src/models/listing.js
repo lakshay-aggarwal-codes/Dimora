@@ -280,6 +280,13 @@ const listingSchema = new Schema(
     countryKey: { type: String, maxlength: 100 },
     locationKey: { type: String, maxlength: 320 },
 
+    // Set only on listings imported from a sample dataset (scripts/import-dataset.js);
+    // the import matches on it, so running it twice never duplicates.
+    importedFrom: {
+      source: { type: String, maxlength: 40 },
+      id: { type: String, maxlength: 64 },
+    },
+
     // Soft delete: the row stays, the pages stop showing it (P04-T05).
     deletedAt: { type: Date },
 

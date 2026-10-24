@@ -211,6 +211,9 @@ function createReviewService({
   async function remove({ listingId, reviewId }) {
     const removed = await ReviewModel.findOneAndDelete({ _id: reviewId });
     if (!removed) return null;
+    // A hidden review (P14-T04) was already taken out of the list and the
+    // totals when it was hidden; subtracting again would count it twice.
+    if (removed.status === "hidden") return removed;
     try {
       await ratings.removeReview(ListingModel, listingId, removed);
     } catch (err) {

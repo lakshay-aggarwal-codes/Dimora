@@ -711,7 +711,12 @@ describe("describeReview", () => {
       rating: 4,
       comment: "Nice",
       legacy: false,
+      hidden: false,
     });
+    // a moderator-hidden review is flagged so the author is told (P14-T04)
+    expect(
+      trips.describeReview({ state: "done", review: { rating: 2, comment: "x", status: "hidden" } }).hidden,
+    ).toBe(true);
   });
   test("nothing given means none", () => {
     expect(trips.describeReview(undefined)).toEqual({

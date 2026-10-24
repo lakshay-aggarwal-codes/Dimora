@@ -185,6 +185,7 @@ module.exports = {
   SeedError,
   assertSeedAllowed,
   resolveMongoUri,
+  ensureDemoHost,
   parseArgs,
   buildSeedListings,
   runSeed,

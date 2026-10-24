@@ -1,0 +1,92 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    One report (P14-T04). Locals: page { report, target, others, openOthers }.
+    Moderators decide here: close the report, and for a reviewed item hide or
+    restore it. Every form posts to a route wrapped in auditedMutation.
+%>
+<%
+    const r = page.report;
+    const t = page.target;
+    const STATUS_VARIANT = { open: "warning", resolved: "success", dismissed: "neutral" };
+    const stamp = (d) => (d ? d.toISOString().replace("T", " ").slice(0, 19) : "");
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-9">
+        <p class="mb-1"><a href="/admin/reports">&larr; Reports</a></p>
+        <h1 class="h3">Report about <%= r.kindLabel.toLowerCase() %>
+            <%- include("../partials/badge.ejs", { text: r.status, variant: STATUS_VARIANT[r.status] || "neutral" }) %></h1>
+
+        <dl class="row">
+            <dt class="col-sm-3">Reason</dt><dd class="col-sm-9"><%= r.reasonLabel %></dd>
+            <dt class="col-sm-3">Details</dt><dd class="col-sm-9"><% if (r.details) { %><span class="detail-description"><%= r.details %></span><% } else { %><span class="text-muted">none given</span><% } %></dd>
+            <dt class="col-sm-3">Reported by</dt><dd class="col-sm-9"><%= r.reporter %> on <%= stamp(r.createdAt) %> UTC</dd>
+            <% if (r.status !== "open") { %>
+            <dt class="col-sm-3">Closed</dt><dd class="col-sm-9"><%= r.status %> by <%= r.resolvedBy || "(removed account)" %> on <%= stamp(r.resolvedAt) %> UTC<% if (r.note) { %>: <span class="detail-description"><%= r.note %></span><% } %></dd>
+            <% } %>
+        </dl>
+
+        <h2 class="h5">The reported <%= r.kindLabel.toLowerCase() %></h2>
+        <% if (t.gone) { %>
+        <p class="text-muted" data-target-gone>It no longer exists. You can still close the report.</p>
+        <% } else if (t.unavailable) { %>
+        <p class="text-muted" data-target-unavailable>Messages cannot be opened here yet: messaging does not exist. When it does, only the reported conversation will be shown.</p>
+        <% } else if (t.kind === "listing") { %>
+        <p><a href="<%= t.url %>"><%= t.title %></a> (<%= t.status %>). Suspend or restore it on its moderation page.</p>
+        <% } else if (t.kind === "user") { %>
+        <p><a href="<%= t.url %>"><%= t.username %></a> (<%= t.status %>). Suspend or reinstate the account on its page.</p>
+        <% } else if (t.kind === "review") { %>
+        <div class="border rounded p-3 mb-3" data-reported-review>
+            <p class="mb-1"><strong><%= t.rating %> of 5</strong> · by <%= t.author %> · on <%= t.listingTitle %></p>
+            <p class="detail-description mb-1"><%= t.comment %></p>
+            <% if (t.hidden) { %><p class="mb-0 small text-danger-emphasis" data-review-hidden>Hidden<% if (t.hiddenReason) { %>: <%= t.hiddenReason %><% } %></p><% } %>
+        </div>
+        <% if (!t.hidden) { %>
+        <h3 class="h6">Hide this review</h3>
+        <p class="text-muted small">It disappears from the listing and stops counting in its rating. The guest can still read it on their booking page and cannot write another for the same stay.</p>
+        <form action="/admin/reviews/<%= t.id %>/hide" method="POST" class="mb-4">
+            <%- include("../includes/csrf.ejs") %>
+            <input type="hidden" name="from" value="<%= r.id %>">
+            <label class="form-label" for="hide-reason">Reason (required, written to the audit log)</label>
+            <textarea class="form-control mb-2" id="hide-reason" name="reason" rows="2" minlength="5" maxlength="500" required></textarea>
+            <button class="btn btn-danger" type="submit">Hide review</button>
+        </form>
+        <% } else { %>
+        <h3 class="h6">Restore this review</h3>
+        <form action="/admin/reviews/<%= t.id %>/restore" method="POST" class="mb-4">
+            <%- include("../includes/csrf.ejs") %>
+            <input type="hidden" name="from" value="<%= r.id %>">
+            <label class="form-label" for="restore-reason">Reason (required, written to the audit log)</label>
+            <textarea class="form-control mb-2" id="restore-reason" name="reason" rows="2" minlength="5" maxlength="500" required></textarea>
+            <button class="btn btn-dark" type="submit">Restore review</button>
+        </form>
+        <% } %>
+        <% } %>
+
+        <% if (r.status === "open") { %>
+        <h2 class="h5">Close this report</h2>
+        <p class="text-muted small">The reporter sees only that it was looked at. Your note is for the audit log.</p>
+        <form action="/admin/reports/<%= r.id %>/resolve" method="POST" id="close-form" class="mb-4">
+            <%- include("../includes/csrf.ejs") %>
+            <label class="form-label" for="close-note">Note (required)</label>
+            <textarea class="form-control mb-2" id="close-note" name="note" rows="2" minlength="5" maxlength="500" required></textarea>
+            <% if (page.openOthers > 0) { %>
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="close-others" name="closeOthers" value="1">
+                <label class="form-check-label" for="close-others">Also close the <%= page.openOthers %> other open report<%= page.openOthers === 1 ? "" : "s" %> about this <%= r.kindLabel.toLowerCase() %></label>
+            </div>
+            <% } %>
+            <button class="btn btn-dark" type="submit">Resolve: action was taken</button>
+            <button class="btn btn-outline-dark" type="submit" formaction="/admin/reports/<%= r.id %>/dismiss">Dismiss: nothing to do</button>
+        </form>
+        <% } %>
+
+        <% if (page.others.length) { %>
+        <h2 class="h5">Other reports about this <%= r.kindLabel.toLowerCase() %></h2>
+        <ul class="list-unstyled">
+            <% page.others.forEach((o) => { %>
+            <li class="mb-2"><a href="/admin/reports/<%= o.id %>"><%= o.reasonLabel %></a> · <%= o.reporter %> · <%= o.status %><% if (o.details) { %><br><span class="small detail-description"><%= o.details %></span><% } %></li>
+            <% }) %>
+        </ul>
+        <% } %>
+    </div>
+</div>

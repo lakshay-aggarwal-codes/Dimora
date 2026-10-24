@@ -203,6 +203,7 @@ function describeReview(review) {
     out.rating = review.review.rating;
     out.comment = review.review.comment || "";
     out.legacy = Boolean(review.review.legacy);
+    out.hidden = review.review.status === "hidden";
   }
   return out;
 }

@@ -24,4 +24,12 @@ router.post("/listings/:id/suspend", auditedMutation(controller.suspendListing))
 router.post("/listings/:id/restore", auditedMutation(controller.restoreListing));
 router.post("/listings/:id/reviewed", auditedMutation(controller.reviewListing));
 
+router.get("/reports", wrapAsync(controller.reports));
+router.get("/reports/:id", wrapAsync(controller.report));
+router.post("/reports/:id/resolve", auditedMutation(controller.resolveReport));
+router.post("/reports/:id/dismiss", auditedMutation(controller.dismissReport));
+
+router.post("/reviews/:id/hide", auditedMutation(controller.hideReview));
+router.post("/reviews/:id/restore", auditedMutation(controller.restoreReview));
+
 module.exports = router;

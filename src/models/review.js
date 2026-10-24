@@ -34,6 +34,20 @@ const reviewSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    // Moderation (P14-T04). A hidden review is not shown on the listing and is
+    // not in the listing's rating totals; its stay still counts as reviewed, so
+    // the guest cannot simply write another. Reviews written before this field
+    // existed have no status and are visible.
+    status: {
+      type: String,
+      enum: ["visible", "hidden"],
+      default: "visible",
+    },
+    moderation: {
+      hiddenAt: Date,
+      hiddenBy: { type: Schema.Types.ObjectId, ref: "User" },
+      hiddenReason: { type: String, trim: true, maxlength: 500 },
+    },
     listingSnapshot: {
       title: String,
       city: String,

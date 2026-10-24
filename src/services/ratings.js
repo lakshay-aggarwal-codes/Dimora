@@ -110,6 +110,7 @@ async function recomputeRatings({ ListingModel, ReviewModel }, listingId) {
   if (!listing) return null;
   const reviews = await ReviewModel.find({
     _id: { $in: listing.reviews || [] },
+    status: { $ne: "hidden" }, // a hidden review is not in the totals (P14-T04)
   })
     .select("rating")
     .lean();
