@@ -47,12 +47,13 @@
                         </li>
                     <% } else { %>
                         <li class="nav-item">
-                            <%# Placeholder until notifications exist (P11-T01): reachable by keyboard, does nothing. %>
-                            <button type="button" class="nav-link nav-icon-btn" aria-disabled="true"
-                                data-placeholder="notifications">
+                            <%# Unread count: public/js/notifications.js fills it in and keeps it current. %>
+                            <a class="nav-link nav-icon-btn bell-link" href="/notifications"<%- current("/notifications") %>
+                                data-notifications-bell data-count-url="/api/notifications/count" data-poll-seconds="30">
                                 <i class="fa-regular fa-bell" aria-hidden="true"></i>
-                                <span class="visually-hidden">Notifications (coming soon)</span>
-                            </button>
+                                <span class="visually-hidden" data-bell-label>Notifications</span>
+                                <span class="bell-badge" data-bell-count aria-hidden="true" hidden>0</span>
+                            </a>
                         </li>
                         <li class="nav-item dropdown">
                             <button type="button" class="nav-link nav-icon-btn dropdown-toggle" id="account-menu"

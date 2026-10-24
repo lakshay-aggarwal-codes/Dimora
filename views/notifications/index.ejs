@@ -1,0 +1,71 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    The member's notifications (P11-T01). Locals: items, show ("all" |
+    "unread"), page, totalPages, total, unread (src/services/notifications.js
+    listFor). Titles and texts are plain text and escaped; a link is a
+    same-site path checked by the service. State is written in words, not only
+    shown by a dot.
+%>
+<%
+    const filterQuery = show === "unread" ? { show: "unread" } : {};
+    const hidden = (show === "unread" ? '<input type="hidden" name="show" value="unread">' : "") +
+        (page > 1 ? '<input type="hidden" name="page" value="' + Number(page) + '">' : "");
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-8">
+        <h1 class="h3">Notifications</h1>
+
+        <div class="notification-bar">
+            <nav aria-label="Filter notifications">
+                <ul class="nav nav-pills">
+                    <li class="nav-item">
+                        <a class="nav-link<%= show === 'all' ? ' active' : '' %>" href="/notifications"<%- show === 'all' ? ' aria-current="page"' : '' %>>All</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link<%= show === 'unread' ? ' active' : '' %>" href="/notifications?show=unread"<%- show === 'unread' ? ' aria-current="page"' : '' %>>Unread<% if (unread > 0) { %> (<%= unread %>)<% } %></a>
+                    </li>
+                </ul>
+            </nav>
+            <% if (unread > 0) { %>
+            <form action="/notifications/read-all" method="POST">
+                <%- include("../includes/csrf.ejs") %>
+                <%- hidden %>
+                <button type="submit" class="btn btn-sm btn-outline-dark">Mark all as read</button>
+            </form>
+            <% } %>
+        </div>
+
+        <% if (items.length === 0) { %>
+            <% if (show === "unread") { %>
+            <%- include("../partials/empty-state.ejs", { title: "You are all caught up", message: "No unread notifications.", icon: "fa-bell", actionHref: "/notifications", actionLabel: "See all notifications", headingLevel: 2 }) %>
+            <% } else { %>
+            <%- include("../partials/empty-state.ejs", { title: "No notifications yet", message: "Updates about your bookings and listings will appear here.", icon: "fa-bell", headingLevel: 2 }) %>
+            <% } %>
+        <% } else { %>
+        <ul class="notification-list" aria-label="Notifications, newest first">
+            <% items.forEach((n) => { %>
+            <li class="notification<%= n.read ? '' : ' notification-unread' %>">
+                <div class="notification-main">
+                    <p class="notification-title">
+                        <% if (!n.read) { %><span class="badge text-bg-dark">Unread</span> <% } %>
+                        <% if (n.url) { %><a href="<%= n.url %>"><%= n.title %></a><% } else { %><%= n.title %><% } %>
+                    </p>
+                    <% if (n.body) { %><p class="notification-body"><%= n.body %></p><% } %>
+                    <p class="notification-time"><time datetime="<%= n.iso %>"><%= n.when %></time></p>
+                </div>
+                <% if (!n.read) { %>
+                <form action="/notifications/<%= n.id %>/read" method="POST">
+                    <%- include("../includes/csrf.ejs") %>
+                    <%- hidden %>
+                    <button type="submit" class="btn btn-sm btn-outline-dark">
+                        Mark as read<span class="visually-hidden">: <%= n.title %></span>
+                    </button>
+                </form>
+                <% } %>
+            </li>
+            <% }) %>
+        </ul>
+        <%- include("../partials/pagination.ejs", { page, totalPages, baseUrl: "/notifications", query: filterQuery }) %>
+        <% } %>
+    </div>
+</div>

@@ -59,6 +59,28 @@
   cursor: default;
 }
 
+/* Unread count on the bell (P11-T01). The number is also in the link's
+   hidden text, so the badge itself is only a visual. */
+.bell-link {
+  position: relative;
+}
+
+.bell-badge {
+  min-width: 1.25rem;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.25rem;
+  text-align: center;
+}
+
+.bell-badge[hidden] {
+  display: none;
+}
+
 .account-name {
   max-width: 10rem;
   overflow: hidden;
@@ -1834,4 +1856,64 @@
 .ocal-today {
   outline: 3px solid var(--color-focus);
   outline-offset: -2px;
+}
+
+/* Notifications page (P11-T01) */
+.notification-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.notification-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notification {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-raised);
+}
+
+.notification + .notification {
+  margin-top: var(--space-3);
+}
+
+/* Unread: a stronger edge as well as the word "Unread" in the row. */
+.notification-unread {
+  border-color: var(--color-primary);
+  border-left-width: var(--space-1);
+}
+
+.notification-main {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.notification-title {
+  margin: 0;
+  font-weight: var(--font-weight-medium);
+  overflow-wrap: anywhere;
+}
+
+.notification-body {
+  margin: var(--space-1) 0 0;
+  overflow-wrap: anywhere;
+}
+
+.notification-time {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
 }

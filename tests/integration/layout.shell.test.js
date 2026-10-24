@@ -251,14 +251,26 @@ describe("logged-in navbar", () => {
       ...extra,
     });
 
-  test("has a notification placeholder that stays keyboard-focusable", async () => {
+  test("has a bell that links to /notifications and is filled in by the notifications script (P11-T01)", async () => {
     const html = await navbar();
     const bell = html.match(
-      /<button type="button" class="nav-link nav-icon-btn" aria-disabled="true"[\s\S]*?<\/button>/,
+      /<a class="nav-link nav-icon-btn bell-link" href="\/notifications"[\s\S]*?<\/a>/,
     )[0];
-    expect(bell).toContain('data-placeholder="notifications"');
-    expect(bell).toContain("Notifications (coming soon)");
-    expect(bell).not.toMatch(/\sdisabled[\s>=]/);
+    expect(bell).toContain("data-notifications-bell");
+    expect(bell).toContain('data-count-url="/api/notifications/count"');
+    expect(bell).toContain('data-poll-seconds="30"');
+    // The accessible name is text; the number badge is a hidden visual only.
+    expect(bell).toMatch(/<span class="visually-hidden" data-bell-label>Notifications<\/span>/);
+    expect(bell).toMatch(/<span class="bell-badge" data-bell-count aria-hidden="true" hidden>/);
+    expect(bell).not.toContain("aria-disabled");
+    expect(bell).not.toContain("coming soon");
+  });
+
+  test("the bell is the current page on /notifications", async () => {
+    const html = await navbar({ currentPath: "/notifications" });
+    expect(html).toMatch(
+      /<a class="nav-link nav-icon-btn bell-link" href="\/notifications" aria-current="page"/,
+    );
   });
 
   test("has an account menu with a Logout form (POST, CSRF token) and the username", async () => {
