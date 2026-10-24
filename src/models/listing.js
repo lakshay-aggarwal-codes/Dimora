@@ -16,6 +16,7 @@ const STATUSES = ["draft", "published", "unpublished", "suspended"];
 const {
   PROPERTY_TYPE_VALUES: PROPERTY_TYPES,
   ROOM_TYPE_VALUES: ROOM_TYPES,
+  VIBE_VALUES: VIBES,
   CANCELLATION_POLICY_VALUES: CANCELLATION_POLICIES,
 } = require("../config/constants");
 
@@ -105,6 +106,9 @@ const listingSchema = new Schema(
 
     propertyType: { type: String, enum: PROPERTY_TYPES },
     roomType: { type: String, enum: ROOM_TYPES },
+    // The setting a host chose (beach, mountain, ...). Optional, no default;
+    // the category strip on /listings filters on it (P05-T04).
+    vibe: { type: String, enum: VIBES },
 
     // Mirror of the cover photo (images[0]), kept in step by the media service
     // (src/services/images.js) because older pages and the cards still read it.
@@ -242,9 +246,7 @@ const listingSchema = new Schema(
     // The old rupee price, kept as it was stored before migration 003.
     legacyPrice: { type: Number },
 
-    // Denormalised from reviews (P12-T02): changed only by services/ratings.js,
-    // in one atomic update together with `reviews`. ratingAvg = sum / count.
-    ratingSum: { type: Number, default: 0, min: 0, validate: integer },
+    // Denormalised from reviews; recomputed by the review code (P12-T02).
     ratingAvg: { type: Number, default: 0, min: 0, max: 5 },
     ratingCount: { type: Number, default: 0, min: 0, validate: integer },
 
@@ -286,6 +288,19 @@ const listingSchema = new Schema(
     // exactly these listings; a listing suspended by moderation (P14-T03) does
     // not carry the flag and stays suspended.
     hiddenByOwnerSuspension: { type: Boolean },
+
+    // Moderation (P14-T03). `reviewedAt/By`: an admin has looked at the
+    // listing (marked reviewed, suspended it or restored it); a published
+    // listing without it is in the "new" queue. `suspended*` describe the
+    // CURRENT moderation suspension, cleared when the listing is restored (the
+    // audit log keeps the history). The reason is shown to the host.
+    moderation: {
+      reviewedAt: { type: Date },
+      reviewedBy: { type: Schema.Types.ObjectId, ref: "User" },
+      suspendedAt: { type: Date },
+      suspendedBy: { type: Schema.Types.ObjectId, ref: "User" },
+      suspendReason: { type: String, trim: true, maxlength: 500 },
+    },
   },
   { timestamps: true },
 );
@@ -376,15 +391,9 @@ listingSchema.index(
   },
 );
 
-// Deleting a listing removes the reviews written before bookings existed. A
-// review of a real stay (it has a reservation) is kept: it stays attached to
-// the listing's id and to the snapshot taken when it was written (P12-T01).
 listingSchema.post("findOneAndDelete", async (listing) => {
   if (listing) {
-    await Review.deleteMany({
-      _id: { $in: listing.reviews },
-      reservation: { $exists: false },
-    });
+    await Review.deleteMany({ _id: { $in: listing.reviews } });
   }
 });
 

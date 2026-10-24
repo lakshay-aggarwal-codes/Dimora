@@ -1,0 +1,68 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    Listing moderation queue (P14-T03). Locals: result { rows, page, totalPages,
+    total, filter }. Everything is printed escaped.
+%>
+<%
+    const TABS = [
+        { value: "reported", label: "Reported" },
+        { value: "new", label: "New (not reviewed)" },
+        { value: "suspended", label: "Suspended" }
+    ];
+    const STATUS_VARIANT = { published: "success", suspended: "danger", draft: "warning", unpublished: "neutral" };
+    const day = (d) => (d ? d.toISOString().slice(0, 10) : "");
+%>
+<div class="row mt-3">
+    <div class="col-12">
+        <p class="mb-1"><a href="/admin">&larr; Admin</a></p>
+        <h1 class="h3">Listing moderation</h1>
+
+        <nav aria-label="Queues">
+            <ul class="nav nav-pills mb-3">
+                <% TABS.forEach((t) => { %>
+                <li class="nav-item"><a class="nav-link<%= result.filter === t.value ? " active" : "" %>"<% if (result.filter === t.value) { %> aria-current="page"<% } %> href="/admin/listings?filter=<%= t.value %>"><%= t.label %></a></li>
+                <% }) %>
+            </ul>
+        </nav>
+
+        <p class="text-muted" data-queue-total><%= result.total %> <%= result.total === 1 ? "listing" : "listings" %>.</p>
+
+        <% if (!result.rows.length) { %>
+        <%- include("../partials/empty-state.ejs", {
+            title: result.filter === "reported" ? "No open reports about listings" : (result.filter === "new" ? "Every published listing has been reviewed" : "No suspended listings"),
+            message: "Nothing to do here right now.",
+            icon: "fa-flag",
+            headingLevel: 2
+        }) %>
+        <% } else { %>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <caption class="visually-hidden">Listings in this queue</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Listing</th>
+                        <th scope="col">Host</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Open reports</th>
+                        <th scope="col">Created (UTC)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% result.rows.forEach((r) => { %>
+                    <tr>
+                        <td><a href="/admin/listings/<%= r.id %>"><%= r.title %></a>
+                            <% if (r.place) { %><span class="text-muted small d-block"><%= r.place %></span><% } %></td>
+                        <td><% if (r.hostId) { %><a href="/admin/users/<%= r.hostId %>"><%= r.host %></a><% } %></td>
+                        <td><%- include("../partials/badge.ejs", { text: r.status, variant: STATUS_VARIANT[r.status] || "neutral" }) %>
+                            <% if (r.hiddenWithHost) { %><span class="small d-block">with the host's account</span><% } %></td>
+                        <td><%= r.openReports %></td>
+                        <td><%= day(r.createdAt) %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <%- include("../partials/pagination.ejs", { page: result.page, totalPages: result.totalPages, baseUrl: "/admin/listings", query: { filter: result.filter } }) %>
+        <% } %>
+    </div>
+</div>

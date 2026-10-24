@@ -1,0 +1,109 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    One listing for moderation (P14-T03). Locals: page { listing, summary,
+    reports, history }. Everything is printed escaped: titles, descriptions and
+    report details are text typed by members.
+%>
+<%
+    const s = page.summary;
+    const STATUS_VARIANT = { published: "success", suspended: "danger", draft: "warning", unpublished: "neutral" };
+    const day = (d) => (d ? d.toISOString().slice(0, 10) : "");
+    const stamp = (d) => d.toISOString().replace("T", " ").slice(0, 19);
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-9">
+        <p class="mb-1"><a href="/admin/listings">&larr; Listing moderation</a></p>
+        <h1 class="h3"><%= s.title %>
+            <%- include("../partials/badge.ejs", { text: s.status, variant: STATUS_VARIANT[s.status] || "neutral" }) %></h1>
+        <% if (s.deleted) { %><p class="alert alert-secondary">The host deleted this listing.</p><% } %>
+
+        <dl class="row">
+            <dt class="col-sm-3">Host</dt>
+            <dd class="col-sm-9"><% if (s.host) { %><a href="/admin/users/<%= s.host.id %>"><%= s.host.username %></a><% if (s.host.status !== "active") { %> (<%= s.host.status %>)<% } %><% } else { %>none<% } %></dd>
+            <dt class="col-sm-3">Place</dt><dd class="col-sm-9"><%= s.place %></dd>
+            <dt class="col-sm-3">Price per night</dt><dd class="col-sm-9"><%= s.nightlyMinor === null ? "not set" : formatMoney(s.nightlyMinor, s.currency) %></dd>
+            <dt class="col-sm-3">Photos</dt><dd class="col-sm-9"><%= s.photos %></dd>
+            <dt class="col-sm-3">Reviewed by an admin</dt><dd class="col-sm-9"><%= s.reviewedAt ? day(s.reviewedAt) : "not yet" %></dd>
+            <dt class="col-sm-3">Public page</dt><dd class="col-sm-9"><a href="/listings/<%= s.id %>">Open the listing</a></dd>
+        </dl>
+        <% if (s.descriptionExcerpt) { %>
+        <h2 class="h5">Description</h2>
+        <p class="detail-description"><%= s.descriptionExcerpt %></p>
+        <% } %>
+
+        <h2 class="h5">Open reports (<%= page.reports.length %>)</h2>
+        <% if (!page.reports.length) { %>
+        <p class="text-muted">Nobody has an open report about this listing.</p>
+        <% } else { %>
+        <ul class="list-unstyled" data-reports>
+            <% page.reports.forEach((r) => { %>
+            <li class="mb-2"><strong><%= r.reason %></strong> by <%= r.reporter %> on <%= day(r.createdAt) %><% if (r.details) { %><br><span class="detail-description"><%= r.details %></span><% } %></li>
+            <% }) %>
+        </ul>
+        <p class="small text-muted">Reports are closed in the reports queue, not here.</p>
+        <% } %>
+
+        <% if (s.status === "suspended") { %>
+        <h2 class="h5">Suspension</h2>
+        <p data-suspension>Suspended <%= s.suspendedAt ? day(s.suspendedAt) : "" %><% if (s.suspendedBy) { %> by <%= s.suspendedBy %><% } %><% if (s.suspendReason) { %>: <span class="detail-description"><%= s.suspendReason %></span><% } %></p>
+        <% } %>
+
+        <% if (s.status === "published" && !s.deleted) { %>
+        <h2 class="h5">Suspend this listing</h2>
+        <p class="text-muted">Guests no longer see it and nobody can book it. The host can read your reason on the listing's status page. Bookings already made are not cancelled. The reason is written to the audit log.</p>
+        <form action="/admin/listings/<%= s.id %>/suspend" method="POST" class="mb-4">
+            <%- include("../includes/csrf.ejs") %>
+            <label class="form-label" for="suspend-reason">Reason (required, shown to the host)</label>
+            <textarea class="form-control mb-2" id="suspend-reason" name="reason" rows="3" minlength="5" maxlength="500" required></textarea>
+            <button class="btn btn-danger" type="submit">Suspend listing</button>
+        </form>
+        <% } else if (s.status === "suspended" && !s.deleted) { %>
+            <% if (s.hiddenWithHost) { %>
+            <p class="text-muted">This listing is hidden because its host's account is suspended. It is published again when the account is reinstated.</p>
+            <% } else { %>
+            <h2 class="h5">Restore this listing</h2>
+            <p class="text-muted">It is published again at once. The reason is written to the audit log.</p>
+            <form action="/admin/listings/<%= s.id %>/restore" method="POST" class="mb-4">
+                <%- include("../includes/csrf.ejs") %>
+                <label class="form-label" for="restore-reason">Reason (required)</label>
+                <textarea class="form-control mb-2" id="restore-reason" name="reason" rows="3" minlength="5" maxlength="500" required></textarea>
+                <button class="btn btn-dark" type="submit">Restore listing</button>
+            </form>
+            <% } %>
+        <% } %>
+
+        <% if (!s.reviewedAt && !s.deleted) { %>
+        <h2 class="h5">Mark as reviewed</h2>
+        <p class="text-muted">Nothing wrong here: take it out of the "new" queue.</p>
+        <form action="/admin/listings/<%= s.id %>/reviewed" method="POST" class="mb-4">
+            <%- include("../includes/csrf.ejs") %>
+            <label class="form-label" for="review-note">Note (optional)</label>
+            <textarea class="form-control mb-2" id="review-note" name="note" rows="2" maxlength="500"></textarea>
+            <button class="btn btn-outline-dark" type="submit">Mark as reviewed</button>
+        </form>
+        <% } %>
+
+        <h2 class="h5">Admin history</h2>
+        <% if (!page.history.length) { %>
+        <p class="text-muted">No administrative action has been taken on this listing.</p>
+        <% } else { %>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <caption class="visually-hidden">Latest administrative actions on this listing</caption>
+                <thead><tr><th scope="col">When (UTC)</th><th scope="col">Who</th><th scope="col">Action</th><th scope="col">Reason</th></tr></thead>
+                <tbody>
+                    <% page.history.forEach((row) => { %>
+                    <tr>
+                        <td><%= stamp(row.createdAt) %></td>
+                        <td><%= row.actor ? row.actor.username : (row.actorLabel || "system") %></td>
+                        <td><code><%= row.action %></code></td>
+                        <td><%= row.reason || "" %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <p><a href="/admin/audit">Full audit log</a></p>
+        <% } %>
+    </div>
+</div>

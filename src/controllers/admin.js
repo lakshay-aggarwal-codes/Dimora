@@ -1,9 +1,10 @@
-// /admin pages: the landing page, the read-only audit log (P14-T01) and user
-// management (P14-T02). Listings, reports and reservations arrive with
-// P14-T03..T05.
+// /admin pages: the landing page, the read-only audit log (P14-T01), user
+// management (P14-T02) and listing moderation (P14-T03). Reports and
+// reservations arrive with P14-T04..T05.
 const mongoose = require("mongoose");
 const audit = require("../services/audit");
 const userAdmin = require("../services/userAdmin");
+const moderation = require("../services/listingModeration");
 const { AdminRefusal } = require("../middleware/admin");
 const { NotFoundError } = require("../utils/errors");
 
@@ -95,5 +96,75 @@ module.exports.reinstateUser = async (req) => {
     },
     redirectTo: backTo(id),
     flash: `"${done.user.username}" is active again.`,
+  };
+};
+
+// ---- Listing moderation (P14-T03) ----
+
+module.exports.listings = async (req, res) => {
+  const result = await moderation.listQueue({
+    filter: text(req.query.filter),
+    page: text(req.query.page),
+  });
+  res.render("admin/listings", { pageTitle: "Listing moderation", result });
+};
+
+module.exports.listing = async (req, res) => {
+  const page = await moderation.getListingForModeration(req.params.id);
+  if (!page) throw new NotFoundError("That listing does not exist.");
+  res.render("admin/listing", { pageTitle: page.summary.title, page });
+};
+
+function listingBack(id) {
+  return mongoose.isValidObjectId(id) ? `/admin/listings/${id}` : "/admin/listings";
+}
+
+// A refusal from the moderation service (nothing was changed) becomes
+// AdminRefusal: the wrapper shows it and writes no audit row.
+async function refusingListing(id, work) {
+  try {
+    return await work();
+  } catch (err) {
+    if (err instanceof moderation.ModerationError) {
+      throw new AdminRefusal(err.message, listingBack(id));
+    }
+    throw err;
+  }
+}
+
+// The three handlers below are wrapped in auditedMutation by src/routes/admin.js.
+module.exports.suspendListing = async (req) => {
+  const { id } = req.params;
+  const done = await refusingListing(id, () =>
+    moderation.suspendListing({ admin: req.user, id, reason: text(req.body && req.body.reason) }),
+  );
+  return {
+    audit: { action: "listing.suspend", targetType: "listing", targetId: done.listing._id, reason: done.reason, details: done.details },
+    redirectTo: listingBack(id),
+    flash: `"${done.listing.title}" is suspended. The host can read the reason on the listing's status page.`,
+  };
+};
+
+module.exports.restoreListing = async (req) => {
+  const { id } = req.params;
+  const done = await refusingListing(id, () =>
+    moderation.restoreListing({ admin: req.user, id, reason: text(req.body && req.body.reason) }),
+  );
+  return {
+    audit: { action: "listing.restore", targetType: "listing", targetId: done.listing._id, reason: done.reason, details: done.details },
+    redirectTo: listingBack(id),
+    flash: `"${done.listing.title}" is published again.`,
+  };
+};
+
+module.exports.reviewListing = async (req) => {
+  const { id } = req.params;
+  const done = await refusingListing(id, () =>
+    moderation.markReviewed({ admin: req.user, id, note: text(req.body && req.body.note) }),
+  );
+  return {
+    audit: { action: "listing.review", targetType: "listing", targetId: done.listing._id, reason: done.reason || undefined, details: done.details },
+    redirectTo: listingBack(id),
+    flash: `"${done.listing.title}" is marked as reviewed.`,
   };
 };

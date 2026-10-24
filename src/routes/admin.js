@@ -18,4 +18,10 @@ router.get("/users/:id", wrapAsync(controller.user));
 router.post("/users/:id/suspend", auditedMutation(controller.suspendUser));
 router.post("/users/:id/reinstate", auditedMutation(controller.reinstateUser));
 
+router.get("/listings", wrapAsync(controller.listings));
+router.get("/listings/:id", wrapAsync(controller.listing));
+router.post("/listings/:id/suspend", auditedMutation(controller.suspendListing));
+router.post("/listings/:id/restore", auditedMutation(controller.restoreListing));
+router.post("/listings/:id/reviewed", auditedMutation(controller.reviewListing));
+
 module.exports = router;

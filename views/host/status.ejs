@@ -1,17 +1,32 @@
 <% layout("/layouts/boilerPlate") %>
 <%
-    const statusLabel = { draft: "Draft", published: "Published", unpublished: "Unpublished" }[listing.status] || listing.status;
-    const statusVariant = { draft: "warning", published: "success", unpublished: "neutral" }[listing.status] || "neutral";
+    const statusLabel = { draft: "Draft", published: "Published", unpublished: "Unpublished", suspended: "Suspended" }[listing.status] || listing.status;
+    const statusVariant = { draft: "warning", published: "success", unpublished: "neutral", suspended: "danger" }[listing.status] || "neutral";
+    const suspended = listing.status === "suspended";
+    const suspendReason = listing.moderation && listing.moderation.suspendReason ? listing.moderation.suspendReason : "";
+    const hiddenWithAccount = Boolean(listing.hiddenByOwnerSuspension);
 %>
 <div class="row mt-3">
     <div class="col-12 col-lg-9 mx-auto">
         <h1 class="h3"><%= listing.title %></h1>
         <p>
             <%- include("../partials/badge.ejs", { text: statusLabel, variant: statusVariant }) %>
-            <% if (listing.status === "published") { %>Guests can see this listing.<% } else { %>Only you can see this listing.<% } %>
+            <% if (listing.status === "published") { %>Guests can see this listing.<% } else if (suspended) { %>Guests cannot see this listing.<% } else { %>Only you can see this listing.<% } %>
         </p>
 
+        <% if (suspended) { %>
+        <div class="alert alert-danger" role="alert" data-suspended-notice>
+            <% if (hiddenWithAccount) { %>
+            <strong>This listing is hidden because your account is suspended.</strong> It will be published again if your account is reinstated.
+            <% } else { %>
+            <strong>This listing was suspended by Dimora's moderators.</strong> Guests cannot see or book it and you cannot publish it yourself.
+            <% if (suspendReason) { %><br>Reason: <span class="detail-description" data-suspend-reason><%= suspendReason %></span><% } %>
+            <% } %>
+            Bookings that were already made are not cancelled by this.
+        </div>
+        <% } else { %>
         <%- include("../partials/readiness.ejs", { listing, readiness }) %>
+        <% } %>
 
         <div class="status-actions">
             <% if (listing.status === "draft") { %>
@@ -22,7 +37,8 @@
             <a class="btn btn-outline-dark" href="/host/listings/<%= listing._id %>/calendar">Availability calendar</a>
             <% } %>
 
-            <% if (listing.status !== "published") { %>
+            <% if (suspended) { %>
+            <% } else if (listing.status !== "published") { %>
             <form method="POST" action="/host/listings/<%= listing._id %>/publish">
                 <%- include("../includes/csrf.ejs") %>
                 <button type="submit" class="btn btn-dark"<% if (!readiness.canPublish) { %> disabled aria-disabled="true"<% } %>>Publish listing</button>

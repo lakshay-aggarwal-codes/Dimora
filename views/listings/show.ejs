@@ -47,7 +47,7 @@
         </div>
         <% } else if (listing.status !== "published" && canEditListing) { %>
         <div class="alert alert-warning" role="status">
-            This listing is <strong><%= listing.status === "draft" ? "a draft" : "unpublished" %></strong>: only you can see it.
+            This listing is <strong><%= listing.status === "draft" ? "a draft" : (listing.status === "suspended" ? "suspended" : "unpublished") %></strong>: only you<%= listing.status === "suspended" ? " and the moderators" : "" %> can see it.
             <a href="/host/listings/<%= listing._id %>/status">See what is left to do</a>
         </div>
         <% } %>
