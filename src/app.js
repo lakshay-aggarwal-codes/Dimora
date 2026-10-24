@@ -33,6 +33,7 @@ const profileRouter = require("./routes/profile");
 const tripsRouter = require("./routes/trips");
 const reportsRouter = require("./routes/reports");
 const wishlistsRouter = require("./routes/wishlists");
+const compareRouter = require("./routes/compare");
 const pagesRouter = require("./routes/pages");
 const apiRouter = require("./routes/api");
 const adminRouter = require("./routes/admin");
@@ -183,6 +184,7 @@ function createApp({
   app.use("/listings/:id/reviews", reviewRouter);
   app.use("/", reportsRouter);
   app.use("/", wishlistsRouter);
+  app.use("/", compareRouter);
   app.use("/", profileRouter);
   app.use("/", tripsRouter);
   app.use("/", pagesRouter);

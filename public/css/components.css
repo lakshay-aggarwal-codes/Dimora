@@ -1890,3 +1890,113 @@
 .saved-unavailable {
   background-color: var(--color-surface-sunken);
 }
+
+/* ---- Stay comparison (P10-T03) ---- */
+.compare-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+  margin-bottom: var(--space-4);
+}
+
+.compare-help {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.compare-control label {
+  display: block;
+  font-size: 0.875rem;
+}
+
+.compare-control-wide {
+  flex: 1 1 14rem;
+}
+
+.compare-pick {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 2.75rem;
+}
+
+.compare-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+}
+
+.compare-scroll:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.compare-table {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: var(--color-surface-raised);
+}
+
+.compare-table th,
+.compare-table td {
+  padding: var(--space-3);
+  vertical-align: top;
+  border-bottom: 1px solid var(--color-border-strong);
+  text-align: left;
+}
+
+.compare-table tbody th[scope="row"],
+.compare-corner {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 8rem;
+  max-width: 11rem;
+  background-color: var(--color-surface-sunken);
+  font-weight: var(--font-weight-medium, 600);
+}
+
+.compare-col {
+  min-width: 12rem;
+  font-weight: normal;
+}
+
+.compare-img {
+  display: block;
+  width: 100%;
+  height: 7rem;
+  margin-bottom: var(--space-2);
+  object-fit: cover;
+  border-radius: var(--radius-md, 8px);
+}
+
+.compare-title {
+  display: block;
+  font-weight: 600;
+}
+
+.compare-where,
+.compare-sub {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: normal;
+  color: var(--color-text-muted, inherit);
+}
+
+.compare-remove {
+  display: inline-block;
+  margin-top: var(--space-2);
+  font-size: 0.875rem;
+}
+
+.compare-rules {
+  white-space: pre-line;
+  max-width: 16rem;
+}
+
+.compare-group th {
+  background-color: var(--color-surface-sunken);
+}

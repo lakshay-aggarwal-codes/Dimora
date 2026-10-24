@@ -1,0 +1,181 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    Stay comparison (P10-T03). Locals (src/services/compare.js compare):
+    ids, dates {in,out,guests}|null, columns, removable, removeHref {id: url},
+    place {text,name,note}|null, amenities, cheapestId, blocked (string|null).
+    Every value is written with <%= %> (escaped); only whitelisted fields get here.
+%>
+<% const money = (minor, currency) => formatMoney(minor, currency); %>
+<div class="row mt-3">
+    <div class="col-12">
+        <h1 class="h3 mb-1">Compare stays</h1>
+        <p class="text-body-secondary mb-3">
+            <a href="/wishlists">Back to saved stays</a>
+        </p>
+
+        <% if (blocked) { %>
+            <div class="alert alert-warning" role="alert"><%= blocked %></div>
+            <ul class="compare-blocked-list">
+                <% columns.forEach((c) => { if (c.available) { %>
+                <li><a href="<%= c.href %>"><%= c.title %></a> (<%= c.currency %>)<% if (removable) { %> &middot; <a href="<%= removeHref[c.id] %>">Remove from comparison</a><% } %></li>
+                <% } }) %>
+            </ul>
+        <% } else { %>
+
+        <form class="compare-controls" action="/compare" method="GET" aria-label="Dates and place for this comparison">
+            <input type="hidden" name="ids" value="<%= ids.join(',') %>">
+            <div class="compare-control">
+                <label for="cmp-in">Check-in</label>
+                <input type="date" id="cmp-in" name="in" class="form-control" value="<%= dates ? dates.in : '' %>">
+            </div>
+            <div class="compare-control">
+                <label for="cmp-out">Check-out</label>
+                <input type="date" id="cmp-out" name="out" class="form-control" value="<%= dates ? dates.out : '' %>">
+            </div>
+            <div class="compare-control">
+                <label for="cmp-guests">Guests</label>
+                <input type="number" id="cmp-guests" name="guests" class="form-control" min="1" max="16" value="<%= dates ? dates.guests : 1 %>">
+            </div>
+            <div class="compare-control compare-control-wide">
+                <label for="cmp-place">Distance to (a place)</label>
+                <input type="text" id="cmp-place" name="place" class="form-control" maxlength="120" value="<%= place ? place.text : '' %>" placeholder="e.g. Railway station, Panaji">
+            </div>
+            <button type="submit" class="btn btn-dark">Update</button>
+        </form>
+
+        <% if (!dates) { %>
+        <p class="text-body-secondary">Add check-in and check-out dates to see the total price and whether each stay is free. Until then, only the price per night is shown.</p>
+        <% } %>
+        <% if (place && place.note) { %>
+        <div class="alert alert-info" role="status"><%= place.note %></div>
+        <% } %>
+
+        <div class="compare-scroll" role="region" tabindex="0" aria-label="Comparison table. Scroll sideways to see every stay.">
+        <table class="compare-table">
+            <caption class="visually-hidden">Comparison of <%= columns.length %> stays</caption>
+            <thead>
+                <tr>
+                    <td class="compare-corner"></td>
+                    <% columns.forEach((c) => { %>
+                    <th scope="col" class="compare-col">
+                        <% if (c.available) { %>
+                            <% if (c.imageUrl) { %><img src="<%= c.imageUrl %>" alt="" class="compare-img"><% } %>
+                            <a class="compare-title" href="<%= c.href %>"><%= c.title %></a>
+                            <% if (c.where) { %><span class="compare-where"><%= c.where %></span><% } %>
+                        <% } else { %>
+                            <span class="compare-title">No longer available</span>
+                            <span class="compare-where">The host has hidden or removed this stay.</span>
+                        <% } %>
+                        <% if (removable) { %><a class="compare-remove" href="<%= removeHref[c.id] %>">Remove<span class="visually-hidden"> this stay from the comparison</span></a><% } %>
+                    </th>
+                    <% }) %>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">Price per night</th>
+                    <% columns.forEach((c) => { %>
+                    <td><% if (!c.available) { %>&mdash;<% } else if (c.nightlyMinor === null) { %>Price not set<% } else { %><%= money(c.nightlyMinor, c.currency) %><% } %></td>
+                    <% }) %>
+                </tr>
+                <% if (dates) { %>
+                <tr>
+                    <th scope="row">Total for <%= dates.in %> to <%= dates.out %></th>
+                    <% columns.forEach((c) => { %>
+                    <td>
+                        <% if (!c.available) { %>&mdash;
+                        <% } else if (c.quote.state === 'total') { %>
+                            <strong><%= money(c.quote.totalMinor, c.quote.currency) %></strong>
+                            <span class="compare-sub"><%= c.quote.nights %> night<%= c.quote.nights === 1 ? '' : 's' %>, <%= c.quote.taxIncluded ? 'taxes included' : 'with taxes and fees' %></span>
+                            <% if (c.id === cheapestId) { %><span class="badge text-bg-success">Lowest total</span><% } %>
+                        <% } else { %>
+                            <span class="compare-unavailable"><%= c.quote.state === 'unavailable' ? 'Not bookable: ' : '' %><%= c.quote.note %></span>
+                        <% } %>
+                    </td>
+                    <% }) %>
+                </tr>
+                <tr>
+                    <th scope="row">Average per night</th>
+                    <% columns.forEach((c) => { %>
+                    <td><%= c.available && c.quote.state === 'total' ? money(c.quote.avgPerNightMinor, c.quote.currency) : '\u2014' %></td>
+                    <% }) %>
+                </tr>
+                <tr>
+                    <th scope="row">Cleaning and service fees, share of the total</th>
+                    <% columns.forEach((c) => { %>
+                    <td><%= c.available && c.quote.state === 'total' ? c.quote.feesPercent : '\u2014' %></td>
+                    <% }) %>
+                </tr>
+                <% } %>
+                <tr>
+                    <th scope="row">Guests</th>
+                    <% columns.forEach((c) => { %><td><%= c.available && c.capacity.guests !== null ? c.capacity.guests : '\u2014' %></td><% }) %>
+                </tr>
+                <tr>
+                    <th scope="row">Bedrooms</th>
+                    <% columns.forEach((c) => { %><td><%= c.available && c.capacity.bedrooms !== null ? c.capacity.bedrooms : '\u2014' %></td><% }) %>
+                </tr>
+                <tr>
+                    <th scope="row">Beds</th>
+                    <% columns.forEach((c) => { %><td><%= c.available && c.capacity.beds !== null ? c.capacity.beds : '\u2014' %></td><% }) %>
+                </tr>
+                <tr>
+                    <th scope="row">Bathrooms</th>
+                    <% columns.forEach((c) => { %><td><%= c.available && c.capacity.bathrooms !== null ? c.capacity.bathrooms : '\u2014' %></td><% }) %>
+                </tr>
+                <tr>
+                    <th scope="row">Rating</th>
+                    <% columns.forEach((c) => { %>
+                    <td><% if (!c.available) { %>&mdash;<% } else if (c.rating.count > 0) { %><%- include("../partials/rating.ejs", { rating: c.rating.average, count: c.rating.count }) %><% } else { %>No reviews yet<% } %></td>
+                    <% }) %>
+                </tr>
+                <% if (place && place.name) { %>
+                <tr>
+                    <th scope="row">Distance to <%= place.name %>
+                        <span class="compare-sub">Straight line from the stay&rsquo;s approximate location, not a route.</span></th>
+                    <% columns.forEach((c) => { %><td><%= c.available && c.distance ? c.distance : '\u2014' %></td><% }) %>
+                </tr>
+                <% } %>
+                <tr>
+                    <th scope="row">Cancellation</th>
+                    <% columns.forEach((c) => { %>
+                    <td><% if (!c.available) { %>&mdash;<% } else { %><strong><%= c.cancellation.label %></strong><span class="compare-sub"><%= c.cancellation.terms %></span><% } %></td>
+                    <% }) %>
+                </tr>
+                <tr>
+                    <th scope="row">House rules</th>
+                    <% columns.forEach((c) => { %>
+                    <td class="compare-rules"><%= c.available ? (c.houseRules || 'None written') : '\u2014' %></td>
+                    <% }) %>
+                </tr>
+                <% if (amenities.length) { %>
+                <tr class="compare-group"><th scope="rowgroup" colspan="<%= columns.length + 1 %>">Amenities</th></tr>
+                <% amenities.forEach((a) => { %>
+                <tr>
+                    <th scope="row"><%= a.label %></th>
+                    <% columns.forEach((c, i) => { %>
+                    <td>
+                        <% if (!c.available) { %>&mdash;
+                        <% } else if (a.has[i]) { %>
+                            <i class="fa-solid fa-check" aria-hidden="true"></i> Yes
+                            <% if (a.onlyId === c.id) { %><span class="badge text-bg-info">Only in this one</span><% } %>
+                        <% } else { %>
+                            <span class="text-body-secondary">Not listed</span>
+                        <% } %>
+                    </td>
+                    <% }) %>
+                </tr>
+                <% }) %>
+                <% } %>
+                <tr>
+                    <th scope="row">Book</th>
+                    <% columns.forEach((c) => { %>
+                    <td><% if (c.available) { %><a class="btn btn-dark btn-sm" href="<%= c.href %>">View and book<span class="visually-hidden"> <%= c.title %></span></a><% } else { %>&mdash;<% } %></td>
+                    <% }) %>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+        <% } %>
+    </div>
+</div>
