@@ -10,6 +10,7 @@ const { createAgent, login } = require("../helpers/agent");
 const { buildListingData } = require("../helpers/factories");
 const Listing = require("../../src/models/listing");
 const Review = require("../../src/models/review");
+const reviewService = require("../../src/services/reviews");
 const User = require("../../src/models/user");
 const { can } = require("../../src/policies");
 const { fullTitle, metaDescription } = require("../../src/utils/pageMeta");
@@ -33,6 +34,9 @@ const member = () =>
   new User({ username: "viewer", email: "viewer@example.com" });
 
 function stubListing(doc) {
+  // A signed-in viewer makes the page ask whether they have a stay to review
+  // (P12-T01): that is a database question, so it is answered here.
+  jest.spyOn(reviewService, "findReviewable").mockResolvedValue(null);
   const query = {
     populate: () => query,
     then: (res, rej) => Promise.resolve(doc).then(res, rej),

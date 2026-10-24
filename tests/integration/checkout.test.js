@@ -18,6 +18,7 @@ const User = require("../../src/models/user");
 const ledger = require("../../src/services/ledger");
 const pricing = require("../../src/services/pricing");
 const reservations = require("../../src/services/reservations");
+const reviewService = require("../../src/services/reviews");
 const { createReservationService } = reservations;
 const { formatMoney } = require("../../src/utils/money");
 const { cancellationText } = require("../../src/config/cancellationText");
@@ -93,6 +94,9 @@ function stubWorld(doc, { taken = [] } = {}) {
     then: (resolve, reject) => Promise.resolve(doc).then(resolve, reject),
   };
   jest.spyOn(Listing, "findById").mockReturnValue(query);
+  // The listing page asks whether a signed-in viewer has a stay to review
+  // (P12-T01): a database question, answered here.
+  jest.spyOn(reviewService, "findReviewable").mockResolvedValue(null);
   jest.spyOn(ledger, "unavailableDates").mockResolvedValue(taken);
   return doc;
 }

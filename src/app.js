@@ -31,8 +31,8 @@ const reviewRouter = require("./routes/review");
 const useRouter = require("./routes/user");
 const profileRouter = require("./routes/profile");
 const tripsRouter = require("./routes/trips");
-const notificationsRouter = require("./routes/notifications");
 const reportsRouter = require("./routes/reports");
+const wishlistsRouter = require("./routes/wishlists");
 const pagesRouter = require("./routes/pages");
 const apiRouter = require("./routes/api");
 const adminRouter = require("./routes/admin");
@@ -182,9 +182,9 @@ function createApp({
   app.use("/listings", listingRouter);
   app.use("/listings/:id/reviews", reviewRouter);
   app.use("/", reportsRouter);
+  app.use("/", wishlistsRouter);
   app.use("/", profileRouter);
   app.use("/", tripsRouter);
-  app.use("/", notificationsRouter);
   app.use("/", pagesRouter);
   app.use("/", useRouter);
 

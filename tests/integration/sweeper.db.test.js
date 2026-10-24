@@ -161,9 +161,10 @@ describeDb("sweeper (database)", () => {
       checkIn: "2026-11-07",
       checkOut: "2026-11-10",
     });
+    // A different night: two stays cannot hold the same night of one listing.
     const notYet = await reserve(w, {
       status: "confirmed",
-      checkIn: "2026-11-08",
+      checkIn: "2026-11-10",
       checkOut: "2026-11-11",
     });
     const result = await sweeper().runOnce({ now: T0 });

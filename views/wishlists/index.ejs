@@ -1,0 +1,41 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    The member's saved stays (P10-T01). Locals (src/services/wishlists.js
+    overview): items [{ id, available, title, savedAt, card }], availableCount,
+    limit. A stay that is no longer public stays here as "No longer available".
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-10 mx-auto">
+        <h1 class="h3 mb-1">Saved stays</h1>
+        <p class="text-body-secondary"><%= items.length %> of <%= limit %> saved</p>
+
+        <% if (items.length === 0) { %>
+            <%- include("../partials/empty-state.ejs", { title: "Nothing saved yet", message: "Tap the heart on a stay to keep it here.", icon: "fa-heart", actionHref: "/listings", actionLabel: "Browse stays", headingLevel: 2 }) %>
+        <% } else { %>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-1">
+            <% items.forEach((entry) => { %>
+            <div class="col" data-listing-id="<%= entry.id %>">
+                <% if (entry.available) { %>
+                    <%- include("../partials/listing-card.ejs", { item: entry.card, savedIds: new Set([entry.id]) }) %>
+                <% } else { %>
+                    <div class="card h-100 saved-unavailable">
+                        <div class="card-body">
+                            <p class="card-text">
+                                <b class="listing-card-title"><%= entry.title %></b>
+                                <span class="badge text-bg-secondary">No longer available</span>
+                            </p>
+                            <p class="small text-body-secondary mb-2">The host has hidden or removed this stay. It is kept here until you remove it.</p>
+                            <form action="/listings/<%= encodeURIComponent(entry.id) %>/save" method="POST">
+                                <%- include("../includes/csrf.ejs") %>
+                                <input type="hidden" name="saved" value="false">
+                                <button type="submit" class="btn btn-outline-dark btn-sm">Remove from saved</button>
+                            </form>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+            <% }) %>
+        </div>
+        <% } %>
+    </div>
+</div>

@@ -52,7 +52,10 @@
         </div>
         <% } %>
         <div class="mb-3">
-            <h1><%= listing.title %></h1>
+            <div class="detail-title-row">
+                <h1><%= listing.title %></h1>
+                <%- include("../partials/save-button.ejs", { listingId: String(listing._id), title: listing.title, saved: typeof savedIds !== "undefined" && savedIds && typeof savedIds.has === "function" && savedIds.has(String(listing._id)) }) %>
+            </div>
             <% if (place) { %><p class="detail-place"><%= place %></p><% } %>
             <% if (kind || summary.count > 0) { %>
             <p class="detail-meta">

@@ -39,6 +39,18 @@
         </div>
         <% } %>
 
+        <% if (trip.cancelled) { %>
+        <div class="alert alert-secondary" role="status" data-cancelled>
+            <% if (trip.cancelled.by === "host") { %>The host cancelled this booking. The dates were released.<% } else { %>This booking was cancelled and the dates were released.<% } %>
+            <% if (trip.cancelled.reason) { %><br><%= trip.cancelled.by === "host" ? "Reason from the host" : "Reason given" %>: <span class="trip-rules-text"><%= trip.cancelled.reason %></span><% } %>
+            <% if (trip.cancelled.refund) { %>
+            <br><strong data-refund>Refund: <%= trip.cancelled.refund.amountText %><% if (!trip.cancelled.refund.full && !trip.cancelled.refund.none) { %> (the host keeps <%= trip.cancelled.refund.keptText %>)<% } %>.</strong>
+            <%= trip.cancelled.refund.ruleText %>
+            <span class="d-block small mt-1">The refund is calculated and recorded only. Dimora does not take or return money yet (payments are simulated).</span>
+            <% } %>
+        </div>
+        <% } %>
+
         <section class="trip-section" aria-labelledby="trip-stay">
             <h2 class="h5" id="trip-stay">Your stay</h2>
             <dl class="trip-facts">
@@ -90,7 +102,6 @@
             <% } else if (trip.review.state === "done") { %>
             <p class="review-rating mb-1"><span aria-hidden="true"><%= trip.review.rating %> &#9733;</span> <span class="visually-hidden">You rated this stay <%= trip.review.rating %> out of 5</span></p>
             <p class="trip-rules-text mb-0"><%= trip.review.comment %></p>
-            <% if (trip.review.hidden) { %><p class="small text-body-secondary mt-2 mb-0">A Dimora moderator has hidden this review, so other guests do not see it.</p><% } %>
             <% } else { %>
             <p class="mb-0 text-body-secondary">The time to review this stay ended on <%= trip.review.until %>.</p>
             <% } %>
@@ -110,6 +121,33 @@
         <section class="trip-section" aria-labelledby="trip-cancel">
             <h2 class="h5" id="trip-cancel">Cancellation terms: <%= trip.cancellation.label %></h2>
             <p class="mb-0"><%= trip.cancellation.terms %></p>
+        </section>
+        <% } %>
+
+        <% if (trip.cancel) { %>
+        <section class="trip-section" aria-labelledby="trip-cancel-action" data-cancel-section>
+            <h2 class="h5" id="trip-cancel-action">Cancel this booking</h2>
+            <p class="mb-2" data-cancel-offer>
+                <% if (trip.cancel.full) { %>
+                If you cancel now you get everything back: <strong><%= trip.cancel.refundText %></strong>.
+                <% if (trip.cancel.freeUntilText) { %>That stays true until <%= trip.cancel.freeUntilText %> (the listing's time).<% } %>
+                <% } else if (trip.cancel.refundMinor === 0) { %>
+                If you cancel now you get <strong>nothing</strong> back.
+                <% } else { %>
+                If you cancel now you get <strong><%= trip.cancel.refundText %></strong> back of <%= trip.cancel.totalText %>; the host keeps <%= trip.cancel.keptText %>.
+                <% } %>
+                <%= trip.cancel.ruleText %>
+            </p>
+            <p class="small text-body-secondary">Cancelling cannot be undone. The refund is calculated only: Dimora does not move money yet.</p>
+            <details class="inbox-decline">
+                <summary class="btn btn-outline-danger btn-sm">Cancel booking…</summary>
+                <form action="/trips/<%= trip.id %>/cancel" method="POST" class="mt-2">
+                    <%- include("../includes/csrf.ejs") %>
+                    <label class="form-label small" for="cancel-reason">Reason (optional)</label>
+                    <textarea class="form-control form-control-sm" id="cancel-reason" name="reason" rows="3" maxlength="500"></textarea>
+                    <button type="submit" class="btn btn-danger btn-sm mt-2">Yes, cancel this booking</button>
+                </form>
+            </details>
         </section>
         <% } %>
     </div>

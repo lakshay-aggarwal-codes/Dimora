@@ -1,0 +1,26 @@
+<%#
+    The heart. Locals: listingId, title, saved (boolean).
+    Signed in: a small form that works without JavaScript (public/js/save-button.js
+    upgrades it to a fetch). Signed out: a link to the login page.
+    The form sends the state it WANTS (saved = !saved), so a repeat is harmless.
+%>
+<%
+    const heartSaved = typeof saved !== "undefined" && saved === true;
+    const heartTitle = typeof title !== "undefined" ? String(title) : "this stay";
+    const heartLabel = heartSaved ? "Remove " + heartTitle + " from your saved stays" : "Save " + heartTitle + " to your saved stays";
+%>
+<% if (typeof currUser !== "undefined" && currUser) { %>
+<form class="save-form" action="/listings/<%= encodeURIComponent(listingId) %>/save" method="POST" data-save-form>
+    <%- include("../includes/csrf.ejs") %>
+    <input type="hidden" name="saved" value="<%= heartSaved ? 'false' : 'true' %>">
+    <button type="submit" class="save-button<%= heartSaved ? ' is-saved' : '' %>" aria-pressed="<%= heartSaved ? 'true' : 'false' %>" aria-label="<%= heartLabel %>" data-title="<%= heartTitle %>">
+        <i class="<%= heartSaved ? 'fa-solid' : 'fa-regular' %> fa-heart" aria-hidden="true"></i>
+    </button>
+</form>
+<% } else { %>
+<div class="save-form">
+    <a class="save-button" href="/login" aria-label="Log in to save <%= heartTitle %>">
+        <i class="fa-regular fa-heart" aria-hidden="true"></i>
+    </a>
+</div>
+<% } %>

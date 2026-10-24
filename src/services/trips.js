@@ -22,6 +22,8 @@ const {
   isAfter,
 } = require("../utils/dates");
 const { windowEnd, DEFAULT_WINDOW_DAYS } = require("./reviews");
+const { RULE_TEXT } = require("../config/cancellation");
+const { cancelOffer } = require("./cancellations");
 
 const TABS = Object.freeze([
   { key: "upcoming", label: "Upcoming" },
@@ -203,7 +205,6 @@ function describeReview(review) {
     out.rating = review.review.rating;
     out.comment = review.review.comment || "";
     out.legacy = Boolean(review.review.legacy);
-    out.hidden = review.review.status === "hidden";
   }
   return out;
 }
@@ -218,6 +219,33 @@ function declineReasonOf(reservation) {
     .reverse()
     .find((h) => h && h.to === "declined" && h.note);
   return entry ? String(entry.note) : "";
+}
+
+/**
+ * How a cancelled booking ended (P09-T03): who cancelled, the reason they gave
+ * and the refund that was worked out (recorded, simulated: no money moves).
+ */
+function cancelledInfo(reservation, { formatMoney, currency }) {
+  if (
+    reservation.status !== "cancelled_by_guest" &&
+    reservation.status !== "cancelled_by_host"
+  )
+    return null;
+  const refund = reservation.refund;
+  const hasRefund = refund && Number.isSafeInteger(refund.amountMinor);
+  return {
+    by: reservation.status === "cancelled_by_host" ? "host" : "guest",
+    reason: reservation.cancelReason ? String(reservation.cancelReason) : "",
+    refund: hasRefund
+      ? {
+          amountText: formatMoney(refund.amountMinor, currency),
+          keptText: formatMoney(refund.retainedMinor || 0, currency),
+          full: refund.amountMinor === refund.totalMinor,
+          none: refund.amountMinor === 0,
+          ruleText: RULE_TEXT[refund.rule] || "",
+        }
+      : null,
+  };
 }
 
 const idText = (value) => String(value && value._id ? value._id : value);
@@ -448,6 +476,17 @@ function describeTrip(
     address,
     mapUrl,
     declineReason: declineReasonOf(reservation),
+    cancelled: cancelledInfo(reservation, { formatMoney, currency }),
+    // The cancel button and what it would refund, for the guest only (the host
+    // cancels from the booking requests page).
+    cancel: viewerIsGuest
+      ? cancelOffer(reservation, {
+          actor: "guest",
+          now,
+          formatMoney,
+          formatInstant,
+        })
+      : null,
     review: describeReview(review),
     paymentSimulated: true,
   };

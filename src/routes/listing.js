@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync");
+const { withSavedIds } = require("../middleware/savedIds");
 const { isLoggedIn, authorize, validateListing } = require("../middleware");
 const {
   requireImage,
@@ -21,7 +22,7 @@ const IMAGE_FIELD = "listing[image][url]";
 // never leaves an orphaned image behind.
 router
   .route("/")
-  .get(wrapAsync(searchController.index))
+  .get(withSavedIds, wrapAsync(searchController.index))
   .post(
     isLoggedIn,
     authorize("listing:create"),
@@ -65,7 +66,7 @@ router.put(
 
 router
   .route("/:id")
-  .get(wrapAsync(listingController.showListings))
+  .get(withSavedIds, wrapAsync(listingController.showListings))
   .put(
     isLoggedIn,
     authorize("listing:edit"),
