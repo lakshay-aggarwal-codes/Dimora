@@ -77,6 +77,14 @@ function tooManyAttempts(req, res, next) {
   );
 }
 
+function tooManyAccountTries(req, res, next) {
+  next(
+    new AppError(429, "Too many attempts on your account settings. Please wait a while and try again.", {
+      code: "rate_limited",
+    }),
+  );
+}
+
 function tooManyQuotes(req, res, next) {
   next(
     new AppError(429, "Too many price checks. Please wait a minute and try again.", {
@@ -122,6 +130,15 @@ function createAuthLimiters() {
       requestWasSuccessful: (req) => Boolean(req.user),
     }),
     signup: rateLimit({ ...common, windowMs: 60 * 60 * 1000, limit: 10 }),
+    // Password change and account deletion (P02-T04): 10 an hour per signed-in
+    // member, on top of the account's own failed-password lock.
+    account: rateLimit({
+      ...common,
+      handler: tooManyAccountTries,
+      windowMs: 60 * 60 * 1000,
+      limit: 10,
+      keyGenerator: (req) => (req.user && req.user._id ? `user:${req.user._id}` : ipKeyGenerator(req.ip)),
+    }),
     // Price checks (P08-T02): a guest picking dates makes a few per minute.
     quote: rateLimit({ ...common, handler: tooManyQuotes, windowMs: 60 * 1000, limit: 60 }),
     // Messages and "Contact host" (P11-T02): 20 a minute per signed-in member.

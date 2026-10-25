@@ -31,6 +31,38 @@ const USERNAME_PATTERN = /^[A-Za-z0-9_]+$/;
 const PASSWORD_MIN = 10;
 const PASSWORD_MAX = 128;
 
+
+// The password rule, shared by signup and "change password" (P02-T04): length,
+// not a common password, not the username or the email's name. The username
+// and email come from the object being validated (signup) or from the Joi
+// `context` option (change password, where the object has no username).
+function passwordRule() {
+    return Joi.string().min(PASSWORD_MIN).max(PASSWORD_MAX).required()
+        .custom((value, helpers) => {
+            if (value.length > PASSWORD_MAX) return value; // already refused for its length
+            if (isCommonPassword(value)) return helpers.error("password.common");
+            const { username, email } = { ...(helpers.prefs.context || {}), ...(helpers.state.ancestors[0] || {}) };
+            const lower = value.toLowerCase();
+            const localPart = typeof email === "string" ? email.split("@")[0].toLowerCase() : "";
+            if (
+                (typeof username === "string" && lower === username.trim().toLowerCase()) ||
+                (localPart && lower === localPart)
+            ) {
+                return helpers.error("password.personal");
+            }
+            return value;
+        })
+        .messages({
+            "any.required": "Choose a password.",
+            "string.base": "Choose a password.",
+            "string.empty": "Choose a password.",
+            "string.min": `Password must be at least ${PASSWORD_MIN} characters.`,
+            "string.max": `Password must be at most ${PASSWORD_MAX} characters.`,
+            "password.common": "That password is too common. Choose a less predictable one.",
+            "password.personal": "Password must not be the same as your username or email.",
+        });
+}
+
 // The messages are written for the person filling in the form and are shown as
 // they are (flash). Joi's own wording never reaches the page.
 module.exports.signupSchema = Joi.object({
@@ -51,29 +83,44 @@ module.exports.signupSchema = Joi.object({
             "string.max": "Enter a valid email address.",
             "string.email": "Enter a valid email address.",
         }),
-    password: Joi.string().min(PASSWORD_MIN).max(PASSWORD_MAX).required()
-        .custom((value, helpers) => {
-            if (isCommonPassword(value)) return helpers.error("password.common");
-            const { username, email } = helpers.state.ancestors[0] || {};
-            const lower = value.toLowerCase();
-            const localPart = typeof email === "string" ? email.split("@")[0].toLowerCase() : "";
-            if (
-                (typeof username === "string" && lower === username.trim().toLowerCase()) ||
-                (localPart && lower === localPart)
-            ) {
-                return helpers.error("password.personal");
-            }
-            return value;
-        })
-        .messages({
-            "any.required": "Choose a password.",
-            "string.base": "Choose a password.",
-            "string.empty": "Choose a password.",
-            "string.min": `Password must be at least ${PASSWORD_MIN} characters.`,
-            "string.max": `Password must be at most ${PASSWORD_MAX} characters.`,
-            "password.common": "That password is too common. Choose a less predictable one.",
-            "password.personal": "Password must not be the same as your username or email.",
-        }),
+    password: passwordRule(),
+});
+
+// Change password (P02-T04). Validate with `{ context: { username, email } }`.
+// The current password is only checked for being present: it is verified
+// against the stored hash, never against the strength rules.
+module.exports.changePasswordSchema = Joi.object({
+    currentPassword: Joi.string().max(PASSWORD_MAX).required().messages({
+        "any.required": "Enter your current password.",
+        "string.base": "Enter your current password.",
+        "string.empty": "Enter your current password.",
+        "string.max": "Enter your current password.",
+    }),
+    newPassword: passwordRule(),
+    confirmPassword: Joi.string().empty("").required().valid(Joi.ref("newPassword")).messages({
+        "any.required": "Type the new password again to confirm it.",
+        "string.empty": "Type the new password again to confirm it.",
+        "any.only": "The two new passwords do not match.",
+    }),
+}).custom((value, helpers) => {
+    if (value.currentPassword === value.newPassword) return helpers.error("password.same");
+    return value;
+}).messages({ "password.same": "The new password must be different from the current one." });
+
+// Delete account (P02-T04): the password again, and the word DELETE.
+module.exports.deleteAccountSchema = Joi.object({
+    password: Joi.string().max(PASSWORD_MAX).required().messages({
+        "any.required": "Enter your password to delete your account.",
+        "string.base": "Enter your password to delete your account.",
+        "string.empty": "Enter your password to delete your account.",
+        "string.max": "Enter your password to delete your account.",
+    }),
+    confirm: Joi.string().trim().valid("DELETE").required().messages({
+        "any.required": "Type DELETE to confirm.",
+        "string.base": "Type DELETE to confirm.",
+        "string.empty": "Type DELETE to confirm.",
+        "any.only": "Type DELETE to confirm.",
+    }),
 });
 
 module.exports.USERNAME_PATTERN = USERNAME_PATTERN;

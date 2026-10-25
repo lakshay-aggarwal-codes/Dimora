@@ -1,0 +1,58 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    Account settings (P02-T04). Locals: blockers [{ code, message }] (why the
+    account cannot be deleted yet), passwordMin. Both forms need the current
+    password; nothing here is prefilled.
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-7 col-xl-6">
+        <h1 class="h3">Account settings</h1>
+        <p class="text-body-secondary">Signed in as <strong><%= currUser.username %></strong>. <a href="/users/<%= currUser._id %>">View your public profile</a> · <a href="/account/profile">Edit profile</a></p>
+
+        <section class="mb-5" aria-labelledby="pw-heading">
+            <h2 class="h5" id="pw-heading">Change password</h2>
+            <form method="post" action="/account/password" novalidate>
+                <%- include("../includes/csrf.ejs") %>
+                <div class="mb-3">
+                    <label class="form-label" for="currentPassword">Current password</label>
+                    <input class="form-control" type="password" id="currentPassword" name="currentPassword" autocomplete="current-password" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="newPassword">New password</label>
+                    <input class="form-control" type="password" id="newPassword" name="newPassword" autocomplete="new-password" minlength="<%= passwordMin %>" maxlength="128" aria-describedby="pw-hint" required>
+                    <div class="form-text" id="pw-hint">At least <%= passwordMin %> characters, not a common password, not your username or the name part of your email.</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="confirmPassword">New password again</label>
+                    <input class="form-control" type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" maxlength="128" required>
+                </div>
+                <button class="btn btn-dark" type="submit">Change password</button>
+            </form>
+        </section>
+
+        <section aria-labelledby="del-heading" class="border border-danger rounded p-3 mb-5">
+            <h2 class="h5 text-danger-emphasis" id="del-heading">Delete account</h2>
+            <p>Deleting removes your name, email, photo and bio, takes your places off Dimora and cannot be undone. Bookings and reviews other people rely on stay, shown as coming from a deleted account.</p>
+            <% if (blockers.length) { %>
+            <div class="alert alert-warning" role="status" data-blockers>
+                <p class="mb-1"><strong>You cannot delete your account yet:</strong></p>
+                <ul class="mb-0">
+                    <% blockers.forEach((b) => { %><li data-blocker="<%= b.code %>"><%= b.message %></li><% }) %>
+                </ul>
+            </div>
+            <% } %>
+            <form method="post" action="/account/delete" novalidate>
+                <%- include("../includes/csrf.ejs") %>
+                <div class="mb-3">
+                    <label class="form-label" for="deletePassword">Your password</label>
+                    <input class="form-control" type="password" id="deletePassword" name="password" autocomplete="current-password" maxlength="128" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="deleteConfirm">Type DELETE to confirm</label>
+                    <input class="form-control" type="text" id="deleteConfirm" name="confirm" autocomplete="off" required>
+                </div>
+                <button class="btn btn-danger" type="submit"<% if (blockers.length) { %> aria-describedby="del-heading"<% } %>>Delete my account</button>
+            </form>
+        </section>
+    </div>
+</div>
