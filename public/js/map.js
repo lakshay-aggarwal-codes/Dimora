@@ -152,6 +152,9 @@
         source: "approximate-area",
         paint: { "line-color": "#0f766e", "line-width": 2 },
       });
+      // Lets public/js/neighborhood.js add its distance circles (P15-T02).
+      window.dimoraDetailMap = { map: map, lng: lng, lat: lat };
+      window.dispatchEvent(new CustomEvent("dimora:map-loaded"));
     });
 
     // An error before the first load (invalid token, offline, blocked style)

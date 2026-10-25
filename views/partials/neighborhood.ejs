@@ -1,0 +1,39 @@
+<%#
+    "What's around": places near the stay (P15-T02). Local: neighborhood
+    (src/services/neighborhood.js). Place names come from OpenStreetMap, i.e.
+    from strangers: every one is written with <%= %> (escaped), never <%- %>.
+    Without JavaScript every list is shown one under the other; public/js/neighborhood.js
+    turns them into keyboard-accessible tabs and adds the map circles.
+    data-rings holds only labels and radii (metres), never a position.
+%>
+<section class="neighborhood mt-4" aria-labelledby="neighborhood-heading" data-neighborhood data-rings="<%= JSON.stringify(neighborhood.rings) %>">
+    <h2 id="neighborhood-heading" class="h4">What&rsquo;s around</h2>
+
+    <div class="neighborhood-tabs" role="tablist" aria-label="Kinds of places nearby" data-tablist hidden>
+        <% neighborhood.categories.forEach((category) => { %>
+        <button type="button" class="neighborhood-tab" role="tab" id="nb-tab-<%= category.id %>" aria-controls="nb-panel-<%= category.id %>" aria-selected="false" tabindex="-1" data-category="<%= category.id %>"><%= category.label %> <span class="neighborhood-count">(<%= category.items.length %>)</span></button>
+        <% }) %>
+    </div>
+
+    <% neighborhood.categories.forEach((category) => { %>
+    <div class="neighborhood-panel" id="nb-panel-<%= category.id %>" data-panel="<%= category.id %>">
+        <h3 class="h6 neighborhood-panel-title"><%= category.label %></h3>
+        <ul class="neighborhood-list">
+            <% category.items.forEach((item) => { %>
+            <li><span class="neighborhood-name"><%= item.name || item.kindLabel %></span> <span class="neighborhood-distance"><%= item.distanceLabel %></span></li>
+            <% }) %>
+        </ul>
+    </div>
+    <% }) %>
+
+    <div class="form-check neighborhood-ring" data-ring-control hidden>
+        <input class="form-check-input" type="checkbox" id="nb-ring" aria-describedby="nb-ring-note">
+        <label class="form-check-label" for="nb-ring">Show the distance to the nearest one on the map</label>
+        <p id="nb-ring-note" class="small text-body-secondary mb-0" role="status" data-ring-note></p>
+    </div>
+
+    <p class="small text-body-secondary mt-2 mb-0">
+        Distances are straight lines from the approximate area on the map, not walking or driving routes, rounded to 50&nbsp;m.
+        Places: <%= neighborhood.source %>. This data may be incomplete. Updated <%= neighborhood.fetchedOn %>.
+    </p>
+</section>

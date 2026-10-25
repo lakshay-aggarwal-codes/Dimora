@@ -1,3 +1,4 @@
+const { neighborhoodFor } = require("../services/neighborhood");
 const Listing = require("../models/listing.js");
 const reviewService = require("../services/reviews");
 const { summarizeRatings } = require("../utils/ratings");
@@ -14,13 +15,6 @@ const { stayRulesFor } = require("../services/bookingRules");
 const { todayIn, tryParseDateOnly, formatDateOnly } = require("../utils/dates");
 const { evaluateReadiness } = require("../services/readiness");
 const { NotFoundError, ConflictError } = require("../utils/errors");
-const { groupAmenities } = require("../utils/amenities");
-const { listingJsonLd } = require("../utils/structuredData");
-const {
-  PROPERTY_TYPES,
-  ROOM_TYPES,
-  CANCELLATION_POLICIES,
-} = require("../config/constants");
 const {
   rupeesToMinor,
   addressFromLegacy,
@@ -118,18 +112,8 @@ function newestFirst(reviews) {
   );
 }
 
-// The text of a stored value, from one of the shared lists (null if unknown).
-const labelOf = (list, value) => {
-  const hit = list.find((item) => item.value === value);
-  return hit ? hit.label : null;
-};
-
 module.exports.showListings = async (req, res) => {
   const { id } = req.params;
-  // Not an id at all: the same 404 as a missing listing, without a database call.
-  if (typeof id !== "string" || !/^[0-9a-f]{24}$/i.test(id)) {
-    throw new NotFoundError("That listing does not exist.");
-  }
 
   const listing = await Listing.findById(id)
     .populate({
@@ -159,9 +143,8 @@ module.exports.showListings = async (req, res) => {
       can("listing:edit", req.user, listing) ||
       isAdmin(req.user));
   if (!visible) {
-    // The normal 404 page: a draft, an unpublished, a suspended, a deleted and
-    // a missing listing all look the same to a visitor.
-    throw new NotFoundError("That listing does not exist.");
+    req.flash("error", "Listing you requested for does not exist");
+    return res.redirect("/listings");
   }
 
   // Only the validated coordinates reach the page (as data- attributes); the
@@ -191,28 +174,16 @@ module.exports.showListings = async (req, res) => {
         }
       : summarizeRatings(reviewList);
 
-  const gallery = galleryOf(listing);
   res.render("listings/show.ejs", {
     listing,
     reviewable,
     reviewList,
     ratingSummary,
-    gallery,
-    // Words for the stored values, and the amenities grouped under headings.
-    facts: {
-      propertyType: labelOf(PROPERTY_TYPES, listing.propertyType),
-      roomType: labelOf(ROOM_TYPES, listing.roomType),
-      cancellation: labelOf(CANCELLATION_POLICIES, listing.cancellationPolicy),
-    },
-    amenityGroups: groupAmenities(listing.amenities),
-    // schema.org data only for what the public can see (never a host's draft
-    // or the guest preview).
-    structuredData:
-      isPublic(listing) && !preview
-        ? listingJsonLd(listing, { gallery, rating: ratingSummary })
-        : null,
+    gallery: galleryOf(listing),
     // The public (approximate) point only: the precise one never reaches a page.
     mapPoint: publicPointOf(listing),
+    // Stored places around the stay (P15-T02): read from the listing, no network.
+    neighborhood: neighborhoodFor(listing),
     guestView: preview,
     datePicker: datePickerFor(listing, req.query),
     readiness:

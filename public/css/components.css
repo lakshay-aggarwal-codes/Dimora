@@ -1836,22 +1836,237 @@
   outline-offset: -2px;
 }
 
-/* Host overview (P13-T01) */
-.overview-tiles {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: var(--space-4);
+/* ---- Save (heart) button, wishlists (P10-T01) ---- */
+.listing-card-wrap {
+  position: relative;
+  height: 100%;
 }
 
-.overview-tile {
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+.listing-card-wrap .save-form {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 2;
+}
+
+.save-form {
+  margin: 0;
+}
+
+.save-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 50%;
+  background-color: var(--color-surface-raised);
+  color: var(--color-text);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.save-button:hover {
+  background-color: var(--color-surface-sunken);
+}
+
+.save-button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.save-button.is-saved {
+  color: var(--color-danger);
+}
+
+.detail-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.saved-unavailable {
+  background-color: var(--color-surface-sunken);
+}
+
+/* ---- Stay comparison (P10-T03) ---- */
+.compare-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+  margin-bottom: var(--space-4);
+}
+
+.compare-help {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.compare-control label {
+  display: block;
+  font-size: 0.875rem;
+}
+
+.compare-control-wide {
+  flex: 1 1 14rem;
+}
+
+.compare-pick {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 2.75rem;
+}
+
+.compare-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+}
+
+.compare-scroll:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.compare-table {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: separate;
+  border-spacing: 0;
   background-color: var(--color-surface-raised);
 }
 
-.overview-number {
-  margin: var(--space-1) 0;
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
+.compare-table th,
+.compare-table td {
+  padding: var(--space-3);
+  vertical-align: top;
+  border-bottom: 1px solid var(--color-border-strong);
+  text-align: left;
+}
+
+.compare-table tbody th[scope="row"],
+.compare-corner {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 8rem;
+  max-width: 11rem;
+  background-color: var(--color-surface-sunken);
+  font-weight: var(--font-weight-medium, 600);
+}
+
+.compare-col {
+  min-width: 12rem;
+  font-weight: normal;
+}
+
+.compare-img {
+  display: block;
+  width: 100%;
+  height: 7rem;
+  margin-bottom: var(--space-2);
+  object-fit: cover;
+  border-radius: var(--radius-md, 8px);
+}
+
+.compare-title {
+  display: block;
+  font-weight: 600;
+}
+
+.compare-where,
+.compare-sub {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: normal;
+  color: var(--color-text-muted, inherit);
+}
+
+.compare-remove {
+  display: inline-block;
+  margin-top: var(--space-2);
+  font-size: 0.875rem;
+}
+
+.compare-rules {
+  white-space: pre-line;
+  max-width: 16rem;
+}
+
+.compare-group th {
+  background-color: var(--color-surface-sunken);
+}
+
+/* ---- "What's around" (P15-T02) ---- */
+.neighborhood-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.neighborhood-tab {
+  min-height: 2.75rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  background-color: var(--color-surface-raised);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.neighborhood-tab[aria-selected="true"] {
+  background-color: var(--color-text);
+  color: var(--color-surface-raised);
+}
+
+.neighborhood-tab:focus-visible,
+.neighborhood-panel:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.neighborhood-count {
+  font-size: 0.875rem;
+}
+
+.neighborhood-list {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.neighborhood-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border-strong);
+}
+
+.neighborhood-distance {
+  white-space: nowrap;
+  color: var(--color-text-muted, inherit);
+}
+
+/* With tabs, the tab already names the list: hide the duplicate heading. */
+.neighborhood.is-tabbed .neighborhood-panel-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.neighborhood-panel[hidden] {
+  display: none;
+}
+
+.neighborhood-ring {
+  margin-top: var(--space-3);
 }
