@@ -5,10 +5,6 @@ coverage/
 data/
 # Large local dataset archive
 Dimora_Full_Datasets.zip
-
-# Generated reports and scratch files (they can contain environment details)
-jest-out.txt
-jest-report.json
-failures.txt
-one.txt
-*.zip
+# Playwright (P17-T03)
+playwright-report/
+test-results/

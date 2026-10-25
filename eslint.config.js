@@ -4,7 +4,14 @@ const js = require("@eslint/js");
 const globals = require("globals");
 
 module.exports = [
-  { ignores: ["node_modules/**", "coverage/**"] },
+  {
+    ignores: [
+      "node_modules/**",
+      "coverage/**",
+      "playwright-report/**",
+      "test-results/**",
+    ],
+  },
   js.configs.recommended,
   {
     files: ["**/*.js"],

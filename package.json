@@ -26,16 +26,12 @@
     "format:check": "prettier --check .",
     "test": "jest",
     "test:coverage": "jest --coverage",
+    "test:e2e": "playwright test",
     "seed": "node scripts/seed.js",
     "migrate": "node scripts/migrate.js",
     "migrate:dry": "node scripts/migrate.js --dry-run",
-    "import:airbnb": "node scripts/import-dataset.js",
-    "nearby:refresh": "node scripts/refresh-nearby.js",
     "sweep": "node scripts/sweep.js",
-    "make-admin": "node scripts/make-admin.js",
-    "scan:secrets": "node scripts/scan-secrets.js",
-    "preflight": "node scripts/preflight.js",
-    "audit:deps": "npm audit --omit=dev --audit-level=high"
+    "make-admin": "node scripts/make-admin.js"
   },
   "dependencies": {
     "@mapbox/mapbox-sdk": "^0.16.2",
