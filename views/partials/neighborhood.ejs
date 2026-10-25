@@ -1,7 +1,7 @@
 <%#
     "What's around": places near the stay (P15-T02). Local: neighborhood
     (src/services/neighborhood.js). Place names come from OpenStreetMap, i.e.
-    from strangers: every one is written with <%= %> (escaped), never <%- %>.
+    from strangers: every one is written with the escaping print tag, never the raw one.
     Without JavaScript every list is shown one under the other; public/js/neighborhood.js
     turns them into keyboard-accessible tabs and adds the map circles.
     data-rings holds only labels and radii (metres), never a position.

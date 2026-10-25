@@ -4,6 +4,7 @@ const express = require("express");
 const wrapAsync = require("../utils/wrapAsync");
 const { isLoggedIn, authorize } = require("../middleware");
 const { uploadPhotos } = require("../config/cloudinary");
+const { inputGuard } = require("../middleware/inputGuard");
 const controller = require("../controllers/images");
 
 const router = express.Router({ mergeParams: true });
@@ -14,6 +15,7 @@ router.post(
   "/",
   ...mayEdit,
   uploadPhotos.array("photos"),
+  inputGuard,
   wrapAsync(controller.upload),
 );
 

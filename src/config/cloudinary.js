@@ -22,7 +22,9 @@ const ALLOWED_FORMATS = ["jpg", "png", "webp"];
 // Files are held in memory, then streamed to Cloudinary. There is deliberately
 // no fileFilter on the declared type: the browser chooses that, so it proves
 // nothing. src/services/images.js looks at the file's real first bytes.
-const limits = { fileSize: MAX_IMAGE_BYTES };
+// Text fields of a multipart form are limited too (P17-T02): multer's default
+// allows any number of fields of 1 MB each.
+const limits = { fileSize: MAX_IMAGE_BYTES, fieldSize: 100 * 1024, fields: 100 };
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { ...limits, files: 1 },

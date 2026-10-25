@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync");
+const { inputGuard } = require("../middleware/inputGuard");
 const { withSavedIds } = require("../middleware/savedIds");
 const { isLoggedIn, authorize, validateListing } = require("../middleware");
 const {
@@ -27,6 +28,7 @@ router
     isLoggedIn,
     authorize("listing:create"),
     upload.single(IMAGE_FIELD),
+    inputGuard,
     validateListing,
     requireImage,
     verifyUploadedImage,
@@ -71,6 +73,7 @@ router
     isLoggedIn,
     authorize("listing:edit"),
     upload.single(IMAGE_FIELD),
+    inputGuard,
     validateListing,
     verifyUploadedImage,
     geocodeListing({ backTo: (req) => `/listings/${req.params.id}/edit` }),

@@ -1,5 +1,6 @@
 // /users/:id (public) and /account/profile (the signed-in member's own).
 const express = require("express");
+const { inputGuard } = require("../middleware/inputGuard");
 const wrapAsync = require("../utils/wrapAsync");
 const { isLoggedIn } = require("../middleware");
 const { upload } = require("../config/cloudinary");
@@ -15,6 +16,7 @@ router.put(
   "/account/profile",
   isLoggedIn,
   upload.single("avatar"),
+  inputGuard,
   wrapAsync(controller.update),
 );
 
