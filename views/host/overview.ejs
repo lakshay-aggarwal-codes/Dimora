@@ -1,0 +1,76 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    The host overview (P13-T01): four tiles, each linking to the list it comes
+    from. Locals: data (src/services/hostOverview.js overview), formatStayDate,
+    formatInstant. Numbers only, no charts. Everything is printed escaped.
+%>
+<%
+    const plural = (n, one, many) => n + " " + (n === 1 ? one : many);
+    const weekWord = "next " + data.week.days + " days";
+%>
+<div class="row mt-3">
+    <div class="col-12">
+        <h1 class="h3">Host overview</h1>
+        <p class="text-body-secondary">What needs you, and how your places are doing. <a href="/host/listings">My listings</a> · <a href="/host/calendar">Booking calendar</a></p>
+
+        <% if (data.listingCount === 0) { %>
+        <%- include("../partials/empty-state.ejs", { title: "You have no listings yet", message: "Create one and publish it; requests, check-ins and earnings show up here.", icon: "fa-house", actionHref: "/host/listings/new", actionLabel: "Dimora your home", headingLevel: 2 }) %>
+        <% } else { %>
+        <div class="overview-tiles">
+            <section class="overview-tile" aria-labelledby="tile-pending" data-tile="pending">
+                <h2 class="h6" id="tile-pending">Waiting for your answer</h2>
+                <p class="overview-number"><%= data.pending.count %><% if (data.pending.capped) { %>+<% } %></p>
+                <% if (data.pending.count === 0) { %>
+                <p class="mb-2 text-body-secondary">No requests are waiting.</p>
+                <% } else { %>
+                <p class="mb-2">The soonest runs out <strong><%= formatInstant(data.pending.soonestExpiry) %></strong>. A request that is not answered in time expires and the dates are released.</p>
+                <% } %>
+                <a href="/host/reservations">See requests</a>
+            </section>
+
+            <section class="overview-tile" aria-labelledby="tile-week" data-tile="week">
+                <h2 class="h6" id="tile-week">Check-ins and check-outs, <%= weekWord %></h2>
+                <p class="overview-number"><%= plural(data.week.checkIns, "check-in", "check-ins") %></p>
+                <p class="mb-1"><%= plural(data.week.checkOuts, "check-out", "check-outs") %></p>
+                <% if (data.week.upcomingCheckIns.length) { %>
+                <ul class="list-unstyled small mb-2" aria-label="Next check-ins">
+                    <% data.week.upcomingCheckIns.forEach((s) => { %>
+                    <li><a href="/trips/<%= s.id %>"><%= formatStayDate(s.date) %></a> · <%= s.guest %> · <%= s.title %></li>
+                    <% }) %>
+                </ul>
+                <% } %>
+                <% if (data.week.upcomingCheckOuts.length) { %>
+                <ul class="list-unstyled small mb-2" aria-label="Next check-outs">
+                    <% data.week.upcomingCheckOuts.forEach((s) => { %>
+                    <li><a href="/trips/<%= s.id %>"><%= formatStayDate(s.date) %></a> · <%= s.guest %> · <%= s.title %> (out)</li>
+                    <% }) %>
+                </ul>
+                <% } %>
+                <% if (!data.week.checkIns && !data.week.checkOuts) { %><p class="mb-2 text-body-secondary">Nothing is scheduled.</p><% } %>
+                <a href="/host/reservations#inbox-confirmed">See confirmed stays</a>
+            </section>
+
+            <section class="overview-tile" aria-labelledby="tile-earnings" data-tile="earnings">
+                <h2 class="h6" id="tile-earnings">Estimated earnings, stays starting this month</h2>
+                <p class="overview-number"><%= formatMoney(data.earnings.estimateMinor, "INR") %></p>
+                <p class="mb-1"><strong>Estimate, no payouts.</strong> Dimora does not pay anything out yet; payments are simulated.</p>
+                <p class="small text-body-secondary mb-2">From <%= plural(data.earnings.stays, "confirmed or completed stay", "confirmed or completed stays") %>: the nights and cleaning fee you set, without the guest service fee and taxes.</p>
+                <a href="/host/calendar">See the calendar</a>
+            </section>
+
+            <section class="overview-tile" aria-labelledby="tile-occupancy" data-tile="occupancy">
+                <h2 class="h6" id="tile-occupancy">Occupancy, next <%= data.occupancy.days %> nights</h2>
+                <% if (data.occupancy.percent === null) { %>
+                <p class="overview-number">&ndash;</p>
+                <p class="mb-2 text-body-secondary"><%= data.occupancy.listings === 0 ? "Publish a listing to see its occupancy." : "Every night is blocked, so there is nothing to measure." %></p>
+                <% } else { %>
+                <p class="overview-number"><%= data.occupancy.percent %>%</p>
+                <p class="mb-1"><%= plural(data.occupancy.bookedNights, "night", "nights") %> booked of <%= data.occupancy.availableNights %> available.</p>
+                <p class="small text-body-secondary mb-2">Across <%= plural(data.occupancy.listings, "published listing", "published listings") %><% if (data.occupancy.blockedNights) { %>; <%= plural(data.occupancy.blockedNights, "blocked night is", "blocked nights are") %> not counted as available<% } %>. Requests still waiting are not counted as booked.</p>
+                <% } %>
+                <a href="/host/calendar">See the calendar</a>
+            </section>
+        </div>
+        <% } %>
+    </div>
+</div>

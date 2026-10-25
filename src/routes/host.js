@@ -7,6 +7,7 @@ const controller = require("../controllers/host");
 const availability = require("../controllers/availability");
 const reservations = require("../controllers/hostReservations");
 const hostCalendar = require("../controllers/hostCalendar");
+const hostOverview = require("../controllers/hostOverview");
 
 const router = express.Router();
 const mayCreate = [isLoggedIn, authorize("listing:create")];
@@ -50,6 +51,9 @@ router.post(
   wrapAsync(availability.unblock),
 );
 
+// The overview tiles (P13-T01): any signed-in member; it only reads their own data.
+router.get("/", isLoggedIn, wrapAsync(hostOverview.show));
+
 // All listings in one month (P13-T02): any signed-in host; it only reads
 // that host's own listings.
 router.get("/calendar", isLoggedIn, wrapAsync(hostCalendar.show));
@@ -66,12 +70,6 @@ router.post(
   "/reservations/:id/decline",
   isLoggedIn,
   wrapAsync(reservations.decline),
-);
-// The host cancels a confirmed stay (P09-T03): reason required, guest refunded in full.
-router.post(
-  "/reservations/:id/cancel",
-  isLoggedIn,
-  wrapAsync(reservations.cancel),
 );
 
 module.exports = router;

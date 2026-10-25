@@ -59,28 +59,6 @@
   cursor: default;
 }
 
-/* Unread count on the bell (P11-T01). The number is also in the link's
-   hidden text, so the badge itself is only a visual. */
-.bell-link {
-  position: relative;
-}
-
-.bell-badge {
-  min-width: 1.25rem;
-  padding: 0 var(--space-1);
-  border-radius: var(--radius-pill);
-  background-color: var(--color-accent);
-  color: var(--color-on-accent);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  line-height: 1.25rem;
-  text-align: center;
-}
-
-.bell-badge[hidden] {
-  display: none;
-}
-
 .account-name {
   max-width: 10rem;
   overflow: hidden;
@@ -1858,176 +1836,22 @@
   outline-offset: -2px;
 }
 
-/* Notifications page (P11-T01) */
-.notification-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
+/* Host overview (P13-T01) */
+.overview-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--space-4);
 }
 
-.notification-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.notification {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
+.overview-tile {
+  padding: var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background-color: var(--color-surface-raised);
 }
 
-.notification + .notification {
-  margin-top: var(--space-3);
-}
-
-/* Unread: a stronger edge as well as the word "Unread" in the row. */
-.notification-unread {
-  border-color: var(--color-primary);
-  border-left-width: var(--space-1);
-}
-
-.notification-main {
-  flex: 1 1 14rem;
-  min-width: 0;
-}
-
-.notification-title {
-  margin: 0;
-  font-weight: var(--font-weight-medium);
-  overflow-wrap: anywhere;
-}
-
-.notification-body {
-  margin: var(--space-1) 0 0;
-  overflow-wrap: anywhere;
-}
-
-.notification-time {
-  margin: var(--space-1) 0 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-/* Conversation page (P11-T02). Message text is plain text: pre-wrap keeps its
-   line breaks without any HTML. */
-.message-list {
-  margin: 0 0 var(--space-4);
-  padding: 0;
-  list-style: none;
-}
-
-.message {
-  max-width: 40rem;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background-color: var(--color-surface-raised);
-}
-
-.message + .message {
-  margin-top: var(--space-3);
-}
-
-.message-mine {
-  margin-left: auto;
-  border-color: var(--color-primary);
-  background-color: var(--color-primary-subtle);
-}
-
-.message-meta {
-  margin: 0 0 var(--space-1);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-.message-body {
-  margin: 0;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
-}
-
-/* Messages list (P11-T03) */
-.conversation-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.conversation-list li + li {
-  margin-top: var(--space-3);
-}
-
-.conversation-row {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background-color: var(--color-surface-raised);
-  color: inherit;
-  text-decoration: none;
-}
-
-.conversation-row:hover {
-  border-color: var(--color-primary);
-}
-
-.conversation-dot {
-  flex: none;
-  width: var(--space-2);
-  height: var(--space-2);
-  margin-top: var(--space-2);
-  border-radius: var(--radius-pill);
-  background-color: transparent;
-}
-
-.conversation-unread .conversation-dot {
-  background-color: var(--color-primary);
-}
-
-.conversation-main {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.conversation-name {
-  font-weight: var(--font-weight-medium);
-}
-
-.conversation-unread .conversation-name {
+.overview-number {
+  margin: var(--space-1) 0;
+  font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
 }
-
-.conversation-listing,
-.conversation-time {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
-
-.conversation-preview {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.conversation-side {
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--space-1);
-}
-

@@ -47,13 +47,12 @@
                         </li>
                     <% } else { %>
                         <li class="nav-item">
-                            <%# Unread count: public/js/notifications.js fills it in and keeps it current. %>
-                            <a class="nav-link nav-icon-btn bell-link" href="/notifications"<%- current("/notifications") %>
-                                data-notifications-bell data-count-url="/api/notifications/count" data-poll-seconds="30">
+                            <%# Placeholder until notifications exist (P11-T01): reachable by keyboard, does nothing. %>
+                            <button type="button" class="nav-link nav-icon-btn" aria-disabled="true"
+                                data-placeholder="notifications">
                                 <i class="fa-regular fa-bell" aria-hidden="true"></i>
-                                <span class="visually-hidden" data-bell-label>Notifications</span>
-                                <span class="bell-badge" data-bell-count aria-hidden="true" hidden>0</span>
-                            </a>
+                                <span class="visually-hidden">Notifications (coming soon)</span>
+                            </button>
                         </li>
                         <li class="nav-item dropdown">
                             <button type="button" class="nav-link nav-icon-btn dropdown-toggle" id="account-menu"
@@ -66,8 +65,8 @@
                                     <span class="dropdown-item-text small">Signed in as
                                         <strong><%= currUser.username %></strong></span>
                                 </li>
-                                <li><a class="dropdown-item" href="/messages"<%- current("/messages") %>>Messages</a></li>
                                 <li><a class="dropdown-item" href="/trips"<%- current("/trips") %>>Your trips</a></li>
+                                <li><a class="dropdown-item" href="/host"<%- current("/host") %>>Host overview</a></li>
                                 <li><a class="dropdown-item" href="/host/reservations"<%- current("/host/reservations") %>>Booking requests</a></li>
                                 <li><a class="dropdown-item" href="/host/calendar"<%- current("/host/calendar") %>>Booking calendar</a></li>
                                 <% if (typeof can === "function" && can("admin:access")) { %>
