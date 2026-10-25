@@ -49,7 +49,7 @@ function authorize(action, { concealForbidden = false } = {}) {
   const type = action.split(":")[0];
   const load = action.endsWith(":create") ? null : LOADERS[type];
 
-  return async function authorizeMiddleware(req, res, next) {
+  const authorizeMiddleware = async (req, res, next) => {
     if (!req.user) return redirectToLogin(req, res);
 
     let resource;
@@ -66,6 +66,9 @@ function authorize(action, { concealForbidden = false } = {}) {
     if (resource) req[type] = resource;
     next();
   };
+  // Lets the route matrix test (P17-T01) see which action guards a route.
+  authorizeMiddleware.policyAction = action;
+  return authorizeMiddleware;
 }
 
 module.exports = { authorize };

@@ -1,0 +1,116 @@
+// The authorization route matrix (P17-T01): every route of the app, how it is
+// guarded and who may use it. tests/unit/routeMatrix.test.js walks the real
+// router stack and fails for a route that is missing here, an entry whose route
+// is gone, a guard that does not match the entry, and an anonymous request that
+// is not turned away the way the entry says.
+//
+// access:
+//   public        no guard on purpose (reading pages, the sign-in forms)
+//   login         `isLoggedIn`; a visitor is sent to /login (302)
+//   authorize     `isLoggedIn` + `authorize(action)`; a visitor is sent to /login (302)
+//   inline-login  the handler itself answers a visitor with 401 JSON
+//   admin         mounted behind `adminGuard`; a visitor gets 404
+//
+// Add a route to the app, add its line here (with the right access), and add the
+// object-level cases to tests/integration/authz.db.test.js.
+
+// prettier-ignore
+const MATRIX = {
+  "GET /": { access: "public", who: "anyone, signed in or not" },
+  "GET /about": { access: "public", who: "anyone, signed in or not" },
+  "GET /account/profile": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "PUT /account/profile": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "GET /admin": { access: "admin", who: "an active admin; everyone else, visitors included, gets 404 (adminGuard)" },
+  "GET /admin/audit": { access: "admin", who: "an active admin; everyone else, visitors included, gets 404 (adminGuard)" },
+  "GET /admin/listings": { access: "admin", who: "an active admin; everyone else, visitors included, gets 404 (adminGuard)" },
+  "GET /admin/listings/:id": { access: "admin", who: "an active admin; everyone else, visitors included, gets 404 (adminGuard)" },
+  "POST /admin/listings/:id/restore": { access: "admin", who: "an active admin; everyone else, visitors included, gets 404 (adminGuard)" },
+  "POST /admin/listings/:id/reviewed": { access: "admin", who: "an active admin; everyone else, visitors included, gets 404 (adminGuard)" },
+  "POST /admin/listings/:id/suspend": { access: "admin", who: "an active admin; everyone else, visitors included, gets 404 (adminGuard)" },
+  "GET /admin/users": { access: "admin", who: "an active admin; everyone else, visitors included, gets 404 (adminGuard)" },
+  "GET /admin/users/:id": { access: "admin", who: "an active admin; everyone else, visitors included, gets 404 (adminGuard)" },
+  "POST /admin/users/:id/reinstate": { access: "admin", who: "an active admin; everyone else, visitors included, gets 404 (adminGuard)" },
+  "POST /admin/users/:id/suspend": { access: "admin", who: "an active admin; everyone else, visitors included, gets 404 (adminGuard)" },
+  "GET /api/conversations": { access: "inline-login", who: "any signed-in member; a visitor gets 401 JSON (the handler answers it)" },
+  "GET /api/conversations/:id/messages": { access: "inline-login", who: "any signed-in member; a visitor gets 401 JSON (the handler answers it)" },
+  "POST /api/conversations/:id/messages": { access: "inline-login", who: "any signed-in member; a visitor gets 401 JSON (the handler answers it)" },
+  "GET /api/listings/:id/availability": { access: "public", who: "anyone, signed in or not" },
+  "POST /api/listings/:id/conversations": { access: "inline-login", who: "any signed-in member; a visitor gets 401 JSON (the handler answers it)" },
+  "GET /api/listings/:id/quote": { access: "public", who: "anyone, signed in or not" },
+  "GET /api/notifications/count": { access: "inline-login", who: "any signed-in member; a visitor gets 401 JSON (the handler answers it)" },
+  "POST /api/reservations/:id/conversation": { access: "inline-login", who: "any signed-in member; a visitor gets 401 JSON (the handler answers it)" },
+  "GET /api/search/map": { access: "public", who: "anyone, signed in or not" },
+  "GET /conversations/:id": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "POST /conversations/:id/messages": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "GET /host/calendar": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "GET /host/listings": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "POST /host/listings": { access: "authorize", action: "listing:create", who: "any active member (listing:create)" },
+  "GET /host/listings/:id": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "GET /host/listings/:id/calendar": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "POST /host/listings/:id/calendar/blocks": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "POST /host/listings/:id/calendar/unblock": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "POST /host/listings/:id/publish": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "GET /host/listings/:id/status": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "GET /host/listings/:id/steps/:n": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "POST /host/listings/:id/steps/:n": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "POST /host/listings/:id/unpublish": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "GET /host/listings/new": { access: "authorize", action: "listing:create", who: "any active member (listing:create)" },
+  "GET /host/reservations": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "POST /host/reservations/:id/accept": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "POST /host/reservations/:id/decline": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "GET /listings": { access: "public", who: "anyone, signed in or not" },
+  "POST /listings": { access: "authorize", action: "listing:create", who: "any active member (listing:create)" },
+  "DELETE /listings/:id": { access: "authorize", action: "listing:delete", who: "the listing's host, or an admin (listing:delete)" },
+  "GET /listings/:id": { access: "public", who: "anyone, signed in or not" },
+  "PUT /listings/:id": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "GET /listings/:id/checkout": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "POST /listings/:id/checkout": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "POST /listings/:id/contact": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "GET /listings/:id/edit": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "POST /listings/:id/images": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "DELETE /listings/:id/images/:imageId": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "PUT /listings/:id/images/:imageId": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "PUT /listings/:id/images/:imageId/cover": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "PUT /listings/:id/images/:imageId/move": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "PUT /listings/:id/images/order": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "POST /listings/:id/reviews": { access: "authorize", action: "review:create", who: "any active member; the service checks the stay (review:create)" },
+  "DELETE /listings/:id/reviews/:reviewId": { access: "authorize", action: "review:delete", who: "the review's author, or an admin (review:delete)" },
+  "PUT /listings/:id/sections/:key": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
+  "GET /listings/new": { access: "authorize", action: "listing:create", who: "any active member (listing:create)" },
+  "GET /login": { access: "public", who: "anyone, signed in or not" },
+  "POST /login": { access: "public", who: "anyone, signed in or not" },
+  "POST /logout": { access: "public", who: "anyone, signed in or not" },
+  "GET /messages": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "GET /notifications": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "POST /notifications/:id/read": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "POST /notifications/read-all": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "GET /privacy": { access: "public", who: "anyone, signed in or not" },
+  "GET /reports": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "POST /reports": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "GET /reports/new": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "GET /signup": { access: "public", who: "anyone, signed in or not" },
+  "POST /signup": { access: "public", who: "anyone, signed in or not" },
+  "GET /terms": { access: "public", who: "anyone, signed in or not" },
+  "GET /trips": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "GET /trips/:id": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "POST /trips/:id/cancel": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "GET /users/:id": { access: "public", who: "anyone, signed in or not" },
+};
+
+// Routes the app registers itself (src/app.js) that are not endpoints: they count
+// requests for a rate limit and hand over to the real router, or catch what no
+// router answered.
+// prettier-ignore
+const APP_LEVEL = {
+  "POST /login": "rate limit, then the user router",
+  "POST /signup": "rate limit, then the user router",
+  "POST /reports": "rate limit, then the reports router",
+  "POST /api/conversations/:id/messages": "rate limit, then the messages router",
+  "POST /api/listings/:id/conversations": "rate limit, then the messages router",
+  "POST /api/reservations/:id/conversation": "rate limit, then the messages router",
+  "POST /listings/:id/contact": "rate limit, then the messages router",
+  "POST /conversations/:id/messages": "rate limit, then the messages router",
+  "ALL /{*splat}": "404 for anything no router answered",
+};
+
+module.exports = { MATRIX, APP_LEVEL };

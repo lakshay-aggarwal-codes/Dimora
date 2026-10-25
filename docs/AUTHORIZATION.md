@@ -36,11 +36,23 @@ Policies are pure functions `(user, resource) => boolean` (no database, no reque
 
 "Active" = `status` is `active` (accounts without a `status` count as active). Suspended and deleted accounts can do nothing. A listing without an owner (old data) can be removed only by an admin; a review without an author likewise.
 
+## The route matrix (P17-T01)
+
+`tests/helpers/routeMatrix.js` lists every route of the app: its method and path, how it is guarded (`public`, `login`, `authorize` + action, `inline-login`, `admin`) and who may use it. `tests/unit/routeMatrix.test.js` builds the real app, reads its router stack and fails when
+
+- a route has no entry (a new route is not finished until someone decides who may use it) or an entry has no route any more;
+- the guards on a route are not the ones its entry names (`isLoggedIn`, `authorize(<action>)` with exactly that action, `adminGuard` in front of everything under `/admin`, every admin write wrapped in `auditedMutation`);
+- a public route other than sign-up, log-in and log-out changes data;
+- an anonymous request is not turned away as the entry says: 302 to `/login` (`login`, `authorize`), 401 JSON (`inline-login`), 404 (`admin`).
+
+`authorize(action)` marks the middleware it returns with `policyAction` so the test can see which action guards a route. The matrix says *who gets in the door*; object-level rules (is this booking yours?) stay in the policies and the services and are tested in `tests/integration/authz.db.test.js` and the per-feature suites.
+
 ## Adding a rule
 
 1. Write the function in `src/policies/<resource>.js` and register it in `src/policies/index.js`.
 2. Add a loader in `src/middleware/authorize.js` if the action needs a resource (and a message).
-3. Add rows to `tests/unit/policies.test.js` (it fails if an action is registered but missing from the matrix) and to `tests/integration/authz.db.test.js`.
+3. Add the route's line to `tests/helpers/routeMatrix.js` (the route matrix test fails without it).
+4. Add rows to `tests/unit/policies.test.js` (it fails if an action is registered but missing from the matrix) and to `tests/integration/authz.db.test.js`.
 
 ## Admin area (P14-T01)
 
