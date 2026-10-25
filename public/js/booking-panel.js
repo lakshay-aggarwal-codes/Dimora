@@ -47,10 +47,47 @@
     }
   }
 
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  /** "2026-12-05" -> "5 Dec" (text only: no Date, so no time zone can move it). */
+  function dayText(value) {
+    const match = /^\d{4}-(\d{2})-(\d{2})$/.exec(String(value));
+    return match ? Number(match[2]) + " " + (MONTHS[Number(match[1]) - 1] || match[1]) : String(value);
+  }
+
+  /** "2 days earlier" / "1 day later" for a window moved by `days` from the request. */
+  function shiftText(days) {
+    const n = Math.abs(days);
+    return n + (n === 1 ? " day " : " days ") + (days < 0 ? "earlier" : "later");
+  }
+
+  const validDate = (value) => typeof value === "string" && DATE_ONLY.test(value);
+
+  /**
+   * The nearest free stays of the same length (P15-T04), as plain data.
+   * Only windows with a valid quote are kept.
+   */
+  function describeAlternatives(alternatives) {
+    if (!alternatives || typeof alternatives !== "object" || !Array.isArray(alternatives.windows)) return null;
+    return {
+      radiusDays: Number.isInteger(alternatives.radiusDays) ? alternatives.radiusDays : 14,
+      windows: alternatives.windows
+        .filter((w) => w && validDate(w.in) && validDate(w.out) && w.quote && Number.isSafeInteger(w.quote.totalMinor))
+        .map((w) => ({
+          in: w.in,
+          out: w.out,
+          nights: w.nights,
+          label: dayText(w.in) + " to " + dayText(w.out),
+          shift: Number.isInteger(w.shiftDays) ? shiftText(w.shiftDays) : "",
+          total: formatMoney(w.quote.totalMinor, w.quote.currency),
+        })),
+    };
+  }
+
   /**
    * What the panel should show for a quote payload, as plain data:
    * { kind: "quote", lines: [{label, amount}], total, nights }, or
-   * { kind: "problems", messages: [...] }.
+   * { kind: "problems", messages: [...], alternatives?: { radiusDays, windows } }.
    */
   function describe(payload) {
     if (!payload || typeof payload !== "object") return { kind: "problems", messages: ["The price is not available right now."] };
@@ -67,7 +104,10 @@
       };
     }
     const messages = Array.isArray(payload.problems) ? payload.problems.map((p) => p.message).filter(Boolean) : [];
-    return { kind: "problems", messages: messages.length ? messages : ["These dates cannot be booked."] };
+    const view = { kind: "problems", messages: messages.length ? messages : ["These dates cannot be booked."] };
+    const alternatives = describeAlternatives(payload.alternatives);
+    if (alternatives) view.alternatives = alternatives;
+    return view;
   }
 
   /** Messages of a 400 / 429 / 5xx answer (the API's own error body). */
@@ -90,9 +130,7 @@
     return base + "?" + quoteQuery(payload.in, payload.out, payload.guests);
   }
 
-  const validDate = (value) => typeof value === "string" && DATE_ONLY.test(value);
-
-  globalThis.DimoraBookingPanelCore = { formatMoney, lineLabel, describe, describeError, quoteQuery, checkoutHref, validDate };
+  globalThis.DimoraBookingPanelCore = { formatMoney, lineLabel, describe, describeAlternatives, dayText, shiftText, describeError, quoteQuery, checkoutHref, validDate };
 
   // ---- the widget ----
 
@@ -147,6 +185,41 @@
       list.appendChild(item);
     });
     show(list);
+  }
+
+  /** The links to other free dates, under the reasons (P15-T04). Text only; the links are plain pages. */
+  function appendAlternatives(alternatives) {
+    const wrap = document.createElement("div");
+    wrap.className = "quote-alternatives mt-2";
+    wrap.setAttribute("data-alternatives", "");
+    const heading = document.createElement("p");
+    heading.className = "small fw-semibold mb-1";
+    if (!alternatives.windows.length) {
+      heading.textContent = "No free dates of the same length within " + alternatives.radiusDays + " days of these.";
+      wrap.appendChild(heading);
+      result.appendChild(wrap);
+      return;
+    }
+    heading.textContent = "Free on other dates:";
+    const list = document.createElement("ul");
+    list.className = "list-unstyled small mb-0";
+    const pageBase = String(checkoutBase || "").replace(/\/checkout$/, "");
+    alternatives.windows.forEach((w) => {
+      const item = document.createElement("li");
+      const link = document.createElement("a");
+      link.setAttribute("href", pageBase + "?" + quoteQuery(w.in, w.out, guestsSelect.value));
+      link.textContent = w.label + " (" + plural(w.nights, "night", "nights") + ", " + w.total + ")";
+      item.appendChild(link);
+      if (w.shift) {
+        const note = document.createElement("span");
+        note.className = "text-body-secondary";
+        note.textContent = " " + w.shift;
+        item.appendChild(note);
+      }
+      list.appendChild(item);
+    });
+    wrap.append(heading, list);
+    result.appendChild(wrap);
   }
 
   function showQuote(view) {
@@ -207,6 +280,7 @@
         setReserve(checkoutHref(checkoutBase, body));
       } else {
         showMessages(view.messages);
+        if (view.alternatives) appendAlternatives(view.alternatives);
       }
     } catch (err) {
       if (err && err.name === "AbortError") return;

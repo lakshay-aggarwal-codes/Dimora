@@ -5,6 +5,7 @@
 const ledger = require("./ledger");
 const { buildFilter } = require("./search");
 const { parseListingQuery } = require("../validation/searchQuery");
+const { DEFAULT_TIMEZONE, todayIn } = require("../utils/dates");
 
 /**
  * @param {object} query req.query
@@ -15,11 +16,20 @@ async function listingFilterFor(query, { now = new Date() } = {}) {
   const filter = buildFilter(parsed.searchParams);
   let takenIds = [];
   if (parsed.stay) {
-    const taken = await ledger.unavailableListingIds(
-      parsed.stay.checkIn,
-      parsed.stay.checkOut,
-      { now },
-    );
+    // With "Available +-3 days" a listing stays if ANY same-length stay
+    // starting within 3 days of the asked check-in is free (never before today).
+    const taken = parsed.stay.flexDays
+      ? await ledger.unavailableListingIdsFlexible(
+          parsed.stay.checkIn,
+          parsed.stay.checkOut,
+          parsed.stay.flexDays,
+          { now, earliest: todayIn(DEFAULT_TIMEZONE, now) },
+        )
+      : await ledger.unavailableListingIds(
+          parsed.stay.checkIn,
+          parsed.stay.checkOut,
+          { now },
+        );
     takenIds = taken;
     if (taken.length > 0) filter._id = { $nin: taken };
   }

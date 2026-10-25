@@ -3,7 +3,8 @@
 //   form          what to show in the form inputs, even when it was invalid
 //   errors        a message per parameter that was wrong
 //   searchParams  the same filters under the search service's names (P05-T01)
-//   stay          { checkIn, checkOut } as date-only Dates when both are valid
+//   stay          { checkIn, checkOut, flexDays } as date-only Dates when both
+//                 are valid (flexDays: 3 when "Available +-3 days" is on, else 0)
 //
 // URL names: dest, in, out, guests, minPrice, maxPrice, type, amenities,
 // minRating, sort, page (and, from the search service, keywords, bedrooms,
@@ -23,6 +24,9 @@ const {
   todayIn,
   tryParseDateOnly,
 } = require("../utils/dates");
+
+// "Available +-3 days" on the search page (P15-T04).
+const FLEX_DAYS = 3;
 
 const SORTS = Object.freeze([
   "relevance",
@@ -190,6 +194,18 @@ function parseListingQuery(
     state.out = formatDateOnly(stay.checkOut);
   }
 
+  // ---- flexible dates (P15-T04): only "3" means on; it needs valid dates ----
+  const rawFlex = pick(raw, ["flex"]);
+  let flexDays = 0;
+  if (rawFlex !== undefined && rawFlex !== "" && rawFlex !== "0") {
+    if (rawFlex !== "3") {
+      errors.flex = "Flexible dates can only be 3 days either side.";
+    } else if (stay.checkIn) {
+      flexDays = FLEX_DAYS;
+      state.flex = FLEX_DAYS;
+    }
+  }
+
   // ---- what the form inputs show (strings only, even when invalid) ----
   const text = (names) => {
     const value = pick(raw, names);
@@ -221,10 +237,10 @@ function parseListingQuery(
     errors,
     searchParams,
     stay: stay.checkIn
-      ? { checkIn: stay.checkIn, checkOut: stay.checkOut }
+      ? { checkIn: stay.checkIn, checkOut: stay.checkOut, flexDays }
       : null,
     page: state.page ?? 1,
   };
 }
 
-module.exports = { parseListingQuery, SORTS, MAX_PAGE };
+module.exports = { parseListingQuery, SORTS, MAX_PAGE, FLEX_DAYS };

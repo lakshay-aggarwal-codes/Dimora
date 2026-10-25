@@ -44,7 +44,12 @@
                 <button type="submit" class="btn btn-dark w-100">Search</button>
             </div>
         </div>
-        <% hidden(filterState, ["dest", "in", "out", "guests"]).forEach(([name, value]) => { %>
+        <div class="form-check mt-2">
+            <input class="form-check-input" type="checkbox" name="flex" value="3" id="flex"<% if (filterState.flex === 3) { %> checked<% } %> aria-describedby="flex-help">
+            <label class="form-check-label" for="flex">Available ±3 days</label>
+            <span class="form-text d-block" id="flex-help">Needs both dates. Also shows stays of the same length that start up to 3 days earlier or later.</span>
+        </div>
+        <% hidden(filterState, ["dest", "in", "out", "guests", "flex"]).forEach(([name, value]) => { %>
         <input type="hidden" name="<%= name %>" value="<%= value %>">
         <% }) %>
     </form>

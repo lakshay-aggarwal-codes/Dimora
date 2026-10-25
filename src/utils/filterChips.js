@@ -61,7 +61,10 @@ function activeChips(state = {}) {
 
   if (state.dest) add("dest", `Where: ${state.dest}`, { dest: undefined });
   if (state.in && state.out) {
-    add("dates", `${dayLabel(state.in)} to ${dayLabel(state.out)}`, { in: undefined, out: undefined });
+    add("dates", `${dayLabel(state.in)} to ${dayLabel(state.out)}`, { in: undefined, out: undefined, flex: undefined });
+  }
+  if (state.flex === 3 && state.in && state.out) {
+    add("flex", "Available ±3 days", { flex: undefined });
   }
   if (Number.isInteger(state.guests)) {
     add("guests", plural(state.guests, "guest", "guests"), { guests: undefined });

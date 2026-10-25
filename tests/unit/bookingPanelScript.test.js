@@ -162,3 +162,71 @@ describe("query and checkout address", () => {
       expect(core.validDate(bad)).toBe(false);
   });
 });
+
+describe("alternatives (P15-T04)", () => {
+  const payload = (over = {}) => ({
+    bookable: false,
+    problems: [{ code: "nights_unavailable", message: "These nights are not available: 2026-12-11." }],
+    quote: null,
+    alternatives: {
+      radiusDays: 14,
+      windows: [
+        { in: "2026-12-14", out: "2026-12-17", nights: 3, shiftDays: 4, quote: { totalMinor: 800000, currency: "INR" } },
+        { in: "2026-12-06", out: "2026-12-09", nights: 3, shiftDays: -4, quote: { totalMinor: 750000, currency: "INR" } },
+      ],
+    },
+    ...over,
+  });
+
+  test("describe keeps the reasons and adds the windows with a label, the shift and the price", () => {
+    const view = core.describe(payload());
+    expect(view.kind).toBe("problems");
+    expect(view.messages).toEqual(["These nights are not available: 2026-12-11."]);
+    expect(view.alternatives.radiusDays).toBe(14);
+    expect(view.alternatives.windows.map((w) => [w.in, w.out, w.nights, w.label, w.shift, plain(w.total)])).toEqual([
+      ["2026-12-14", "2026-12-17", 3, "14 Dec to 17 Dec", "4 days later", "₹8,000"],
+      ["2026-12-06", "2026-12-09", 3, "6 Dec to 9 Dec", "4 days earlier", "₹7,500"],
+    ]);
+  });
+
+  test("an empty list is kept (the panel says nothing is free nearby); no alternatives key means none", () => {
+    expect(core.describe(payload({ alternatives: { radiusDays: 14, windows: [] } })).alternatives).toEqual({ radiusDays: 14, windows: [] });
+    expect("alternatives" in core.describe(payload({ alternatives: undefined }))).toBe(false);
+    expect("alternatives" in core.describe({ bookable: false, problems: [{ message: "x" }] })).toBe(false);
+  });
+
+  test("a bookable quote carries no alternatives", () => {
+    const view = core.describe({ bookable: true, quote: { nights: 1, currency: "INR", totalMinor: 100, lines: [] }, alternatives: { windows: [] } });
+    expect(view.kind).toBe("quote");
+    expect(view.alternatives).toBeUndefined();
+  });
+
+  test("windows with bad dates or a bad price are left out, and junk is ignored", () => {
+    const bad = payload({
+      alternatives: {
+        radiusDays: "14",
+        windows: [
+          null,
+          { in: "tomorrow", out: "2026-12-17", nights: 3, quote: { totalMinor: 1 } },
+          { in: "2026-12-14", out: "2026-12-17", nights: 3, quote: { totalMinor: "800000" } },
+          { in: "2026-12-14", out: "2026-12-17", nights: 3 },
+          { in: "2026-12-14", out: "2026-12-17", nights: 3, quote: { totalMinor: 800000, currency: "INR" } },
+        ],
+      },
+    });
+    const view = core.describe(bad);
+    expect(view.alternatives.radiusDays).toBe(14);
+    expect(view.alternatives.windows).toHaveLength(1);
+    expect(core.describeAlternatives("nope")).toBeNull();
+    expect(core.describeAlternatives({ windows: "x" })).toBeNull();
+  });
+
+  test("dayText and shiftText are text only", () => {
+    expect(core.dayText("2026-01-05")).toBe("5 Jan");
+    expect(core.dayText("2026-12-31")).toBe("31 Dec");
+    expect(core.dayText("whatever")).toBe("whatever");
+    expect(core.shiftText(1)).toBe("1 day later");
+    expect(core.shiftText(-1)).toBe("1 day earlier");
+    expect(core.shiftText(-14)).toBe("14 days earlier");
+  });
+});

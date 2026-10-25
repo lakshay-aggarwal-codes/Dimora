@@ -16,7 +16,8 @@ module.exports.show = async (req, res) => {
     (isPublic(listing) || can("listing:edit", req.user, listing));
   if (!visible) throw new NotFoundError("That listing does not exist.");
 
-  const payload = await getQuote(listing, req.query);
+  // The booking panel also wants the nearest free stays when the nights are taken (P15-T04).
+  const payload = await getQuote(listing, req.query, { alternatives: true });
   res.set("Cache-Control", "no-store");
   res.json(payload);
 };

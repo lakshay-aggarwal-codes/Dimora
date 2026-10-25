@@ -6,6 +6,7 @@ const ORDER = [
   "in",
   "out",
   "guests",
+  "flex",
   "category",
   "minPrice",
   "maxPrice",

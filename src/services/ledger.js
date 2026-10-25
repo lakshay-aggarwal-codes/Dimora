@@ -8,6 +8,7 @@
 //   releaseBlockedNights(listingId, from, to)          (P07-T03: unblock)
 //   unavailableDates(listingId, from, to, { now }?)    (P07-T04: public availability API)
 //   confirmNights(sourceId)                            (P07-T05: accepting a request)
+//   unavailableListingIdsFlexible(from, to, flexDays)  (P15-T04: search "available +-3 days")
 //
 // Booking works by inserting one row per night with `insertMany(...,
 // { ordered: true })`. The unique (listing, date) index rejects a night that is
@@ -407,10 +408,74 @@ function createLedgerService({
     return [...ids.values()];
   }
 
+  /**
+   * Search with flexible dates (P15-T04): ids of the listings that have NO
+   * free stay of the same length starting within `flexDays` days of `from`
+   * (before or after). A listing with a free shifted stay is not returned, so
+   * the search keeps it. Shifts that would start before `earliest` (today) do
+   * not count. An expired hold counts as free.
+   */
+  async function unavailableListingIdsFlexible(
+    from,
+    to,
+    flexDays,
+    { now = new Date(), earliest = from } = {},
+  ) {
+    if (!isDateOnly(from) || !isDateOnly(to)) {
+      throw new TypeError("from and to must be date-only Dates (00:00:00Z)");
+    }
+    if (!Number.isInteger(flexDays) || flexDays < 0 || flexDays > 14) {
+      throw new TypeError("flexDays must be a whole number from 0 to 14");
+    }
+    const nights = nightsOf(from, to);
+    if (nights <= 0) throw new TypeError("to must be after from");
+    const wideFrom = addDays(from, -flexDays);
+    const wideTo = addDays(to, flexDays);
+    if (nightsOf(wideFrom, wideTo) > MAX_AVAILABILITY_SPAN_DAYS) {
+      throw new TypeError(
+        `the range can cover at most ${MAX_AVAILABILITY_SPAN_DAYS} nights`,
+      );
+    }
+    const rows = await model
+      .find(
+        { date: { $gte: wideFrom, $lt: wideTo } },
+        { listing: 1, date: 1, holdExpiresAt: 1 },
+      )
+      .lean();
+    const byListing = new Map();
+    for (const row of rows) {
+      if (isStale(row, now)) continue;
+      const key = String(row.listing);
+      if (!byListing.has(key)) {
+        byListing.set(key, { id: row.listing, taken: new Set() });
+      }
+      byListing.get(key).taken.add(row.date.getTime());
+    }
+    const unavailable = [];
+    for (const { id, taken } of byListing.values()) {
+      let hasWindow = false;
+      for (let shift = -flexDays; shift <= flexDays && !hasWindow; shift += 1) {
+        const start = addDays(from, shift);
+        if (start.getTime() < earliest.getTime()) continue;
+        let free = true;
+        for (let i = 0; i < nights; i += 1) {
+          if (taken.has(addDays(start, i).getTime())) {
+            free = false;
+            break;
+          }
+        }
+        if (free) hasWindow = true;
+      }
+      if (!hasWindow) unavailable.push(id);
+    }
+    return unavailable;
+  }
+
   return {
     reserveNights,
     releaseNights,
     availableRanges,
+    unavailableListingIdsFlexible,
     nightsInRange,
     releaseBlockedNights,
     unavailableDates,

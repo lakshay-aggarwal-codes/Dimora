@@ -63,10 +63,13 @@ describe("quote API", () => {
     jest
       .spyOn(ledger, "unavailableDates")
       .mockResolvedValue([parseDateOnly(text(21))]);
+    // no free stretch anywhere nearby: the answer says so (P15-T04)
+    jest.spyOn(ledger, "availableRanges").mockResolvedValue([]);
     const res = await createAgent().get(URL(doc._id, qs(stay())));
     expect(res.status).toBe(200);
     expect(res.body.bookable).toBe(false);
     expect(res.body.quote).toBeNull();
+    expect(res.body.alternatives).toEqual({ radiusDays: 14, windows: [] });
     expect(res.body.problems).toEqual([
       {
         code: "nights_unavailable",
@@ -76,6 +79,54 @@ describe("quote API", () => {
     expect(JSON.stringify(res.body)).not.toMatch(
       /source|reservation|block|owner|user/i,
     );
+  });
+
+  test("taken nights also return the nearest free stays of the same length, each priced by the quote service (P15-T04)", async () => {
+    const doc = makeDoc();
+    stubFindById(doc);
+    const requestedIn = parseDateOnly(text(20));
+    const free = { from: parseDateOnly(text(24)), to: parseDateOnly(text(30)), nights: 6 };
+    jest.spyOn(ledger, "availableRanges").mockResolvedValue([free]);
+    // the requested stay is taken; every suggested stay is free when it is checked
+    jest.spyOn(ledger, "unavailableDates").mockImplementation(async (id, from) =>
+      from.getTime() === requestedIn.getTime() ? [parseDateOnly(text(21))] : [],
+    );
+    const res = await createAgent().get(URL(doc._id, qs(stay())));
+    expect(res.status).toBe(200);
+    expect(res.body.bookable).toBe(false);
+    const { windows, radiusDays } = res.body.alternatives;
+    expect(radiusDays).toBe(14);
+    expect(windows.map((w) => [w.in, w.out, w.nights, w.shiftDays])).toEqual([
+      [text(24), text(27), 3, 4],
+      [text(27), text(30), 3, 7],
+    ]);
+    for (const w of windows) {
+      const expected = pricing.quote({
+        listing: doc,
+        checkIn: parseDateOnly(w.in),
+        checkOut: parseDateOnly(w.out),
+        guests: 2,
+      });
+      expect(w.quote).toEqual(JSON.parse(JSON.stringify(expected)));
+    }
+  });
+
+  test("a stay that is bookable, or refused by a rule, carries no alternatives", async () => {
+    const doc = makeDoc({ minNights: 5 });
+    stubFindById(doc);
+    let ranges = jest.spyOn(ledger, "availableRanges");
+    jest.spyOn(ledger, "unavailableDates").mockResolvedValue([]);
+    const rule = await createAgent().get(URL(doc._id, qs(stay())));
+    expect(rule.body.alternatives).toBeUndefined();
+    expect(ranges).not.toHaveBeenCalled();
+    jest.restoreAllMocks();
+    stubFindById(makeDoc());
+    ranges = jest.spyOn(ledger, "availableRanges");
+    jest.spyOn(ledger, "unavailableDates").mockResolvedValue([]);
+    const ok = await createAgent().get(URL(doc._id, qs(stay())));
+    expect(ok.body.bookable).toBe(true);
+    expect(ok.body.alternatives).toBeUndefined();
+    expect(ranges).not.toHaveBeenCalled();
   });
 
   test("a rule problem (minimum stay) is a 200 with its reason", async () => {
