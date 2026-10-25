@@ -38,12 +38,31 @@ function startHousekeeping() {
   const { createSweeper, startSweeper } = require("./src/services/sweeper");
   const logger = createLogger();
   startSweeper({
-    runOnce: createSweeper({
-      logger,
-      notifier: require("./src/services/notificationEvents").notifier,
-    }).runOnce,
+    runOnce: createSweeper({ logger }).runOnce,
     intervalMs: config.sweeper.intervalMs,
     logger,
+  });
+}
+
+// Nearby places (P15-T01): fail at start-up on a bad OVERPASS_URL, then retry
+// the fetches that failed every few minutes.
+function startNearby() {
+  const { readNearbyConfig } = require("./src/config/nearby");
+  let nearbyConfig;
+  try {
+    nearbyConfig = readNearbyConfig();
+  } catch (err) {
+    console.error(`[config] ${err.message}`);
+    process.exit(1);
+  }
+  if (!nearbyConfig.enabled) {
+    console.log("Nearby places disabled (NEARBY_ENABLED=false)");
+    return;
+  }
+  const { createLogger } = require("./src/config/logger");
+  require("./src/services/nearbyRetry").startNearbyRetry({
+    logger: createLogger(),
+    config: nearbyConfig,
   });
 }
 
@@ -55,6 +74,7 @@ main()
   .then(() => {
     console.log("Connected to DB");
     startHousekeeping();
+    startNearby();
 
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);

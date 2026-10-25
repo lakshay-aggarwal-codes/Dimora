@@ -7,7 +7,6 @@ const controller = require("../controllers/host");
 const availability = require("../controllers/availability");
 const reservations = require("../controllers/hostReservations");
 const hostCalendar = require("../controllers/hostCalendar");
-const hostOverview = require("../controllers/hostOverview");
 
 const router = express.Router();
 const mayCreate = [isLoggedIn, authorize("listing:create")];
@@ -33,6 +32,11 @@ router.post(
 router.get("/listings/:id/status", ...mayEdit, controller.status);
 router.post("/listings/:id/publish", ...mayEdit, wrapAsync(controller.publish));
 router.post(
+  "/listings/:id/nearby/refresh",
+  ...mayEdit,
+  controller.refreshNearby,
+);
+router.post(
   "/listings/:id/unpublish",
   ...mayEdit,
   wrapAsync(controller.unpublish),
@@ -50,9 +54,6 @@ router.post(
   ...mayEdit,
   wrapAsync(availability.unblock),
 );
-
-// The overview tiles (P13-T01): any signed-in member; it only reads their own data.
-router.get("/", isLoggedIn, wrapAsync(hostOverview.show));
 
 // All listings in one month (P13-T02): any signed-in host; it only reads
 // that host's own listings.

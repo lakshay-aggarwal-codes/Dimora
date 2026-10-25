@@ -54,6 +54,10 @@
             <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#delete-listing">Delete listing</button>
         </div>
 
+        <% if (listing.status === "published" && typeof nearby !== "undefined") { %>
+        <%- include("../partials/nearby-status.ejs", { listingId: String(listing._id), nearby }) %>
+        <% } %>
+
         <%- include("../partials/confirm-modal.ejs", {
             id: "delete-listing",
             title: "Delete this listing?",

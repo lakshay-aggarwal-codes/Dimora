@@ -30,6 +30,7 @@
     "migrate": "node scripts/migrate.js",
     "migrate:dry": "node scripts/migrate.js --dry-run",
     "import:airbnb": "node scripts/import-dataset.js",
+    "nearby:refresh": "node scripts/refresh-nearby.js",
     "sweep": "node scripts/sweep.js",
     "make-admin": "node scripts/make-admin.js"
   },

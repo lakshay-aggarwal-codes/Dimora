@@ -1,0 +1,41 @@
+<%#
+    Host status page: what is stored about places around the listing (P15-T01).
+    Locals: listingId, nearby (src/services/nearby.js summaryFor), csrf helper.
+    Names come from OpenStreetMap, i.e. from strangers: every one is written with
+    <%= %> (escaped), never <%- %>.
+%>
+<section class="nearby-status" aria-labelledby="nearby-heading">
+    <h2 id="nearby-heading" class="h5">Nearby places</h2>
+    <% if (!nearby.enabled) { %>
+        <p class="text-body-secondary">Nearby places are switched off on this site.</p>
+    <% } else { %>
+        <% if (nearby.fetchedOn) { %>
+            <p>Updated <%= nearby.fetchedOn %>: <%= nearby.total %> place<%= nearby.total === 1 ? '' : 's' %> found. Source: <%= nearby.source %>.
+               Distances are straight lines from the approximate location guests see, not routes.</p>
+            <% nearby.categories.forEach((category) => { %>
+            <details>
+                <summary><%= category.label %> (<%= category.items.length %>)</summary>
+                <% if (category.items.length === 0) { %>
+                    <p class="text-body-secondary">Nothing found nearby in OpenStreetMap. Data in some areas is thin.</p>
+                <% } else { %>
+                <ul>
+                    <% category.items.forEach((item) => { %>
+                    <li><%= item.name || (item.kind ? item.kind.replace(/_/g, ' ') : 'Unnamed place') %>, about <%= item.distanceM %> m</li>
+                    <% }) %>
+                </ul>
+                <% } %>
+            </details>
+            <% }) %>
+        <% } else { %>
+            <p class="text-body-secondary">Not fetched yet. It is fetched when you publish, and again if you press the button.</p>
+        <% } %>
+        <% if (nearby.failing) { %>
+            <p role="status">The last attempt did not work (OpenStreetMap&rsquo;s server was busy or unreachable). We will try again automatically.</p>
+        <% } %>
+        <form method="POST" action="/host/listings/<%= listingId %>/nearby/refresh">
+            <%- include("../includes/csrf.ejs") %>
+            <button type="submit" class="btn btn-outline-dark btn-sm"<% if (!nearby.canRefresh) { %> disabled aria-disabled="true"<% } %>>Refresh nearby places</button>
+            <% if (!nearby.canRefresh && nearby.retryOn) { %><span class="small text-body-secondary">Available again on <%= nearby.retryOn %>.</span><% } %>
+        </form>
+    <% } %>
+</section>

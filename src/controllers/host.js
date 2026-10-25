@@ -14,6 +14,7 @@ const {
 const { validateStep } = require("../validation/wizard");
 const { evaluateReadiness } = require("../services/readiness");
 const lifecycle = require("../services/lifecycle");
+const nearby = require("../services/nearby");
 const { NotFoundError, ValidationError } = require("../utils/errors");
 const {
   PROPERTY_TYPES,
@@ -233,6 +234,9 @@ module.exports.publish = async (req, res) => {
     }
     throw err;
   }
+  // Nearby places are fetched in the background: a slow or broken Overpass
+  // never delays or blocks publishing (P15-T01).
+  nearby.scheduleRefresh(listing._id, { deps: { log: req.log } });
   req.flash("success", "Your listing is published.");
   res.redirect(`/listings/${listing._id}`);
 };
@@ -256,9 +260,38 @@ module.exports.status = (req, res) => {
   res.render("host/status.ejs", {
     listing,
     readiness: evaluateReadiness(listing),
+    nearby: nearby.summaryFor(listing),
     pageTitle: `Status of ${listing.title}`,
     pageDescription: "Publish, unpublish or delete your listing.",
   });
+};
+
+// Host button "Refresh nearby places" (P15-T01). The check is instant; the
+// fetch itself runs in the background and the host sees the result on this page.
+module.exports.refreshNearby = (req, res) => {
+  const listing = req.listing;
+  if (listing.deletedAt)
+    throw new NotFoundError("That listing does not exist.");
+  const back = () => res.redirect(statusUrl(listing._id));
+  if (listing.status !== "published") {
+    req.flash("error", "Nearby places are fetched when a listing is published.");
+    return back();
+  }
+  const verdict = nearby.manualVerdict(listing);
+  if (!verdict.ok) {
+    const why = {
+      disabled: "Nearby places are switched off on this site.",
+      no_location: "This listing has no location yet.",
+      cooldown: `Nearby places were updated recently. You can refresh them again on ${verdict.retryAt && verdict.retryAt.toISOString().slice(0, 10)}.`,
+      throttled: "A refresh was just tried. Please wait a few minutes.",
+      fresh: "Nearby places are up to date.",
+    }[verdict.reason];
+    req.flash("error", why || "Nearby places cannot be refreshed now.");
+    return back();
+  }
+  nearby.scheduleRefresh(listing._id, { manual: true, deps: { log: req.log } });
+  req.flash("success", "We are fetching nearby places. This can take a minute; reload this page to see them.");
+  return back();
 };
 
 // "My listings": everything this host owns and what to do next with each.

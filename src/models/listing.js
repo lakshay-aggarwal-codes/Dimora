@@ -287,6 +287,27 @@ const listingSchema = new Schema(
       id: { type: String, maxlength: 64 },
     },
 
+    // Places around the listing, from OpenStreetMap (P15-T01). Written only by
+    // src/services/nearby.js; distances are straight lines from the PUBLIC
+    // (approximate) point. `key` says which precise point the data is for.
+    nearby: {
+      fetchedAt: { type: Date },
+      attemptedAt: { type: Date },
+      source: { type: String, maxlength: 60 },
+      key: { type: String, maxlength: 32 },
+      failures: { type: Number, default: 0, min: 0 },
+      nextRetryAt: { type: Date },
+      items: [
+        {
+          _id: false,
+          category: { type: String, maxlength: 20 },
+          name: { type: String, maxlength: 100 },
+          kind: { type: String, maxlength: 40 },
+          distanceM: { type: Number, min: 0 },
+        },
+      ],
+    },
+
     // Soft delete: the row stays, the pages stop showing it (P04-T05).
     deletedAt: { type: Date },
 
