@@ -297,6 +297,115 @@ describe("pages", () => {
   });
 });
 
+describe("the inbox page (P11-T03)", () => {
+  const writeTo = async (guest, text, listing = LISTING) => {
+    const res = await request(app(guest)).post(`/api/listings/${listing}/conversations`).type("form").send({});
+    const cid = res.body.conversation.id;
+    await post(guest, cid, text);
+    return cid;
+  };
+
+  test("signed out goes to the login page", async () => {
+    const res = await request(app(undefined)).get("/messages");
+    expect(res.headers.location).toMatch(/\/login/);
+  });
+
+  test("an empty inbox says so and points to the listings", async () => {
+    const res = await request(app(ann)).get("/messages");
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("No messages yet");
+    expect(res.text).toContain('href="/listings"');
+    expect(res.headers["cache-control"]).toBe("no-store");
+  });
+
+  test("a conversation nobody has written in is not listed", async () => {
+    await open();
+    const res = await request(app(hal)).get("/messages");
+    expect(res.text).toContain("No messages yet");
+  });
+
+  test("lists my conversations with who, which listing, a preview, and unread in words", async () => {
+    const cid = await writeTo(ann, "Is the <b>cot</b> free?");
+    const forHost = await request(app(hal)).get("/messages");
+    expect(forHost.status).toBe(200);
+    expect(forHost.text).toContain(`href="/conversations/${cid}"`);
+    expect(forHost.text).toContain("conversation-row conversation-unread");
+    expect(forHost.text).toContain("1 unread");
+    expect(forHost.text).toContain(">ann<");
+    expect(forHost.text).toContain("Sea &lt;b&gt;house&lt;/b&gt;");
+    // The preview is text: escaped, never HTML.
+    expect(forHost.text).toContain("Is the &lt;b&gt;cot&lt;/b&gt; free?");
+    expect(forHost.text).not.toContain("<b>cot</b>");
+    // The sender sees their own message as read, prefixed "You:".
+    const forGuest = await request(app(ann)).get("/messages");
+    expect(forGuest.text).not.toContain("conversation-unread");
+    expect(forGuest.text).not.toContain("unread</span>");
+    expect(forGuest.text).toContain("You: ");
+  });
+
+  test("opening the thread clears the unread mark in the list", async () => {
+    const cid = await writeTo(ann, "Hello");
+    await request(app(hal)).get(`/conversations/${cid}`);
+    const res = await request(app(hal)).get("/messages");
+    expect(res.text).not.toContain("conversation-unread");
+  });
+
+  test("an outsider and an admin see none of it", async () => {
+    await writeTo(ann, "Private");
+    for (const user of [eve, root]) {
+      const res = await request(app(user)).get("/messages");
+      expect(res.text).toContain("No messages yet");
+      expect(res.text).not.toContain("Private");
+    }
+  });
+
+  test("pages of 20 with page links", async () => {
+    for (let i = 0; i < 25; i += 1) {
+      const guest = person(id(100 + i), `g${i}`);
+      db.User.rows.push(guest);
+      await writeTo(guest, `Hello ${i}`);
+    }
+    const first = await request(app(hal)).get("/messages");
+    expect(first.text.match(/class="conversation-row/g)).toHaveLength(20);
+    expect(first.text).toContain('href="/messages?page=2"');
+    const second = await request(app(hal)).get("/messages?page=2");
+    expect(second.text.match(/class="conversation-row/g)).toHaveLength(5);
+  });
+});
+
+describe("the thread page keeps itself current (P11-T03)", () => {
+  test("the newest page polls every 15 seconds and loads the script", async () => {
+    const cid = await open();
+    await post(ann, cid, "Hi");
+    const res = await request(app(ann)).get(`/conversations/${cid}`);
+    expect(res.text).toContain("data-message-list");
+    expect(res.text).toContain(`data-messages-url="/api/conversations/${cid}/messages"`);
+    expect(res.text).toContain('data-poll-seconds="15"');
+    expect(res.text).toContain('role="log"');
+    expect(res.text).toMatch(/<li class="message message-mine" data-id="[0-9a-f]{24}">/);
+    expect(res.text).toContain('<script src="/js/conversation-thread.js"></script>');
+    expect(res.text).toContain('href="/messages"');
+  });
+
+  test("an empty thread shows the hint, and the list is still there for polling", async () => {
+    const cid = await open();
+    const res = await request(app(ann)).get(`/conversations/${cid}`);
+    expect(res.text).toMatch(/<p class="text-body-secondary" data-empty>No messages yet/);
+    expect(res.text).toContain("data-message-list");
+  });
+
+  test("an older page (?before=) is not polled", async () => {
+    const cid = await open();
+    for (let i = 1; i <= 52; i += 1) await post(ann, cid, `M${i}`);
+    const newest = await request(app(ann)).get(`/api/conversations/${cid}/messages`);
+    const older = await request(app(ann)).get(`/conversations/${cid}?before=${newest.body.nextBefore}`);
+    expect(older.status).toBe(200);
+    expect(older.text).toContain("data-message-list");
+    expect(older.text).not.toContain("data-messages-url");
+    expect(older.text).not.toContain("data-poll-seconds");
+  });
+});
+
 describe("the whole app", () => {
   test("pages send a visitor to log in; the API answers 401 JSON", async () => {
     const agent = createAgent();

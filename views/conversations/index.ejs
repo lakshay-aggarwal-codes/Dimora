@@ -1,0 +1,36 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    The member's messages (P11-T03). Locals: conversations, page, totalPages,
+    total (src/services/conversations.js listFor). Names, listing titles and
+    previews are plain text and escaped. An unread conversation says so in
+    words as well as with a dot.
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-8">
+        <h1 class="h3">Messages</h1>
+
+        <% if (conversations.length === 0) { %>
+        <%- include("../partials/empty-state.ejs", { title: "No messages yet", message: "When you contact a host, or a guest contacts you, the conversation will be here.", icon: "fa-comments", actionHref: "/listings", actionLabel: "Browse places to stay", headingLevel: 2 }) %>
+        <% } else { %>
+        <ul class="conversation-list" aria-label="Conversations, newest message first">
+            <% conversations.forEach((c) => { %>
+            <li>
+                <a class="conversation-row<%= c.unread > 0 ? ' conversation-unread' : '' %>" href="/conversations/<%= c.id %>">
+                    <span class="conversation-dot" aria-hidden="true"></span>
+                    <span class="conversation-main">
+                        <span class="conversation-name"><%= c.otherName %></span>
+                        <span class="conversation-listing"><%= c.listingTitle %></span>
+                        <span class="conversation-preview"><%= c.lastFromMe ? "You: " : "" %><%= c.preview %></span>
+                    </span>
+                    <span class="conversation-side">
+                        <time class="conversation-time"><%= c.when %></time>
+                        <% if (c.unread > 0) { %><span class="badge text-bg-dark"><%= c.unread %> unread</span><% } %>
+                    </span>
+                </a>
+            </li>
+            <% }) %>
+        </ul>
+        <%- include("../partials/pagination.ejs", { page, totalPages, baseUrl: "/messages", query: {} }) %>
+        <% } %>
+    </div>
+</div>

@@ -266,6 +266,13 @@ describe("logged-in navbar", () => {
     expect(bell).not.toContain("coming soon");
   });
 
+  test("the account menu links to the messages inbox (P11-T03)", async () => {
+    const html = await navbar();
+    expect(html).toMatch(/<a class="dropdown-item" href="\/messages">Messages<\/a>/);
+    const here = await navbar({ currentPath: "/messages" });
+    expect(here).toMatch(/<a class="dropdown-item" href="\/messages" aria-current="page">Messages<\/a>/);
+  });
+
   test("the bell is the current page on /notifications", async () => {
     const html = await navbar({ currentPath: "/notifications" });
     expect(html).toMatch(

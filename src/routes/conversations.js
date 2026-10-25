@@ -8,7 +8,7 @@
 //   POST /api/listings/:id/conversations          "Contact host"
 //   POST /api/reservations/:id/conversation       the thread of one booking
 // Pages (a visitor is sent to the login page):
-//   POST /listings/:id/contact, GET /conversations/:id,
+//   POST /listings/:id/contact, GET /messages (the inbox), GET /conversations/:id,
 //   POST /conversations/:id/messages
 const express = require("express");
 const wrapAsync = require("../utils/wrapAsync");
@@ -30,6 +30,7 @@ router.post(
 );
 
 router.post("/listings/:id/contact", isLoggedIn, wrapAsync(controller.contact));
+router.get("/messages", isLoggedIn, wrapAsync(controller.inbox));
 router.get("/conversations/:id", isLoggedIn, wrapAsync(controller.show));
 router.post(
   "/conversations/:id/messages",
