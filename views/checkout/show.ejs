@@ -32,7 +32,7 @@
         <div class="col-lg-7">
             <div class="checkout-listing d-flex gap-3 mb-4">
                 <% if (c.listing.coverUrl) { %>
-                <img class="checkout-cover" src="<%= imageUrl(c.listing.coverUrl, 'thumb') %>" alt="" width="200" height="150">
+                <img class="checkout-cover" src="<%= imageUrl(c.listing.coverUrl, 'thumb') %>" alt="" width="200" height="150" loading="lazy" decoding="async">
                 <% } %>
                 <div>
                     <h2 class="h5 mb-1"><a href="/listings/<%= c.listing.id %>"><%= c.listing.title %></a></h2>

@@ -35,7 +35,7 @@
             <li class="trip-card">
                 <a class="trip-card-link" href="/trips/<%= trip.id %>">
                     <% if (trip.coverUrl) { %>
-                    <img class="trip-cover" src="<%= trip.coverUrl %>" alt="" loading="lazy" width="120" height="90">
+                    <img class="trip-cover" src="<%= typeof imageUrl === 'function' ? imageUrl(trip.coverUrl, 'thumb') : trip.coverUrl %>" alt="" loading="lazy" decoding="async" width="120" height="90">
                     <% } else { %>
                     <span class="trip-cover trip-cover-empty" aria-hidden="true"></span>
                     <% } %>

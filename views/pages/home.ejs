@@ -41,7 +41,7 @@
         <% destinations.forEach((place) => { %>
             <li>
                 <a class="destination-link" href="/listings?search=<%= encodeURIComponent(place.search) %>">
-                    <% if (place.imageUrl) { %><img class="destination-image" src="<%= place.imageUrl %>" alt="" loading="lazy"><% } %>
+                    <% if (place.imageUrl) { %><img class="destination-image" src="<%= typeof imageUrl === 'function' ? imageUrl(place.imageUrl, 'avatar') : place.imageUrl %>" alt="" width="56" height="56" loading="lazy" decoding="async"><% } %>
                     <span class="destination-name"><%= place.label %></span>
                     <span class="destination-count"><%= place.count %> <%= place.count === 1 ? "stay" : "stays" %></span>
                 </a>

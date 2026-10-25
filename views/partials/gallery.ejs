@@ -20,7 +20,9 @@
 <section class="gallery" data-gallery aria-label="Photos of <%= galleryTitle %>">
     <a class="gallery-main" href="<%= imageUrl(photos[0].url, 'full') %>" data-gallery-item
         data-alt="<%= altFor(photos[0], 0) %>" data-caption="<%= photos[0].caption %>">
-        <img class="gallery-main-img" src="<%= imageUrl(photos[0].url, 'card') %>" alt="<%= altFor(photos[0], 0) %>">
+        <%# The main photo is what the visitor sees first: load it at once, ahead of the rest. %>
+        <% const mainSet = typeof imageSrcset === "function" ? imageSrcset(photos[0].url, [600, 900, 1200]) : ""; %>
+        <img class="gallery-main-img" src="<%= imageUrl(photos[0].url, 'card') %>" alt="<%= altFor(photos[0], 0) %>"<% if (mainSet) { %> srcset="<%= mainSet %>" sizes="(min-width: 992px) 60vw, 100vw"<% } %> width="1200" height="900" loading="eager" fetchpriority="high" decoding="async">
         <% if (photos.length > 1) { %>
         <span class="gallery-more">Show all <%= photos.length %> photos</span>
         <% } %>
@@ -31,7 +33,7 @@
         <li>
             <a class="gallery-thumb" href="<%= imageUrl(photo.url, 'full') %>" data-gallery-item
                 data-alt="<%= altFor(photo, index) %>" data-caption="<%= photo.caption %>">
-                <img src="<%= imageUrl(photo.url, 'thumb') %>" alt="Photo <%= index + 1 %> of <%= photos.length %>: <%= altFor(photo, index) %>">
+                <img src="<%= imageUrl(photo.url, 'thumb') %>" alt="Photo <%= index + 1 %> of <%= photos.length %>: <%= altFor(photo, index) %>" width="200" height="150" loading="lazy" decoding="async">
             </a>
         </li>
         <% }) %>

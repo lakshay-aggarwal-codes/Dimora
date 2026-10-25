@@ -33,4 +33,54 @@ function imageUrl(url, preset = "card") {
   return `${base}${PRESETS[preset]}/${rest}`;
 }
 
-module.exports = { imageUrl, PRESETS };
+const UNSPLASH_HOST = "images.unsplash.com";
+const MIN_WIDTH = 100;
+const MAX_WIDTH = 4000;
+
+/**
+ * The `srcset` of a picture: the same photo at several widths, so a phone
+ * downloads a 400 px file and a large screen a 1200 px one (P18-T01).
+ *   imageSrcset("https://res.cloudinary.com/x/image/upload/v1/a.jpg", [400, 800])
+ *   -> "https://res.cloudinary.com/x/image/upload/w_400,f_auto,q_auto/v1/a.jpg 400w,
+ *       https://res.cloudinary.com/x/image/upload/w_800,f_auto,q_auto/v1/a.jpg 800w"
+ * Cloudinary uploads and the Unsplash seed photos are resized; any other URL, or
+ * one that already carries a transformation, gives "" (the plain `src` is used).
+ * @param {string} url
+ * @param {number[]} [widths] whole numbers from 100 to 4000
+ */
+function imageSrcset(url, widths = [400, 800, 1200]) {
+  if (
+    !Array.isArray(widths) ||
+    widths.length === 0 ||
+    !widths.every((w) => Number.isInteger(w) && w >= MIN_WIDTH && w <= MAX_WIDTH)
+  ) {
+    throw new Error("imageSrcset: widths must be whole numbers from 100 to 4000");
+  }
+  if (typeof url !== "string" || url === "") return "";
+
+  const cloud = UPLOAD.exec(url);
+  if (cloud) {
+    const [, base, rest] = cloud;
+    if (TRANSFORMATION.test(rest.split("/")[0])) return "";
+    return widths.map((w) => `${base}w_${w},f_auto,q_auto/${rest} ${w}w`).join(", ");
+  }
+
+  let parsed;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return "";
+  }
+  if (parsed.protocol !== "https:" || parsed.hostname !== UNSPLASH_HOST) return "";
+  return widths
+    .map((w) => {
+      const sized = new URL(url);
+      sized.searchParams.set("w", String(w));
+      sized.searchParams.set("auto", "format");
+      sized.searchParams.set("q", "70");
+      return `${sized.toString()} ${w}w`;
+    })
+    .join(", ");
+}
+
+module.exports = { imageUrl, imageSrcset, PRESETS };

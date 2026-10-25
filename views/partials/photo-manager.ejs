@@ -26,7 +26,7 @@
     <ol class="photo-list">
         <% managed.forEach((photo, index) => { %>
         <li class="photo-item">
-            <img class="photo-thumb" src="<%= imageUrl(photo.url, 'edit') %>" alt="<%= photo.alt || `Photo ${index + 1}` %>">
+            <img class="photo-thumb" src="<%= imageUrl(photo.url, 'edit') %>" alt="<%= photo.alt || `Photo ${index + 1}` %>" width="144" height="144" loading="lazy" decoding="async">
             <div class="photo-body">
                 <p class="photo-position">
                     Photo <%= index + 1 %> of <%= managed.length %>

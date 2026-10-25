@@ -24,7 +24,7 @@ describe("views: raw (unescaped) output", () => {
     [/^current\(/, "helper returning a fixed attribute string for the nav link"],
     [/^range\.(from|to)$/, "page numbers (numbers computed on the server)"],
     [/^destText$/, "built in views/listings/index.ejs with every & < > \" ' escaped"],
-    [/^structuredData$/, "JSON-LD: must be built with src/utils/jsonLd.js; currently never set"],
+    [/^structuredData$/, "JSON-LD: must come from listingJsonLd / jsonForScript (src/utils/structuredData.js); not yet set by any controller"],
   ];
 
   test("only the allow-listed expressions are printed raw", () => {

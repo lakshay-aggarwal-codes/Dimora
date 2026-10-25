@@ -22,7 +22,7 @@ const { formatMoney } = require("./utils/money");
 const { configureLocationSecret } = require("./utils/geo");
 const pagination = require("./utils/pagination");
 const { hiddenFields, listingsUrl } = require("./utils/searchUrl");
-const { imageUrl } = require("./utils/imageUrl");
+const { imageUrl, imageSrcset } = require("./utils/imageUrl");
 
 const listingRouter = require("./routes/listing");
 const imagesRouter = require("./routes/images");
@@ -31,19 +31,19 @@ const reviewRouter = require("./routes/review");
 const useRouter = require("./routes/user");
 const profileRouter = require("./routes/profile");
 const tripsRouter = require("./routes/trips");
-const notificationsRouter = require("./routes/notifications");
-const conversationsRouter = require("./routes/conversations");
 const reportsRouter = require("./routes/reports");
+const wishlistsRouter = require("./routes/wishlists");
+const compareRouter = require("./routes/compare");
 const pagesRouter = require("./routes/pages");
 const apiRouter = require("./routes/api");
 const adminRouter = require("./routes/admin");
-const accountRouter = require("./routes/account");
 const {
   assignCspNonce,
   securityHeaders,
   createAuthLimiters,
 } = require("./middleware/security");
 const { csrfProtection } = require("./middleware/csrf");
+const { inputGuard, URLENCODED_OPTIONS } = require("./middleware/inputGuard");
 const { recoverCheckout } = require("./middleware/checkoutRecovery");
 
 const ROOT_DIR = path.join(__dirname, "..");
@@ -78,6 +78,7 @@ function createApp({
   app.locals.fullTitle = fullTitle;
   app.locals.metaDescription = metaDescription;
   app.locals.imageUrl = imageUrl; // Cloudinary size/format presets for <img>
+  app.locals.imageSrcset = imageSrcset; // the same photo at several widths
   app.locals.pagination = pagination;
   app.locals.hiddenFields = hiddenFields; // carries the search state through a form
   app.locals.listingsUrl = listingsUrl; // /listings?... links that keep the query // used by views/partials/pagination.ejs
@@ -117,7 +118,9 @@ function createApp({
     }),
   );
 
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.urlencoded(URLENCODED_OPTIONS));
+  // Refuse operator keys ($ne, a.b), NUL bytes and absurd nesting (P17-T02).
+  app.use(inputGuard);
   app.use(methodOverride("_method"));
 
   let store = sessionStore;
@@ -174,22 +177,9 @@ function createApp({
   const limiters = createAuthLimiters();
   app.post("/login", limiters.login);
   app.post("/signup", limiters.signup);
-  app.post("/account/password", limiters.account);
-  app.post("/account/delete", limiters.account);
 
   app.use("/api/listings/:id/quote", limiters.quote);
   app.post("/reports", limiters.report); // counts, then lets the reports router answer
-  // Sending a message or starting a conversation (P11-T02); counts, then the router answers.
-  app.post(
-    [
-      "/api/conversations/:id/messages",
-      "/api/listings/:id/conversations",
-      "/api/reservations/:id/conversation",
-      "/listings/:id/contact",
-      "/conversations/:id/messages",
-    ],
-    limiters.message,
-  );
   app.use("/api", apiRouter);
   app.use("/admin", adminRouter);
   app.use("/host", hostRouter);
@@ -197,13 +187,12 @@ function createApp({
   app.use("/listings", listingRouter);
   app.use("/listings/:id/reviews", reviewRouter);
   app.use("/", reportsRouter);
+  app.use("/", wishlistsRouter);
+  app.use("/", compareRouter);
   app.use("/", profileRouter);
   app.use("/", tripsRouter);
-  app.use("/", notificationsRouter);
-  app.use("/", conversationsRouter);
   app.use("/", pagesRouter);
   app.use("/", useRouter);
-  app.use("/", accountRouter);
 
   app.all("/{*splat}", (req, res, next) => {
     next(new NotFoundError());

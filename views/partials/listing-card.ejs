@@ -8,6 +8,10 @@
 <%
     const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6";
     const cardImage = item.imageUrl ? item.imageUrl : FALLBACK_IMAGE;
+    // Sized pictures (P18-T01): the card shows a 800 px version, and srcset lets a
+    // phone take 400 px. The helpers may be missing in a bare test app.
+    const cardSrc = typeof imageUrl === "function" ? imageUrl(cardImage, "card") : cardImage;
+    const cardSrcset = typeof imageSrcset === "function" ? imageSrcset(cardImage, [400, 800, 1200]) : "";
     const where = [item.location, item.country].filter(Boolean).join(", ");
     const hasRating = typeof item.rating === "number" && Number.isFinite(item.rating);
     // `savedIds` (a Set of ids) comes from the withSavedIds middleware; pages
@@ -18,7 +22,7 @@
 <a href="/listings/<%= encodeURIComponent(item.id) %>" class="listing-link">
     <div class="card h-100 listing-card">
         <%# The title below names the link, so the photo is decorative: empty alt. %>
-        <img src="<%= cardImage %>" class="card-img-top listing-card-img" alt="">
+        <img src="<%= cardSrc %>"<% if (cardSrcset) { %> srcset="<%= cardSrcset %>" sizes="(min-width: 992px) 33vw, (min-width: 768px) 50vw, 100vw"<% } %> width="800" height="600" loading="lazy" decoding="async" class="card-img-top listing-card-img" alt="">
         <div class="card-body">
             <p class="card-text">
                 <b class="listing-card-title"><%= item.title %></b>

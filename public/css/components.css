@@ -821,6 +821,8 @@
 .show-img {
   display: block;
   width: 100%;
+  /* The width/height attributes reserve space; aspect-ratio decides the height. */
+  height: auto;
   max-height: var(--size-show-image-max);
   aspect-ratio: var(--ratio-show-image);
   object-fit: cover;

@@ -8,7 +8,7 @@
     const initial = String(typeof name !== "undefined" && name ? name : "?").trim().charAt(0).toUpperCase() || "?";
 %>
 <% if (typeof avatarUrl !== "undefined" && avatarUrl) { %>
-<img class="avatar avatar-<%= avatarSize %>" src="<%= imageUrl(avatarUrl, 'avatar') %>" alt="" loading="lazy">
+<img class="avatar avatar-<%= avatarSize %>" src="<%= imageUrl(avatarUrl, 'avatar') %>" alt="" loading="lazy" decoding="async">
 <% } else { %>
 <span class="avatar avatar-<%= avatarSize %> avatar-initial" aria-hidden="true"><%= initial %></span>
 <% } %>
