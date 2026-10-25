@@ -86,16 +86,40 @@ const lineDate = (d) => formatDateOnly(d);
 /**
  * @param {object} [deps] replaceable in unit tests
  */
+// Which notification (P11-T04) follows each move; see notificationEvents.js.
+const TRANSITION_EVENTS = Object.freeze({
+  confirmed: "reservation.accepted",
+  declined: "reservation.declined",
+  expired: "reservation.expired",
+  cancelled_by_guest: "reservation.cancelled",
+  cancelled_by_host: "reservation.cancelled",
+  completed: "review.available",
+});
+
 function createReservationService({
   ReservationModel = require("../models/reservation"),
   ListingModel = require("../models/listing"),
   ledgerService = require("./ledger"),
   pricing = require("./pricing"),
   newId = () => new (require("mongoose").Types.ObjectId)(),
+  // Tells the people involved (P11-T04): `{ dispatch(event, { reservation }) }`.
+  // None by default, so a service built in a test sends nothing; the exported
+  // instance at the bottom of this file gets the real one.
+  notifier = null,
   replayRetries = 5,
   replayDelayMs = 40,
   sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
 } = {}) {
+  // Never throws and never changes the result: a notification is a courtesy.
+  async function tell(event, reservation) {
+    if (!notifier) return;
+    try {
+      await notifier.dispatch(event, { reservation });
+    } catch {
+      // dispatch already swallows its own errors; this keeps a custom notifier harmless too
+    }
+  }
+
   const sameRequest = (reservation, wanted) =>
     sameId(reservation.listing, wanted.listing) &&
     lineDate(reservation.checkIn) === lineDate(wanted.checkIn) &&
@@ -245,6 +269,7 @@ function createReservationService({
         },
         idempotencyKey: key,
       });
+      await tell(instant ? "reservation.booked" : "reservation.requested", reservation);
       return { reservation, created: true };
     } catch (err) {
       await releaseQuietly(_id);
@@ -335,6 +360,9 @@ function createReservationService({
 
     if (to === "confirmed") await ledgerService.confirmNights(updated._id);
     else if (releasesNights(to)) await ledgerService.releaseNights(updated._id);
+
+    const event = TRANSITION_EVENTS[to];
+    if (event) await tell(event, updated);
     return updated;
   }
 
@@ -342,7 +370,7 @@ function createReservationService({
 }
 
 module.exports = {
-  ...createReservationService(),
+  ...createReservationService({ notifier: require("./notificationEvents").notifier }),
   createReservationService,
   PENDING_HOLD_MS,
 };

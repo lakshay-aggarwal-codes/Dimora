@@ -38,7 +38,10 @@ function startHousekeeping() {
   const { createSweeper, startSweeper } = require("./src/services/sweeper");
   const logger = createLogger();
   startSweeper({
-    runOnce: createSweeper({ logger }).runOnce,
+    runOnce: createSweeper({
+      logger,
+      notifier: require("./src/services/notificationEvents").notifier,
+    }).runOnce,
     intervalMs: config.sweeper.intervalMs,
     logger,
   });

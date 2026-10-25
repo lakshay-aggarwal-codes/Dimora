@@ -20,6 +20,7 @@ const Report = require("../models/report");
 const AuditLog = require("../models/auditLog");
 const { toPageNumber } = require("./audit");
 const { REPORT_REASONS } = require("../config/reports");
+const { notifier } = require("./notificationEvents");
 
 const PAGE_SIZE = 20;
 const REASON_MIN = 5;
@@ -310,6 +311,8 @@ async function suspendListing({ admin, id, reason, now = new Date() }) {
       "That listing changed while you were suspending it. Reload the page and try again.",
     );
   }
+  // The host reads the reason on the listing page; tell them too (P11-T04).
+  await notifier.dispatch("listing.suspended", { listing, reason: text });
   return {
     listing,
     reason: text,
@@ -364,6 +367,7 @@ async function restoreListing({ admin, id, reason, now = new Date() }) {
       "That listing changed while you were restoring it. Reload the page and try again.",
     );
   }
+  await notifier.dispatch("listing.restored", { listing });
   return {
     listing,
     reason: text,

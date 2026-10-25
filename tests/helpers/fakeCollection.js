@@ -25,6 +25,13 @@ const isPlain = (v) =>
 const copy = (v) =>
   Array.isArray(v) ? v.map(copy) : isPlain(v) ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, copy(x)])) : v;
 
+// Dates by time, numbers as numbers, anything else (ids) as text.
+function order(a, b) {
+  if (a instanceof Date || b instanceof Date) return Number(a) - Number(b);
+  if (typeof a === "number" || typeof b === "number") return Number(a) - Number(b);
+  return String(a) < String(b) ? -1 : String(a) > String(b) ? 1 : 0;
+}
+
 function matches(row, filter) {
   return Object.entries(filter).every(([key, cond]) => {
     if (key === "$or") return cond.some((f) => matches(row, f));
@@ -34,8 +41,11 @@ function matches(row, filter) {
       return Object.entries(cond).every(([op, x]) => {
         if (op === "$in") return x.some((y) => same(value, y));
         if (op === "$ne") return !same(value, x);
-        if (op === "$lt") return value !== undefined && String(value) < String(x);
-        if (op === "$gt") return Number(value) > x;
+        if (op === "$exists") return (value !== undefined) === x;
+        if (op === "$lt") return value !== undefined && order(value, x) < 0;
+        if (op === "$lte") return value !== undefined && order(value, x) <= 0;
+        if (op === "$gt") return value !== undefined && order(value, x) > 0;
+        if (op === "$gte") return value !== undefined && order(value, x) >= 0;
         throw new Error(`fakeCollection: unsupported operator ${op}`);
       });
     }

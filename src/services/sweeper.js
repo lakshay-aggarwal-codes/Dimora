@@ -8,7 +8,10 @@
 //   3. orphans   ledger rows whose reservation is missing or has released its
 //                nights, and block rows with no block record (deleted)
 //   4. drafts    listing drafts untouched for 90 days (src/services/drafts.js)
+//   5. remind    (only when a `notifier` is given, P11-T04) tell the guest and
+//                the host the day before check-in, once per reservation
 //
+
 // Safe on several instances at once. Steps 1 and 2 go through
 // reservations.transition(), a compare-and-set: when two instances try the same
 // reservation, one wins and the other gets a 409 that is counted as "skipped",
@@ -44,6 +47,9 @@ const DEFAULTS = Object.freeze({
 // date narrows the database query, and the exact test is made per reservation
 // in its own zone.
 const LATEST_ZONE = "Pacific/Kiritimati";
+// ...and behind UTC by at most 12 hours (Baker Island).
+const EARLIEST_ZONE = "Etc/GMT+12";
+const DAY_MS = 24 * HOUR_MS;
 
 /** `now` moved by `ms`, without handing a value to the Date constructor. */
 function shift(now, ms) {
@@ -70,6 +76,7 @@ function createSweeper({
   ListingModel = require("../models/listing"),
   reservationService = require("./reservations"),
   deleteStaleDrafts = require("./drafts").deleteStaleDrafts,
+  notifier = null, // `{ dispatch(event, ctx) }` (notificationEvents.js); none = no reminders
   destroyImage,
   logger,
   options = {},
@@ -155,6 +162,61 @@ function createSweeper({
               id: String(row._id),
               message: describeError(err),
             });
+        }
+      },
+    );
+  }
+
+  /**
+   * "Check-in tomorrow" (P11-T04). A confirmed booking whose check-in is the
+   * day after today IN THE LISTING'S OWN ZONE. Each one is claimed first with a
+   * conditional update (`reminders.checkIn` not yet set), so two instances, or
+   * the next pass, cannot send it twice; the price of that is that a failure
+   * after the claim loses the reminder rather than repeating it.
+   */
+  async function remindCheckIns(now, summary) {
+    if (!notifier) return;
+    summary.reminded = summary.reminded || 0;
+    await forEachReservation(
+      {
+        status: "confirmed",
+        "reminders.checkIn": { $exists: false },
+        // Tomorrow somewhere on Earth; the exact test is per reservation below.
+        checkIn: {
+          $gt: todayIn(EARLIEST_ZONE, now),
+          $lte: shift(todayIn(LATEST_ZONE, now), DAY_MS),
+        },
+      },
+      "_id guest host listing checkIn checkOut nights guests listingSnapshot",
+      async (row) => {
+        const zone =
+          (row.listingSnapshot && row.listingSnapshot.timezone) ||
+          DEFAULT_TIMEZONE;
+        if (row.checkIn.getTime() !== shift(todayIn(zone, now), DAY_MS).getTime())
+          return;
+        try {
+          const claim = await ReservationModel.updateOne(
+            {
+              _id: row._id,
+              status: "confirmed",
+              "reminders.checkIn": { $exists: false },
+            },
+            { $set: { "reminders.checkIn": now } },
+          );
+          if (!claim || claim.modifiedCount !== 1) {
+            summary.skipped += 1; // another instance claimed it
+            return;
+          }
+          await notifier.dispatch("reservation.checkin_tomorrow", {
+            reservation: row,
+          });
+          summary.reminded += 1;
+        } catch (err) {
+          summary.errors.push({
+            step: "remind",
+            id: String(row._id),
+            message: describeError(err),
+          });
         }
       },
     );
@@ -262,6 +324,7 @@ function createSweeper({
       ["complete", () => completeStays(now, summary)],
       ["orphans", () => removeOrphanNights(now, summary)],
       ["drafts", () => removeStaleDrafts(now, summary, drafts)],
+      ["remind", () => remindCheckIns(now, summary)],
     ];
     for (const [name, step] of steps) {
       try {
@@ -297,7 +360,8 @@ function startSweeper({
     running = true;
     try {
       const s = await runOnce();
-      const worked = s.expired + s.completed + s.orphanNights + s.staleDrafts;
+      const worked =
+        s.expired + s.completed + s.orphanNights + s.staleDrafts + (s.reminded || 0);
       if (worked > 0) {
         log.info(
           {
@@ -305,6 +369,7 @@ function startSweeper({
             completed: s.completed,
             orphanNights: s.orphanNights,
             staleDrafts: s.staleDrafts,
+            reminded: s.reminded || 0,
             skipped: s.skipped,
           },
           "sweeper pass",

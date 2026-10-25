@@ -495,3 +495,65 @@ describe("getListingForModeration", () => {
     expect(JSON.stringify(q.calls.select)).not.toMatch(/email|hash|salt/);
   });
 });
+
+// P11-T04: the host is told when an admin suspends or restores their listing.
+describe("notifying the host", () => {
+  const { notifier } = require("../../src/services/notificationEvents");
+  const suspendedDoc = (over = {}) =>
+    published({ status: "suspended", ...over });
+
+  test("suspending sends listing.suspended with the (trimmed) reason, after the update", async () => {
+    const doc = published();
+    stubListing(doc);
+    const dispatch = jest.spyOn(notifier, "dispatch").mockResolvedValue(1);
+    await m.suspendListing({
+      admin,
+      id: String(doc._id),
+      reason: "  Photos are of another place  ",
+      now: NOW,
+    });
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    const [event, ctx] = dispatch.mock.calls[0];
+    expect(event).toBe("listing.suspended");
+    expect(ctx.reason).toBe("Photos are of another place");
+    expect(ctx.listing).toMatchObject({ title: "Sea house", owner: doc.owner });
+  });
+
+  test("a suspension that did not happen tells nobody", async () => {
+    const doc = published();
+    stubListing(doc, { modified: 0 });
+    const dispatch = jest.spyOn(notifier, "dispatch").mockResolvedValue(1);
+    await expect(
+      m.suspendListing({ admin, id: String(doc._id), reason: "Photos are of another place", now: NOW }),
+    ).rejects.toBeInstanceOf(m.ModerationError);
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  test("restoring sends listing.restored", async () => {
+    const doc = suspendedDoc();
+    stubListing(doc);
+    const dispatch = jest.spyOn(notifier, "dispatch").mockResolvedValue(1);
+    await m.restoreListing({ admin, id: String(doc._id), reason: "Host fixed the photos", now: NOW });
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch.mock.calls[0][0]).toBe("listing.restored");
+    expect(dispatch.mock.calls[0][1].listing.owner).toBe(doc.owner);
+  });
+
+  test("a restore that did not happen tells nobody", async () => {
+    const doc = suspendedDoc();
+    stubListing(doc, { modified: 0 });
+    const dispatch = jest.spyOn(notifier, "dispatch").mockResolvedValue(1);
+    await expect(
+      m.restoreListing({ admin, id: String(doc._id), reason: "Host fixed the photos", now: NOW }),
+    ).rejects.toBeInstanceOf(m.ModerationError);
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  test("no database connection (these unit tests): the real dispatcher writes nothing and does not throw", async () => {
+    const doc = published();
+    stubListing(doc);
+    await expect(
+      m.suspendListing({ admin, id: String(doc._id), reason: "Photos are of another place", now: NOW }),
+    ).resolves.toBeTruthy();
+  });
+});
