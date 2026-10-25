@@ -32,7 +32,10 @@
     "import:airbnb": "node scripts/import-dataset.js",
     "nearby:refresh": "node scripts/refresh-nearby.js",
     "sweep": "node scripts/sweep.js",
-    "make-admin": "node scripts/make-admin.js"
+    "make-admin": "node scripts/make-admin.js",
+    "scan:secrets": "node scripts/scan-secrets.js",
+    "preflight": "node scripts/preflight.js",
+    "audit:deps": "npm audit --omit=dev --audit-level=high"
   },
   "dependencies": {
     "@mapbox/mapbox-sdk": "^0.16.2",

@@ -42,3 +42,44 @@ Evidence labels: **code review** (read in the source), **test** (a test pins it)
 ## How to repeat
 
 `npm test -- tests/unit/inputGuard.test.js tests/unit/inputParsers.test.js tests/unit/securityReview.static.test.js tests/unit/jsonLd.test.js tests/integration/inputGuard.routes.test.js`
+
+# Dependencies, secrets and configuration (P17-T04)
+
+Reviewed 2026-10-25 on the files of the repository (no `.git` folder was available).
+
+## What was checked
+
+| Check | Result | Evidence |
+|---|---|---|
+| Known vulnerabilities in dependencies (`npm audit`) | **Not run**: no network in the review environment. Run `npm run audit:deps` (production dependencies, high and above) and read the output; CI already prints the full report on every push (report only, never fails the build). | not covered |
+| Pinned versions | `package.json` uses `^` ranges (normal); `package-lock.json` (lockfile v3, 684 packages) pins every version, every package comes from `registry.npmjs.org` and has an integrity hash; the lockfile matches `package.json`. CI installs with `npm ci`. Deploy with `npm ci --omit=dev`. | code review (script check of the lockfile) |
+| Unused dependencies | None found: every entry of `dependencies` and `devDependencies` is required somewhere. | code review (text search, not a proof) |
+| Secrets in the working tree | None found. Scanned every text file (including the UTF-16 test reports and the zip's contents) for database URIs with passwords, Mapbox secret tokens, private keys, cloud and payment keys, and literal values of secret settings. Only test fixtures (fake passwords) matched the loose rule. `.env` is not in the repository and is git-ignored. | `npm run scan:secrets`, `tests/unit/secretScan.test.js` |
+| Secrets in git history | **Not scanned** (no `.git` in the files reviewed). Run: `git log --all -p \| node scripts/scan-secrets.js --stdin` (PowerShell: `git log --all -p \| node scripts/scan-secrets.js --stdin` works the same). The old session secret was known to have been committed once; `src/config/env.js` already refuses it, but it must stay rotated. | not covered |
+| Configuration | `src/config/env.js` fails at start-up on missing or weak settings (32+ character session secret, known leaked secret, placeholders, one Mapbox token for both jobs). New `npm run preflight` adds the deployment rules (below). | `tests/unit/preflight.test.js` |
+| Stray files | The repository root holds generated or scratch files (`jest-out.txt`, `jest-report.json`, `failures.txt`, `one.txt`, `Dimora_Claude_Guide.zip`, `data-info/`). No secrets in them, but test reports can leak environment details. They are now git-ignored; if they are already tracked, remove them from git (commands in `docs/tasks/P17-T04.md`). | code review |
+
+## Findings
+
+| # | Severity | Finding | Status |
+|---|---|---|---|
+| D1 | Low | The `SESSION_SECRET` also keys the approximate public location offset (`configureLocationSecret`). Changing it logs everyone out **and moves every listing's public map point**. | Documented in the checklist: rotate only deliberately, and expect map points to move. |
+| D2 | Low | Production rules were spread over comments; nothing checked `https`, a hosted database or the nearby-places contact before a deployment. | `npm run preflight` (new). |
+| D3 | Info | No automatic secret scan in CI. | CI step `npm run scan:secrets` added (blocking). |
+| D4 | Info | Generated reports in the repository root (see above). | Git-ignored. |
+
+## Production checklist
+
+Run `npm run preflight` with the production `.env` (or the host's real environment); it prints ok / warn / FAIL per item and never prints a secret.
+
+1. `NODE_ENV=production`; `PORT` as the host expects.
+2. `MONGODB_URI`: hosted database (`mongodb+srv://...`), a database user with only this database's rights, the host's IP allowed in Atlas Network Access.
+3. `SESSION_SECRET`: 32+ random characters, generated with the command in `.env.example`, different from every other environment. Rotating it logs everyone out and moves public map points (D1).
+4. `APP_BASE_URL`: your `https://` address (cookies are `Secure` and the app trusts one proxy hop in production, so the host must sit behind exactly one TLS-terminating proxy).
+5. `CLOUDINARY_*`: production account or folder; the API secret only on the server.
+6. `MAPBOX_SERVER_TOKEN` (never sent to browsers) and a **different** `MAPBOX_PUBLIC_TOKEN` (`pk.`), restricted by URL to your domain in the Mapbox account. Read ADR-007 before turning on `MAPBOX_GEOCODING_PERMANENT`.
+7. `NEARBY_CONTACT`: an email or URL for the Overpass operators (or `NEARBY_ENABLED=false`).
+8. `SWEEPER_ENABLED` left on (several instances are fine).
+9. Install with `npm ci --omit=dev`; Node 20.19 or newer.
+10. Before each release: `npm run lint`, `npm test`, `npm run audit:deps`, `npm run scan:secrets`, `npm run migrate:dry` then `npm run migrate`.
+11. After any secret was ever shown in a chat, a log or a commit: rotate it at the provider, then remove it.
