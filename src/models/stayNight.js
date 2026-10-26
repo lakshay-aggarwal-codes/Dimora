@@ -43,6 +43,14 @@ stayNightSchema.index({ listing: 1, date: 1 }, { unique: true });
 stayNightSchema.index({ "source.id": 1 });
 // The sweeper finds expired holds (rows without a hold are skipped).
 stayNightSchema.index({ holdExpiresAt: 1 }, { sparse: true });
+// Search with dates (P18-T02, migration 010): "which listings have a taken
+// night between these dates" has no listing in it, so (listing, date) cannot
+// answer it and the whole ledger was read. The hold is in the key so the query
+// is answered from the index alone.
+stayNightSchema.index(
+  { date: 1, listing: 1, holdExpiresAt: 1 },
+  { name: "date_1_listing_1_holdExpiresAt_1" },
+);
 
 const StayNight = mongoose.model("StayNight", stayNightSchema);
 StayNight.SOURCE_KINDS = SOURCE_KINDS;

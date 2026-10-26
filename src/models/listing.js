@@ -280,34 +280,6 @@ const listingSchema = new Schema(
     countryKey: { type: String, maxlength: 100 },
     locationKey: { type: String, maxlength: 320 },
 
-    // Set only on listings imported from a sample dataset (scripts/import-dataset.js);
-    // the import matches on it, so running it twice never duplicates.
-    importedFrom: {
-      source: { type: String, maxlength: 40 },
-      id: { type: String, maxlength: 64 },
-    },
-
-    // Places around the listing, from OpenStreetMap (P15-T01). Written only by
-    // src/services/nearby.js; distances are straight lines from the PUBLIC
-    // (approximate) point. `key` says which precise point the data is for.
-    nearby: {
-      fetchedAt: { type: Date },
-      attemptedAt: { type: Date },
-      source: { type: String, maxlength: 60 },
-      key: { type: String, maxlength: 32 },
-      failures: { type: Number, default: 0, min: 0 },
-      nextRetryAt: { type: Date },
-      items: [
-        {
-          _id: false,
-          category: { type: String, maxlength: 20 },
-          name: { type: String, maxlength: 100 },
-          kind: { type: String, maxlength: 40 },
-          distanceM: { type: Number, min: 0 },
-        },
-      ],
-    },
-
     // Soft delete: the row stays, the pages stop showing it (P04-T05).
     deletedAt: { type: Date },
 
@@ -381,20 +353,15 @@ listingSchema.pre("validate", function () {
   }
 });
 
-// Index names are explicit and match scripts/migrations/003-listing-model-v2.js,
-// which builds the same indexes on existing databases.
-listingSchema.index(
-  { status: 1, "address.city": 1 },
-  { name: "status_1_address.city_1" },
-);
+// Index names are explicit and match the migrations, which build the same
+// indexes on existing databases (003, 005-007, and 010 for the sort indexes and
+// the two it drops). Migration 003 also built status_1_address.city_1 and
+// pricing.nightlyMinor_1; migration 010 (P18-T02) drops them because no query
+// uses them any more (see docs/PERFORMANCE.md).
 listingSchema.index({ owner: 1, status: 1 }, { name: "owner_1_status_1" });
 listingSchema.index(
   { title: "text", description: "text" },
   { name: "title_text_description_text" },
-);
-listingSchema.index(
-  { "pricing.nightlyMinor": 1 },
-  { name: "pricing.nightlyMinor_1" },
 );
 // Search (P05-T01): status + city + price, and status + country + price, serve
 // the destination box and the price filter. Built by migration 006.
@@ -405,6 +372,26 @@ listingSchema.index(
 listingSchema.index(
   { status: 1, countryKey: 1, "pricing.nightlyMinor": 1 },
   { name: "status_1_countryKey_1_pricing.nightlyMinor_1" },
+);
+// Sorting the public listings without a destination (P18-T02, migration 010):
+// each order the search offers, and the home page and the map, read the
+// published listings already in order instead of sorting them in memory.
+// Price descending reads the price index backwards.
+listingSchema.index(
+  { status: 1, _id: -1 },
+  { name: "status_1__id_-1" },
+);
+listingSchema.index(
+  { status: 1, createdAt: -1, _id: -1 },
+  { name: "status_1_createdAt_-1__id_-1" },
+);
+listingSchema.index(
+  { status: 1, ratingAvg: -1, ratingCount: -1, _id: -1 },
+  { name: "status_1_ratingAvg_-1_ratingCount_-1__id_-1" },
+);
+listingSchema.index(
+  { status: 1, "pricing.nightlyMinor": 1, _id: 1 },
+  { name: "status_1_pricing.nightlyMinor_1__id_1" },
 );
 // Map queries (P06-T04) use the PUBLIC point only. Built by migration 007.
 listingSchema.index({ publicGeometry: "2dsphere" }, { name: "publicGeometry_2dsphere" });

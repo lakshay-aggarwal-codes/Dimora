@@ -102,6 +102,24 @@ function describeInboxRow(reservation, { previousStays, now }) {
  * are not over (soonest check-in first), each with a guest summary: name,
  * member since, and how many stays that guest has completed with this host.
  */
+/**
+ * The two inbox lists as data (filter and sort). The query-plan review
+ * (src/services/queryPlans.js) reads these, so what is checked against the
+ * indexes is what the inbox runs.
+ */
+function inboxQueries(hostId, today) {
+  return {
+    pending: {
+      filter: { host: hostId, status: "pending" },
+      sort: { holdExpiresAt: 1, _id: 1 },
+    },
+    confirmed: {
+      filter: { host: hostId, status: "confirmed", checkOut: { $gt: today } },
+      sort: { checkIn: 1, _id: 1 },
+    },
+  };
+}
+
 async function listInbox(
   { ReservationModel = require("../models/reservation") } = {},
   hostId,
@@ -109,18 +127,15 @@ async function listInbox(
 ) {
   const today = todayIn(DEFAULT_TIMEZONE, now);
   const populateGuest = "displayName username createdAt";
+  const queries = inboxQueries(hostId, today);
   const [pendingRows, confirmedRows] = await Promise.all([
-    ReservationModel.find({ host: hostId, status: "pending" })
-      .sort({ holdExpiresAt: 1, _id: 1 })
+    ReservationModel.find(queries.pending.filter)
+      .sort(queries.pending.sort)
       .limit(LIMIT + 1)
       .populate("guest", populateGuest)
       .lean(),
-    ReservationModel.find({
-      host: hostId,
-      status: "confirmed",
-      checkOut: { $gt: today },
-    })
-      .sort({ checkIn: 1, _id: 1 })
+    ReservationModel.find(queries.confirmed.filter)
+      .sort(queries.confirmed.sort)
       .limit(LIMIT + 1)
       .populate("guest", populateGuest)
       .lean(),
@@ -212,6 +227,7 @@ async function respond(
 
 module.exports = {
   listInbox,
+  inboxQueries,
   respond,
   parseReason,
   countdownText,

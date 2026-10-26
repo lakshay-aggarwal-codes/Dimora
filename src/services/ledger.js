@@ -399,7 +399,12 @@ function createLedgerService({
       );
     }
     const rows = await model
-      .find({ date: { $gte: from, $lt: to } }, { listing: 1, holdExpiresAt: 1 })
+      // `_id: 0` and only indexed fields: answered from the index alone
+      // (date_1_listing_1_holdExpiresAt_1, P18-T02).
+      .find(
+        { date: { $gte: from, $lt: to } },
+        { _id: 0, listing: 1, holdExpiresAt: 1 },
+      )
       .lean();
     const ids = new Map();
     for (const row of rows) {
@@ -439,7 +444,7 @@ function createLedgerService({
     const rows = await model
       .find(
         { date: { $gte: wideFrom, $lt: wideTo } },
-        { listing: 1, date: 1, holdExpiresAt: 1 },
+        { _id: 0, listing: 1, date: 1, holdExpiresAt: 1 },
       )
       .lean();
     const byListing = new Map();

@@ -79,10 +79,6 @@ const reservationSchema = new Schema(
     // original reservation (unique with the guest).
     idempotencyKey: { type: String, required: true, minlength: 8, maxlength: 64 },
 
-    // Set once by the sweeper when "check-in tomorrow" was sent (P11-T04), so
-    // a repeated pass or a second instance sends it only once.
-    reminders: { checkIn: { type: Date } },
-
     cancelReason: { type: String, trim: true, maxlength: 500 },
     cancelledBy: { type: String, enum: ACTORS },
     // What a cancellation refunds (P09-T03), written in the same update that
@@ -113,7 +109,17 @@ reservationSchema.pre("validate", function () {
 });
 
 reservationSchema.index({ guest: 1, createdAt: -1 });
-reservationSchema.index({ host: 1, status: 1 });
+// The host's requests inbox (P18-T02, migration 010): pending requests by
+// hold, confirmed stays by check-in, already in order. They also serve every
+// query on (host, status), which is why the plain (host, status) index is gone.
+reservationSchema.index(
+  { host: 1, status: 1, holdExpiresAt: 1, _id: 1 },
+  { name: "host_1_status_1_holdExpiresAt_1__id_1" },
+);
+reservationSchema.index(
+  { host: 1, status: 1, checkIn: 1, _id: 1 },
+  { name: "host_1_status_1_checkIn_1__id_1" },
+);
 reservationSchema.index({ listing: 1, checkIn: 1 });
 reservationSchema.index({ guest: 1, idempotencyKey: 1 }, { unique: true });
 // The sweeper (P07-T07) looks for requests past their hold and for stays whose

@@ -49,7 +49,10 @@ const auditLogSchema = new Schema(
   { timestamps: { createdAt: true, updatedAt: false }, versionKey: false },
 );
 
-auditLogSchema.index({ createdAt: -1 });
+// The audit page reads newest first, ties by _id (P18-T02, migration 010). With
+// only createdAt in the index the _id tie-break forced a sort of the whole log,
+// which only ever grows; this index delivers the order.
+auditLogSchema.index({ createdAt: -1, _id: -1 }, { name: "createdAt_-1__id_-1" });
 auditLogSchema.index({ actor: 1, createdAt: -1 });
 auditLogSchema.index({ targetType: 1, targetId: 1, createdAt: -1 });
 auditLogSchema.index({ action: 1, createdAt: -1 });

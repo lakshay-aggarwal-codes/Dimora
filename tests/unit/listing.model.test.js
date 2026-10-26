@@ -168,16 +168,17 @@ describe("images", () => {
 });
 
 describe("indexes", () => {
-  test("declares the four indexes migration 003 builds, by name", () => {
+  test("declares the indexes migration 003 built that are still used, by name", () => {
     const named = Listing.schema.indexes().map(([, options]) => options.name);
     expect(named).toEqual(
-      expect.arrayContaining([
-        "status_1_address.city_1",
-        "owner_1_status_1",
-        "title_text_description_text",
-        "pricing.nightlyMinor_1",
-      ]),
+      expect.arrayContaining(["owner_1_status_1", "title_text_description_text"]),
     );
+  });
+
+  test("no longer declares the two indexes migration 010 drops (P18-T02)", () => {
+    const named = Listing.schema.indexes().map(([, options]) => options.name);
+    expect(named).not.toContain("status_1_address.city_1");
+    expect(named).not.toContain("pricing.nightlyMinor_1");
   });
 });
 

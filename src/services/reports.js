@@ -125,12 +125,15 @@ async function describeTarget(
     };
   }
   if (kind === "review") {
-    const review = await ReviewModel.findById(id).select("author").lean();
+    const review = await ReviewModel.findById(id).select("author listing").lean();
     if (!review) throw missing();
-    // A review is shown only on its listing, so it is reportable only while that listing is public.
-    const listing = await ListingModel.findOne({ reviews: review._id })
-      .select("title status deletedAt")
-      .lean();
+    // A review is shown only on its listing, so it is reportable only while that
+    // listing is public. The review knows its listing (since reviews v2); only a
+    // review without one is looked up by the listing's own list of reviews, which
+    // has no index (P18-T02).
+    const listing = review.listing
+      ? await ListingModel.findById(review.listing).select("title status deletedAt").lean()
+      : await ListingModel.findOne({ reviews: review._id }).select("title status deletedAt").lean();
     if (!isPublic(listing)) throw missing();
     return {
       kind,

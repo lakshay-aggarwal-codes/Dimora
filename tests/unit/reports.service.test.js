@@ -297,6 +297,27 @@ describe("describeTarget", () => {
     ).rejects.toThrow(/Messages cannot be reported yet/);
   });
 
+  test("a review knows its listing: the listing is read by id, not found by scanning every listing's reviews (P18-T02)", async () => {
+    const c = setup();
+    c.review.listing = c.listing._id;
+    const findOne = jest.spyOn(c.deps.ListingModel, "findOne");
+    const findById = jest.spyOn(c.deps.ListingModel, "findById");
+    const target = await describeTarget(c.deps, "review", String(c.review._id));
+    expect(target.label).toBe("A review of Sea house");
+    expect(findOne).not.toHaveBeenCalled();
+    expect(findById).toHaveBeenCalledWith(c.listing._id);
+    // and an unpublished listing still hides it
+    c.listing.status = "unpublished";
+    await expect(describeTarget(c.deps, "review", String(c.review._id))).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  test("an old review without a listing is still found through the listing's own list", async () => {
+    const c = setup();
+    const findOne = jest.spyOn(c.deps.ListingModel, "findOne");
+    expect((await describeTarget(c.deps, "review", String(c.review._id))).label).toBe("A review of Sea house");
+    expect(findOne).toHaveBeenCalledTimes(1);
+  });
+
   test("a review with no author is reportable; its owner is null", async () => {
     const c = setup();
     c.review.author = undefined;
