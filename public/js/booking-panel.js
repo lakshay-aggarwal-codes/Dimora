@@ -173,6 +173,7 @@
   }
 
   function show(node) {
+    result.removeAttribute("aria-busy"); // any answer ends the waiting
     result.replaceChildren(node);
   }
 
@@ -222,6 +223,24 @@
     result.appendChild(wrap);
   }
 
+  /** "Checking the price…" for the live region, plus grey blocks shaped like the price lines (P18-T04). */
+  function showLoading() {
+    show(paragraph("Checking the price…"));
+    const stack = document.createElement("div");
+    stack.className = "skeleton-stack";
+    stack.setAttribute("aria-hidden", "true");
+    for (let i = 0; i < 3; i += 1) {
+      const line = document.createElement("span");
+      line.className = "skeleton";
+      stack.appendChild(line);
+    }
+    const total = document.createElement("span");
+    total.className = "skeleton skeleton-total";
+    stack.appendChild(total);
+    result.appendChild(stack);
+    result.setAttribute("aria-busy", "true");
+  }
+
   function showQuote(view) {
     const wrap = document.createElement("div");
     const list = document.createElement("ul");
@@ -255,7 +274,7 @@
       return;
     }
     setReserve("");
-    show(paragraph("Checking the price…"));
+    showLoading();
     controller = typeof AbortController === "undefined" ? null : new AbortController();
     try {
       const response = await fetch(quoteUrl + "?" + quoteQuery(checkIn, checkOut, guestsSelect.value), {

@@ -30,7 +30,7 @@ function makeEl(extra = {}) {
   return el;
 }
 
-function setup({ withMapbox = true, token = "pk.x", query = "dest=Goa&guests=2" } = {}) {
+function setup({ withMapbox = true, token = "pk.x", query = "dest=Goa&guests=2", reduceMotion = null } = {}) {
   const els = {
     "search-map": makeEl({ dataset: { token, endpoint: "/api/search/map", query } }),
     "map-toggle": makeEl({ hidden: true }),
@@ -88,6 +88,8 @@ function setup({ withMapbox = true, token = "pk.x", query = "dest=Goa&guests=2" 
     console: { error: () => {} },
   };
   if (withMapbox) sandbox.mapboxgl = mapboxgl;
+  // P18-T04: the script reads the "reduce motion" preference with matchMedia (a page without it is read as "no preference")
+  if (reduceMotion !== null) sandbox.matchMedia = (query) => ({ matches: reduceMotion && /prefers-reduced-motion/.test(query) });
   vm.runInNewContext(SOURCE, sandbox);
 
   return {
@@ -294,6 +296,59 @@ describe("searchMap.js", () => {
     t.openMap();
     await t.load();
     t.rec.layerHandlers["click:stay-clusters"]({ features: [{ properties: { cluster_id: 7 }, geometry: { coordinates: [5, 6] } }] });
-    expect(t.rec.easeTo.pop()).toEqual({ center: [5, 6], zoom: 9 });
+    expect(t.rec.easeTo.pop()).toEqual({ center: [5, 6], zoom: 9, duration: 250 });
+  });
+
+  describe("motion and loading (P18-T04)", () => {
+    test("a cluster opens in 250 ms, never the 500 ms Mapbox would choose by itself", async () => {
+      const t = setup({ reduceMotion: false });
+      t.openMap();
+      await t.load();
+      t.rec.layerHandlers["click:stay-clusters"]({ features: [{ properties: { cluster_id: 7 }, geometry: { coordinates: [5, 6] } }] });
+      expect(t.rec.easeTo.pop().duration).toBe(250);
+    });
+
+    test("with 'reduce motion' the map jumps (duration 0), and every other move already did", async () => {
+      const t = setup({ reduceMotion: true });
+      t.openMap();
+      t.respond(FC([feat("a1", 74, 15)]));
+      await t.load();
+      t.rec.layerHandlers["click:stay-clusters"]({ features: [{ properties: { cluster_id: 7 }, geometry: { coordinates: [5, 6] } }] });
+      expect(t.rec.easeTo.pop().duration).toBe(0);
+      for (const move of [...t.rec.easeTo, ...t.rec.fit.map(([, options]) => options)]) expect(move.duration).toBe(0);
+    });
+
+    test("a page without matchMedia is read as no preference", async () => {
+      const t = setup();
+      t.openMap();
+      await t.load();
+      t.rec.layerHandlers["click:stay-clusters"]({ features: [{ properties: { cluster_id: 7 }, geometry: { coordinates: [5, 6] } }] });
+      expect(t.rec.easeTo.pop().duration).toBe(250);
+    });
+
+    test("the map shows its loading look while the stays load and drops it when they arrive", async () => {
+      const t = setup();
+      t.openMap();
+      t.respond(FC([feat("a1", 74, 15)]));
+      const loaded = t.load();
+      expect(t.els["search-map"].classes.has("is-loading")).toBe(true);
+      await loaded;
+      expect(t.els["search-map"].classes.has("is-loading")).toBe(false);
+    });
+
+    test("it also drops the loading look when the request fails, and when the map cannot start", async () => {
+      const failed = setup();
+      failed.openMap();
+      failed.respond({}, false);
+      await failed.load();
+      expect(failed.els["search-map"].classes.has("is-loading")).toBe(false);
+
+      const broken = setup();
+      broken.openMap();
+      broken.els["search-map"].classes.add("is-loading");
+      broken.rec.handlers.error({ error: new Error("offline") });
+      expect(broken.els["search-map"].classes.has("is-loading")).toBe(false);
+      expect(broken.els["search-map"].classes.has("map-unavailable")).toBe(true);
+    });
   });
 });

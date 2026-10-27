@@ -10,7 +10,8 @@
     --duration-slow: 0ms;
   }
 
-  html {
+  html,
+  .filter-container {
     scroll-behavior: auto;
   }
 }

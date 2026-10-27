@@ -158,7 +158,8 @@
   /* ---- Motion (set to 0ms by base.css when the user asks for reduced motion) ---- */
   --duration-fast: 150ms;
   --duration-base: 200ms;
-  --duration-slow: 700ms;
+  --duration-slow: 300ms; /* the longest animation of feedback the site has (P18-T04) */
+  --duration-loading: 1200ms; /* the loading pulse only: not feedback, and off under reduced motion */
   --easing-standard: ease;
 
   /* ---- Stacking ---- */

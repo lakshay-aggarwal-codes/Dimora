@@ -37,6 +37,13 @@
   let timer = null;
   let popup = null;
 
+  // "Reduce motion" is honoured here too: Mapbox animates by itself (its default
+  // for easeTo is 500 ms), so every move it makes states its duration (P18-T04).
+  const reducedMotion =
+    typeof matchMedia === "function" &&
+    matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const MOVE_MS = reducedMotion ? 0 : 250; // essential feedback never takes longer than 300 ms
+
   function say(message) {
     if (statusEl) statusEl.textContent = message;
   }
@@ -59,6 +66,7 @@
   function fail(message) {
     if (failed) return;
     failed = true;
+    el.classList.remove("is-loading");
     say(message);
     el.classList.add("map-unavailable");
   }
@@ -113,6 +121,7 @@
     const params = new URLSearchParams(el.dataset.query || "");
     if (bbox) params.set("bbox", bbox.join(","));
     say("Loading stays on the map\u2026");
+    el.classList.add("is-loading");
 
     return fetch((el.dataset.endpoint || "/api/search/map") + "?" + params.toString(), {
       headers: { Accept: "application/json" },
@@ -124,6 +133,7 @@
         return response.json();
       })
       .then(function (data) {
+        el.classList.remove("is-loading");
         map.getSource(SOURCE).setData(data);
         const meta = data.meta || {};
         say(meta.message || String(meta.returned || 0) + (meta.returned === 1 ? " stay" : " stays") + " on the map.");
@@ -132,6 +142,7 @@
       })
       .catch(function (err) {
         if (err && err.name === "AbortError") return null;
+        el.classList.remove("is-loading");
         console.error("Map results failed to load:", err);
         say("The stays could not be loaded for the map.");
         return null;
@@ -222,7 +233,7 @@
       const source = map.getSource(SOURCE);
       source.getClusterExpansionZoom(feature.properties.cluster_id, function (err, zoom) {
         if (err) return;
-        map.easeTo({ center: feature.geometry.coordinates, zoom: zoom });
+        map.easeTo({ center: feature.geometry.coordinates, zoom: zoom, duration: MOVE_MS });
       });
     });
     map.on("click", "stay-label", function (event) {
