@@ -3,7 +3,7 @@
 <section class="home-hero" aria-labelledby="home-title">
     <h1 id="home-title" class="home-title">Find a place that feels like home</h1>
     <p class="home-lead">Search by place, see what a stay really costs, or open your own home to guests.</p>
-    <form class="hero-search" action="/listings" method="GET" role="search">
+    <form class="hero-search" action="/listings" method="GET" role="search" aria-label="Search stays">
         <div class="hero-search-fields">
             <%- include("../partials/form-field.ejs", { id: "hero-destination", name: "search", type: "search", label: "Where", placeholder: "Search destinations", autocomplete: "off" }) %>
             <%- include("../partials/form-field.ejs", { id: "hero-check-in", name: "checkIn", type: "date", label: "Check in" }) %>
@@ -41,7 +41,7 @@
         <% destinations.forEach((place) => { %>
             <li>
                 <a class="destination-link" href="/listings?search=<%= encodeURIComponent(place.search) %>">
-                    <% if (place.imageUrl) { %><img class="destination-image" src="<%= typeof imageUrl === 'function' ? imageUrl(place.imageUrl, 'avatar') : place.imageUrl %>" alt="" width="56" height="56" loading="lazy" decoding="async"><% } %>
+                    <% if (place.imageUrl) { %><img class="destination-image" src="<%= place.imageUrl %>" alt="" loading="lazy"><% } %>
                     <span class="destination-name"><%= place.label %></span>
                     <span class="destination-count"><%= place.count %> <%= place.count === 1 ? "stay" : "stays" %></span>
                 </a>

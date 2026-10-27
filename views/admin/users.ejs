@@ -14,7 +14,7 @@
         <p class="mb-1"><a href="/admin">&larr; Admin</a></p>
         <h1 class="h3">Users</h1>
 
-        <form class="row g-2 align-items-end mb-3" action="/admin/users" method="GET" role="search">
+        <form class="row g-2 align-items-end mb-3" action="/admin/users" method="GET" role="search" aria-label="Search accounts">
             <div class="col-12 col-md-6">
                 <label class="form-label" for="user-q">Username, email or display name</label>
                 <input class="form-control" id="user-q" type="search" name="q" maxlength="100" value="<%= result.q %>">

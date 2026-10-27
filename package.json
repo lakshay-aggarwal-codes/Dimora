@@ -29,8 +29,9 @@
     "seed": "node scripts/seed.js",
     "migrate": "node scripts/migrate.js",
     "migrate:dry": "node scripts/migrate.js --dry-run",
+    "import:airbnb": "node scripts/import-dataset.js",
+    "nearby:refresh": "node scripts/refresh-nearby.js",
     "sweep": "node scripts/sweep.js",
-    "explain": "node scripts/explain-queries.js",
     "make-admin": "node scripts/make-admin.js"
   },
   "dependencies": {
@@ -57,9 +58,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
+    "axe-core": "^4.14.0",
     "eslint": "^9.0.0",
     "globals": "^15.0.0",
     "jest": "^30.5.2",
+    "jsdom": "^26.1.0",
     "mongodb-memory-server": "^11.3.0",
     "nodemon": "^3.0.0",
     "prettier": "^3.0.0",

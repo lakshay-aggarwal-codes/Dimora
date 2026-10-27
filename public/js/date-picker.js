@@ -22,6 +22,7 @@
     "July", "August", "September", "October", "November", "December",
   ];
   const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+  const WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const DATE_ONLY = /^([1-9]\d{3})-(\d{2})-(\d{2})$/;
 
   // ---- calendar arithmetic (proleptic Gregorian, integers only) ----
@@ -171,6 +172,7 @@
   let loadError = false;
   let notice = "";
   let pendingFocus = false;
+  let pendingNav = null; // "prev" or "next": the month button to give focus back to after a redraw
 
   const mount = root.querySelector("[data-date-picker-mount]");
   const hiddenIn = root.querySelector("input[name='checkIn']");
@@ -282,7 +284,8 @@
   }
 
   function dayLabel(day, enabled) {
-    let label = longDate(day);
+    // The weekday first, as a screen reader would say a date: "Monday, 2 November 2026".
+    let label = WEEKDAY_NAMES[weekday(day)] + ", " + longDate(day);
     if (day === checkIn) label += ", check-in";
     else if (day === checkOut) label += ", check-out";
     if (!enabled) {
@@ -302,6 +305,7 @@
     for (const name of WEEKDAYS) {
       const th = text("th", name);
       th.setAttribute("scope", "col");
+      th.setAttribute("aria-label", WEEKDAY_NAMES[WEEKDAYS.indexOf(name)]); // "Su" alone is read as a word
       headRow.appendChild(th);
     }
     head.appendChild(headRow);
@@ -389,6 +393,19 @@
       const target = mount.querySelector('[data-day="' + focusDay + '"]');
       if (target) target.focus();
     }
+
+    // The month buttons are rebuilt with the grid, which would drop the
+    // keyboard user's focus on the page. Give it back to the button that was
+    // pressed, or to the other one when that one is now disabled (the first
+    // or last month).
+    if (pendingNav) {
+      const wanted = pendingNav;
+      pendingNav = null;
+      const same = mount.querySelector('[data-nav="' + wanted + '"]');
+      const other = mount.querySelector('[data-nav="' + (wanted === "next" ? "prev" : "next") + '"]');
+      const target = same && !same.disabled ? same : other && !other.disabled ? other : null;
+      if (target) target.focus();
+    }
   }
 
   async function showMonth(year, month) {
@@ -421,6 +438,7 @@
     if (nav) {
       if (nav.disabled) return;
       const to = nav.dataset.nav === "next" ? nextMonth(view.year, view.month) : previousMonth(view.year, view.month);
+      pendingNav = nav.dataset.nav;
       showMonth(to.year, to.month);
       return;
     }

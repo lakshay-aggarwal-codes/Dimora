@@ -1,8 +1,9 @@
 <%#
     Host status page: what is stored about places around the listing (P15-T01).
     Locals: listingId, nearby (src/services/nearby.js summaryFor), csrf helper.
-    Names come from OpenStreetMap, i.e. from strangers: every one is written with
-    the escaping print tag (never the raw one).
+    Names come from OpenStreetMap, i.e. from strangers: every one is printed
+    escaped (the equals-sign tag), never raw (the minus-sign tag). Do not write
+    those tags inside this comment: their closing characters end it early.
 %>
 <section class="nearby-status" aria-labelledby="nearby-heading">
     <h2 id="nearby-heading" class="h5">Nearby places</h2>

@@ -20,7 +20,9 @@
         <% } %>
 
         <p class="text-body-secondary" data-empty<%- messages.length > 0 ? " hidden" : "" %>>No messages yet. Say hello below.</p>
-        <ol class="message-list" role="log" aria-label="Messages, oldest first" data-message-list
+        <%# role="log" sits on a wrapper: on the <ol> itself it would remove the list semantics from its items. %>
+        <div role="log" aria-label="Messages, oldest first">
+        <ol class="message-list" data-message-list
             data-other-name="<%= conversation.otherName %>"<% if (live) { %> data-messages-url="/api/conversations/<%= conversation.id %>/messages" data-poll-seconds="15"<% } %>>
             <% messages.forEach((m) => { %>
             <li class="message<%= m.mine ? ' message-mine' : '' %>" data-id="<%= m.id %>">
@@ -29,6 +31,7 @@
             </li>
             <% }) %>
         </ol>
+        </div>
 
         <% if (conversation.canReply) { %>
         <form action="/conversations/<%= conversation.id %>/messages" method="POST" class="mt-3">
