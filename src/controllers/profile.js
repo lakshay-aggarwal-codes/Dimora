@@ -5,6 +5,8 @@ const User = require("../models/user");
 const Listing = require("../models/listing");
 const Review = require("../models/review");
 const { loadPublicProfile } = require("../services/profile");
+const { loadTrust } = require("../services/trust");
+const Reservation = require("../models/reservation");
 const { validateProfile } = require("../validation/profile");
 const { assertValidImage, UploadFailedError } = require("../services/images");
 const { uploadBuffer, deleteImage } = require("../config/cloudinary");
@@ -20,8 +22,16 @@ module.exports.show = async (req, res) => {
     req.params.id,
   );
   if (!profile) throw new NotFoundError("That profile does not exist.");
+  // Facts the system knows (P12-T05). A failure here must not take the page down.
+  let trust = null;
+  try {
+    trust = await loadTrust({ User, Reservation }, profile.id);
+  } catch {
+    trust = null;
+  }
   res.render("users/profile.ejs", {
     profile,
+    trust,
     isOwn: Boolean(req.user && String(req.user._id) === profile.id),
     pageTitle: profile.displayName,
     pageDescription: `${profile.displayName} on Dimora.`,

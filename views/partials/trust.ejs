@@ -1,0 +1,13 @@
+<%#
+    Trust indicators (P12-T05). Local: trust (services/trust.js buildTrust) or
+    nothing. Prints only facts the site knows; the note says what "confirmed"
+    means. Never add a badge here without reading docs/TRUST.md.
+%>
+<% if (typeof trust !== "undefined" && trust && trust.items.length) { %>
+<ul class="trust-list list-unstyled mb-1" data-trust>
+    <% trust.items.forEach((item) => { %><li data-trust-item="<%= item.key %>"><%= item.text %></li><% }) %>
+</ul>
+<% if (trust.emailConfirmed) { %>
+<p class="form-text mb-0" data-trust-note>"Confirmed" means this member opened a link we sent to their email address. Dimora does not check anyone's identity.</p>
+<% } %>
+<% } %>

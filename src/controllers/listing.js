@@ -1,5 +1,8 @@
 const { neighborhoodFor } = require("../services/neighborhood");
 const Listing = require("../models/listing.js");
+const User = require("../models/user");
+const Reservation = require("../models/reservation");
+const { loadTrust } = require("../services/trust");
 const reviewService = require("../services/reviews");
 const { summarizeRatings } = require("../utils/ratings");
 const { can } = require("../policies");
@@ -174,8 +177,19 @@ module.exports.showListings = async (req, res) => {
         }
       : summarizeRatings(reviewList);
 
+  // The host's confirmed facts (P12-T05). A failure here must not take the page down.
+  let hostTrust = null;
+  try {
+    hostTrust = listing.owner
+      ? await loadTrust({ User, Reservation }, listing.owner)
+      : null;
+  } catch {
+    hostTrust = null;
+  }
+
   res.render("listings/show.ejs", {
     listing,
+    hostTrust,
     reviewable,
     reviewList,
     ratingSummary,

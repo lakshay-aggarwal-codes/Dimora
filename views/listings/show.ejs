@@ -91,7 +91,9 @@
                     <span class="host-avatar" aria-hidden="true"><%= hostInitial %></span>
                     <div>
                         <h2 id="host-heading" class="h5 mb-0">Hosted by <%= hostName %></h2>
-                        <% if (memberSince) { %><p class="mb-0 text-body-secondary">Member since <%= memberSince %></p><% } %>
+                        <% if (typeof hostTrust !== "undefined" && hostTrust && hostTrust.items.length) { %>
+                        <%- include("../partials/trust.ejs", { trust: hostTrust }) %>
+                        <% } else if (memberSince) { %><p class="mb-0 text-body-secondary">Member since <%= memberSince %></p><% } %>
                     </div>
                 </section>
                 <% } %>

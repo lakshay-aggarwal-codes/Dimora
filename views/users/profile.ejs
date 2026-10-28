@@ -11,7 +11,9 @@
             <div>
                 <h1 class="h3 profile-name"><%= profile.displayName %></h1>
                 <p class="profile-username">@<%= profile.username %></p>
-                <% if (profile.memberSince) { %><p class="profile-since">Member since <%= profile.memberSince %></p><% } %>
+                <% if (typeof trust !== "undefined" && trust && trust.items.length) { %>
+                <%- include("../partials/trust.ejs", { trust }) %>
+                <% } else if (profile.memberSince) { %><p class="profile-since">Member since <%= profile.memberSince %></p><% } %>
             </div>
         </header>
 
