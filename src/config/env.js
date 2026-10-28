@@ -27,6 +27,7 @@ const KEYS = [
   "SWEEPER_ENABLED",
   "SWEEPER_INTERVAL_SECONDS",
   "REVIEW_WINDOW_DAYS",
+  "TRUST_PROXY_HOPS",
 ];
 
 // Secrets that were committed to the repository or are obvious placeholders.
@@ -89,6 +90,10 @@ const schema = Joi.object({
   SWEEPER_INTERVAL_SECONDS: Joi.number().integer().min(5).max(3600).default(60),
   // How many days after check-out a guest may still review the stay (P12-T01).
   REVIEW_WINDOW_DAYS: Joi.number().integer().min(1).max(365).default(30),
+  // How many reverse proxies sit in front of the app in production (P19-T03).
+  // Express uses it to find the real client address (rate limits, secure
+  // cookies). Default 1; see docs/DEPLOYMENT.md before changing it.
+  TRUST_PROXY_HOPS: Joi.number().integer().min(1).max(5).default(1),
 });
 
 function isPlaceholder(value) {
@@ -195,6 +200,7 @@ function validateEnv(source = process.env) {
       intervalMs: value.SWEEPER_INTERVAL_SECONDS * 1000,
     }),
     reviews: Object.freeze({ windowDays: value.REVIEW_WINDOW_DAYS }),
+    trustProxyHops: value.TRUST_PROXY_HOPS,
     warnings: Object.freeze(warnings),
   });
 }

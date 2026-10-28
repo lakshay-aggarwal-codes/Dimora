@@ -1,0 +1,62 @@
+# Render Blueprint for Dimora (P19-T03). Read docs/DEPLOYMENT.md first.
+#
+# Free instance, so:
+#   - the service sleeps after 15 minutes without traffic and takes about a
+#     minute to wake (Render's documented behaviour, checked 2026-10-28);
+#   - there is no pre-deploy command (paid only), so migrations run in the
+#     build command: a failing migration fails the build and the running
+#     version stays up;
+#   - no shell and no one-off jobs: run `npm run make-admin` from your own
+#     machine against the production database (see docs/DEPLOYMENT.md).
+#
+# Values marked `sync: false` are asked for once, in the Render dashboard, when
+# the Blueprint is created. Never write a secret in this file.
+services:
+  - type: web
+    name: dimora
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm ci && npm run migrate
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    # Deploy by hand until the migration and CI routine feels safe
+    # (docs/DEPLOYMENT.md, "Updating and rolling back").
+    autoDeploy: false
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # The version Render's docs list as its default on 2026-10-28; pinned so
+      # a later default change cannot surprise a deploy. package.json needs >=20.19.
+      - key: NODE_VERSION
+        value: 24.14.1
+      - key: APP_BASE_URL # https://<your-service>.onrender.com (or your domain), no trailing slash
+        sync: false
+      - key: MONGODB_URI # the Atlas mongodb+srv:// string for a database user of its own
+        sync: false
+      # Generated once by Render (random, 256 bits). It also keys the approximate
+      # public location of every listing: do not rotate it casually.
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: MAPBOX_SERVER_TOKEN # secret (sk.) token, server only
+        sync: false
+      - key: MAPBOX_PUBLIC_TOKEN # public (pk.) token, URL-restricted to your site
+        sync: false
+      - key: MAPBOX_GEOCODING_PERMANENT
+        value: "false"
+      - key: NEARBY_CONTACT # an email or URL that identifies you to the Overpass operators
+        sync: false
+      - key: NEARBY_ENABLED
+        value: "true"
+      - key: SWEEPER_ENABLED
+        value: "true"
+      # Hops of X-Forwarded-For to trust. 1 is the default; check it after the
+      # first deploy (docs/DEPLOYMENT.md, "Client address").
+      - key: TRUST_PROXY_HOPS
+        value: "1"

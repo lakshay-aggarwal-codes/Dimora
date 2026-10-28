@@ -75,7 +75,7 @@ Run `npm run preflight` with the production `.env` (or the host's real environme
 1. `NODE_ENV=production`; `PORT` as the host expects.
 2. `MONGODB_URI`: hosted database (`mongodb+srv://...`), a database user with only this database's rights, the host's IP allowed in Atlas Network Access.
 3. `SESSION_SECRET`: 32+ random characters, generated with the command in `.env.example`, different from every other environment. Rotating it logs everyone out and moves public map points (D1).
-4. `APP_BASE_URL`: your `https://` address (cookies are `Secure` and the app trusts one proxy hop in production, so the host must sit behind exactly one TLS-terminating proxy).
+4. `APP_BASE_URL`: your `https://` address (cookies are `Secure` and the app trusts `TRUST_PROXY_HOPS` proxy hops in production, default 1; set it to the number of proxies in front of the app, see `docs/DEPLOYMENT.md`).
 5. `CLOUDINARY_*`: production account or folder; the API secret only on the server.
 6. `MAPBOX_SERVER_TOKEN` (never sent to browsers) and a **different** `MAPBOX_PUBLIC_TOKEN` (`pk.`), restricted by URL to your domain in the Mapbox account. Read ADR-007 before turning on `MAPBOX_GEOCODING_PERMANENT`.
 7. `NEARBY_CONTACT`: an email or URL for the Overpass operators (or `NEARBY_ENABLED=false`).

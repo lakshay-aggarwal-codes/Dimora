@@ -23,25 +23,28 @@ if (config.dnsServers.length) {
 
 const mongoose = require("mongoose");
 const { createApp } = require("./src/app");
+const { createShutdown } = require("./src/config/shutdown");
 require("./src/controllers/listing").initGeocoding();
 
 const app = createApp({ config });
 const PORT = config.port;
 
 // Housekeeping (P07-T07): started once the database is connected.
+// Returns the function that stops its timer ("stoppers" for graceful shutdown).
 function startHousekeeping() {
   if (!config.sweeper.enabled) {
     console.log("Sweeper disabled (SWEEPER_ENABLED=false)");
-    return;
+    return () => {};
   }
   const { createLogger } = require("./src/config/logger");
   const { createSweeper, startSweeper } = require("./src/services/sweeper");
   const logger = createLogger();
-  startSweeper({
+  const sweeper = startSweeper({
     runOnce: createSweeper({ logger }).runOnce,
     intervalMs: config.sweeper.intervalMs,
     logger,
   });
+  return () => sweeper.stop();
 }
 
 // Nearby places (P15-T01): fail at start-up on a bad OVERPASS_URL, then retry
@@ -57,10 +60,10 @@ function startNearby() {
   }
   if (!nearbyConfig.enabled) {
     console.log("Nearby places disabled (NEARBY_ENABLED=false)");
-    return;
+    return () => {};
   }
   const { createLogger } = require("./src/config/logger");
-  require("./src/services/nearbyRetry").startNearbyRetry({
+  return require("./src/services/nearbyRetry").startNearbyRetry({
     logger: createLogger(),
     config: nearbyConfig,
   });
@@ -73,12 +76,21 @@ async function main() {
 main()
   .then(() => {
     console.log("Connected to DB");
-    startHousekeeping();
-    startNearby();
+    const stoppers = [startHousekeeping(), startNearby()];
 
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
+
+    // The host sends SIGTERM on every deploy and spin-down (P19-T03).
+    const shutdown = createShutdown({
+      server,
+      stoppers,
+      closeDb: () => mongoose.disconnect(),
+      logger: { info: console.log, warn: console.warn, error: console.error },
+    });
+    process.on("SIGTERM", () => shutdown("SIGTERM"));
+    process.on("SIGINT", () => shutdown("SIGINT"));
   })
   .catch((err) => {
     console.error("Failed to connect to MongoDB:", err);

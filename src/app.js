@@ -45,6 +45,7 @@ const {
 const { csrfProtection } = require("./middleware/csrf");
 const { inputGuard, URLENCODED_OPTIONS } = require("./middleware/inputGuard");
 const { recoverCheckout } = require("./middleware/checkoutRecovery");
+const { createHealthRouter } = require("./routes/health");
 
 const ROOT_DIR = path.join(__dirname, "..");
 
@@ -61,11 +62,14 @@ const ROOT_DIR = path.join(__dirname, "..");
  *   is needed.
  * @param {object} [options.logger] pino logger (default: JSON to stdout;
  *   silent when config.isTest).
+ * @param {() => boolean} [options.isDbReady] answers /readyz (default: the
+ *   Mongoose connection is open). Tests pass a stub.
  */
 function createApp({
   config = loadEnv(),
   sessionStore,
   logger = createLogger({ level: config.isTest ? "silent" : "info" }),
+  isDbReady,
 } = {}) {
   configureCloudinary(config.cloudinary);
   configureLocationSecret(config.sessionSecret); // keys the public-location offset (P06-T02)
@@ -84,14 +88,19 @@ function createApp({
   app.locals.listingsUrl = listingsUrl; // /listings?... links that keep the query // used by views/partials/pagination.ejs
 
   app.disable("x-powered-by");
-  // Behind one reverse proxy (Render, Railway, nginx...): needed for secure
-  // cookies and for rate limiting by the real client address.
-  if (config.isProduction) app.set("trust proxy", 1);
+  // Behind reverse proxies (Render, Railway, nginx...): needed for secure
+  // cookies and for rate limiting by the real client address. The number of
+  // hops is TRUST_PROXY_HOPS (default 1); see docs/DEPLOYMENT.md.
+  if (config.isProduction) app.set("trust proxy", config.trustProxyHops || 1);
 
   app.engine("ejs", ejsMate);
   // Before static files so every response carries the security headers.
   app.use(assignCspNonce);
   app.use(securityHeaders({ isProduction: Boolean(config.isProduction) }));
+  // Health checks (P19-T03): before the request log, the session and CSRF, so
+  // a check every few seconds writes no log line, creates no session and needs
+  // no cookie or token.
+  app.use(createHealthRouter({ isDbReady }));
   app.use(express.static(path.join(ROOT_DIR, "public")));
 
   // After static files (so assets are not logged), before everything else so
