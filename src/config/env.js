@@ -28,6 +28,10 @@ const KEYS = [
   "SWEEPER_INTERVAL_SECONDS",
   "REVIEW_WINDOW_DAYS",
   "TRUST_PROXY_HOPS",
+  "EMAIL_TRANSPORT",
+  "EMAIL_FROM",
+  "RESEND_API_KEY",
+  "EMAIL_VERIFICATION_REQUIRED",
 ];
 
 // Secrets that were committed to the repository or are obvious placeholders.
@@ -94,6 +98,15 @@ const schema = Joi.object({
   // Express uses it to find the real client address (rate limits, secure
   // cookies). Default 1; see docs/DEPLOYMENT.md before changing it.
   TRUST_PROXY_HOPS: Joi.number().integer().min(1).max(5).default(1),
+  // Email (P02-T05). "console" writes the message to the server log (development:
+  // the link you would click is in the terminal); "resend" sends it through
+  // Resend's HTTPS API (docs/EMAIL.md; hosts such as Render's free plan block SMTP).
+  EMAIL_TRANSPORT: Joi.string().valid("console", "resend").default("console"),
+  EMAIL_FROM: Joi.string().max(200).default("Dimora <no-reply@localhost>"),
+  RESEND_API_KEY: Joi.string().max(200),
+  // false = signing up still works and nothing asks for a confirmed address.
+  // For a deployment that cannot send email. Default true.
+  EMAIL_VERIFICATION_REQUIRED: Joi.boolean().default(true),
 });
 
 function isPlaceholder(value) {
@@ -173,6 +186,18 @@ function validateEnv(source = process.env) {
     else warnings.push(msg);
   }
 
+  if (value && value.EMAIL_TRANSPORT === "resend") {
+    if (!raw.RESEND_API_KEY) problems.push("RESEND_API_KEY is missing (EMAIL_TRANSPORT=resend)");
+    if (!raw.EMAIL_FROM) problems.push("EMAIL_FROM is missing (EMAIL_TRANSPORT=resend); use an address on a domain you verified with Resend");
+  }
+  if (isProduction && value && value.EMAIL_TRANSPORT === "console") {
+    warnings.push(
+      value.EMAIL_VERIFICATION_REQUIRED === false
+        ? "EMAIL_TRANSPORT=console in production: no email is delivered (password reset by email does not work)"
+        : "EMAIL_TRANSPORT=console in production and EMAIL_VERIFICATION_REQUIRED is on: nobody can confirm an address, so nobody can publish a listing or book; set up Resend (docs/EMAIL.md) or set EMAIL_VERIFICATION_REQUIRED=false",
+    );
+  }
+
   if (problems.length) throw new EnvValidationError(problems, warnings);
 
   const port = value.PORT;
@@ -201,6 +226,12 @@ function validateEnv(source = process.env) {
     }),
     reviews: Object.freeze({ windowDays: value.REVIEW_WINDOW_DAYS }),
     trustProxyHops: value.TRUST_PROXY_HOPS,
+    email: Object.freeze({
+      transport: value.EMAIL_TRANSPORT,
+      from: value.EMAIL_FROM,
+      resendApiKey: value.RESEND_API_KEY || null,
+      verificationRequired: value.EMAIL_VERIFICATION_REQUIRED !== false,
+    }),
     warnings: Object.freeze(warnings),
   });
 }

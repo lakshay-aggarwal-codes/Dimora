@@ -56,6 +56,18 @@ services:
         value: "true"
       - key: SWEEPER_ENABLED
         value: "true"
+      # Email (docs/EMAIL.md). Render's free plan blocks SMTP, so Resend's HTTPS
+      # API is used (needs RESEND_API_KEY and EMAIL_FROM, or the app refuses to
+      # start). With no Resend account yet, set EMAIL_TRANSPORT to console and
+      # EMAIL_VERIFICATION_REQUIRED to "false", or nobody can publish or book.
+      - key: EMAIL_TRANSPORT
+        value: resend
+      - key: EMAIL_FROM # e.g. Dimora <no-reply@your-verified-domain>
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_VERIFICATION_REQUIRED
+        value: "true"
       # Hops of X-Forwarded-For to trust. 1 is the default; check it after the
       # first deploy (docs/DEPLOYMENT.md, "Client address").
       - key: TRUST_PROXY_HOPS

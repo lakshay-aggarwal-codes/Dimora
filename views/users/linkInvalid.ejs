@@ -1,0 +1,14 @@
+<% layout("/layouts/boilerPlate") %>
+<%# Locals: kind ("verify" or "reset"). One text for every reason: unknown, used, expired, replaced by a newer link. %>
+    <div class="row mt-3">
+        <div class="col-12 col-md-8 col-lg-6 mx-auto">
+            <h1>This link does not work</h1>
+            <p>It may have been used already, replaced by a newer one, or it has expired.</p>
+            <% if (kind === "reset") { %>
+            <a class="btn btn-dark" href="/forgot-password">Ask for a new link</a>
+            <% } else { %>
+            <a class="btn btn-dark" href="/verify-email/needed">Ask for a new link</a>
+            <p class="form-text mt-2">You will be asked to log in first.</p>
+            <% } %>
+        </div>
+    </div>

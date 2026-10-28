@@ -77,6 +77,14 @@ const MATRIX = {
   "DELETE /listings/:id/reviews/:reviewId": { access: "authorize", action: "review:delete", who: "the review's author, or an admin (review:delete)" },
   "PUT /listings/:id/sections/:key": { access: "authorize", action: "listing:edit", who: "the listing's host (listing:edit)" },
   "GET /listings/new": { access: "authorize", action: "listing:create", who: "any active member (listing:create)" },
+  "GET /forgot-password": { access: "public", who: "anyone, signed in or not" },
+  "POST /forgot-password": { access: "public", who: "anyone, signed in or not" },
+  "GET /reset-password/:token": { access: "public", who: "anyone, signed in or not" },
+  "POST /reset-password": { access: "public", who: "anyone, signed in or not" },
+  "GET /verify-email/needed": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "POST /verify-email/resend": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "GET /verify-email/:token": { access: "public", who: "anyone, signed in or not" },
+  "POST /verify-email": { access: "public", who: "anyone, signed in or not" },
   "GET /login": { access: "public", who: "anyone, signed in or not" },
   "POST /login": { access: "public", who: "anyone, signed in or not" },
   "POST /logout": { access: "public", who: "anyone, signed in or not" },
@@ -94,8 +102,6 @@ const MATRIX = {
   "GET /trips": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
   "GET /trips/:id": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
   "POST /trips/:id/cancel": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
-  "GET /trips/:id/change": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
-  "POST /trips/:id/change": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
   "GET /users/:id": { access: "public", who: "anyone, signed in or not" },
 };
 
@@ -106,6 +112,8 @@ const MATRIX = {
 const APP_LEVEL = {
   "POST /login": "rate limit, then the user router",
   "POST /signup": "rate limit, then the user router",
+  "POST /forgot-password": "rate limit, then the email router",
+  "POST /verify-email/resend": "rate limit, then the email router",
   "POST /reports": "rate limit, then the reports router",
   "POST /api/conversations/:id/messages": "rate limit, then the messages router",
   "POST /api/listings/:id/conversations": "rate limit, then the messages router",

@@ -123,6 +123,34 @@ module.exports.deleteAccountSchema = Joi.object({
     }),
 });
 
+// Forgot password (P02-T05): only the address; the answer never says whether it is known.
+module.exports.forgotPasswordSchema = Joi.object({
+    email: Joi.string().trim().lowercase().max(254).email({ tlds: { allow: false } }).required()
+        .messages({
+            "any.required": "Enter your email address.",
+            "string.base": "Enter your email address.",
+            "string.empty": "Enter your email address.",
+            "string.max": "Enter a valid email address.",
+            "string.email": "Enter a valid email address.",
+        }),
+});
+
+// Reset password (P02-T05). Validate with `{ context: { username, email } }`.
+module.exports.resetPasswordSchema = Joi.object({
+    token: Joi.string().pattern(/^[A-Za-z0-9_-]{43}$/).required().messages({
+        "any.required": "This link is not valid.",
+        "string.base": "This link is not valid.",
+        "string.empty": "This link is not valid.",
+        "string.pattern.base": "This link is not valid.",
+    }),
+    newPassword: passwordRule(),
+    confirmPassword: Joi.string().empty("").required().valid(Joi.ref("newPassword")).messages({
+        "any.required": "Type the new password again to confirm it.",
+        "string.empty": "Type the new password again to confirm it.",
+        "any.only": "The two passwords do not match.",
+    }),
+});
+
 module.exports.USERNAME_PATTERN = USERNAME_PATTERN;
 module.exports.PASSWORD_MIN = PASSWORD_MIN;
 module.exports.PASSWORD_MAX = PASSWORD_MAX;

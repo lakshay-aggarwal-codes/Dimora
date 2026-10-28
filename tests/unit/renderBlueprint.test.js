@@ -60,6 +60,7 @@ test("every secret is asked for in the dashboard (sync: false) or generated, nev
     "CLOUDINARY_API_KEY",
     "CLOUDINARY_API_SECRET",
     "MAPBOX_SERVER_TOKEN",
+    "RESEND_API_KEY",
   ];
   for (const key of SECRETS) assert.deepEqual(vars[key], ["sync: false"], key);
   assert.deepEqual(vars.SESSION_SECRET, ["generateValue: true"]);

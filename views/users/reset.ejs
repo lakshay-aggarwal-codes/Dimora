@@ -1,0 +1,23 @@
+<% layout("/layouts/boilerPlate") %>
+<%# Locals: token (checked 43-character link token), passwordMin. %>
+    <div class="row mt-3">
+        <div class="col-12 col-md-8 col-lg-6 mx-auto">
+            <h1>Choose a new password</h1>
+            <form method="post" action="/reset-password" class="needs-validation" novalidate>
+                <%- include("../includes/csrf.ejs") %>
+                <input type="hidden" name="token" value="<%= token %>">
+                <%- include("../partials/form-field.ejs", {
+                    id: "newPassword", label: "New password", type: "password", autocomplete: "new-password", required: true,
+                    hint: "At least " + passwordMin + " characters, not a common password, not your username or the name part of your email.",
+                    feedback: "Use at least " + passwordMin + " characters.",
+                    attrs: { minlength: passwordMin, maxlength: 128 }
+                }) %>
+                <%- include("../partials/form-field.ejs", {
+                    id: "confirmPassword", label: "New password again", type: "password", autocomplete: "new-password", required: true,
+                    feedback: "Type the new password again.",
+                    attrs: { maxlength: 128 }
+                }) %>
+                <button type="submit" class="btn btn-dark">Change password</button>
+            </form>
+        </div>
+    </div>

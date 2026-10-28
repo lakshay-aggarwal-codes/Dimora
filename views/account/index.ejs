@@ -9,6 +9,12 @@
         <h1 class="h3">Account settings</h1>
         <p class="text-body-secondary">Signed in as <strong><%= currUser.username %></strong>. <a href="/users/<%= currUser._id %>">View your public profile</a> · <a href="/account/profile">Edit profile</a></p>
 
+        <% if (typeof emailVerificationRequired !== "undefined" && emailVerificationRequired && !currUser.emailVerifiedAt) { %>
+        <div class="alert alert-warning" role="status" data-email-unverified>
+            Your email address is not confirmed. You need it to publish a listing or book a stay. <a href="/verify-email/needed">Send me the link</a>.
+        </div>
+        <% } %>
+
         <section class="mb-5" aria-labelledby="pw-heading">
             <h2 class="h5" id="pw-heading">Change password</h2>
             <form method="post" action="/account/password" novalidate>

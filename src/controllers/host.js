@@ -2,6 +2,7 @@
 // form post, so it works without JavaScript; each step saves the draft, and a
 // draft is invisible to the public until it is published at the end.
 const crypto = require("node:crypto");
+const { ensureVerifiedEmail } = require("../middleware/verified");
 const Listing = require("../models/listing");
 const { loadHostListings, MAX_ROWS } = require("../services/hostListings");
 const wizard = require("../services/wizard");
@@ -205,6 +206,7 @@ module.exports.saveStep = async (req, res) => {
 // Publish a draft (or re-publish an unpublished listing). The Host Readiness
 // Checklist (src/services/readiness.js) decides; the page showed the same one.
 module.exports.publish = async (req, res) => {
+  if (!ensureVerifiedEmail(req, res)) return; // P02-T05
   const listing = req.listing;
   if (listing.deletedAt)
     throw new NotFoundError("That listing does not exist.");

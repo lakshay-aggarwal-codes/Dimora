@@ -6,11 +6,12 @@ const { createApp } = require("../../src/app");
 const { createLogger } = require("../../src/config/logger");
 const { testConfig } = require("./config");
 
-function createTestApp({ logger, config } = {}) {
+function createTestApp({ logger, config, emailService } = {}) {
   return createApp({
     config: config || testConfig(),
     sessionStore: new session.MemoryStore(),
     logger: logger || createLogger({ level: "silent" }),
+    emailService,
   });
 }
 

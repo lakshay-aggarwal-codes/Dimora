@@ -3,6 +3,7 @@ const passport = require("passport");
 const User = require("../models/user");
 const { signupSchema } = require("../validation");
 const { safeRedirectPath } = require("../utils/safeRedirect");
+const { sendVerification } = require("../services/emailAuth");
 
 // What the visitor is told. None of this text comes from the database driver,
 // passport or Mongoose.
@@ -61,11 +62,31 @@ module.exports.signup = async (req, res, next) => {
       new User({ email, username }),
       password,
     );
+    // Ask for a confirmed address (P02-T05). A failed email never fails the signup.
+    let confirmationSent = false;
+    if (req.app.locals.emailVerificationRequired) {
+      try {
+        await sendVerification({
+          user: registeredUser,
+          emailService: req.app.locals.emailService,
+          baseUrl: req.app.locals.appBaseUrl,
+        });
+        confirmationSent = true;
+      } catch (mailErr) {
+        const log = req.app.locals.logger;
+        if (log && log.error) log.error({ err: { name: mailErr.name, message: mailErr.message } }, "verification email failed");
+      }
+    }
     req.login(registeredUser, (err) => {
       if (err) {
         return next(err);
       }
-      req.flash("success", "User registered successfully");
+      req.flash(
+        "success",
+        confirmationSent
+          ? "User registered successfully. We sent a link to confirm your email address."
+          : "User registered successfully",
+      );
       res.redirect("/listings");
     });
   } catch (e) {

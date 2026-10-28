@@ -85,6 +85,14 @@ function tooManyAccountTries(req, res, next) {
   );
 }
 
+function tooManyEmails(req, res, next) {
+  next(
+    new AppError(429, "Too many email requests. Please wait a while and try again.", {
+      code: "rate_limited",
+    }),
+  );
+}
+
 function tooManyQuotes(req, res, next) {
   next(
     new AppError(429, "Too many price checks. Please wait a minute and try again.", {
@@ -139,6 +147,9 @@ function createAuthLimiters() {
       limit: 10,
       keyGenerator: (req) => (req.user && req.user._id ? `user:${req.user._id}` : ipKeyGenerator(req.ip)),
     }),
+    // Password-reset and "send the confirmation link again" (P02-T05): 10 an
+    // hour per IP, on top of the per-account limits in services/emailTokens.js.
+    emailLink: rateLimit({ ...common, handler: tooManyEmails, windowMs: 60 * 60 * 1000, limit: 10 }),
     // Price checks (P08-T02): a guest picking dates makes a few per minute.
     quote: rateLimit({ ...common, handler: tooManyQuotes, windowMs: 60 * 1000, limit: 60 }),
     // Messages and "Contact host" (P11-T02): 20 a minute per signed-in member.

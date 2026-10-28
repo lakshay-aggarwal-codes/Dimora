@@ -1,0 +1,14 @@
+<% layout("/layouts/boilerPlate") %>
+<%# Locals: email (the signed-in member's address). %>
+    <div class="row mt-3">
+        <div class="col-12 col-md-8 col-lg-6 mx-auto">
+            <h1>Confirm your email address</h1>
+            <p>You need a confirmed email address to publish a listing or to book a stay. Browsing, saving places and messaging hosts do not need one.</p>
+            <p>The link goes to <strong><%= email %></strong> and is valid for 24 hours. Check your spam folder too.</p>
+            <form method="post" action="/verify-email/resend">
+                <%- include("../includes/csrf.ejs") %>
+                <button type="submit" class="btn btn-dark">Send the link again</button>
+            </form>
+            <p class="form-text mt-2">You can ask for a new link once a minute, up to five an hour.</p>
+        </div>
+    </div>
