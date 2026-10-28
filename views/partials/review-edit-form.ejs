@@ -1,0 +1,36 @@
+<%#
+    Edit your review (P12-T03). Locals: action (the review's URL, no query),
+    rating, comment, idPrefix (unique per review on a page), from ("listing" or
+    "trip": where to return to), until (optional text: the last day to edit).
+    The stars start on the current rating; the form is sent with PUT.
+%>
+<%
+    const prefix = typeof idPrefix !== "undefined" && idPrefix ? idPrefix : "edit";
+    const back = typeof from !== "undefined" && from === "trip" ? "trip" : "listing";
+    const stars = [[1, "Terrible"], [2, "Not good"], [3, "Average"], [4, "Very good"], [5, "Amazing"]];
+%>
+<form method="post" action="<%= action %>?_method=PUT" novalidate class="needs-validation detail-review-form">
+    <%- include("../includes/csrf.ejs") %>
+    <input type="hidden" name="review[from]" value="<%= back %>">
+    <% if (typeof until !== "undefined" && until) { %><p class="small text-body-secondary">You can edit this review until <%= until %>.</p><% } %>
+    <div class="mb-3">
+        <p class="form-label" aria-hidden="true">Rating</p>
+        <fieldset class="starability-slot" aria-describedby="<%= prefix %>-rating-feedback">
+            <legend class="visually-hidden">Rating, from 1 to 5 stars</legend>
+            <% stars.forEach(([n, title]) => { %>
+            <input type="radio" id="<%= prefix %>-rate<%= n %>" name="review[rating]" value="<%= n %>" required <%= Number(rating) === n ? "checked" : "" %> />
+            <label for="<%= prefix %>-rate<%= n %>" title="<%= title %>"><%= n %> star<%= n === 1 ? "" : "s" %></label>
+            <% }) %>
+        </fieldset>
+        <div id="<%= prefix %>-rating-feedback" class="text-danger small" role="alert" data-rating-feedback hidden>
+            Please choose a rating.
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label" for="<%= prefix %>-comment">Comment</label>
+        <textarea class="form-control" id="<%= prefix %>-comment" name="review[comment]" rows="5" maxlength="2000"
+            aria-describedby="<%= prefix %>-comment-feedback" required><%= comment %></textarea>
+        <div class="invalid-feedback" id="<%= prefix %>-comment-feedback">Please write a comment.</div>
+    </div>
+    <button type="submit" class="btn btn-sm btn-dark">Save changes</button>
+</form>

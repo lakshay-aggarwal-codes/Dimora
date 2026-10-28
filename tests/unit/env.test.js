@@ -236,6 +236,14 @@ test("the review window is 30 days by default and can be set", () => {
   assert.equal(validateEnv({ ...VALID, REVIEW_WINDOW_DAYS: "14" }).reviews.windowDays, 14);
 });
 
+test("the review edit window is 7 days by default and can be set (1 to 90)", () => {
+  assert.equal(validateEnv(VALID).reviews.editDays, 7);
+  assert.equal(validateEnv({ ...VALID, REVIEW_EDIT_DAYS: "14" }).reviews.editDays, 14);
+  for (const bad of ["0", "91", "1.5", "soon"]) {
+    assert.throws(() => validateEnv({ ...VALID, REVIEW_EDIT_DAYS: bad }), /REVIEW_EDIT_DAYS/);
+  }
+});
+
 test("a review window outside 1 to 365 whole days is refused", () => {
   for (const bad of ["0", "366", "1.5", "soon"]) {
     assert.throws(() => validateEnv({ ...VALID, REVIEW_WINDOW_DAYS: bad }), /REVIEW_WINDOW_DAYS/);

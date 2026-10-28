@@ -59,6 +59,10 @@ const MATRIX = [
     },
   ],
   ["review:delete", review, { "review author": true, admin: true }],
+  // Editing (P12-T03): the author only. An admin hides a review, never rewrites it.
+  ["review:edit", review, { "review author": true }],
+  // Replying (P12-T03): decided on the LISTING; only its host (not an admin, not the guest).
+  ["review:reply", listing, { "listing owner": true }],
   [
     "reservation:view",
     reservation,
@@ -76,8 +80,6 @@ const MATRIX = [
     reservation,
     { "listing owner": true, "guest of the booking": true },
   ],
-  // Changing the dates (P09-T04): only the guest of that booking; the host and an admin cannot move a guest's stay.
-  ["reservation:modify", reservation, { "guest of the booking": true }],
   // Reporting (P12-T04): any active member, except about their own thing (the resource is { owner }).
   [
     "report:create",
@@ -134,6 +136,14 @@ describe("authorization matrix", () => {
 });
 
 describe("policy edge cases", () => {
+  test("a review without an author cannot be edited by anyone, and an empty resource is denied", () => {
+    expect(can("review:edit", people["other member"], {})).toBe(false);
+    expect(can("review:edit", people.admin, {})).toBe(false);
+    expect(can("review:edit", people["review author"], null)).toBe(false);
+    expect(can("review:reply", people["listing owner"], null)).toBe(false);
+    expect(can("review:reply", people["listing owner"], {})).toBe(false);
+  });
+
   test("a listing without an owner can be edited by nobody, removed only by an admin", () => {
     const orphan = { owner: undefined };
     expect(can("listing:edit", people["other member"], orphan)).toBe(false);

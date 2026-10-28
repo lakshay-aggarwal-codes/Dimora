@@ -1,8 +1,5 @@
 const { neighborhoodFor } = require("../services/neighborhood");
 const Listing = require("../models/listing.js");
-const User = require("../models/user");
-const Reservation = require("../models/reservation");
-const { loadTrust } = require("../services/trust");
 const reviewService = require("../services/reviews");
 const { summarizeRatings } = require("../utils/ratings");
 const { can } = require("../policies");
@@ -168,6 +165,19 @@ module.exports.showListings = async (req, res) => {
   // review, services/ratings.js); a listing that has none yet is counted from
   // the reviews it holds.
   const reviewList = newestFirst(listing.reviews);
+  // Which of these reviews the signed-in guest can still edit (P12-T03): their
+  // own, visible, inside the edit window. `edit` decides again on the PUT.
+  const editDays = req.app.locals.reviewEditDays;
+  const editableReviewIds =
+    req.user && !preview
+      ? reviewList
+          .filter(
+            (r) =>
+              can("review:edit", req.user, r) &&
+              reviewService.isEditable(r, new Date(), editDays),
+          )
+          .map((r) => String(r._id))
+      : [];
   const ratingSummary =
     listing.ratingCount > 0
       ? {
@@ -177,21 +187,12 @@ module.exports.showListings = async (req, res) => {
         }
       : summarizeRatings(reviewList);
 
-  // The host's confirmed facts (P12-T05). A failure here must not take the page down.
-  let hostTrust = null;
-  try {
-    hostTrust = listing.owner
-      ? await loadTrust({ User, Reservation }, listing.owner)
-      : null;
-  } catch {
-    hostTrust = null;
-  }
-
   res.render("listings/show.ejs", {
     listing,
-    hostTrust,
     reviewable,
     reviewList,
+    editableReviewIds,
+    editDays,
     ratingSummary,
     gallery: galleryOf(listing),
     // The public (approximate) point only: the precise one never reaches a page.

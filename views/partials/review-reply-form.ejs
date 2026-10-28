@@ -1,0 +1,17 @@
+<%#
+    The host's reply to one review (P12-T03). Locals: action (the review's URL,
+    no query), text (the current reply, or ""), idPrefix (unique per review).
+    Posting again replaces the reply; the delete form sits beside it in the page.
+%>
+<%
+    const prefix = typeof idPrefix !== "undefined" && idPrefix ? idPrefix : "reply";
+    const current = typeof text !== "undefined" && text ? text : "";
+%>
+<form method="post" action="<%= action %>/reply" novalidate class="needs-validation">
+    <%- include("../includes/csrf.ejs") %>
+    <label class="form-label small" for="<%= prefix %>-text">Your public reply</label>
+    <textarea class="form-control" id="<%= prefix %>-text" name="reply[text]" rows="3" maxlength="1000"
+        aria-describedby="<%= prefix %>-feedback" required><%= current %></textarea>
+    <div class="invalid-feedback" id="<%= prefix %>-feedback">Please write a reply (up to 1000 characters).</div>
+    <button type="submit" class="btn btn-sm btn-dark mt-2"><%= current ? "Save reply" : "Post reply" %></button>
+</form>

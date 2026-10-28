@@ -122,6 +122,62 @@ describe("ratingUpdate", () => {
     },
   );
 
+  test("changing a rating: the sum moves by the difference, the count and the list stay (P12-T03)", () => {
+    const a = review(3);
+    const b = review(4);
+    const doc = listingDoc({
+      reviews: [a._id, b._id],
+      ratingSum: 7,
+      ratingCount: 2,
+      ratingAvg: 3.5,
+    });
+    const up = applyPipeline(
+      doc,
+      ratings.ratingUpdate({ change: { from: 3, to: 5 } }),
+    );
+    expect(up).toMatchObject({ ratingSum: 9, ratingCount: 2 });
+    expect(up.ratingAvg).toBeCloseTo(4.5, 12);
+    expect(up.reviews).toEqual([a._id, b._id]);
+    const down = applyPipeline(
+      up,
+      ratings.ratingUpdate({ change: { from: 5, to: 1 } }),
+    );
+    expect(down).toMatchObject({ ratingSum: 5, ratingCount: 2 });
+    expect(down.ratingAvg).toBeCloseTo(2.5, 12);
+  });
+
+  test("changing from a rating that never counted adds it; the sum never goes below zero", () => {
+    const counted = applyPipeline(
+      listingDoc({ ratingSum: 4, ratingCount: 1, ratingAvg: 4 }),
+      ratings.ratingUpdate({ change: { from: undefined, to: 2 } }),
+    );
+    expect(counted).toMatchObject({ ratingSum: 6, ratingCount: 2 });
+    const floor = applyPipeline(
+      listingDoc({ ratingSum: 1, ratingCount: 1, ratingAvg: 1 }),
+      ratings.ratingUpdate({ change: { from: 5, to: 1 } }),
+    );
+    expect(floor.ratingSum).toBe(0);
+  });
+
+  test("changeRating is one updateOne with a pipeline", async () => {
+    const model = fakeListings(
+      listingDoc({ ratingSum: 8, ratingCount: 2, ratingAvg: 4 }),
+    );
+    await ratings.changeRating(model, model.doc._id, { from: 3, to: 4 });
+    expect(model.calls).toHaveLength(1);
+    expect(Array.isArray(model.calls[0][1])).toBe(true);
+    expect(model.doc).toMatchObject({ ratingSum: 9, ratingCount: 2 });
+  });
+
+  test("change cannot be combined with add or remove", () => {
+    expect(() =>
+      ratings.ratingUpdate({
+        change: { from: 1, to: 2 },
+        add: { reviewId: 1, stars: 1 },
+      }),
+    ).toThrow(TypeError);
+  });
+
   test("exactly one of add and remove", () => {
     expect(() => ratings.ratingUpdate({})).toThrow(TypeError);
     expect(() =>
@@ -201,6 +257,41 @@ describe("the aggregate always equals a recomputation (random operations)", () =
         expect(model.doc.reviews.map(String).sort()).toEqual(
           [...live.keys()].sort(),
         );
+      }
+    },
+  );
+
+  test.each([1, 2, 20261029])(
+    "seed %i: adds, deletes and re-ratings (P12-T03) keep the totals equal to a recomputation",
+    async (seed) => {
+      const rng = prng(seed);
+      const model = fakeListings(listingDoc());
+      const live = new Map();
+      for (let i = 0; i < 400; i += 1) {
+        const roll = rng.next();
+        if (live.size === 0 || roll < 0.4) {
+          const r = { _id: new ObjectId(), rating: rng.int(1, 5) };
+          live.set(String(r._id), r);
+          await ratings.addReview(model, model.doc._id, r);
+        } else if (roll < 0.55) {
+          const id = rng.pick([...live.keys()]);
+          const r = live.get(id);
+          live.delete(id);
+          await ratings.removeReview(model, model.doc._id, r);
+        } else {
+          const id = rng.pick([...live.keys()]);
+          const r = live.get(id);
+          const to = rng.int(1, 5);
+          await ratings.changeRating(model, model.doc._id, {
+            from: r.rating,
+            to,
+          });
+          r.rating = to;
+        }
+        const truth = ratings.totalsOf([...live.values()]);
+        expect(model.doc.ratingSum).toBe(truth.ratingSum);
+        expect(model.doc.ratingCount).toBe(truth.ratingCount);
+        expect(model.doc.ratingAvg).toBeCloseTo(truth.ratingAvg, 12);
       }
     },
   );

@@ -14,4 +14,25 @@ function remove(user, review) {
   );
 }
 
-module.exports = { create, delete: remove };
+/**
+ * Only the author edits a review, and only while the account is active. An
+ * admin moderates (hides) but never rewrites someone's words. Whether the edit
+ * window is still open is decided by services/reviews.js, which knows the time.
+ */
+function edit(user, review) {
+  return Boolean(
+    review && isActiveUser(user) && sameId(review.author, user._id),
+  );
+}
+
+/**
+ * The host's reply (P12-T03). The resource is the LISTING the review is on:
+ * only its owner may reply, edit the reply or take it back.
+ */
+function reply(user, listing) {
+  return Boolean(
+    listing && isActiveUser(user) && sameId(listing.owner, user._id),
+  );
+}
+
+module.exports = { create, delete: remove, edit, reply };

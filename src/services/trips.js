@@ -24,7 +24,6 @@ const {
 const { windowEnd, DEFAULT_WINDOW_DAYS } = require("./reviews");
 const { RULE_TEXT } = require("../config/cancellation");
 const { cancelOffer } = require("./cancellations");
-const { modifiability } = require("./modifications");
 
 const TABS = Object.freeze([
   { key: "upcoming", label: "Upcoming" },
@@ -206,6 +205,15 @@ function describeReview(review) {
     out.rating = review.review.rating;
     out.comment = review.review.comment || "";
     out.legacy = Boolean(review.review.legacy);
+    // Editing (P12-T03) and the host's reply, if there is one.
+    out.id = review.review._id ? String(review.review._id) : "";
+    out.editable = Boolean(review.editable);
+    out.editUntil = review.editUntil ? formatStayDate(review.editUntil) : null;
+    out.edited = Boolean(review.review.editedAt);
+    out.reply =
+      review.review.reply && review.review.reply.text
+        ? String(review.review.reply.text)
+        : "";
   }
   return out;
 }
@@ -365,39 +373,6 @@ async function listTrips(
 }
 
 /**
- * The history of date changes (P09-T04), oldest first, in words: when, from
- * which dates to which, and what the price did. Shown to everyone who may see
- * the booking; it contains no contact details.
- */
-function changesOf(reservation, { formatMoney, currency }) {
-  const list = Array.isArray(reservation.modifications)
-    ? reservation.modifications
-    : [];
-  const range = (stay) =>
-    stay && stay.checkIn && stay.checkOut
-      ? `${formatStayDate(stay.checkIn)} to ${formatStayDate(stay.checkOut)}`
-      : "";
-  return list.map((entry) => {
-    const diff = Number.isSafeInteger(entry.differenceMinor)
-      ? entry.differenceMinor
-      : 0;
-    const money = formatMoney(Math.abs(diff), entry.currency || currency);
-    return {
-      atText: entry.at ? formatInstant(entry.at, DEFAULT_TIMEZONE) : "",
-      fromText: range(entry.from),
-      toText: range(entry.to),
-      differenceText:
-        diff > 0
-          ? `${money} more`
-          : diff < 0
-            ? `${money} less`
-            : "same price",
-      reapproval: Boolean(entry.reapproval),
-    };
-  });
-}
-
-/**
  * Everything the confirmation page shows.
  * `reservation` has `listing`, `host` and `guest` populated (any may be missing
  * if the document was deleted; the snapshots still carry the contract).
@@ -521,16 +496,6 @@ function describeTrip(
           formatInstant,
         })
       : null,
-    // "Change dates" for the guest while the booking can still move (P09-T04),
-    // and the changes made so far for everyone who may see the booking.
-    change:
-      viewerIsGuest && modifiability(reservation, now).ok
-        ? {
-            url: `/trips/${idText(reservation._id)}/change`,
-            reapproval: reservation.status === "pending",
-          }
-        : null,
-    changes: changesOf(reservation, { formatMoney, currency }),
     review: describeReview(review),
     paymentSimulated: true,
   };
@@ -550,7 +515,6 @@ module.exports = {
   lineLabel,
   referenceOf,
   formatStayDate,
-  formatStayWeekday,
   formatInstant,
   reviewPromptOf,
   describeReview,

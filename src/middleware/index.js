@@ -1,5 +1,10 @@
 const { ValidationError } = require("../utils/errors");
-const { listingSchema, reviewSchema } = require("../validation");
+const {
+  listingSchema,
+  reviewSchema,
+  reviewEditSchema,
+  reviewReplySchema,
+} = require("../validation");
 
 // Authentication guards live in ./auth, object-level authorization (who may
 // edit/delete what) in ./authorize and ../policies (P02-T06).
@@ -21,6 +26,22 @@ module.exports.validateListing = (req, res, next) => {
   req.body = value; // trimmed strings, price as a number
   next();
 };
+
+function validateWith(schema) {
+  return (req, res, next) => {
+    // `?? {}`: a request with no parsable body must fail validation, not crash.
+    const { error } = schema.validate(req.body ?? {});
+    if (error) {
+      throw new ValidationError(
+        error.details.map((el) => el.message).join(","),
+      );
+    }
+    next();
+  };
+}
+
+module.exports.validateReviewEdit = validateWith(reviewEditSchema);
+module.exports.validateReviewReply = validateWith(reviewReplySchema);
 
 module.exports.validateReview = (req, res, next) => {
   let { error } = reviewSchema.validate(req.body);

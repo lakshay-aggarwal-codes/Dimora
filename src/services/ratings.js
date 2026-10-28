@@ -12,6 +12,7 @@
 //
 //   ratingUpdate({ add: { reviewId, stars } })      a review was written
 //   ratingUpdate({ remove: { reviewId, stars } })   a review was deleted
+//   ratingUpdate({ change: { from, to } })          a review's rating was edited
 //   recomputeRatings(...)                           repair from the reviews themselves
 
 const RATING = Object.freeze({ MIN: 1, MAX: 5 });
@@ -34,13 +35,35 @@ const averageStage = {
 };
 
 /**
- * The update pipeline for one review being added or removed.
- * @param {{ add?: {reviewId: *, stars: number}, remove?: {reviewId: *, stars: number} }} change
+ * The update pipeline for one review being added, removed or re-rated.
+ * @param {{ add?: {reviewId: *, stars: number}, remove?: {reviewId: *, stars: number},
+ *           change?: {from: number, to: number} }} change
  */
 function ratingUpdate(change) {
-  const { add, remove } = change;
-  if (Boolean(add) === Boolean(remove))
-    throw new TypeError("give exactly one of add and remove");
+  const { add, remove, change: rerate } = change;
+  if ([add, remove, rerate].filter(Boolean).length !== 1)
+    throw new TypeError("give exactly one of add, remove and change");
+  if (rerate) {
+    // The review stays in the list; only the sum (and the count, if the old
+    // rating was not countable) move. Still one atomic update.
+    const { from, to } = rerate;
+    const sumDelta =
+      (isCountable(to) ? to : 0) - (isCountable(from) ? from : 0);
+    const countDelta = (isCountable(to) ? 1 : 0) - (isCountable(from) ? 1 : 0);
+    return [
+      {
+        $set: {
+          ratingSum: {
+            $max: [0, { $add: [{ $ifNull: ["$ratingSum", 0] }, sumDelta] }],
+          },
+          ratingCount: {
+            $max: [0, { $add: [{ $ifNull: ["$ratingCount", 0] }, countDelta] }],
+          },
+        },
+      },
+      averageStage,
+    ];
+  }
   const { reviewId, stars } = add || remove;
   const sign = add ? 1 : -1;
   const counted = isCountable(stars);
@@ -81,6 +104,14 @@ function removeReview(ListingModel, listingId, review) {
   return ListingModel.updateOne(
     { _id: listingId },
     ratingUpdate({ remove: { reviewId: review._id, stars: review.rating } }),
+  );
+}
+
+/** A review's rating was edited: move the totals by the difference, in one update. */
+function changeRating(ListingModel, listingId, { from, to }) {
+  return ListingModel.updateOne(
+    { _id: listingId },
+    ratingUpdate({ change: { from, to } }),
   );
 }
 
@@ -125,6 +156,7 @@ module.exports = {
   ratingUpdate,
   addReview,
   removeReview,
+  changeRating,
   totalsOf,
   recomputeRatings,
 };

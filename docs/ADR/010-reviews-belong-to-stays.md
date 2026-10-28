@@ -28,3 +28,9 @@ Until now anyone with an account could review any listing, any number of times, 
 - **Hide or delete legacy reviews.** Loses content the project already has and leaves new listings empty; a label is enough to be honest.
 - **No label.** Presents unverified reviews exactly like verified ones.
 - **Check the one-review rule only in code.** Two simultaneous requests could both pass the check; the unique index closes that.
+
+## Update (P12-T03): editing and host replies
+
+- **The author may edit rating and comment for `REVIEW_EDIT_DAYS` after posting** (default 7, 1 to 90), measured from `createdAt` (a review without one is dated by its id). Only the author: an admin hides a review, never rewrites it. A hidden review cannot be edited. The review keeps `editedAt` and the page shows "Edited"; the previous text is not kept.
+- **A rating change moves the totals by the difference** in one atomic update (`ratings.changeRating`), using the rating the compare-and-set on the review returned as "before", so two edits at once still add up.
+- **The listing's host may write one public reply per review** (up to 1000 characters; writing again replaces it, `editedAt` is recorded; the host can remove it). The reply is decided on the listing (`review:reply`: its owner only, not an admin) and is shown as "Response from the host". A hidden review takes its reply with it out of sight.

@@ -712,11 +712,38 @@ describe("describeReview", () => {
       comment: "Nice",
       legacy: false,
       hidden: false,
+      id: "",
+      editable: false,
+      editUntil: null,
+      edited: false,
+      reply: "",
     });
     // a moderator-hidden review is flagged so the author is told (P14-T04)
     expect(
       trips.describeReview({ state: "done", review: { rating: 2, comment: "x", status: "hidden" } }).hidden,
     ).toBe(true);
+  });
+  test("done carries what the author can still do and the host's reply (P12-T03)", () => {
+    const id = new ObjectId();
+    const out = trips.describeReview({
+      state: "done",
+      review: {
+        _id: id,
+        rating: 5,
+        comment: "Great",
+        editedAt: new Date("2026-11-21T00:00:00Z"),
+        reply: { text: "Thank you!" },
+      },
+      editable: true,
+      editUntil: d("2026-11-27"),
+    });
+    expect(out).toMatchObject({
+      id: String(id),
+      editable: true,
+      editUntil: "27 Nov 2026",
+      edited: true,
+      reply: "Thank you!",
+    });
   });
   test("nothing given means none", () => {
     expect(trips.describeReview(undefined)).toEqual({

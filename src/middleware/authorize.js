@@ -8,6 +8,9 @@
 //                           req.review) and the request continues
 //
 // Actions without a loader (listing:create, review:create) have no resource.
+// `{ resource: "listing" }` loads a different resource than the action's prefix
+// names: "review:reply" is decided by the listing's owner, so its route loads
+// the listing (req.listing) and the policy receives it.
 const Listing = require("../models/listing.js");
 const Review = require("../models/review.js");
 const { can } = require("../policies");
@@ -41,12 +44,14 @@ const FORBIDDEN = {
   "listing:delete": "Only the host can delete this listing.",
   "review:create": "You are not allowed to write reviews.",
   "review:delete": "Only the author can delete this review.",
+  "review:edit": "Only the author can edit this review.",
+  "review:reply": "Only the host can reply to reviews.",
 };
 
-function authorize(action, { concealForbidden = false } = {}) {
+function authorize(action, { concealForbidden = false, resource: kind } = {}) {
   // Fails at startup (route definition) for a typo, not on the first request.
   can(action, undefined, undefined);
-  const type = action.split(":")[0];
+  const type = kind || action.split(":")[0];
   const load = action.endsWith(":create") ? null : LOADERS[type];
 
   const authorizeMiddleware = async (req, res, next) => {

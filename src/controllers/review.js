@@ -27,6 +27,55 @@ module.exports.createReview = async (req, res) => {
   );
 };
 
+// The author edits rating and comment (P12-T03). The form says which page it
+// was on, so the guest lands back there.
+module.exports.updateReview = async (req, res) => {
+  const { id, reviewId } = req.params;
+  const { rating, comment, from } = req.body.review;
+  const { review, changed } = await reviewService.edit({
+    user: req.user,
+    listingId: id,
+    reviewId,
+    rating,
+    comment,
+    editDays: req.app.locals.reviewEditDays,
+  });
+  req.flash("success", changed ? "Your review was updated." : "No changes.");
+  const trip = review.reservation
+    ? `/trips/${review.reservation}#review`
+    : null;
+  res.redirect(
+    from === "trip" && trip ? trip : `/listings/${id}#review-${reviewId}`,
+  );
+};
+
+// The host's reply to a review (P12-T03).
+module.exports.createReply = async (req, res) => {
+  const { id, reviewId } = req.params;
+  await reviewService.reply({
+    user: req.user,
+    listing: req.listing,
+    reviewId,
+    text: req.body.reply.text,
+  });
+  req.flash("success", "Your reply was posted.");
+  res.redirect(`/listings/${id}#review-${reviewId}`);
+};
+
+module.exports.destroyReply = async (req, res) => {
+  const { id, reviewId } = req.params;
+  const removed = await reviewService.removeReply({
+    user: req.user,
+    listing: req.listing,
+    reviewId,
+  });
+  req.flash(
+    "success",
+    removed ? "Your reply was removed." : "No reply to remove.",
+  );
+  res.redirect(`/listings/${id}#review-${reviewId}`);
+};
+
 module.exports.destroyreview = async (req, res) => {
   const { id, reviewId } = req.params;
   // One service call: deletes the review and updates the listing's list and

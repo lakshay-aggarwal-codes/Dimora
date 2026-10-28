@@ -52,6 +52,17 @@ const reviewSchema = new Schema(
       title: String,
       city: String,
     },
+    // Set when the author changes the rating or comment inside the edit window
+    // (P12-T03). Shown as "Edited" next to the review.
+    editedAt: Date,
+    // The host's one public reply (P12-T03). The host is the listing's owner;
+    // `author` records who wrote it. Absent until the host replies.
+    reply: {
+      text: { type: String, trim: true, maxlength: 1000 },
+      author: { type: Schema.Types.ObjectId, ref: "User" },
+      createdAt: Date,
+      editedAt: Date,
+    },
   },
   { timestamps: true },
 );

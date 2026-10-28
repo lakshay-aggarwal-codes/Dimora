@@ -61,29 +61,6 @@
             </dl>
         </section>
 
-        <% if (trip.change) { %>
-        <section class="trip-section no-print" aria-labelledby="trip-change" data-change-section>
-            <h2 class="h5" id="trip-change">Change your dates</h2>
-            <p class="mb-2">
-                Need other dates? You see the new price and the difference before anything changes. The new nights are held first: if they are not free, your booking stays exactly as it is.
-                <% if (trip.change.reapproval) { %>Because the host has not answered yet, the host decides again on the new dates and gets 24 hours from the change.<% } %>
-            </p>
-            <a class="btn btn-outline-dark btn-sm" href="<%= trip.change.url %>">Change dates</a>
-        </section>
-        <% } %>
-
-        <% if (trip.changes.length) { %>
-        <section class="trip-section" aria-labelledby="trip-changes" data-changes>
-            <h2 class="h5" id="trip-changes">Changes to this booking</h2>
-            <ul class="mb-0">
-                <% trip.changes.forEach((c) => { %>
-                <li><%= c.atText %>: dates moved from <%= c.fromText %> to <%= c.toText %> (<%= c.differenceText %>)<% if (c.reapproval) { %>; sent back to the host<% } %>.</li>
-                <% }) %>
-            </ul>
-            <p class="small text-body-secondary mt-2 mb-0">Price differences are recorded only. Dimora does not take or return money yet (payments are simulated).</p>
-        </section>
-        <% } %>
-
         <section class="trip-section" aria-labelledby="trip-where">
             <h2 class="h5" id="trip-where">Where</h2>
             <% if (trip.revealed && trip.address) { %>
@@ -124,7 +101,19 @@
             <%- include("../partials/review-form.ejs", { action: "/listings/" + trip.listing.id + "/reviews", reservationId: trip.id, idPrefix: "trip", intro: "How was your stay? You can review it until " + trip.review.until + "." }) %>
             <% } else if (trip.review.state === "done") { %>
             <p class="review-rating mb-1"><span aria-hidden="true"><%= trip.review.rating %> &#9733;</span> <span class="visually-hidden">You rated this stay <%= trip.review.rating %> out of 5</span></p>
-            <p class="trip-rules-text mb-0"><%= trip.review.comment %></p>
+            <p class="trip-rules-text mb-0"><%= trip.review.comment %><% if (trip.review.edited) { %> <span class="small text-body-secondary">(edited)</span><% } %></p>
+            <% if (trip.review.reply) { %>
+            <div class="border-start ps-3 mt-3">
+                <p class="small fw-semibold mb-1">Response from the host</p>
+                <p class="mb-0"><%= trip.review.reply %></p>
+            </div>
+            <% } %>
+            <% if (trip.review.editable) { %>
+            <details class="mt-3">
+                <summary class="small">Edit your review</summary>
+                <%- include("../partials/review-edit-form.ejs", { action: "/listings/" + trip.listing.id + "/reviews/" + trip.review.id, rating: trip.review.rating, comment: trip.review.comment, idPrefix: "trip-edit", from: "trip", until: trip.review.editUntil }) %>
+            </details>
+            <% } %>
             <% } else { %>
             <p class="mb-0 text-body-secondary">The time to review this stay ended on <%= trip.review.until %>.</p>
             <% } %>

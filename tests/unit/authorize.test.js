@@ -152,6 +152,87 @@ describe("authorize('review:delete')", () => {
   });
 });
 
+describe("authorize('review:reply', { resource: 'listing' })", () => {
+  const reviewId = new ObjectId();
+  const req = (extra) =>
+    makeReq({ params: { id: "L1", reviewId: String(reviewId) }, ...extra });
+  const run = (rq) => {
+    const next = jest.fn();
+    return authorize("review:reply", { resource: "listing" })(
+      rq,
+      makeRes(),
+      next,
+    ).then(() => next);
+  };
+
+  test("the host passes and the LISTING is left on req.listing; no review is loaded", async () => {
+    const found = { owner: me, reviews: [reviewId] };
+    jest.spyOn(Listing, "findById").mockResolvedValue(found);
+    const reviewLookup = jest.spyOn(Review, "findById");
+    const rq = req();
+    const next = await run(rq);
+    expect(next).toHaveBeenCalledWith();
+    expect(rq.listing).toBe(found);
+    expect(reviewLookup).not.toHaveBeenCalled();
+  });
+
+  test("another member gets a 403 with the reply message", async () => {
+    jest
+      .spyOn(Listing, "findById")
+      .mockResolvedValue({ owner: new ObjectId(), reviews: [reviewId] });
+    await expect(run(req())).rejects.toMatchObject({
+      statusCode: 403,
+      message: "Only the host can reply to reviews.",
+    });
+  });
+
+  test("a missing listing is a 404", async () => {
+    jest.spyOn(Listing, "findById").mockResolvedValue(null);
+    await expect(run(req())).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  test("anonymous goes to the login page", async () => {
+    const find = jest.spyOn(Listing, "findById");
+    const res = makeRes();
+    await authorize("review:reply", { resource: "listing" })(
+      req({ user: undefined }),
+      res,
+      jest.fn(),
+    );
+    expect(res.redirect).toHaveBeenCalledWith("/login");
+    expect(find).not.toHaveBeenCalled();
+  });
+});
+
+describe("authorize('review:edit')", () => {
+  const reviewId = new ObjectId();
+  const req = (extra) =>
+    makeReq({ params: { id: "L1", reviewId: String(reviewId) }, ...extra });
+
+  test("the author passes; another member and an admin get a 403", async () => {
+    jest.spyOn(Listing, "findById").mockResolvedValue({ reviews: [reviewId] });
+    const found = { author: me };
+    jest.spyOn(Review, "findById").mockResolvedValue(found);
+    const rq = req();
+    const next = jest.fn();
+    await authorize("review:edit")(rq, makeRes(), next);
+    expect(next).toHaveBeenCalledWith();
+    expect(rq.review).toBe(found);
+
+    Review.findById.mockResolvedValue({ author: new ObjectId() });
+    await expect(
+      authorize("review:edit")(req(), makeRes(), jest.fn()),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(
+      authorize("review:edit")(
+        req({ user: { _id: new ObjectId(), role: "admin", status: "active" } }),
+        makeRes(),
+        jest.fn(),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+  });
+});
+
 test("authorize() rejects an unknown action when the route is defined", () => {
   expect(() => authorize("listing:fly")).toThrow(/Unknown policy action/);
 });

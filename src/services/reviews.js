@@ -10,6 +10,13 @@
 //   already reviewed ............. 409 already_reviewed (also when two requests race: the
 //                                  partial unique index on `reservation` decides)
 //   bad rating or comment ........ 400
+// Editing and replying (P12-T03):
+//   edit: only the author, only while the review is visible and inside the edit
+//   window (REVIEW_EDIT_DAYS after it was posted); 409 review_edit_window_closed
+//   after that. A new rating moves the listing's totals by the difference, in
+//   one atomic update (ratings.changeRating).
+//   reply: only the listing's host, one reply per review (writing again
+//   replaces it), never on a hidden review, 1000 characters at most.
 // A review is still allowed after the host deleted the listing: it stays
 // attached to the listing's id and to the snapshot taken at booking time.
 const {
@@ -28,7 +35,10 @@ const { isActiveUser, sameId } = require("../policies/shared");
 const ratings = require("./ratings");
 
 const DEFAULT_WINDOW_DAYS = 30;
+const DEFAULT_EDIT_DAYS = 7;
 const COMMENT_MAX = 2000;
+const REPLY_MAX = 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
 const OBJECT_ID = /^[0-9a-f]{24}$/i;
 
 /** The last day (date-only) a stay can be reviewed: check-out + window. */
@@ -58,6 +68,40 @@ function parseComment(raw) {
   return text;
 }
 
+function parseReply(raw) {
+  const text = typeof raw === "string" ? raw.trim() : "";
+  if (text.length === 0) throw new ValidationError("Write a reply.");
+  if (text.length > REPLY_MAX) {
+    throw new ValidationError(
+      `The reply can be at most ${REPLY_MAX} characters.`,
+    );
+  }
+  return text;
+}
+
+/** When a review was posted: `createdAt`, else the time its id was created. */
+function postedAt(review) {
+  const created =
+    review && review.createdAt ? new Date(review.createdAt) : null;
+  if (created && !Number.isNaN(created.getTime())) return created;
+  return review && review._id && typeof review._id.getTimestamp === "function"
+    ? review._id.getTimestamp()
+    : null;
+}
+
+/** The moment the author can no longer edit this review (null if its age is unknown). */
+function editDeadline(review, editDays = DEFAULT_EDIT_DAYS) {
+  const posted = postedAt(review);
+  return posted ? new Date(posted.getTime() + editDays * DAY_MS) : null;
+}
+
+/** Can the author still edit? (Ownership and status are checked elsewhere.) */
+function isEditable(review, now = new Date(), editDays = DEFAULT_EDIT_DAYS) {
+  if (!review || review.status === "hidden") return false;
+  const deadline = editDeadline(review, editDays);
+  return Boolean(deadline) && now.getTime() <= deadline.getTime();
+}
+
 const isDuplicateKey = (err) =>
   Boolean(err) && (err.code === 11000 || err.code === 11001);
 
@@ -66,6 +110,7 @@ function createReviewService({
   ReviewModel = require("../models/review"),
   ListingModel = require("../models/listing"),
   windowDays = DEFAULT_WINDOW_DAYS,
+  editDays = DEFAULT_EDIT_DAYS,
 } = {}) {
   /**
    * @param {{ user: object, listingId: string, reservationId: string,
@@ -239,6 +284,7 @@ function createReviewService({
     reservation,
     now = new Date(),
     windowDays: days = windowDays,
+    editDays: editFor = editDays,
   }) {
     if (
       !isActiveUser(user) ||
@@ -251,7 +297,14 @@ function createReviewService({
     const review = await ReviewModel.findOne({
       reservation: reservation._id,
     }).lean();
-    if (review) return { state: "done", review };
+    if (review) {
+      return {
+        state: "done",
+        review,
+        editable: isEditable(review, now, editFor),
+        editUntil: editDeadline(review, editFor),
+      };
+    }
     const snap = reservation.listingSnapshot || {};
     const until = windowEnd(reservation, days);
     const open = !isAfter(
@@ -261,7 +314,176 @@ function createReviewService({
     return { state: open ? "open" : "closed", until };
   }
 
-  return { submit, remove, findReviewable, stateFor };
+  /**
+   * The author changes the rating and/or comment of their own review, inside
+   * the edit window. One compare-and-set on the review (author, visible, still
+   * inside the window) returns the document as it was, so the rating difference
+   * is exact even when two edits arrive together; then ONE atomic update moves
+   * the listing's totals by that difference. If that update fails the review is
+   * put back, so the review and the totals never disagree.
+   * @returns {Promise<{review: object, changed: boolean}>}
+   */
+  async function edit({
+    user,
+    listingId,
+    reviewId,
+    rating,
+    comment,
+    now = new Date(),
+    editDays: days = editDays,
+  }) {
+    const stars = parseRating(rating);
+    const text = parseComment(comment);
+    if (!isActiveUser(user)) {
+      throw new ForbiddenError("Your account cannot edit reviews.", {
+        code: "account_not_active",
+      });
+    }
+    if (!OBJECT_ID.test(String(reviewId))) {
+      throw new NotFoundError("That review does not exist.");
+    }
+    const current = await ReviewModel.findOne({ _id: reviewId });
+    // Somebody else's review, a review of another listing, a hidden review and
+    // one that does not exist all look the same.
+    if (
+      !current ||
+      current.status === "hidden" ||
+      !sameId(current.author, user._id) ||
+      (current.listing && listingId && !sameId(current.listing, listingId))
+    ) {
+      throw new NotFoundError("That review does not exist.");
+    }
+    if (!isEditable(current, now, days)) {
+      throw new ConflictError(
+        `A review can be edited for ${days} days after it was posted.`,
+        { code: "review_edit_window_closed" },
+      );
+    }
+    if (current.rating === stars && current.comment === text) {
+      return { review: current, changed: false };
+    }
+
+    const cutoff = new Date(now.getTime() - days * DAY_MS);
+    const before = await ReviewModel.findOneAndUpdate(
+      {
+        _id: current._id,
+        author: user._id,
+        status: { $ne: "hidden" },
+        createdAt: { $gte: cutoff },
+      },
+      { $set: { rating: stars, comment: text, editedAt: now } },
+      { new: false },
+    );
+    if (!before) {
+      // Hidden, deleted or past the window between the read and the write.
+      throw new ConflictError("This review can no longer be edited.", {
+        code: "review_edit_window_closed",
+      });
+    }
+
+    if (before.rating !== stars) {
+      const target = before.listing || current.listing || listingId;
+      try {
+        await ratings.changeRating(ListingModel, target, {
+          from: before.rating,
+          to: stars,
+        });
+        // Hidden while we were changing it: the totals no longer include it,
+        // so repair them from the reviews instead of trusting the difference.
+        if (await ReviewModel.exists({ _id: before._id, status: "hidden" })) {
+          await ratings.recomputeRatings({ ListingModel, ReviewModel }, target);
+        }
+      } catch (err) {
+        await ReviewModel.updateOne(
+          { _id: before._id },
+          {
+            $set: {
+              rating: before.rating,
+              comment: before.comment,
+              ...(before.editedAt ? { editedAt: before.editedAt } : {}),
+            },
+            ...(before.editedAt ? {} : { $unset: { editedAt: "" } }),
+          },
+        ).catch(() => {});
+        throw err;
+      }
+    }
+    const plain = before.toObject ? before.toObject() : { ...before };
+    return {
+      review: { ...plain, rating: stars, comment: text, editedAt: now },
+      changed: true,
+    };
+  }
+
+  // The listing's host (who `listing` is, already authorized by the route's
+  // `review:reply` policy) answers a visible review of that listing.
+  async function loadReplyTarget({ user, listing, reviewId }) {
+    if (!isActiveUser(user) || !listing || !sameId(listing.owner, user._id)) {
+      throw new ForbiddenError("Only the host can reply to reviews.", {
+        code: "not_host",
+      });
+    }
+    // A hidden review leaves the listing's list, so membership covers it too.
+    const listed = (listing.reviews || []).some((r) => sameId(r, reviewId));
+    if (!listed || !OBJECT_ID.test(String(reviewId))) {
+      throw new NotFoundError("That review does not exist.");
+    }
+  }
+
+  /**
+   * The host writes (or replaces) the one public reply to a review. Replacing
+   * keeps the first reply's date and records `editedAt`.
+   * @returns {Promise<object>} the review with its reply
+   */
+  async function reply({ user, listing, reviewId, text, now = new Date() }) {
+    const body = parseReply(text);
+    await loadReplyTarget({ user, listing, reviewId });
+    const existing = await ReviewModel.findOne({
+      _id: reviewId,
+      status: { $ne: "hidden" },
+    });
+    if (!existing) throw new NotFoundError("That review does not exist.");
+    const had = existing.reply && existing.reply.text;
+    const update = had
+      ? { $set: { "reply.text": body, "reply.editedAt": now } }
+      : {
+          $set: {
+            reply: {
+              text: body,
+              author: user._id,
+              createdAt: now,
+            },
+          },
+        };
+    const saved = await ReviewModel.findOneAndUpdate(
+      { _id: reviewId, status: { $ne: "hidden" } },
+      update,
+      { new: true },
+    );
+    if (!saved) throw new NotFoundError("That review does not exist.");
+    return saved;
+  }
+
+  /** The host takes their reply back. @returns {Promise<boolean>} whether there was one */
+  async function removeReply({ user, listing, reviewId }) {
+    await loadReplyTarget({ user, listing, reviewId });
+    const done = await ReviewModel.findOneAndUpdate(
+      { _id: reviewId, "reply.text": { $exists: true } },
+      { $unset: { reply: "" } },
+      { new: false },
+    );
+    return Boolean(done);
+  }
+
+  return {
+    submit,
+    remove,
+    edit,
+    reply,
+    removeReply,
+    findReviewable,
+    stateFor,
+  };
 }
 
 module.exports = {
@@ -269,7 +491,12 @@ module.exports = {
   createReviewService,
   parseRating,
   parseComment,
+  parseReply,
   windowEnd,
+  editDeadline,
+  isEditable,
   DEFAULT_WINDOW_DAYS,
+  DEFAULT_EDIT_DAYS,
   COMMENT_MAX,
+  REPLY_MAX,
 };
