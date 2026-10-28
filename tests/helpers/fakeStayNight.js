@@ -33,6 +33,8 @@ function matches(row, filter) {
     if (!isOperators) return keyOf(value) === keyOf(condition);
     return Object.entries(condition).every(([op, operand]) => {
       if (op === "$in") return operand.map(keyOf).includes(keyOf(value));
+      if (op === "$nin") return !operand.map(keyOf).includes(keyOf(value));
+      if (op === "$exists") return (value !== undefined && value !== null) === Boolean(operand);
       if (value == null) return false; // missing fields never match ranges
       const v = keyOf(value);
       const o = keyOf(operand);
@@ -82,6 +84,19 @@ class FakeStayNight {
     const before = this.rows.length;
     this.rows = this.rows.filter((row) => !matches(row, filter));
     return { deletedCount: before - this.rows.length };
+  }
+
+  // Only $set, on every row that matches (the ledger's extendHold uses it).
+  async updateMany(filter, update) {
+    await Promise.resolve();
+    let modifiedCount = 0;
+    for (const row of this.rows) {
+      if (!matches(row, filter)) continue;
+      Object.assign(row, update.$set || {});
+      for (const key of Object.keys(update.$unset || {})) delete row[key];
+      modifiedCount += 1;
+    }
+    return { modifiedCount };
   }
 
   // Like Model.exists: the first matching row, or null.

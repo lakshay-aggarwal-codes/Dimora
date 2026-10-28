@@ -34,4 +34,14 @@ function cancel(user, reservation) {
   );
 }
 
-module.exports = { view, respond, cancel };
+/**
+ * Change the dates of a booking (P09-T04): only the guest who made it. The
+ * host cannot move a guest's stay (they decline or cancel), an admin cannot
+ * act for the guest, and a suspended guest cannot change anything.
+ */
+function modify(user, reservation) {
+  if (!reservation || !isActiveUser(user)) return false;
+  return sameId(reservation.guest, user._id);
+}
+
+module.exports = { view, respond, cancel, modify };

@@ -31,6 +31,12 @@ const TABLE = [
   ["reservation.booked", { reservation: reservation() }, [
     [HOST, "reservation.booked", "New booking: Sea house", "/host/reservations", "confirmed instantly"],
   ]],
+  ["reservation.modified", { reservation: reservation({ status: "pending" }) }, [
+    [HOST, "reservation.modified", "Request changed, please answer again: Sea house", "/host/reservations", "The 24 hours to answer start again"],
+  ]],
+  ["reservation.modified", { reservation: reservation({ status: "confirmed" }) }, [
+    [HOST, "reservation.modified", "Stay dates changed: Sea house", "/host/reservations", "The old nights are open again"],
+  ]],
   ["reservation.accepted", { reservation: reservation() }, [
     [GUEST, "reservation.accepted", "Booking confirmed: Sea house", `/trips/${RES}`, "The host accepted your request"],
   ]],

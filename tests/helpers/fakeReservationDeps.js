@@ -125,6 +125,52 @@ class FakeLedger {
     return { released: before - this.rows.length };
   }
 
+  // Change of dates (P09-T04): only rows of ONE source are touched.
+  async releaseNightsOn(sourceId, nights) {
+    if (this.failReleaseOn) throw new Error("release failed");
+    const wanted = new Set(nights.map((n) => n.getTime()));
+    const before = this.rows.length;
+    this.rows = this.rows.filter(
+      (r) => !(val(r.source.id) === val(sourceId) && wanted.has(r.date.getTime())),
+    );
+    return { released: before - this.rows.length };
+  }
+
+  async trimNights(sourceId, keep) {
+    if (this.failTrim) throw new Error("trim failed");
+    const wanted = new Set(keep.map((n) => n.getTime()));
+    const before = this.rows.length;
+    this.rows = this.rows.filter(
+      (r) => !(val(r.source.id) === val(sourceId) && !wanted.has(r.date.getTime())),
+    );
+    return { released: before - this.rows.length };
+  }
+
+  async extendHold(sourceId, holdExpiresAt) {
+    if (this.failExtend) throw new Error("extend failed");
+    let n = 0;
+    for (const r of this.rows) {
+      if (val(r.source.id) === val(sourceId) && r.holdExpiresAt) {
+        r.holdExpiresAt = holdExpiresAt;
+        n += 1;
+      }
+    }
+    return { extended: n };
+  }
+
+  async unavailableDates(listing, from, to, { now = new Date() } = {}) {
+    return this.rows
+      .filter(
+        (r) =>
+          val(r.listing) === val(listing) &&
+          r.date.getTime() >= from.getTime() &&
+          r.date.getTime() < to.getTime() &&
+          !(r.holdExpiresAt && r.holdExpiresAt.getTime() < now.getTime()),
+      )
+      .map((r) => r.date)
+      .sort((a, b) => a.getTime() - b.getTime());
+  }
+
   async confirmNights(sourceId) {
     let n = 0;
     for (const r of this.rows) {

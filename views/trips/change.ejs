@@ -1,0 +1,89 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+  Change the dates of a booking (P09-T04). Local: change (built by
+  controllers/trips.js changeView). Everything is written with the escaping
+  tag. The price shown for the new dates is the one the server will store; the
+  confirm form carries it so the server can tell if it moved meanwhile. The
+  page works without JavaScript: look at the price (GET), then confirm (POST).
+%>
+<section class="mt-3" aria-labelledby="change-heading">
+    <p class="mb-2"><a href="/trips/<%= change.id %>">&larr; Back to booking <%= change.reference %></a></p>
+    <h1 id="change-heading" class="h2 mb-3">Change dates: <%= change.title %></h1>
+
+    <div class="alert alert-warning" role="note" data-simulation-banner>
+        <strong>Simulation.</strong> Dimora is a college project: no money is taken or returned. A price difference is calculated and recorded only.
+    </div>
+
+    <% if (change.priceChanged) { %>
+    <div class="alert alert-danger" role="alert" data-price-changed>
+        <strong>The price has changed.</strong> It was <%= change.priceChanged.previousText %> a moment ago. Nothing was changed. Check the new total below and confirm it to continue.
+    </div>
+    <% } %>
+
+    <% if (change.problems.length) { %>
+    <div class="alert alert-danger" role="alert" data-problems>
+        <ul class="mb-0">
+            <% change.problems.forEach((message) => { %><li><%= message %></li><% }) %>
+        </ul>
+    </div>
+    <% } %>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <h2 class="h5">Your stay now</h2>
+            <dl class="know-list" data-current-stay>
+                <dt>Check-in</dt><dd><%= change.current.inLabel %></dd>
+                <dt>Check-out</dt><dd><%= change.current.outLabel %></dd>
+                <dt>Nights</dt><dd><%= change.current.nights %></dd>
+                <dt>Guests</dt><dd><%= change.current.guests %> (the number of guests stays the same)</dd>
+                <dt>Total</dt><dd><%= change.current.totalText %></dd>
+            </dl>
+
+            <h2 class="h5 mt-4" id="change-form-heading">New dates</h2>
+            <form action="/trips/<%= change.id %>/change" method="GET" aria-labelledby="change-form-heading" data-change-form>
+                <div class="mb-3">
+                    <label class="form-label" for="change-in">New check-in</label>
+                    <input class="form-control" type="date" id="change-in" name="in" required min="<%= change.minDate %>" value="<%= change.form.in %>">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="change-out">New check-out</label>
+                    <input class="form-control" type="date" id="change-out" name="out" required min="<%= change.minDate %>" value="<%= change.form.out %>">
+                </div>
+                <button type="submit" class="btn btn-outline-dark">Show the new price</button>
+            </form>
+        </div>
+
+        <div class="col-lg-6">
+            <% if (change.proposal) { %>
+            <h2 class="h5">New stay</h2>
+            <dl class="know-list" data-new-stay>
+                <dt>Check-in</dt><dd><%= change.proposal.inLabel %></dd>
+                <dt>Check-out</dt><dd><%= change.proposal.outLabel %></dd>
+                <dt>Nights</dt><dd><%= change.proposal.nights %></dd>
+            </dl>
+            <ul class="quote-lines" aria-label="Price of the new stay">
+                <% change.proposal.lines.forEach((line) => { %>
+                <li><span><%= line.label %></span><span><%= line.amount %></span></li>
+                <% }) %>
+            </ul>
+            <div class="quote-total"><span>New total</span><span data-new-total><%= change.proposal.totalText %></span></div>
+            <p class="mt-2 mb-1" data-difference="<%= change.proposal.difference.kind %>"><strong><%= change.proposal.difference.text %></strong> (compared with <%= change.current.totalText %> now; today's prices for this place apply.)</p>
+            <% if (change.reapproval) { %>
+            <p data-reapproval>The host has not answered yet. If you confirm, your request goes back to the host for these new dates, who has 24 hours to answer. Until then the new nights are held for you.</p>
+            <% } else { %>
+            <p data-immediate>Your booking stays confirmed. The new nights are held first and the old ones are released only once that worked. The host is told.</p>
+            <% } %>
+            <form action="/trips/<%= change.id %>/change" method="POST" data-change-confirm>
+                <%- include("../includes/csrf.ejs") %>
+                <input type="hidden" name="in" value="<%= change.form.in %>">
+                <input type="hidden" name="out" value="<%= change.form.out %>">
+                <input type="hidden" name="expectedTotalMinor" value="<%= change.proposal.totalMinor %>">
+                <button type="submit" class="btn btn-dark"><%= change.reapproval ? "Send the new dates to the host" : "Confirm the new dates" %></button>
+                <a class="btn btn-link" href="/trips/<%= change.id %>">Keep my booking as it is</a>
+            </form>
+            <% } else { %>
+            <p class="text-body-secondary" data-no-proposal>Choose the new dates to see the price and the difference. Nothing changes until you confirm.</p>
+            <% } %>
+        </div>
+    </div>
+</section>

@@ -11,5 +11,9 @@ router.get("/trips", isLoggedIn, wrapAsync(controller.index));
 router.get("/trips/:id", isLoggedIn, wrapAsync(controller.show));
 // The guest cancels (P09-T03); the service decides who may and what is refunded.
 router.post("/trips/:id/cancel", isLoggedIn, wrapAsync(controller.cancel));
+// The guest changes the dates (P09-T04): the page shows the new price and the
+// difference first, the POST applies it. The service decides who may.
+router.get("/trips/:id/change", isLoggedIn, wrapAsync(controller.changeForm));
+router.post("/trips/:id/change", isLoggedIn, wrapAsync(controller.change));
 
 module.exports = router;

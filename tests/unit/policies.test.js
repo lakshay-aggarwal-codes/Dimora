@@ -76,6 +76,8 @@ const MATRIX = [
     reservation,
     { "listing owner": true, "guest of the booking": true },
   ],
+  // Changing the dates (P09-T04): only the guest of that booking; the host and an admin cannot move a guest's stay.
+  ["reservation:modify", reservation, { "guest of the booking": true }],
   // Reporting (P12-T04): any active member, except about their own thing (the resource is { owner }).
   [
     "report:create",

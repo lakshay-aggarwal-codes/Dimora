@@ -8,6 +8,7 @@
 //   releaseBlockedNights(listingId, from, to)          (P07-T03: unblock)
 //   unavailableDates(listingId, from, to, { now }?)    (P07-T04: public availability API)
 //   confirmNights(sourceId)                            (P07-T05: accepting a request)
+//   releaseNightsOn / trimNights / extendHold          (P09-T04: changing a booking's dates)
 //   unavailableListingIdsFlexible(from, to, flexDays)  (P15-T04: search "available +-3 days")
 //
 // Booking works by inserting one row per night with `insertMany(...,
@@ -333,6 +334,59 @@ function createLedgerService({
   }
 
   /**
+   * Changing a booking's dates (P09-T04) works on the DIFFERENCE between the
+   * old and the new nights, because the unique (listing, date) index would
+   * refuse a night the booking already holds. The three helpers below touch
+   * only rows of ONE source.
+   *
+   * Frees the given nights of one source (the nights a failed change had just
+   * added). Safe to call twice; other nights of the source stay.
+   * @returns {Promise<{released: number}>}
+   */
+  async function releaseNightsOn(sourceId, nights) {
+    requireId(sourceId, "sourceId");
+    const sorted = normalizeNights(nights);
+    const { deletedCount } = await model.deleteMany({
+      "source.id": sourceId,
+      date: { $in: sorted },
+    });
+    return { released: deletedCount };
+  }
+
+  /**
+   * Keeps exactly `keep` among the nights of one source: every other row of
+   * the source is deleted (the nights a change gave up). Idempotent, so a
+   * failed trim can simply be run again.
+   * @returns {Promise<{released: number}>}
+   */
+  async function trimNights(sourceId, keep) {
+    requireId(sourceId, "sourceId");
+    const sorted = normalizeNights(keep);
+    const { deletedCount } = await model.deleteMany({
+      "source.id": sourceId,
+      date: { $nin: sorted },
+    });
+    return { released: deletedCount };
+  }
+
+  /**
+   * Moves the hold of a source's still-held nights to a new instant (a
+   * pending request whose dates changed gets a fresh answer period). Rows
+   * without a hold (confirmed) are left alone.
+   * @returns {Promise<{extended: number}>}
+   */
+  async function extendHold(sourceId, holdExpiresAt, { now = new Date() } = {}) {
+    requireId(sourceId, "sourceId");
+    const hold = normalizeHold(holdExpiresAt, now);
+    if (!hold) throw new TypeError("holdExpiresAt must be a valid Date");
+    const { modifiedCount } = await model.updateMany(
+      { "source.id": sourceId, holdExpiresAt: { $exists: true } },
+      { $set: { holdExpiresAt: hold } },
+    );
+    return { extended: modifiedCount };
+  }
+
+  /**
    * Frees the HOST-BLOCKED nights of one listing inside [from, to). Only rows
    * with source.kind "block" are touched: a reserved or held night is never
    * released here. Also reports which blocks have no night left, so the
@@ -485,6 +539,9 @@ function createLedgerService({
     releaseBlockedNights,
     unavailableDates,
     confirmNights,
+    releaseNightsOn,
+    trimNights,
+    extendHold,
     hasUpcomingReservation,
     unavailableListingIds,
   };

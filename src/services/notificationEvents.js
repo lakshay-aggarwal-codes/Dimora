@@ -12,6 +12,7 @@
 //   event                  told            type                        link
 //   reservation.requested  host            reservation.requested       /host/reservations
 //   reservation.booked     host            reservation.booked          /host/reservations   (instant book)
+//   reservation.modified   host            reservation.modified        /host/reservations   (guest changed the dates, P09-T04)
 //   reservation.accepted   guest           reservation.accepted        /trips/:id
 //   reservation.declined   guest           reservation.declined        /trips/:id
 //   reservation.expired    guest + host    reservation.expired         /trips/:id | /host/reservations
@@ -88,6 +89,20 @@ const EVENTS = {
       "reservation.booked",
       `New booking: ${titleOf(r)}`,
       `${range(r)}, ${plural(r.nights, "night")}, ${plural(r.guests, "guest")}. It was confirmed instantly.`,
+    ),
+  ],
+  // The guest moved the stay (P09-T04). A pending request starts a new answer
+  // period, so the host is asked again; a confirmed stay only gets the news.
+  "reservation.modified": ({ reservation: r }) => [
+    toHost(
+      r,
+      "reservation.modified",
+      r.status === "pending"
+        ? `Request changed, please answer again: ${titleOf(r)}`
+        : `Stay dates changed: ${titleOf(r)}`,
+      r.status === "pending"
+        ? `The guest changed the request to ${range(r)} (${plural(r.nights, "night")}). The 24 hours to answer start again.`
+        : `The guest moved a confirmed stay to ${range(r)} (${plural(r.nights, "night")}). The old nights are open again.`,
     ),
   ],
   "reservation.accepted": ({ reservation: r }) => [

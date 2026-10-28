@@ -93,6 +93,39 @@ const reservationSchema = new Schema(
       rule: { type: String },
       calculatedAt: { type: Date },
     },
+    // Every change of dates (P09-T04), oldest first. The price snapshot above
+    // always describes the CURRENT dates; each entry keeps what it replaced and
+    // the difference between the two totals. CALCULATED AND RECORDED only: no
+    // money moves (payments are simulated).
+    modifications: {
+      type: [
+        new Schema(
+          {
+            at: { type: Date, required: true },
+            by: { type: Schema.Types.ObjectId, ref: "User" },
+            from: {
+              checkIn: dateOnly,
+              checkOut: dateOnly,
+              nights: { type: Number, min: 1, max: 90 },
+              totalMinor: minor,
+            },
+            to: {
+              checkIn: dateOnly,
+              checkOut: dateOnly,
+              nights: { type: Number, min: 1, max: 90 },
+              totalMinor: minor,
+            },
+            // new total - old total; negative when the new stay costs less
+            differenceMinor: { type: Number, validate: Number.isSafeInteger },
+            currency: { type: String, match: /^[A-Z]{3}$/ },
+            // a pending request went back to the host for a new answer
+            reapproval: { type: Boolean, default: false },
+          },
+          { _id: false },
+        ),
+      ],
+      default: [],
+    },
     paymentStatus: {
       type: String,
       enum: ["none", "simulated_paid", "refunded_simulated"],

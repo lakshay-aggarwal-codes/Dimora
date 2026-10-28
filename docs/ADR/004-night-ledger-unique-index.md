@@ -64,3 +64,7 @@ If any run shows two owners of a night or a request that holds only part of its 
 4. **Delete drafts** untouched for 90 days (`src/services/drafts.js`), at most once an hour per instance.
 
 Several instances are safe without a lock: steps 1 and 2 are compare-and-set transitions (the loser gets a 409 and counts it as "skipped"), step 3 deletes by row `_id` and a repeat deletes nothing, step 4 re-checks each draft in its own delete.
+
+## Changing a booking's dates (P09-T04)
+
+The unique `(listing, date)` index refuses a night the booking already holds, so a date change cannot "hold the new stay, then release the old one" literally. It works on the difference instead: (1) hold the nights that are new (all or nothing), (2) for a pending request move the hold of the kept nights, (3) compare-and-set the reservation (status and old dates must be unchanged), (4) trim the ledger to exactly the new nights. A conflict in step 1 changes nothing; losing step 3 releases exactly the nights step 1 added (`releaseNightsOn`). A failed step 4 leaves old nights blocked (the safe side) and `trimNights` is idempotent, so it can be repeated. The sweeper cannot see such leftover rows (it judges rows by the state of their reservation only).

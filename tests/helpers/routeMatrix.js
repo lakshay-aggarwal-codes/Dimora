@@ -94,6 +94,8 @@ const MATRIX = {
   "GET /trips": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
   "GET /trips/:id": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
   "POST /trips/:id/cancel": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "GET /trips/:id/change": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "POST /trips/:id/change": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
   "GET /users/:id": { access: "public", who: "anyone, signed in or not" },
 };
 
