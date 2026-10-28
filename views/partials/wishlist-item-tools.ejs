@@ -1,0 +1,26 @@
+<%#
+    Under a saved stay in ONE list (P10-T02). Locals: entry ({ id, title, note }),
+    cur ({ id }), allLists ([{ id, name }]). Everything is escaped. Both forms
+    work without JavaScript.
+%>
+<div class="wishlist-item-tools mt-2" data-item-tools="<%= entry.id %>">
+    <form action="/wishlists/<%= cur.id %>/items/<%= encodeURIComponent(entry.id) %>/note" method="POST" class="mb-2">
+        <%- include("../includes/csrf.ejs") %>
+        <label class="form-label small mb-1" for="note-<%= entry.id %>">Your note<span class="visually-hidden"> about <%= entry.title %></span></label>
+        <textarea class="form-control form-control-sm" id="note-<%= entry.id %>" name="note" rows="2" maxlength="300"><%= entry.note || "" %></textarea>
+        <button type="submit" class="btn btn-outline-dark btn-sm mt-1">Save note</button>
+    </form>
+    <% const others = allLists.filter((l) => l.id !== cur.id); %>
+    <% if (others.length) { %>
+    <form action="/wishlists/<%= cur.id %>/items/<%= encodeURIComponent(entry.id) %>/move" method="POST" class="d-flex gap-2 align-items-end">
+        <%- include("../includes/csrf.ejs") %>
+        <div class="flex-grow-1">
+            <label class="form-label small mb-1" for="move-<%= entry.id %>">Move to<span class="visually-hidden"> a list: <%= entry.title %></span></label>
+            <select class="form-select form-select-sm" id="move-<%= entry.id %>" name="to" required>
+                <% others.forEach((l) => { %><option value="<%= l.id %>"><%= l.name %></option><% }) %>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-outline-dark btn-sm">Move</button>
+    </form>
+    <% } %>
+</div>

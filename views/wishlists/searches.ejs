@@ -1,0 +1,35 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    The member's saved searches (P10-T02). Local: searches [{ id, name, summary,
+    href, createdAt }]. `href` is built by the server from the stored canonical
+    query ("/listings?..."). Everything is escaped.
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-8 mx-auto">
+        <h1 class="h3 mb-1">Saved searches</h1>
+        <p class="text-body-secondary"><a href="/wishlists">&larr; Saved stays</a> &middot; Save a search from the results page of <a href="/listings">Explore stays</a>.</p>
+
+        <% if (searches.length === 0) { %>
+            <%- include("../partials/empty-state.ejs", { title: "No saved searches yet", message: "Search for stays, then use \"Save this search\" on the results page.", icon: "fa-magnifying-glass", actionHref: "/listings", actionLabel: "Browse stays", headingLevel: 2 }) %>
+        <% } else { %>
+        <ul class="list-group" data-saved-searches>
+            <% searches.forEach((s) => { %>
+            <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2" data-search-id="<%= s.id %>">
+                <div>
+                    <strong><%= s.name %></strong>
+                    <div class="small text-body-secondary"><%= s.summary %></div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a class="btn btn-dark btn-sm" href="<%= s.href %>">Run again<span class="visually-hidden">: <%= s.name %></span></a>
+                    <form action="/saved-searches/<%= s.id %>/delete" method="POST">
+                        <%- include("../includes/csrf.ejs") %>
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete<span class="visually-hidden">: <%= s.name %></span></button>
+                    </form>
+                </div>
+            </li>
+            <% }) %>
+        </ul>
+        <p class="small text-body-secondary mt-2">Dates are saved as you chose them. If they have passed, the results page tells you.</p>
+        <% } %>
+    </div>
+</div>

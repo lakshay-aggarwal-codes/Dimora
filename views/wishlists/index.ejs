@@ -2,12 +2,61 @@
 <%#
     The member's saved stays (P10-T01). Locals (src/services/wishlists.js
     overview): items [{ id, available, title, savedAt, card }], availableCount,
-    limit. A stay that is no longer public stays here as "No longer available".
+    limit, lists [{ id, name, isDefault, count }], currentList (one of lists or
+    null = every saved stay). A stay that is no longer public stays here as
+    "No longer available". In one list each stay has a note and a "move" form
+    (P10-T02); the page of all saved stays is read-only.
+%>
+<%
+    const allLists = typeof lists !== "undefined" ? lists : [];
+    const cur = typeof currentList !== "undefined" ? currentList : null;
 %>
 <div class="row mt-3">
     <div class="col-12 col-lg-10 mx-auto">
-        <h1 class="h3 mb-1">Saved stays</h1>
-        <p class="text-body-secondary"><%= items.length %> of <%= limit %> saved</p>
+        <h1 class="h3 mb-1"><%= cur ? cur.name : "Saved stays" %></h1>
+        <p class="text-body-secondary"><%= items.length %> of <%= limit %> saved<% if (cur) { %> in this list<% } %> &middot; <a href="/saved-searches">Saved searches</a></p>
+
+        <nav class="wishlist-lists mb-3" aria-label="Your lists" data-lists>
+            <ul class="nav nav-pills flex-wrap gap-1" role="list">
+                <li class="nav-item"><a class="nav-link<%= cur ? '' : ' active' %>" href="/wishlists"<% if (!cur) { %> aria-current="page"<% } %>>All saved</a></li>
+                <% allLists.forEach((l) => { %>
+                <li class="nav-item"><a class="nav-link<%= cur && cur.id === l.id ? ' active' : '' %>" href="/wishlists?list=<%= encodeURIComponent(l.id) %>"<% if (cur && cur.id === l.id) { %> aria-current="page"<% } %>><%= l.name %> <span class="badge text-bg-secondary"><%= l.count %></span></a></li>
+                <% }) %>
+            </ul>
+            <details class="mt-2">
+                <summary class="btn btn-outline-dark btn-sm">New list</summary>
+                <form action="/wishlists" method="POST" class="d-flex gap-2 mt-2" data-create-list>
+                    <%- include("../includes/csrf.ejs") %>
+                    <label class="visually-hidden" for="new-list-name">Name of the new list</label>
+                    <input class="form-control form-control-sm" id="new-list-name" name="name" maxlength="60" required placeholder="e.g. Goa in December">
+                    <button type="submit" class="btn btn-dark btn-sm">Create</button>
+                </form>
+            </details>
+        </nav>
+
+        <% if (cur) { %>
+        <div class="d-flex flex-wrap gap-2 mb-3" data-list-tools>
+            <details>
+                <summary class="btn btn-outline-dark btn-sm">Rename</summary>
+                <form action="/wishlists/<%= cur.id %>/rename" method="POST" class="d-flex gap-2 mt-2">
+                    <%- include("../includes/csrf.ejs") %>
+                    <label class="visually-hidden" for="rename-list">New name</label>
+                    <input class="form-control form-control-sm" id="rename-list" name="name" maxlength="60" required value="<%= cur.name %>">
+                    <button type="submit" class="btn btn-dark btn-sm">Save name</button>
+                </form>
+            </details>
+            <% if (!cur.isDefault) { %>
+            <details>
+                <summary class="btn btn-outline-danger btn-sm">Delete list</summary>
+                <form action="/wishlists/<%= cur.id %>/delete" method="POST" class="mt-2">
+                    <%- include("../includes/csrf.ejs") %>
+                    <p class="small mb-2">The stays in this list are not lost: they move to your main list.</p>
+                    <button type="submit" class="btn btn-danger btn-sm">Yes, delete this list</button>
+                </form>
+            </details>
+            <% } %>
+        </div>
+        <% } %>
 
         <% if (items.length === 0) { %>
             <%- include("../partials/empty-state.ejs", { title: "Nothing saved yet", message: "Tap the heart on a stay to keep it here.", icon: "fa-heart", actionHref: "/listings", actionLabel: "Browse stays", headingLevel: 2 }) %>
@@ -38,6 +87,9 @@
                     <% if (availableCount >= 2) { %>
                     <label class="compare-pick"><input type="checkbox" name="ids" value="<%= entry.id %>" form="compare-form"> Compare <span class="visually-hidden"><%= entry.title %></span></label>
                     <% } %>
+                    <% if (cur) { %>
+                    <%- include("../partials/wishlist-item-tools.ejs", { entry, cur, allLists }) %>
+                    <% } %>
                 <% } else { %>
                     <div class="card h-100 saved-unavailable">
                         <div class="card-body">
@@ -51,6 +103,7 @@
                                 <input type="hidden" name="saved" value="false">
                                 <button type="submit" class="btn btn-outline-dark btn-sm">Remove from saved</button>
                             </form>
+                            <% if (cur && entry.note) { %><p class="small mt-2 mb-0 wishlist-note">Your note: <%= entry.note %></p><% } %>
                         </div>
                     </div>
                 <% } %>

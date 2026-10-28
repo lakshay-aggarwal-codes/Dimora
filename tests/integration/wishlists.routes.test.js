@@ -132,6 +132,10 @@ describe("POST /listings/:id/save", () => {
 });
 
 describe("GET /wishlists", () => {
+  beforeEach(() => {
+    jest.spyOn(service, "listsFor").mockResolvedValue([]); // the lists bar (P10-T02)
+  });
+
   test("signed out: redirect to log in", async () => {
     const res = await request(app(undefined)).get("/wishlists");
     expect([301, 302, 303]).toContain(res.status);

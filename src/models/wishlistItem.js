@@ -7,6 +7,8 @@ const wishlistItemSchema = new Schema({
   wishlist: { type: Schema.Types.ObjectId, ref: "Wishlist", required: true },
   owner: { type: Schema.Types.ObjectId, ref: "User", required: true },
   listing: { type: Schema.Types.ObjectId, ref: "Listing", required: true },
+  // The member's own note about this stay in this list (P10-T02), plain text.
+  note: { type: String, trim: true, maxlength: 300 },
   createdAt: { type: Date, default: Date.now },
 });
 

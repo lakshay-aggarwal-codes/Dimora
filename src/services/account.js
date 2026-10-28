@@ -51,6 +51,7 @@ function models(over = {}) {
     WishlistModel: over.WishlistModel || require("../models/wishlist"),
     WishlistItemModel:
       over.WishlistItemModel || require("../models/wishlistItem"),
+    SavedSearchModel: over.SavedSearchModel || require("../models/savedSearch"),
     NotificationModel:
       over.NotificationModel || require("../models/notification"),
     ReportModel: over.ReportModel || require("../models/report"),
@@ -252,6 +253,7 @@ async function deleteAccount({ user, password, now = new Date(), ...over }) {
     await Promise.all([
       m.WishlistItemModel.deleteMany({ owner: user._id }),
       m.WishlistModel.deleteMany({ owner: user._id }),
+      m.SavedSearchModel.deleteMany({ owner: user._id }),
       m.NotificationModel.deleteMany({ user: user._id }),
       m.ReportModel.updateMany(
         { targetKind: "user", targetId: user._id },

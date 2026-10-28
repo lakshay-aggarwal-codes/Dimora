@@ -107,6 +107,7 @@ function world({
       UserModel,
       WishlistModel: del("wishlist"),
       WishlistItemModel: del("wishlistItem"),
+      SavedSearchModel: del("savedSearch"),
       NotificationModel: del("notification"),
       ReportModel: {
         updateMany: jest.fn(async (f, u) => calls.reports.push([f, u])),
@@ -326,6 +327,7 @@ describe("deleteAccount", () => {
     ]);
     expect(w.calls.deleted.map(([name]) => name).sort()).toEqual([
       "notification",
+      "savedSearch",
       "wishlist",
       "wishlistItem",
     ]);
