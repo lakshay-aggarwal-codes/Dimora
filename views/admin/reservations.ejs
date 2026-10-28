@@ -1,0 +1,85 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    Reservation lookup (P14-T05), read-only. Locals: result { rows, page,
+    totalPages, total, q, status, capped }. Everything is printed escaped.
+%>
+<%
+    const STATUSES = ["pending", "confirmed", "declined", "expired", "cancelled_by_guest", "cancelled_by_host", "completed"];
+    const LABEL = { cancelled_by_guest: "cancelled by guest", cancelled_by_host: "cancelled by host" };
+    const VARIANT = { pending: "warning", confirmed: "success", completed: "primary", declined: "neutral", expired: "neutral", cancelled_by_guest: "danger", cancelled_by_host: "danger" };
+    const keep = {};
+    if (result.q) keep.q = result.q;
+    if (result.status) keep.status = result.status;
+    const day = (d) => (d ? d.toISOString().slice(0, 10) : "");
+%>
+<div class="row mt-3">
+    <div class="col-12">
+        <p class="mb-1"><a href="/admin">&larr; Admin</a></p>
+        <h1 class="h3">Reservations</h1>
+        <p class="text-muted">Read-only. Search by reservation, guest, host or listing id, by a guest's username or email, or by listing title.</p>
+
+        <form class="row g-2 align-items-end mb-3" action="/admin/reservations" method="GET" role="search" aria-label="Search reservations">
+            <div class="col-12 col-md-6">
+                <label class="form-label" for="res-q">Id, guest or listing</label>
+                <input class="form-control" id="res-q" type="search" name="q" maxlength="100" value="<%= result.q %>">
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label" for="res-status">Status</label>
+                <select class="form-select" id="res-status" name="status">
+                    <option value="">Any</option>
+                    <% STATUSES.forEach((s) => { %>
+                    <option value="<%= s %>" <%= result.status === s ? "selected" : "" %>><%= LABEL[s] || s %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <button class="btn btn-dark w-100" type="submit">Search</button>
+            </div>
+        </form>
+
+        <p class="text-muted"><%= result.total %> <%= result.total === 1 ? "reservation" : "reservations" %>.</p>
+        <% if (result.capped) { %>
+        <p class="text-muted small">That search matches many guests or listings; only the first 50 of each were used. Narrow it for a complete answer.</p>
+        <% } %>
+
+        <% if (!result.rows.length) { %>
+        <%- include("../partials/empty-state.ejs", {
+            title: "No reservations match",
+            message: "Try a shorter search, an id, or another status.",
+            icon: "fa-calendar-xmark",
+            headingLevel: 2
+        }) %>
+        <% } else { %>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <caption class="visually-hidden">Reservations, newest first</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Booked (UTC)</th>
+                        <th scope="col">Listing</th>
+                        <th scope="col">Guest</th>
+                        <th scope="col">Host</th>
+                        <th scope="col">Stay</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% result.rows.forEach((r) => { %>
+                    <tr>
+                        <td><a href="/admin/reservations/<%= String(r._id) %>"><%= day(r.createdAt) %></a></td>
+                        <td><%= (r.listing && r.listing.title) || (r.listingSnapshot && r.listingSnapshot.title) || "(removed)" %></td>
+                        <td><%= r.guest ? r.guest.username : "(removed)" %></td>
+                        <td><%= r.host ? r.host.username : "(removed)" %></td>
+                        <td><%= day(r.checkIn) %> &rarr; <%= day(r.checkOut) %> <span class="text-muted small">(<%= r.nights %> <%= r.nights === 1 ? "night" : "nights" %>, <%= r.guests %> <%= r.guests === 1 ? "guest" : "guests" %>)</span></td>
+                        <td><%= r.pricingSnapshot ? formatMoney(r.pricingSnapshot.totalMinor) : "" %></td>
+                        <td><%- include("../partials/badge.ejs", { text: LABEL[r.status] || r.status, variant: VARIANT[r.status] }) %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <%- include("../partials/pagination.ejs", { page: result.page, totalPages: result.totalPages, baseUrl: "/admin/reservations", query: keep }) %>
+        <% } %>
+    </div>
+</div>

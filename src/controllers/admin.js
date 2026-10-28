@@ -1,25 +1,54 @@
 // /admin pages: the landing page, the read-only audit log (P14-T01), user
-// management (P14-T02), listing moderation (P14-T03) and the reports queue with
-// review moderation (P14-T04). Reservations arrive with P14-T05.
+// management (P14-T02), listing moderation (P14-T03), the reports queue with
+// review moderation (P14-T04), and the platform summary, read-only reservation
+// lookup and audit filters (P14-T05).
 const mongoose = require("mongoose");
 const audit = require("../services/audit");
+const AuditLog = require("../models/auditLog");
 const userAdmin = require("../services/userAdmin");
 const moderation = require("../services/listingModeration");
 const reportQueue = require("../services/reportModeration");
 const reviewModeration = require("../services/reviewModeration");
+const adminSummary = require("../services/adminSummary");
+const reservationAdmin = require("../services/reservationAdmin");
 const { AdminRefusal } = require("../middleware/admin");
 const { NotFoundError } = require("../utils/errors");
 
 // A query value is only used when it is a plain string (?q=a&q=b is ignored).
 const text = (value) => (typeof value === "string" ? value : undefined);
 
-module.exports.index = (req, res) => {
-  res.render("admin/index", { pageTitle: "Admin" });
+module.exports.index = async (req, res) => {
+  const summary = await adminSummary.platformSummary();
+  res.render("admin/index", { pageTitle: "Admin", summary });
 };
 
 module.exports.auditLog = async (req, res) => {
-  const log = await audit.listAudit({ page: text(req.query.page) });
-  res.render("admin/audit", { pageTitle: "Audit log", log });
+  const log = await audit.listAudit({
+    page: text(req.query.page),
+    action: text(req.query.action),
+    actor: text(req.query.actor),
+    targetType: text(req.query.targetType),
+    from: text(req.query.from),
+    to: text(req.query.to),
+  });
+  res.render("admin/audit", { pageTitle: "Audit log", log, targetTypes: AuditLog.TARGET_TYPES });
+};
+
+// ---- Reservation lookup (P14-T05): read-only ----
+
+module.exports.reservations = async (req, res) => {
+  const result = await reservationAdmin.searchReservations({
+    q: text(req.query.q),
+    status: text(req.query.status),
+    page: text(req.query.page),
+  });
+  res.render("admin/reservations", { pageTitle: "Reservations", result });
+};
+
+module.exports.reservation = async (req, res) => {
+  const reservation = await reservationAdmin.getReservation(req.params.id);
+  if (!reservation) throw new NotFoundError("That reservation does not exist.");
+  res.render("admin/reservation", { pageTitle: "Reservation", reservation });
 };
 
 module.exports.users = async (req, res) => {

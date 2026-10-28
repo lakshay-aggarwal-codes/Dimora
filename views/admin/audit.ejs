@@ -1,7 +1,13 @@
 <% layout("/layouts/boilerPlate") %>
 <%#
-    Read-only audit log. Locals: log { rows, page, totalPages, total }.
-    Everything is printed escaped, including the JSON details.
+    Read-only audit log. Locals: log { rows, page, totalPages, total, filters },
+    targetTypes. Everything is printed escaped, including the JSON details.
+%>
+<%
+    const f = log.filters || {};
+    const keep = {};
+    ["action", "actor", "targetType", "from", "to"].forEach((k) => { if (f[k]) keep[k] = f[k]; });
+    const filtered = Object.keys(keep).length > 0;
 %>
 <div class="row mt-3">
     <div class="col-12">
@@ -10,10 +16,42 @@
         <p class="text-muted">Newest first. Entries cannot be edited or deleted.
             <%= log.total %> <%= log.total === 1 ? "entry" : "entries" %>.</p>
 
+        <form class="row g-2 align-items-end mb-3" action="/admin/audit" method="GET" role="search" aria-label="Filter the audit log">
+            <div class="col-6 col-md-3">
+                <label class="form-label" for="audit-action">Action</label>
+                <input class="form-control" id="audit-action" type="text" name="action" maxlength="80" placeholder="user. or user.suspend" value="<%= f.action || "" %>">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label" for="audit-actor">Admin username</label>
+                <input class="form-control" id="audit-actor" type="text" name="actor" maxlength="80" value="<%= f.actor || "" %>">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label" for="audit-target">Target</label>
+                <select class="form-select" id="audit-target" name="targetType">
+                    <option value="">Any</option>
+                    <% (targetTypes || []).forEach((t) => { %>
+                    <option value="<%= t %>" <%= f.targetType === t ? "selected" : "" %>><%= t %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label" for="audit-from">From (UTC)</label>
+                <input class="form-control" id="audit-from" type="date" name="from" value="<%= f.from || "" %>">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label" for="audit-to">To (UTC)</label>
+                <input class="form-control" id="audit-to" type="date" name="to" value="<%= f.to || "" %>">
+            </div>
+            <div class="col-6 col-md-1">
+                <button class="btn btn-dark w-100" type="submit">Filter</button>
+            </div>
+            <% if (filtered) { %><div class="col-12"><a href="/admin/audit">Clear filters</a></div><% } %>
+        </form>
+
         <% if (!log.rows.length) { %>
         <%- include("../partials/empty-state.ejs", {
-            title: "Nothing has been logged yet",
-            message: "Administrative actions will appear here.",
+            title: filtered ? "No entries match" : "Nothing has been logged yet",
+            message: filtered ? "Try fewer filters or another date range." : "Administrative actions will appear here.",
             icon: "fa-clipboard-list",
             headingLevel: 2
         }) %>
@@ -46,7 +84,7 @@
                 </tbody>
             </table>
         </div>
-        <%- include("../partials/pagination.ejs", { page: log.page, totalPages: log.totalPages, baseUrl: "/admin/audit", query: {} }) %>
+        <%- include("../partials/pagination.ejs", { page: log.page, totalPages: log.totalPages, baseUrl: "/admin/audit", query: keep }) %>
         <% } %>
     </div>
 </div>

@@ -1,0 +1,84 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    One reservation (P14-T05), read-only: no form and no button here. Locals:
+    reservation (lean, guest/host/listing populated). Everything is escaped.
+%>
+<%
+    const LABEL = { cancelled_by_guest: "cancelled by guest", cancelled_by_host: "cancelled by host" };
+    const VARIANT = { pending: "warning", confirmed: "success", completed: "primary", declined: "neutral", expired: "neutral", cancelled_by_guest: "danger", cancelled_by_host: "danger" };
+    const r = reservation;
+    const day = (d) => (d ? d.toISOString().slice(0, 10) : "");
+    const stamp = (d) => (d ? d.toISOString().replace("T", " ").slice(0, 19) : "");
+    const snap = r.pricingSnapshot || {};
+    const ls = r.listingSnapshot || {};
+    const money = (minor) => (minor === undefined || minor === null ? "" : formatMoney(minor));
+    const person = (u) => (u ? u.username : "(removed)");
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-9">
+        <p class="mb-1"><a href="/admin/reservations">&larr; Reservations</a></p>
+        <h1 class="h3">Reservation <code><%= String(r._id) %></code></h1>
+        <p><%- include("../partials/badge.ejs", { text: LABEL[r.status] || r.status, variant: VARIANT[r.status] }) %>
+            <span class="text-muted small">Read-only view.</span></p>
+
+        <dl class="row">
+            <dt class="col-sm-3">Listing</dt>
+            <dd class="col-sm-9"><% if (r.listing) { %><a href="/admin/listings/<%= String(r.listing._id) %>"><%= r.listing.title %></a><% } else { %>(removed)<% } %>
+                <% if (ls.title && (!r.listing || ls.title !== r.listing.title)) { %><span class="text-muted small d-block">Title at booking: <%= ls.title %></span><% } %></dd>
+            <dt class="col-sm-3">Guest</dt>
+            <dd class="col-sm-9"><% if (r.guest) { %><a href="/admin/users/<%= String(r.guest._id) %>"><%= r.guest.username %></a> <span class="text-muted small"><%= r.guest.email %></span><% } else { %>(removed)<% } %></dd>
+            <dt class="col-sm-3">Host</dt>
+            <dd class="col-sm-9"><% if (r.host) { %><a href="/admin/users/<%= String(r.host._id) %>"><%= r.host.username %></a> <span class="text-muted small"><%= r.host.email %></span><% } else { %>(removed)<% } %></dd>
+            <dt class="col-sm-3">Stay</dt>
+            <dd class="col-sm-9"><%= day(r.checkIn) %> &rarr; <%= day(r.checkOut) %>, <%= r.nights %> <%= r.nights === 1 ? "night" : "nights" %>, <%= r.guests %> <%= r.guests === 1 ? "guest" : "guests" %></dd>
+            <dt class="col-sm-3">Booked (UTC)</dt>
+            <dd class="col-sm-9"><%= stamp(r.createdAt) %></dd>
+            <% if (r.holdExpiresAt) { %>
+            <dt class="col-sm-3">Hold ends (UTC)</dt>
+            <dd class="col-sm-9"><%= stamp(r.holdExpiresAt) %></dd>
+            <% } %>
+            <dt class="col-sm-3">Policy</dt>
+            <dd class="col-sm-9"><%= ls.cancellationPolicy || "" %><%= ls.instantBook ? " (instant book)" : "" %></dd>
+        </dl>
+
+        <h2 class="h5">Price at booking</h2>
+        <dl class="row">
+            <dt class="col-sm-3 fw-normal">Subtotal</dt><dd class="col-sm-9"><%= money(snap.subtotalMinor) %></dd>
+            <dt class="col-sm-3 fw-normal">Cleaning</dt><dd class="col-sm-9"><%= money(snap.cleaningMinor) %></dd>
+            <dt class="col-sm-3 fw-normal">Service fee</dt><dd class="col-sm-9"><%= money(snap.serviceFeeMinor) %></dd>
+            <dt class="col-sm-3 fw-normal">Tax</dt><dd class="col-sm-9"><%= money(snap.taxMinor) %></dd>
+            <dt class="col-sm-3">Total</dt><dd class="col-sm-9"><strong><%= money(snap.totalMinor) %></strong> <span class="text-muted small">Payments are simulated (<%= r.paymentStatus || "none" %>).</span></dd>
+        </dl>
+
+        <% if (r.refund && r.refund.totalMinor !== undefined && r.refund.totalMinor !== null) { %>
+        <h2 class="h5">Refund (calculated and recorded; no money moved)</h2>
+        <dl class="row">
+            <dt class="col-sm-3 fw-normal">Refund</dt><dd class="col-sm-9"><%= money(r.refund.amountMinor) %></dd>
+            <dt class="col-sm-3 fw-normal">Retained</dt><dd class="col-sm-9"><%= money(r.refund.retainedMinor) %></dd>
+            <dt class="col-sm-3 fw-normal">Rule</dt><dd class="col-sm-9"><%= r.refund.policy || "" %><%= r.refund.rule ? ": " + r.refund.rule : "" %></dd>
+        </dl>
+        <% } %>
+        <% if (r.cancelReason) { %>
+        <p><strong>Cancellation reason<%= r.cancelledBy ? " (" + r.cancelledBy + ")" : "" %>:</strong> <%= r.cancelReason %></p>
+        <% } %>
+
+        <h2 class="h5">History</h2>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <caption class="visually-hidden">Status changes, oldest first</caption>
+                <thead><tr><th scope="col">When (UTC)</th><th scope="col">From</th><th scope="col">To</th><th scope="col">By</th><th scope="col">Note</th></tr></thead>
+                <tbody>
+                    <% (r.statusHistory || []).forEach((h) => { %>
+                    <tr>
+                        <td><time datetime="<%= h.at.toISOString() %>"><%= stamp(h.at) %></time></td>
+                        <td><%= h.from ? (LABEL[h.from] || h.from) : "" %></td>
+                        <td><%= LABEL[h.to] || h.to %></td>
+                        <td><%= h.actor %></td>
+                        <td><%= h.note || "" %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

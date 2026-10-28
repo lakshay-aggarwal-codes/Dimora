@@ -8,6 +8,7 @@ const request = require("supertest");
 const ejsMate = require("ejs-mate");
 const { ObjectId } = require("mongoose").Types;
 const audit = require("../../src/services/audit");
+const adminSummary = require("../../src/services/adminSummary");
 const reportQueue = require("../../src/services/reportModeration");
 const reviewModeration = require("../../src/services/reviewModeration");
 const adminRouter = require("../../src/routes/admin");
@@ -506,6 +507,13 @@ describe("the pages (real EJS, layout included)", () => {
   });
 
   test("the admin landing page links to the queue", async () => {
+    // The landing page reads its counts from the database (P14-T05); not here.
+    jest.spyOn(adminSummary, "platformSummary").mockResolvedValue({
+      users: { byStatus: {}, total: 0, admins: 0 },
+      listings: { byStatus: {}, total: 0 },
+      reservations: { byStatus: {}, total: 0 },
+      openReports: 0,
+    });
     const { app } = setup(boss, { render: true });
     expect((await request(app).get("/admin")).text).toContain(
       'href="/admin/reports"',

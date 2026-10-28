@@ -10,13 +10,16 @@ const controller = require("../controllers/admin");
 const router = express.Router();
 router.use(adminGuard);
 
-router.get("/", controller.index);
+router.get("/", wrapAsync(controller.index));
 router.get("/audit", wrapAsync(controller.auditLog));
 
 router.get("/users", wrapAsync(controller.users));
 router.get("/users/:id", wrapAsync(controller.user));
 router.post("/users/:id/suspend", auditedMutation(controller.suspendUser));
 router.post("/users/:id/reinstate", auditedMutation(controller.reinstateUser));
+
+router.get("/reservations", wrapAsync(controller.reservations));
+router.get("/reservations/:id", wrapAsync(controller.reservation));
 
 router.get("/listings", wrapAsync(controller.listings));
 router.get("/listings/:id", wrapAsync(controller.listing));

@@ -1,16 +1,73 @@
 <% layout("/layouts/boilerPlate") %>
 <%#
-    Admin landing page (P14-T01). Only reachable by an active admin
-    (src/middleware/admin.js). More tools arrive with P14-T02..T05.
+    Admin landing page (P14-T01, summary P14-T05). Only reachable by an active
+    admin (src/middleware/admin.js). Locals: summary { users, listings,
+    reservations, openReports } - real counts, read on each visit.
+%>
+<%
+    const STATUS_LABEL = { cancelled_by_guest: "cancelled by guest", cancelled_by_host: "cancelled by host" };
+    const label = (s) => STATUS_LABEL[s] || s;
+    const n = (v) => Number(v).toLocaleString("en-US");
 %>
 <div class="row mt-3">
-    <div class="col-12 col-lg-8">
+    <div class="col-12 col-lg-10">
         <h1 class="h3">Admin</h1>
         <p>Every action taken here is written to the audit log. Admin rights are given only with
             <code>npm run make-admin</code>; nothing on the site can grant them.</p>
+
+        <% if (typeof summary !== "undefined" && summary) { %>
+        <section class="mb-4" aria-labelledby="summary-heading">
+            <h2 class="h5" id="summary-heading">Platform summary</h2>
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <div class="card h-100"><div class="card-body">
+                        <h3 class="h6">Users <span class="text-muted">(<%= n(summary.users.total) %>)</span></h3>
+                        <dl class="row mb-0 small">
+                            <% Object.entries(summary.users.byStatus).forEach(([status, count]) => { %>
+                            <dt class="col-8 fw-normal"><%= status %></dt><dd class="col-4 text-end mb-0"><%= n(count) %></dd>
+                            <% }) %>
+                            <dt class="col-8 fw-normal">active admins</dt><dd class="col-4 text-end mb-0"><%= n(summary.users.admins) %></dd>
+                        </dl>
+                        <a class="small" href="/admin/users">Users</a>
+                    </div></div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="card h-100"><div class="card-body">
+                        <h3 class="h6">Listings <span class="text-muted">(<%= n(summary.listings.total) %>)</span></h3>
+                        <dl class="row mb-0 small">
+                            <% Object.entries(summary.listings.byStatus).forEach(([status, count]) => { %>
+                            <dt class="col-8 fw-normal"><%= status %></dt><dd class="col-4 text-end mb-0"><%= n(count) %></dd>
+                            <% }) %>
+                        </dl>
+                        <a class="small" href="/admin/listings">Listing moderation</a>
+                    </div></div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="card h-100"><div class="card-body">
+                        <h3 class="h6">Reservations <span class="text-muted">(<%= n(summary.reservations.total) %>)</span></h3>
+                        <dl class="row mb-0 small">
+                            <% Object.entries(summary.reservations.byStatus).forEach(([status, count]) => { %>
+                            <dt class="col-8 fw-normal"><%= label(status) %></dt><dd class="col-4 text-end mb-0"><%= n(count) %></dd>
+                            <% }) %>
+                        </dl>
+                        <a class="small" href="/admin/reservations">Reservation lookup</a>
+                    </div></div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="card h-100"><div class="card-body">
+                        <h3 class="h6">Reports</h3>
+                        <p class="mb-1"><strong><%= n(summary.openReports) %></strong> open</p>
+                        <a class="small" href="/admin/reports">Reports queue</a>
+                    </div></div>
+                </div>
+            </div>
+        </section>
+        <% } %>
+
         <ul class="list-unstyled">
             <li class="mb-2"><a class="btn btn-outline-dark" href="/admin/users">Users</a></li>
             <li class="mb-2"><a class="btn btn-outline-dark" href="/admin/listings">Listing moderation</a></li>
+            <li class="mb-2"><a class="btn btn-outline-dark" href="/admin/reservations">Reservations</a></li>
             <li class="mb-2"><a class="btn btn-outline-dark" href="/admin/reports">Reports</a></li>
             <li><a class="btn btn-outline-dark" href="/admin/audit">Audit log</a></li>
         </ul>
