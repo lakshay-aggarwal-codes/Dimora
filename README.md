@@ -208,12 +208,13 @@ The server renders pages, so most routes are pages and form posts. Three are JSO
 - **One market**: rupees, India defaults. One time zone per listing, default Asia/Kolkata.
 - **Not deployed**: there is no deployment recipe or health route yet. Free hosting tiers sleep and have limits that must be checked when one is chosen.
 - **Tests**: `npm test` currently reports a few failing tests in the search and responsive-layout areas (listed in [docs/tasks/FIX-after-Q60.md](docs/tasks/FIX-after-Q60.md)); they predate the latest work. The browser checks in [docs/RESPONSIVE.md](docs/RESPONSIVE.md) and the real-database measurements in [docs/PERFORMANCE.md](docs/PERFORMANCE.md) have to be done by the owner on their own machine.
-- **Demo data is listings only**: there are no sample guests, bookings or reviews.
+- **Demo data**: `npm run seed:demo` makes 29 places, four demo accounts, 14 bookings in every state and 4 reviews ([docs/DEMO.md](docs/DEMO.md)); `npm run seed` makes the places only.
 
 ## More documentation
 
 | Where | What |
 |---|---|
+| [docs/DEMO.md](docs/DEMO.md) | five-minute demo script, engineering highlights, honest limitations |
 | [docs/API.md](docs/API.md) | every route |
 | [docs/ADR](docs/ADR/README.md) | architecture decisions |
 | [docs/AUTHORIZATION.md](docs/AUTHORIZATION.md) | who may do what |
