@@ -26,7 +26,7 @@
                     <form action="/listings" method="GET" role="search" aria-label="Quick search">
                         <label class="visually-hidden" for="nav-search">Search destinations</label>
                         <input class="form-control search-input" id="nav-search" type="search" name="dest"
-                            placeholder="Search destinations" autocomplete="off" data-destination-autocomplete>
+                            placeholder="Search destinations" autocomplete="off">
                         <button class="btn btn-search" type="submit">
                             <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                             <span>Search</span>
@@ -70,6 +70,7 @@
                                 <li><a class="dropdown-item" href="/host"<%- current("/host") %>>Host overview</a></li>
                                 <li><a class="dropdown-item" href="/host/reservations"<%- current("/host/reservations") %>>Booking requests</a></li>
                                 <li><a class="dropdown-item" href="/host/calendar"<%- current("/host/calendar") %>>Booking calendar</a></li>
+                                <li><a class="dropdown-item" href="/host/report"<%- current("/host/report") %>>Earnings report</a></li>
                                 <% if (typeof can === "function" && can("admin:access")) { %>
                                 <li><a class="dropdown-item" href="/admin">Admin</a></li>
                                 <% } %>

@@ -8,6 +8,7 @@ const availability = require("../controllers/availability");
 const reservations = require("../controllers/hostReservations");
 const hostCalendar = require("../controllers/hostCalendar");
 const hostStats = require("../controllers/hostStats");
+const hostReport = require("../controllers/hostReport");
 
 const router = express.Router();
 const mayCreate = [isLoggedIn, authorize("listing:create")];
@@ -55,6 +56,11 @@ router.post(
   ...mayEdit,
   wrapAsync(availability.unblock),
 );
+
+// Earnings and occupancy per listing for a range of months, page and CSV
+// (P13-T04): any signed-in host; it only reads that host's own data.
+router.get("/report", isLoggedIn, wrapAsync(hostReport.show));
+router.get("/report.csv", isLoggedIn, wrapAsync(hostReport.csv));
 
 // Views, saves and checkout starts of one listing (P13-T03): only its host.
 router.get("/listings/:id/stats", ...mayEdit, wrapAsync(hostStats.show));

@@ -1,0 +1,91 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    Earnings and occupancy report (P13-T04). Locals: report { range {fromKey,
+    toKey, firstDay, lastDay, days}, rows, totals, capped, listingsShown }.
+    Estimates only: nothing is paid out. Every value is printed escaped.
+%>
+<%
+    const plural = (n, one, many) => n + " " + (n === 1 ? one : many);
+    const pct = (v) => (v === null ? "\u2014" : v + "%");
+    const q = "from=" + encodeURIComponent(report.range.fromKey) + "&to=" + encodeURIComponent(report.range.toKey);
+%>
+<div class="row mt-3">
+    <div class="col-12 col-xl-10 mx-auto">
+        <p class="mb-1"><a href="/host">Host overview</a> · <a href="/host/listings">My listings</a></p>
+        <h1 class="h3">Earnings and occupancy</h1>
+        <p class="text-body-secondary">Estimates for your own listings. Dimora does not pay anything out yet, so these are not payouts or accounting figures.</p>
+
+        <form class="row g-2 align-items-end mb-3" method="GET" action="/host/report" aria-label="Choose the months">
+            <div class="col-6 col-md-3">
+                <label class="form-label" for="rep-from">From month</label>
+                <input class="form-control" id="rep-from" name="from" type="text" inputmode="numeric" pattern="[0-9]{4}-[0-9]{2}" placeholder="YYYY-MM" maxlength="7" required value="<%= report.range.fromKey %>">
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label" for="rep-to">To month</label>
+                <input class="form-control" id="rep-to" name="to" type="text" inputmode="numeric" pattern="[0-9]{4}-[0-9]{2}" placeholder="YYYY-MM" maxlength="7" required value="<%= report.range.toKey %>">
+            </div>
+            <div class="col-6 col-md-2"><button class="btn btn-dark w-100" type="submit">Show</button></div>
+            <div class="col-6 col-md-4"><a class="btn btn-outline-dark w-100" href="/host/report.csv?<%= q %>" download>Download CSV</a></div>
+        </form>
+
+        <p><strong><%= report.range.firstDay %> to <%= report.range.lastDay %></strong> <span class="text-body-secondary">(<%= plural(report.range.days, "day", "days") %>)</span></p>
+
+        <% if (!report.rows.length) { %>
+        <%- include("../partials/empty-state.ejs", {
+            title: "No listings to report on",
+            message: "Publish a listing and its bookings will appear here.",
+            icon: "fa-chart-simple",
+            headingLevel: 2
+        }) %>
+        <% } else { %>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <caption class="visually-hidden">Bookings, nights, occupancy and estimated earnings for each listing</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Listing</th>
+                        <th scope="col" class="text-end">Bookings started</th>
+                        <th scope="col" class="text-end">Nights booked</th>
+                        <th scope="col" class="text-end">Nights blocked</th>
+                        <th scope="col" class="text-end">Occupancy</th>
+                        <th scope="col" class="text-end">Estimated earnings</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% report.rows.forEach((r) => { %>
+                    <tr>
+                        <th scope="row" class="fw-normal"><a href="/host/listings/<%= r.id %>/stats"><%= r.title %></a>
+                            <% if (r.status !== "published") { %><span class="small text-body-secondary d-block"><%= r.status %></span><% } %></th>
+                        <td class="text-end"><%= r.bookings %></td>
+                        <td class="text-end"><%= r.nightsBooked %> <span class="text-body-secondary small">of <%= r.nightsAvailable %></span></td>
+                        <td class="text-end"><%= r.nightsBlocked %></td>
+                        <td class="text-end"><%= pct(r.occupancy) %></td>
+                        <td class="text-end"><%= formatMoney(r.earningsMinor, r.currency) %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+                <tfoot>
+                    <% report.totals.forEach((t) => { %>
+                    <tr>
+                        <th scope="row"><%= report.totals.length > 1 ? "Total, " + t.currency : "Total" %></th>
+                        <td class="text-end"><%= t.bookings %></td>
+                        <td class="text-end"><%= t.nightsBooked %> <span class="text-body-secondary small">of <%= t.nightsAvailable %></span></td>
+                        <td class="text-end">&mdash;</td>
+                        <td class="text-end"><%= pct(t.occupancy) %></td>
+                        <td class="text-end"><%= formatMoney(t.earningsMinor, t.currency) %></td>
+                    </tr>
+                    <% }) %>
+                </tfoot>
+            </table>
+        </div>
+        <% if (report.capped) { %><p class="text-warning-emphasis">There are more bookings than this report reads; the figures are incomplete. Choose fewer months.</p><% } %>
+        <% } %>
+
+        <h2 class="h6 mt-4">How these are worked out</h2>
+        <ul class="small text-body-secondary">
+            <li><strong>Bookings started</strong> and <strong>earnings</strong>: confirmed and completed stays whose check-in is in these months. Earnings are what you set (nights, weekend nights, cleaning); the guest service fee and taxes are not yours.</li>
+            <li><strong>Nights booked</strong>: nights of confirmed and completed stays that fall inside these months, even if the stay began earlier. <strong>Occupancy</strong> = nights booked / (days in the months &minus; nights you blocked).</li>
+            <li>Requests still waiting, declined, expired and cancelled stays are not counted. Future nights count only once reserved. Days are India time. A listing is measured for the whole range, even if you published it part-way through.</li>
+        </ul>
+    </div>
+</div>
