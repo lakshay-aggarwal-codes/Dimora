@@ -3,7 +3,6 @@
 // the query is never lost and never invented.
 const ORDER = [
   "dest",
-  "radius",
   "in",
   "out",
   "guests",
@@ -15,6 +14,7 @@ const ORDER = [
   "amenities",
   "minRating",
   "sort",
+  "purpose",
   "page",
   "keywords",
   "bedrooms",

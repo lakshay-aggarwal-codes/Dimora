@@ -1,5 +1,10 @@
 const { neighborhoodFor } = require("../services/neighborhood");
 const Listing = require("../models/listing.js");
+const User = require("../models/user");
+const Reservation = require("../models/reservation");
+const { loadTrust } = require("../services/trust");
+const ListingStat = require("../models/listingStat");
+const { VARIANTS, recordClick } = require("../services/rankingStats");
 const reviewService = require("../services/reviews");
 const { summarizeRatings } = require("../utils/ratings");
 const { can } = require("../policies");
@@ -8,10 +13,7 @@ const { isAdmin } = require("../policies/shared");
 const { getGeocodingClient } = require("../services/geocoding");
 const { deleteImage } = require("../config/cloudinary");
 const { galleryOf, replaceCover } = require("../services/images");
-const { imageUrl } = require("../utils/imageUrl");
 const { publicPointOf } = require("../utils/geo");
-const { accessibilityLabels } = require("../utils/accessibility");
-const { ACCESSIBILITY_NOTICE } = require("../config/constants");
 const { isPublic } = require("../utils/visibility");
 const { softDeleteListing } = require("../services/lifecycle");
 const { stayRulesFor } = require("../services/bookingRules");
@@ -177,28 +179,35 @@ module.exports.showListings = async (req, res) => {
         }
       : summarizeRatings(reviewList);
 
-  const gallery = galleryOf(listing);
-  // A draft or unpublished listing, seen by its host or an admin, is not for
-  // search engines (P18-T05).
-  if (!isPublic(listing)) {
-    res.locals.seoUrl = () => "";
-    res.locals.seoRobots = () => "noindex, nofollow";
+  // Opened from a Best-match results page (?from=default|work|family|weekend):
+  // count it once per listing per session, for the ranking comparison (P15-T06).
+  // A counter only; a wrong value is ignored; a failure never shows.
+  const from = typeof req.query.from === "string" ? req.query.from : "";
+  if (VARIANTS.includes(from) && req.session && isPublic(listing)) {
+    const seen = Array.isArray(req.session.rankClicks) ? req.session.rankClicks : [];
+    if (!seen.includes(String(listing._id))) {
+      req.session.rankClicks = [...seen, String(listing._id)].slice(-50);
+      recordClick({ ListingStat, listingId: listing._id, variant: from }).catch(() => {});
+    }
+  }
+
+  // The host's confirmed facts (P12-T05). A failure here must not take the page down.
+  let hostTrust = null;
+  try {
+    hostTrust = listing.owner
+      ? await loadTrust({ User, Reservation }, listing.owner)
+      : null;
+  } catch {
+    hostTrust = null;
   }
 
   res.render("listings/show.ejs", {
     listing,
+    hostTrust,
     reviewable,
     reviewList,
     ratingSummary,
-    gallery,
-    // The first photo, large, for the Open Graph tags (P18-T05); only an https
-    // address is used (the layout checks again).
-    pageImage: gallery[0] ? imageUrl(gallery[0].url, "full") : "",
-    // Host-declared, not verified (P15-T05).
-    accessibility: {
-      labels: accessibilityLabels(listing.accessibility),
-      notice: ACCESSIBILITY_NOTICE,
-    },
+    gallery: galleryOf(listing),
     // The public (approximate) point only: the precise one never reaches a page.
     mapPoint: publicPointOf(listing),
     // Stored places around the stay (P15-T02): read from the listing, no network.

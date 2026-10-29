@@ -12,6 +12,7 @@ What Dimora keeps, for how long, and what removes it. Written from the code on 2
 | Reservations, night ledger | `reservations`, `stay_nights` | kept | never deleted by the app (they are the record of what happened) |
 | Reviews | `reviews` | kept, also after the author's account is anonymised | never deleted by the app; admin moderation can hide |
 | Messages, reports, audit log | `conversations`, `reports`, `auditlogs` | kept | never deleted by the app |
+| Listing counters (saves; how often a stay was shown and opened under each Best-match ordering, `ListingStat`) | MongoDB `listingstats` | kept, counters only: no user, session, time or search text | never removed by the app (docs/RANKING.md) |
 | Saved stays, notifications | `wishlists`, `notifications` | saved stays until removed or the account is deleted; a read notification is deleted **30 days after it was read** | TTL index; account deletion removes both |
 | Server logs | Render's log stream (stdout) | **not set by Dimora**: Render's retention applies and was not checked | Logs hold a request id, method, path and status. Not logged: query strings, form fields, cookies, headers, passwords, one-time email links (their path part is replaced by `[redacted]`). Proven by `tests/unit/logger.redaction.test.js` and `tests/integration/requestLog.db.test.js` |
 | Backups | on the owner's computer (docs/RECOVERY.md) | until the owner deletes them | the owner. A dump contains email addresses and password hashes, so deleting an account does **not** delete it from older dumps |

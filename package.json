@@ -34,6 +34,7 @@
     "sweep": "node scripts/sweep.js",
     "make-admin": "node scripts/make-admin.js",
     "preflight": "node scripts/preflight.js",
+    "report:ranking": "node scripts/report-ranking.js",
     "data:snapshot": "node scripts/data-snapshot.js",
     "data:compare": "node scripts/data-snapshot.js --compare",
     "smoke:deploy": "node scripts/smoke-deploy.js"

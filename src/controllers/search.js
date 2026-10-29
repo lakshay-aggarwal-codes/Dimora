@@ -18,6 +18,10 @@ const { queryPairs, listingsUrl, hiddenFields } = require("../utils/searchUrl");
 const { sortSpec } = require("../services/search");
 const { suggestForEmptyResults } = require("../services/suggestions");
 const { suggestDestinations } = require("../services/destinations");
+const ListingStat = require("../models/listingStat");
+const { PURPOSES, getPurpose } = require("../config/purposes");
+const { rankedPage, maxScore } = require("../services/purposeRank");
+const { recordShown } = require("../services/rankingStats");
 const { formatDateOnly, todayIn, DEFAULT_TIMEZONE } = require("../utils/dates");
 const {
   activeChips,
@@ -59,16 +63,33 @@ module.exports.index = async (req, res) => {
   const outOfRange = total > 0 && requested > totalPages;
   const page = Math.min(requested, totalPages);
 
+  // A trip purpose re-orders "Best match" (P15-T06). It needs that sort and no
+  // search words (words have their own relevance), and says so when it cannot act.
+  const purpose = getPurpose(parsed.state.purpose);
+  const hasText = Boolean(filter.$text);
+  const purposeActive = Boolean(purpose) && sort === "relevance" && !hasText;
+  // Which ordering the page shows, for the click-through comparison; null for
+  // the other sort orders and for word searches (not comparable).
+  const rankVariant = sort === "relevance" && !hasText ? (purpose ? purpose.slug : "default") : null;
+
   let listings = [];
   if (!outOfRange) {
-    const spec = sortSpec(sort, { hasText: Boolean(filter.$text) });
-    const cursor = spec.projection
-      ? Listing.find(filter, spec.projection)
-      : Listing.find(filter);
-    listings = await cursor
-      .sort(spec.sort)
-      .skip((page - 1) * PAGE_SIZE)
-      .limit(PAGE_SIZE);
+    if (purposeActive) {
+      listings = await rankedPage({ Listing, filter, purpose, page, pageSize: PAGE_SIZE });
+    } else {
+      const spec = sortSpec(sort, { hasText });
+      const cursor = spec.projection
+        ? Listing.find(filter, spec.projection)
+        : Listing.find(filter);
+      listings = await cursor
+        .sort(spec.sort)
+        .skip((page - 1) * PAGE_SIZE)
+        .limit(PAGE_SIZE);
+    }
+    // Counters only, never in the way of the page, and not for crawlers.
+    if (rankVariant && listings.length > 0 && !/bot|crawl|spider|preview|monitor/i.test(req.get("user-agent") || "")) {
+      recordShown({ ListingStat, ids: listings.map((l) => l._id), variant: rankVariant }).catch(() => {});
+    }
   }
 
   const pageState = { ...parsed.state };
@@ -76,6 +97,7 @@ module.exports.index = async (req, res) => {
   // A sort order alone is not a search.
   const filterState = { ...pageState };
   delete filterState.sort;
+  delete filterState.purpose;
   const filtered = Object.keys(filterState).length > 0;
 
   // Sort links keep the search and start again at page 1.
@@ -86,6 +108,32 @@ module.exports.index = async (req, res) => {
       sort: option.value === DEFAULT_SORT ? undefined : option.value,
     }),
   }));
+  // "Plan for": the purposes, each as a link that keeps the search (P15-T06).
+  const purposeLinks = [
+    { slug: "", label: "Any trip", current: !purpose, href: listingsUrl(pageState, { purpose: undefined }) },
+    ...PURPOSES.map((p) => ({
+      slug: p.slug,
+      label: p.label,
+      current: Boolean(purpose) && purpose.slug === p.slug,
+      href: listingsUrl(pageState, { purpose: p.slug }),
+    })),
+  ];
+  const purposeInfo = purpose
+    ? {
+        slug: purpose.slug,
+        label: purpose.label,
+        summary: purpose.summary,
+        rules: purpose.rules,
+        max: maxScore(purpose),
+        active: purposeActive,
+        why: purposeActive
+          ? null
+          : hasText
+            ? "Trip ranking is off while you search by words."
+            : "Trip ranking only applies to the Best match order.",
+      }
+    : null;
+
   const from = (page - 1) * PAGE_SIZE + 1;
   const showing =
     total > 0 && !outOfRange && totalPages > 1
@@ -118,6 +166,9 @@ module.exports.index = async (req, res) => {
     hiddenFields,
     mapQuery: new URLSearchParams(queryPairs(pageState)).toString(),
     sortLinks,
+    purposeLinks,
+    purposeInfo,
+    rankVariant,
     showing,
     outOfRange,
     lastPageHref: listingsUrl(pageState, { page: totalPages }),

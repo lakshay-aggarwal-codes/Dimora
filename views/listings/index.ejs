@@ -150,6 +150,26 @@
     </nav>
     <% } %>
 
+    <% const pLinks = typeof purposeLinks !== "undefined" ? purposeLinks : []; const pInfo = typeof purposeInfo !== "undefined" ? purposeInfo : null; %>
+    <% if (resultCount > 0 && !isOut && pLinks.length > 0) { %>
+    <nav class="sort-bar purpose-bar" aria-label="Plan for a trip purpose" data-purpose-bar>
+        <span class="sort-label">Plan for</span>
+        <% pLinks.forEach((option) => { %>
+        <a class="sort-link<%= option.current ? ' is-current' : '' %>" href="<%= option.href %>"<% if (option.current) { %> aria-current="true"<% } %>><%= option.label %></a>
+        <% }) %>
+    </nav>
+    <% if (pInfo) { %>
+    <details class="purpose-rules" data-purpose-rules<% if (pInfo.active) { %> open<% } %>>
+        <summary><%= pInfo.label %>: how the stays are ordered</summary>
+        <% if (pInfo.why) { %><p class="form-text" data-purpose-off><%= pInfo.why %></p><% } %>
+        <p class="mb-1"><%= pInfo.summary %> Each stay gets points for what it states, up to <%= pInfo.max %>. The stays with most points come first; stays with equal points keep the usual order (rating, then number of reviews). Nothing is hidden: it only changes the order.</p>
+        <ul class="mb-1">
+            <% pInfo.rules.forEach((rule) => { %><li>+<%= rule.points %> <%= rule.label %></li><% }) %>
+        </ul>
+    </details>
+    <% } %>
+    <% } %>
+
     <% if (isOut) { %>
     <%- include("../partials/empty-state.ejs", {
         title: "That page does not exist",
@@ -205,7 +225,7 @@
                 priceMinor: Number.isInteger(list.pricing && list.pricing.nightlyMinor) ? list.pricing.nightlyMinor : null,
                 currency: (list.pricing && list.pricing.currency) || "INR",
                 taxNote: "+18% GST"
-            } }) %>
+            }, from: (typeof rankVariant !== "undefined" && rankVariant) ? rankVariant : "" }) %>
         </div>
         <% } %>
     </div>

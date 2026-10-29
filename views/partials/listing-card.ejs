@@ -19,7 +19,7 @@
     const isSaved = typeof savedIds !== "undefined" && savedIds && typeof savedIds.has === "function" && savedIds.has(String(item.id));
 %>
 <div class="listing-card-wrap">
-<a href="/listings/<%= encodeURIComponent(item.id) %>" class="listing-link">
+<a href="/listings/<%= encodeURIComponent(item.id) %><% if (typeof from !== "undefined" && from) { %>?from=<%= encodeURIComponent(from) %><% } %>" class="listing-link">
     <div class="card h-100 listing-card">
         <%# The title below names the link, so the photo is decorative: empty alt. %>
         <img src="<%= cardSrc %>"<% if (cardSrcset) { %> srcset="<%= cardSrcset %>" sizes="(min-width: 992px) 33vw, (min-width: 768px) 50vw, 100vw"<% } %> width="800" height="600" loading="lazy" decoding="async" class="card-img-top listing-card-img" alt="">

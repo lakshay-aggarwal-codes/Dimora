@@ -12,6 +12,14 @@ const listingStatSchema = new Schema({
     unique: true,
   },
   saves: { type: Number, default: 0, min: 0 },
+  // How often the stay was shown on, and opened from, a results page ordered by
+  // Best match, per ordering (P15-T06; src/services/rankingStats.js).
+  ranking: Object.fromEntries(
+    ["default", "work", "family", "weekend"].map((variant) => [
+      variant,
+      { shown: { type: Number, default: 0, min: 0 }, clicked: { type: Number, default: 0, min: 0 } },
+    ]),
+  ),
 });
 
 module.exports = mongoose.model("ListingStat", listingStatSchema);
