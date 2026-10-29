@@ -24,11 +24,11 @@ Not chosen: **Railway**. On 2026-10-28 its docs list a Free plan with $1 of cred
 | Render may **restart a free service at any time**; the file system is **ephemeral**. | Dimora keeps nothing on disk (sessions are in MongoDB, photos in Cloudinary). Restarts only drop requests in flight. |
 | Free web service: **no shell, no one-off jobs, no pre-deploy command**, one instance only. | Migrations run in the build command; `make-admin` runs from your own computer (below). |
 | Render may suspend a free service that starts an **uncommonly high amount of traffic to the internet** (database calls count). | A demo is far below this; do not run imports or load tests against the live site. |
-| Outbound **SMTP ports 25, 465 and 587 are blocked** on free services. | P02-T05 (email) therefore sends through Resend's HTTPS API, not SMTP (docs/EMAIL.md, ADR-012). |
-| While spun down, Render answers `/robots.txt` itself with "disallow all". | Search engines will not index the site while it sleeps (P18-T05). |
+| Outbound **SMTP ports 25, 465 and 587 are blocked** on free services. | Matters for P02-T05 (email): use an email provider's HTTPS API, not SMTP, if you build it. |
+| While spun down, Render answers `/robots.txt` itself with "disallow all". | Search engines will not index the site while it sleeps. Once it is awake, Dimora's own `/robots.txt` (P18-T05) is served. |
 | Atlas Free: **0.5 GB** of data including indexes, **100 operations a second**, 500 connections, **10 GB in and 10 GB out per rolling 7 days**, no `$where`/server-side JavaScript, `allowDiskUse` ignored (32 MB sort limit). | Plenty for the demo data and a class's worth of use. A big import can fill it. Queries that sort in memory must stay under 32 MB (not measured; P18-T02 reviewed the indexes). |
 | Atlas pauses a Free cluster after **30 days with no connection**. | If the site is not opened for a month the database pauses; resume it in Atlas. Export a copy of your data if you stop using it. |
-| Atlas Free: no network peering, no private endpoints; **Atlas backups (snapshots) are not available for Free clusters**; Atlas's docs say to use `mongodump` and `mongorestore` instead (corrected 2026-10-28, an earlier version of this page said otherwise). | **You are the backup.** Take a `mongodump` before every release with a migration and on a schedule you can keep (docs/RECOVERY.md). |
+| Atlas Free: no network peering, no private endpoints; **backups can be switched on** (daily snapshot, up to four kept). | Switch them on (see "Rolling back"). |
 | Cloudinary Free: **25 credits a month** (1 credit = 1,000 transformations, or 1 GB of storage, or 1 GB of delivery bandwidth), transformations and bandwidth in a rolling 30-day window. | The app stores up to 10 photos a listing at 5 MB each; the demo fits. Every size/format variant is a transformation, so many visitors on many photos is what uses the credits. |
 
 ### Background jobs only run while the service is awake
@@ -41,7 +41,7 @@ The housekeeping job (`SWEEPER_*`) and the nearby-places retry run inside the we
 
 ## First deployment
 
-1. **Atlas.** Create a Free cluster (pick the region closest to Render's `singapore` region among the Free regions Atlas offers). Create a **database user of its own** with a long random password and rights on the one `dimora` database only. Under *Network Access* allow the app to connect: Render's outbound addresses are shared ranges that it publishes per region and can change; the simple choice is `0.0.0.0/0`, which leaves the password and TLS as the only protection, so keep the password long and never reuse it. Copy the `mongodb+srv://` string and put the database name before the `?` (`.../dimora?retryWrites=true&w=majority`). There is no Atlas backup on a Free cluster: set up the `mongodump` routine in docs/RECOVERY.md.
+1. **Atlas.** Create a Free cluster (pick the region closest to Render's `singapore` region among the Free regions Atlas offers). Create a **database user of its own** with a long random password and rights on the one `dimora` database only. Under *Network Access* allow the app to connect: Render's outbound addresses are shared ranges that it publishes per region and can change; the simple choice is `0.0.0.0/0`, which leaves the password and TLS as the only protection, so keep the password long and never reuse it. Copy the `mongodb+srv://` string and put the database name before the `?` (`.../dimora?retryWrites=true&w=majority`). Turn on backups for the cluster.
 2. **Cloudinary.** Sign up for the Free plan; note cloud name, API key and API secret.
 3. **Mapbox.** You need two tokens (ADR-007): a **secret** (`sk.`) server token and a **public** (`pk.`) token. Restrict the public token to your site's address in the Mapbox account once you know it (step 6).
 4. **Git.** Push the repository to GitHub (the `.env` file is git-ignored; run `npm run preflight` first, below).
@@ -76,7 +76,6 @@ Remove-Item Env:\MONGODB_URI
 | `SESSION_SECRET` | generated by Render; **do not change it casually**: it also keys every listing's approximate public location (ADR/P06-T02), so a new secret moves every public map pin until migration 007 is re-run |
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | from Cloudinary |
 | `MAPBOX_SERVER_TOKEN`, `MAPBOX_PUBLIC_TOKEN` | two different tokens; the app refuses to start in production if they are equal or the public one is `sk.` |
-| `EMAIL_TRANSPORT`, `EMAIL_FROM`, `RESEND_API_KEY`, `EMAIL_VERIFICATION_REQUIRED` | `resend` + sender on a domain verified at Resend + API key + `true`; **or**, with no domain of your own, `console` + `false` (docs/EMAIL.md). With `console` and `true` nobody can publish or book. |
 | `NEARBY_CONTACT` | an email or URL that identifies you to the Overpass operators |
 | `TRUST_PROXY_HOPS` | `1` to start; check it ("Client address") |
 | `NEARBY_ENABLED`, `SWEEPER_ENABLED`, `MAPBOX_GEOCODING_PERMANENT` | `true`, `true`, `false` (in `render.yaml`) |
@@ -89,6 +88,14 @@ Before you push, with the production values in `.env` (or in the shell): `npm ru
 - `GET /readyz`: 200 only while the MongoDB connection is open, otherwise 503. Use it for an uptime monitor or by hand.
 
 Both are `GET`/`HEAD` only, return `{"status": ...}` and nothing about the build or settings, are not written to the request log, create no session and need no CSRF token.
+
+## Search engines (P18-T05)
+
+- `GET /robots.txt` keeps crawlers out of the admin area, the API, the host and account pages, trips, wishlists, comparison, reports, login and signup, and the new/edit/checkout/image pages of a listing. `GET /sitemap.xml` lists the home page, the results page, About, Privacy, Terms and every published, not deleted listing (its id and last change only, never titles or host text), up to 5,000 listings. Both are cached for an hour and set no cookie.
+- Every address in them, in `<link rel="canonical">` and in the Open Graph tags comes from **`APP_BASE_URL`**, never from the request's `Host` header. **Set `APP_BASE_URL` to the public address** (it is required in production), or the sitemap will point at the wrong site.
+- Pages that are private, draft previews and error pages carry `<meta name="robots" content="noindex, nofollow">` and no canonical link, because `robots.txt` alone does not remove a page from a search engine.
+- The canonical address of a page ignores the query string (dates, guests, filters, sort), except `?page=N` on the results list.
+- Nothing is submitted for you: add the site and its `/sitemap.xml` in the search engine's webmaster tools yourself. A free Render service answers `/robots.txt` itself while it sleeps (above), so the first crawl after a quiet spell can see "disallow all".
 
 ## Client address (`TRUST_PROXY_HOPS`)
 
@@ -124,13 +131,13 @@ Record the value that worked in this file.
 ## Updating and rolling back
 
 1. `npm run lint`, `npm test`, `npm run preflight` on your computer; CI must be green.
-2. If the release has a migration: take a `mongodump` and a data snapshot first (docs/RECOVERY.md), then run `npm run migrate:dry`.
+2. If the release has a migration: confirm a recent Atlas snapshot exists (or take one), and run `npm run migrate:dry`.
 3. Push, then *Deploy latest commit* in Render (`autoDeploy: false`). Switch to `autoDeploy: true` only once you trust steps 1 and 2.
 4. `npm run smoke:deploy -- https://YOUR-SERVICE.onrender.com`.
 
 **Rolling back code:** use the service's rollback in the Render dashboard (Render's "Rollbacks" page describes it). On the free plan that works **only to the two most recent previous deploys**. It does not undo a migration (see the additive rule above). If a bad deploy never answers `/healthz`, Render cancels it after 15 minutes and keeps the old instance.
 
-**Rolling back data:** restore from the `mongodump` you took before the release (docs/RECOVERY.md; Atlas has no snapshot to offer on a Free cluster). Data written since the dump is lost; say so to users. A paused or restored cluster keeps the same connection string unless you create a new one.
+**Rolling back data:** restore from an Atlas snapshot, or from a `mongodump` you took before the release. Data written since the snapshot is lost; say so to users. A paused or restored cluster keeps the same connection string unless you create a new one.
 
 **Rolling back a bad secret:** change the value in the Render dashboard and redeploy; rotate Cloudinary, Mapbox and Atlas credentials at the provider first if one leaked.
 

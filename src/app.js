@@ -46,9 +46,8 @@ const { csrfProtection } = require("./middleware/csrf");
 const { inputGuard, URLENCODED_OPTIONS } = require("./middleware/inputGuard");
 const { recoverCheckout } = require("./middleware/checkoutRecovery");
 const { createHealthRouter } = require("./routes/health");
-const emailAuthRouter = require("./routes/emailAuth");
-const { redactPath } = require("./utils/redactPath");
-const { createEmailService } = require("./services/email");
+const { createSeoRouter } = require("./routes/seo");
+const { canonicalUrl, robotsMeta, absoluteUrl } = require("./utils/seo");
 
 const ROOT_DIR = path.join(__dirname, "..");
 
@@ -65,8 +64,6 @@ const ROOT_DIR = path.join(__dirname, "..");
  *   is needed.
  * @param {object} [options.logger] pino logger (default: JSON to stdout;
  *   silent when config.isTest).
- * @param {{ send: Function }} [options.emailService] sends mail (default: the
- *   transport in config.email; tests pass createMemoryEmailService()).
  * @param {() => boolean} [options.isDbReady] answers /readyz (default: the
  *   Mongoose connection is open). Tests pass a stub.
  */
@@ -75,7 +72,6 @@ function createApp({
   sessionStore,
   logger = createLogger({ level: config.isTest ? "silent" : "info" }),
   isDbReady,
-  emailService,
 } = {}) {
   configureCloudinary(config.cloudinary);
   configureLocationSecret(config.sessionSecret); // keys the public-location offset (P06-T02)
@@ -85,14 +81,6 @@ function createApp({
   app.set("view engine", "ejs");
   app.set("views", path.join(ROOT_DIR, "views"));
   // <title> and meta description helpers used by views/layouts/boilerPlate.ejs
-  // Email (P02-T05). Without config.email (older test configs) nothing asks for
-  // a confirmed address.
-  app.locals.emailService =
-    emailService ||
-    createEmailService({ email: config.email, isProduction: Boolean(config.isProduction), logger });
-  app.locals.emailVerificationRequired = Boolean(config.email && config.email.verificationRequired);
-  app.locals.appBaseUrl = config.appBaseUrl;
-  app.locals.logger = logger;
   app.locals.fullTitle = fullTitle;
   app.locals.metaDescription = metaDescription;
   app.locals.imageUrl = imageUrl; // Cloudinary size/format presets for <img>
@@ -115,6 +103,21 @@ function createApp({
   // a check every few seconds writes no log line, creates no session and needs
   // no cookie or token.
   app.use(createHealthRouter({ isDbReady }));
+  // /robots.txt and /sitemap.xml (P18-T05): no session, no cookie, cached.
+  app.use(createSeoRouter({ baseUrl: config.appBaseUrl }));
+  // What the layout needs for <link rel="canonical">, <meta name="robots"> and
+  // the Open Graph tags (P18-T05). They are functions because the status of the
+  // answer is only known when the page is rendered (an error page has no
+  // canonical URL and is not indexed). The path is read now: a router that
+  // handles the request later sees a shortened one.
+  app.use((req, res, next) => {
+    const { path, query } = req;
+    res.locals.seoUrl = () =>
+      canonicalUrl(config.appBaseUrl, { path, query, status: res.statusCode });
+    res.locals.seoRobots = () => robotsMeta({ path, status: res.statusCode });
+    res.locals.siteUrl = (to) => absoluteUrl(config.appBaseUrl, to);
+    next();
+  });
   app.use(express.static(path.join(ROOT_DIR, "public")));
 
   // After static files (so assets are not logged), before everything else so
@@ -132,7 +135,7 @@ function createApp({
         req: (req) => ({
           id: req.id,
           method: req.method,
-          url: redactPath(req.url),
+          url: (req.url || "").split("?")[0],
         }),
         res: (res) => ({ statusCode: res.statusCode }),
       },
@@ -200,8 +203,6 @@ function createApp({
   const limiters = createAuthLimiters();
   app.post("/login", limiters.login);
   app.post("/signup", limiters.signup);
-  app.post("/forgot-password", limiters.emailLink);
-  app.post("/verify-email/resend", limiters.emailLink);
 
   app.use("/api/listings/:id/quote", limiters.quote);
   app.post("/reports", limiters.report); // counts, then lets the reports router answer
@@ -217,7 +218,6 @@ function createApp({
   app.use("/", profileRouter);
   app.use("/", tripsRouter);
   app.use("/", pagesRouter);
-  app.use("/", emailAuthRouter);
   app.use("/", useRouter);
 
   app.all("/{*splat}", (req, res, next) => {

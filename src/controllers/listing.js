@@ -1,7 +1,6 @@
 const { neighborhoodFor } = require("../services/neighborhood");
 const Listing = require("../models/listing.js");
 const reviewService = require("../services/reviews");
-const listingStats = require("../services/listingStats");
 const { summarizeRatings } = require("../utils/ratings");
 const { can } = require("../policies");
 const { searchPage } = require("../services/search");
@@ -9,7 +8,10 @@ const { isAdmin } = require("../policies/shared");
 const { getGeocodingClient } = require("../services/geocoding");
 const { deleteImage } = require("../config/cloudinary");
 const { galleryOf, replaceCover } = require("../services/images");
+const { imageUrl } = require("../utils/imageUrl");
 const { publicPointOf } = require("../utils/geo");
+const { accessibilityLabels } = require("../utils/accessibility");
+const { ACCESSIBILITY_NOTICE } = require("../config/constants");
 const { isPublic } = require("../utils/visibility");
 const { softDeleteListing } = require("../services/lifecycle");
 const { stayRulesFor } = require("../services/bookingRules");
@@ -148,12 +150,6 @@ module.exports.showListings = async (req, res) => {
     return res.redirect("/listings");
   }
 
-  // Host statistics (P13-T03): one approximate view per session per day. Never
-  // fails the page, and never counts the host, previews or non-public listings.
-  if (!preview && isPublic(listing)) {
-    await listingStats.recordView(req, listing);
-  }
-
   // Only the validated coordinates reach the page (as data- attributes); the
   // whole listing document is never serialised into a script.
   // Offer the review form only to a guest with a completed, unreviewed stay
@@ -181,12 +177,28 @@ module.exports.showListings = async (req, res) => {
         }
       : summarizeRatings(reviewList);
 
+  const gallery = galleryOf(listing);
+  // A draft or unpublished listing, seen by its host or an admin, is not for
+  // search engines (P18-T05).
+  if (!isPublic(listing)) {
+    res.locals.seoUrl = () => "";
+    res.locals.seoRobots = () => "noindex, nofollow";
+  }
+
   res.render("listings/show.ejs", {
     listing,
     reviewable,
     reviewList,
     ratingSummary,
-    gallery: galleryOf(listing),
+    gallery,
+    // The first photo, large, for the Open Graph tags (P18-T05); only an https
+    // address is used (the layout checks again).
+    pageImage: gallery[0] ? imageUrl(gallery[0].url, "full") : "",
+    // Host-declared, not verified (P15-T05).
+    accessibility: {
+      labels: accessibilityLabels(listing.accessibility),
+      notice: ACCESSIBILITY_NOTICE,
+    },
     // The public (approximate) point only: the precise one never reaches a page.
     mapPoint: publicPointOf(listing),
     // Stored places around the stay (P15-T02): read from the listing, no network.
