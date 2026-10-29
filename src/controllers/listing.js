@@ -13,7 +13,10 @@ const { isAdmin } = require("../policies/shared");
 const { getGeocodingClient } = require("../services/geocoding");
 const { deleteImage } = require("../config/cloudinary");
 const { galleryOf, replaceCover } = require("../services/images");
+const { imageUrl } = require("../utils/imageUrl");
 const { publicPointOf } = require("../utils/geo");
+const { accessibilityLabels } = require("../utils/accessibility");
+const { ACCESSIBILITY_NOTICE } = require("../config/constants");
 const { isPublic } = require("../utils/visibility");
 const { softDeleteListing } = require("../services/lifecycle");
 const { stayRulesFor } = require("../services/bookingRules");
@@ -207,7 +210,15 @@ module.exports.showListings = async (req, res) => {
     reviewable,
     reviewList,
     ratingSummary,
-    gallery: galleryOf(listing),
+    gallery,
+    // The first photo, large, for the Open Graph tags (P18-T05); only an https
+    // address is used (the layout checks again).
+    pageImage: gallery[0] ? imageUrl(gallery[0].url, "full") : "",
+    // Host-declared, not verified (P15-T05).
+    accessibility: {
+      labels: accessibilityLabels(listing.accessibility),
+      notice: ACCESSIBILITY_NOTICE,
+    },
     // The public (approximate) point only: the precise one never reaches a page.
     mapPoint: publicPointOf(listing),
     // Stored places around the stay (P15-T02): read from the listing, no network.

@@ -48,6 +48,8 @@ const { recoverCheckout } = require("./middleware/checkoutRecovery");
 const { createHealthRouter } = require("./routes/health");
 const emailAuthRouter = require("./routes/emailAuth");
 const { redactPath } = require("./utils/redactPath");
+const notificationPrefsRouter = require("./routes/notificationPrefs");
+const { createNotificationMailer } = require("./services/notificationEmail");
 const { createEmailService } = require("./services/email");
 
 const ROOT_DIR = path.join(__dirname, "..");
@@ -92,6 +94,19 @@ function createApp({
     createEmailService({ email: config.email, isProduction: Boolean(config.isProduction), logger });
   app.locals.emailVerificationRequired = Boolean(config.email && config.email.verificationRequired);
   app.locals.appBaseUrl = config.appBaseUrl;
+  app.locals.notificationSecret = config.sessionSecret; // keys the "stop these emails" links (P11-T05)
+  // Email copies of notifications (P11-T05): only with a real config.email
+  // (older test configs have none, so tests stay silent).
+  if (config.email) {
+    require("./services/notificationEvents").notifier.setMailer(
+      createNotificationMailer({
+        emailService: app.locals.emailService,
+        baseUrl: config.appBaseUrl,
+        secret: config.sessionSecret,
+        logger,
+      }),
+    );
+  }
   app.locals.logger = logger;
   app.locals.fullTitle = fullTitle;
   app.locals.metaDescription = metaDescription;
@@ -115,6 +130,21 @@ function createApp({
   // a check every few seconds writes no log line, creates no session and needs
   // no cookie or token.
   app.use(createHealthRouter({ isDbReady }));
+  // /robots.txt and /sitemap.xml (P18-T05): no session, no cookie, cached.
+  app.use(createSeoRouter({ baseUrl: config.appBaseUrl }));
+  // What the layout needs for <link rel="canonical">, <meta name="robots"> and
+  // the Open Graph tags (P18-T05). They are functions because the status of the
+  // answer is only known when the page is rendered (an error page has no
+  // canonical URL and is not indexed). The path is read now: a router that
+  // handles the request later sees a shortened one.
+  app.use((req, res, next) => {
+    const { path, query } = req;
+    res.locals.seoUrl = () =>
+      canonicalUrl(config.appBaseUrl, { path, query, status: res.statusCode });
+    res.locals.seoRobots = () => robotsMeta({ path, status: res.statusCode });
+    res.locals.siteUrl = (to) => absoluteUrl(config.appBaseUrl, to);
+    next();
+  });
   app.use(express.static(path.join(ROOT_DIR, "public")));
 
   // After static files (so assets are not logged), before everything else so
@@ -219,6 +249,7 @@ function createApp({
   app.use("/", tripsRouter);
   app.use("/", pagesRouter);
   app.use("/", emailAuthRouter);
+  app.use("/", notificationPrefsRouter);
   app.use("/", useRouter);
 
   app.all("/{*splat}", (req, res, next) => {

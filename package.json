@@ -27,6 +27,7 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "seed": "node scripts/seed.js",
+    "seed:demo": "node scripts/seed-demo.js",
     "migrate": "node scripts/migrate.js",
     "migrate:dry": "node scripts/migrate.js --dry-run",
     "import:airbnb": "node scripts/import-dataset.js",

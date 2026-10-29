@@ -32,6 +32,7 @@ const {
 } = require("../utils/filterChips");
 const { getCategory } = require("../config/categories");
 const { PROPERTY_TYPES, ROOM_TYPES, AMENITIES } = require("../config/constants");
+const { RADII_KM } = require("../services/area");
 
 const PAGE_SIZE = 12;
 
@@ -161,7 +162,7 @@ module.exports.index = async (req, res) => {
       values: pageState,
       typed: parsed.drawer,
       fields: PANEL_FIELDS,
-      lists: { PROPERTY_TYPES, ROOM_TYPES, AMENITIES },
+      lists: { PROPERTY_TYPES, ROOM_TYPES, AMENITIES, RADII_KM },
     },
     hiddenFields,
     mapQuery: new URLSearchParams(queryPairs(pageState)).toString(),

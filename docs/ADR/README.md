@@ -14,5 +14,4 @@ Decisions that shape the whole codebase. Each record states context, decision, c
 | [008](008-market-defaults.md) | Market defaults: India, INR, Asia/Kolkata | Accepted | P19-T02 |
 | [009](009-simulated-payments.md) | Payments are simulated and labelled | Accepted | P16-T02 |
 | [010](010-reviews-belong-to-stays.md) | Reviews belong to completed stays; older reviews are labelled | Accepted | P12-T02, P12-T05 |
-| [011](011-hosting.md) | Hosting: Render free web service, Atlas Free, Cloudinary Free | Accepted (provisional until first deployment) | P19-T04 |
-| [012](012-email-transport.md) | Email through an HTTPS API (Resend); console in development | Accepted | P02-T05 |
+| [011](011-gateway-test-mode.md) | A payment gateway only in test mode: Razorpay if anything, Stripe is out | Proposed (owner's go needed) | P16-T02 follow-up |
