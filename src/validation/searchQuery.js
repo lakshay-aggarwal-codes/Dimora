@@ -6,7 +6,7 @@
 //   stay          { checkIn, checkOut, flexDays } as date-only Dates when both
 //                 are valid (flexDays: 3 when "Available +-3 days" is on, else 0)
 //
-// URL names: dest, in, out, guests, minPrice, maxPrice, type, amenities,
+// URL names: dest, radius (km around dest), in, out, guests, minPrice, maxPrice, type, amenities,
 // minRating, sort, page (and, from the search service, keywords, bedrooms,
 // roomType, instantBook) and `category` (one slug from the category strip,
 // P05-T04). `destination` and the navbar's old `search` are
@@ -36,6 +36,8 @@ const SORTS = Object.freeze([
   "newest",
 ]);
 const MAX_PAGE = 1000;
+// "Within N km of the destination" (P06-T05).
+const RADII_KM = Object.freeze([5, 10, 25, 50]);
 
 // URL name -> the name the search service uses.
 const SERVICE_NAME = Object.freeze({
@@ -152,7 +154,6 @@ function parseListingQuery(
     propertyType: pick(raw, ["type", "propertyType"]),
     roomType: pick(raw, ["roomType"]),
     amenities: pick(raw, ["amenities", "amenities[]"]),
-    access: pick(raw, ["access", "access[]"]),
     instantBook: pick(raw, ["instantBook"]),
     category: pick(raw, ["category"]),
   };
@@ -207,6 +208,15 @@ function parseListingQuery(
     }
   }
 
+  // ---- radius around the destination (P06-T05): needs a valid destination ----
+  const rawRadius = pick(raw, ["radius"]);
+  if (rawRadius !== undefined && rawRadius !== "") {
+    const km = typeof rawRadius === "string" && /^\d{1,3}$/.test(rawRadius) ? Number(rawRadius) : NaN;
+    if (!RADII_KM.includes(km)) errors.radius = `The distance can be ${RADII_KM.join(", ")} km.`;
+    else if (!state.dest) errors.radius = "Choose a destination to search around.";
+    else state.radius = km;
+  }
+
   // ---- what the form inputs show (strings only, even when invalid) ----
   const text = (names) => {
     const value = pick(raw, names);
@@ -244,4 +254,4 @@ function parseListingQuery(
   };
 }
 
-module.exports = { parseListingQuery, SORTS, MAX_PAGE, FLEX_DAYS };
+module.exports = { parseListingQuery, SORTS, MAX_PAGE, FLEX_DAYS, RADII_KM };

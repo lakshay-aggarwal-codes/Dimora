@@ -17,8 +17,7 @@
     const checkboxGroups = [
         { name: "type", legend: "Property type", items: lists.PROPERTY_TYPES || [] },
         { name: "roomType", legend: "What guests get", items: lists.ROOM_TYPES || [] },
-        { name: "amenities", legend: "Amenities", items: lists.AMENITIES || [] },
-        { name: "access", legend: "Accessibility (declared by hosts)", items: lists.ACCESSIBILITY_FEATURES || [] }
+        { name: "amenities", legend: "Amenities", items: lists.AMENITIES || [] }
     ];
 %>
 <details class="filter-panel" id="filter-panel"<% if (hasPanelError) { %> open<% } %>>
@@ -30,6 +29,16 @@
 
     <form method="GET" action="/listings" class="filter-panel-form" aria-label="Filters" data-loading-form novalidate>
         <div class="row g-3">
+            <div class="col-12 col-md-6" data-radius-field>
+                <label class="form-label" for="radius">Distance around the destination</label>
+                <select class="form-select<%= errs.radius ? ' is-invalid' : '' %>" id="radius" name="radius"<% if (errs.radius) { %> aria-invalid="true" aria-describedby="radius-help"<% } else { %> aria-describedby="radius-help"<% } %>>
+                    <option value="">Only the destination itself</option>
+                    <% (lists.RADII_KM || []).forEach((km) => { %><option value="<%= km %>"<%= values.radius === km ? " selected" : "" %>>Within <%= km %> km</option><% }) %>
+                </select>
+                <div class="<%= errs.radius ? 'invalid-feedback d-block' : 'form-text' %>" id="radius-help"><%= errs.radius || "Needs a destination. Measured from the middle of the stays found there, using their approximate locations." %></div>
+            </div>
+        </div>
+        <div class="row g-3 mt-1">
             <div class="col-6 col-md-3">
                 <%- include("./form-field.ejs", { id: "minPrice", name: "minPrice", label: "Lowest price a night (₹)", type: "number", value: typed.minPrice, error: errs.minPrice, attrs: { min: 0, max: 1000000, step: 1, inputmode: "numeric" } }) %>
             </div>
@@ -50,9 +59,8 @@
         <div class="row g-3 mt-1">
             <% checkboxGroups.forEach((group) => { %>
             <div class="col-12 col-md-4">
-                <fieldset class="filter-group"<% if (group.name === "access") { %> aria-describedby="access-note"<% } %>>
+                <fieldset class="filter-group">
                     <legend class="filter-group-legend"><%= group.legend %></legend>
-                    <% if (group.name === "access") { %><p class="small text-body-secondary mb-1" id="access-note">Hosts declare these. Dimora has not checked them.</p><% } %>
                     <% if (errs[group.name]) { %><div class="form-error" id="<%= group.name %>-error"><%= errs[group.name] %></div><% } %>
                     <% group.items.forEach((item) => { %>
                     <div class="form-check">

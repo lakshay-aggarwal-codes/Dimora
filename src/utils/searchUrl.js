@@ -3,6 +3,7 @@
 // the query is never lost and never invented.
 const ORDER = [
   "dest",
+  "radius",
   "in",
   "out",
   "guests",
@@ -12,7 +13,6 @@ const ORDER = [
   "maxPrice",
   "type",
   "amenities",
-  "access",
   "minRating",
   "sort",
   "page",

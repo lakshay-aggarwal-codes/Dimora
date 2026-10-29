@@ -41,7 +41,7 @@ const hrefOf = (query) => `/listings?${query}`;
 function describeQuery(query) {
   const p = new URLSearchParams(query);
   const parts = [];
-  if (p.get("dest")) parts.push(p.get("dest"));
+  if (p.get("dest")) parts.push(p.get("radius") ? `${p.get("dest")} (within ${p.get("radius")} km)` : p.get("dest"));
   if (p.get("in") && p.get("out")) parts.push(`${p.get("in")} to ${p.get("out")}`);
   if (p.get("guests")) parts.push(`${p.get("guests")} guest${p.get("guests") === "1" ? "" : "s"}`);
   if (p.get("minPrice") || p.get("maxPrice")) {
@@ -49,7 +49,7 @@ function describeQuery(query) {
   }
   if (p.get("type")) parts.push(p.get("type"));
   const other = [...p.keys()].filter(
-    (k) => !["dest", "in", "out", "guests", "minPrice", "maxPrice", "type", "sort"].includes(k),
+    (k) => !["dest", "radius", "in", "out", "guests", "minPrice", "maxPrice", "type", "sort"].includes(k),
   );
   if (other.length) parts.push(`${new Set(other).size} more filter${new Set(other).size === 1 ? "" : "s"}`);
   return parts.join(" · ") || "All stays";

@@ -4,6 +4,7 @@
 // requested stay (the night ledger).
 const ledger = require("./ledger");
 const { buildFilter } = require("./search");
+const { areaCentre, areaCondition } = require("./area");
 const { parseListingQuery } = require("../validation/searchQuery");
 const { DEFAULT_TIMEZONE, todayIn } = require("../utils/dates");
 
@@ -11,9 +12,23 @@ const { DEFAULT_TIMEZONE, todayIn } = require("../utils/dates");
  * @param {object} query req.query
  * @returns {Promise<{ parsed: object, filter: object, takenIds: Array }>}
  */
-async function listingFilterFor(query, { now = new Date() } = {}) {
+async function listingFilterFor(query, { now = new Date(), Listing = require("../models/listing") } = {}) {
   const parsed = parseListingQuery(query, { now });
-  const filter = buildFilter(parsed.searchParams);
+  let filter = buildFilter(parsed.searchParams);
+  // "Within N km of the destination" (P06-T05): the circle REPLACES the text
+  // match, so nearby towns count. `parsed.area` is what the page and the
+  // suggestions need; it stays null when the destination has no stays to centre on.
+  parsed.area = null;
+  if (parsed.state.radius && parsed.searchParams.destination) {
+    const centre = await areaCentre(Listing, parsed.searchParams.destination);
+    if (centre) {
+      const { destination, ...rest } = parsed.searchParams;
+      void destination;
+      const condition = areaCondition(centre, parsed.state.radius);
+      filter = { ...buildFilter(rest), ...condition };
+      parsed.area = { km: parsed.state.radius, centre, condition };
+    }
+  }
   let takenIds = [];
   if (parsed.stay) {
     // With "Available +-3 days" a listing stays if ANY same-length stay

@@ -29,6 +29,13 @@ const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 // are looked at (dates and amenities usually remove the most stays).
 const GROUPS = [
   {
+    key: "radius",
+    urlKeys: ["radius"],
+    serviceKeys: [],
+    active: (p) => Boolean(p.area),
+    label: (s) => `Search only "${s.dest}" itself, not ${s.radius} km around it`,
+  },
+  {
     key: "dates",
     urlKeys: ["in", "out"],
     serviceKeys: [], // dates act through the night ledger, not the filter
@@ -41,13 +48,6 @@ const GROUPS = [
     serviceKeys: ["amenities"],
     active: (p) => Array.isArray(p.searchParams.amenities) && p.searchParams.amenities.length > 0,
     label: () => "Remove the amenity filters",
-  },
-  {
-    key: "access",
-    urlKeys: ["access"],
-    serviceKeys: ["access"],
-    active: (p) => Array.isArray(p.searchParams.access) && p.searchParams.access.length > 0,
-    label: () => "Remove the accessibility filters",
   },
   {
     key: "price",
@@ -100,7 +100,7 @@ const GROUPS = [
   },
   {
     key: "destination",
-    urlKeys: ["dest"],
+    urlKeys: ["dest", "radius"],
     serviceKeys: ["destination"],
     active: (p) => destinationParts(p.searchParams.destination).length > 0,
     label: (s) => `Search everywhere instead of "${s.dest}"`,
@@ -111,7 +111,11 @@ const GROUPS = [
 function filterWithout(parsed, group, takenIds) {
   const params = { ...parsed.searchParams };
   for (const key of group.serviceKeys) delete params[key];
-  const filter = buildFilter(params);
+  // With a radius the circle replaces the destination text (P06-T05); removing
+  // the radius or the destination itself brings the plain search back.
+  const keepArea = parsed.area && group.key !== "radius" && group.key !== "destination";
+  if (keepArea) delete params.destination;
+  const filter = { ...buildFilter(params), ...(keepArea ? parsed.area.condition : {}) };
   // Taken nights still exclude listings, unless the dates are what is dropped.
   if (group.key !== "dates" && takenIds.length > 0) filter._id = { $nin: takenIds };
   return filter;

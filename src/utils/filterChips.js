@@ -10,7 +10,6 @@ const {
   PROPERTY_TYPES,
   ROOM_TYPES,
   AMENITIES,
-  ACCESSIBILITY_FEATURES,
 } = require("../config/constants");
 const { CATEGORIES, getCategory } = require("../config/categories");
 const { listingsUrl } = require("./searchUrl");
@@ -18,13 +17,13 @@ const { listingsUrl } = require("./searchUrl");
 // The filters the filter panel edits (the rest of the state is carried through
 // the panel form as hidden inputs, see hiddenFields in searchUrl.js).
 const PANEL_FIELDS = Object.freeze([
+  "radius",
   "minPrice",
   "maxPrice",
   "type",
   "roomType",
   "bedrooms",
   "amenities",
-  "access",
   "instantBook",
 ]);
 
@@ -32,7 +31,6 @@ const labelOf = (list) => new Map(list.map((item) => [item.value, item.label]));
 const PROPERTY_LABELS = labelOf(PROPERTY_TYPES);
 const ROOM_LABELS = labelOf(ROOM_TYPES);
 const AMENITY_LABELS = labelOf(AMENITIES);
-const ACCESS_LABELS = labelOf(ACCESSIBILITY_FEATURES);
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -63,6 +61,9 @@ function activeChips(state = {}) {
     chips.push({ key, label, href: listingsUrl(state, changes) });
 
   if (state.dest) add("dest", `Where: ${state.dest}`, { dest: undefined });
+  if (state.dest && Number.isInteger(state.radius)) {
+    add("radius", `Within ${state.radius} km`, { radius: undefined });
+  }
   if (state.in && state.out) {
     add("dates", `${dayLabel(state.in)} to ${dayLabel(state.out)}`, { in: undefined, out: undefined, flex: undefined });
   }
@@ -100,9 +101,6 @@ function activeChips(state = {}) {
   for (const value of asList(state.amenities)) {
     add(`amenity:${value}`, AMENITY_LABELS.get(value) ?? value, { amenities: without(state.amenities, value) });
   }
-  for (const value of asList(state.access)) {
-    add(`access:${value}`, `${ACCESS_LABELS.get(value) ?? value} (declared)`, { access: without(state.access, value) });
-  }
   if (state.instantBook === true) add("instantBook", "Instant book", { instantBook: undefined });
   if (typeof state.minRating === "number") {
     add("minRating", `Rated ${state.minRating}+`, { minRating: undefined });
@@ -115,12 +113,12 @@ function activeChips(state = {}) {
 /** How many of the filter panel's filters are on (a price range counts once). */
 function filterCount(state = {}) {
   let count = 0;
+  if (state.dest && Number.isInteger(state.radius)) count += 1;
   if (typeof state.minPrice === "number" || typeof state.maxPrice === "number") count += 1;
   count += asList(state.type).length;
   count += asList(state.roomType).length;
   if (Number.isInteger(state.bedrooms) && state.bedrooms > 0) count += 1;
   count += asList(state.amenities).length;
-  count += asList(state.access).length;
   if (state.instantBook === true) count += 1;
   return count;
 }

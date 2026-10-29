@@ -146,7 +146,7 @@ describe("resetFiltersHref", () => {
   });
 
   test("PANEL_FIELDS are the URL names of the panel's inputs", () => {
-    expect(PANEL_FIELDS).toEqual(["minPrice", "maxPrice", "type", "roomType", "bedrooms", "amenities", "access", "instantBook"]);
+    expect(PANEL_FIELDS).toEqual(["radius", "minPrice", "maxPrice", "type", "roomType", "bedrooms", "amenities", "instantBook"]);
   });
 });
 
