@@ -196,6 +196,8 @@ const listingSchema = new Schema(
     },
 
     amenities: { type: [{ type: String, trim: true, maxlength: 60 }] },
+    // Declared by the host, never verified (P15-T05); keys from ACCESSIBILITY_FEATURES.
+    accessibility: { type: [{ type: String, trim: true, maxlength: 40 }] },
     houseRules: { type: String, trim: true, maxlength: 2000 },
     // The host explicitly says there are no special rules (a readiness item).
     noSpecialRules: { type: Boolean, default: false },

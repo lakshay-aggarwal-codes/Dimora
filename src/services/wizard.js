@@ -59,6 +59,7 @@ function formValues(listing, n) {
         beds: get(listing, "capacity.beds"),
         bathrooms: get(listing, "capacity.bathrooms"),
         amenities: [...(listing.amenities || [])],
+        accessibility: [...(listing.accessibility || [])],
       };
     case 5: {
       const nightly = minorToRupees(listing.get("pricing.nightlyMinor"));
@@ -172,6 +173,7 @@ function applyStep(listing, n, value, { geometry } = {}) {
         "capacity.beds": value.beds,
         "capacity.bathrooms": value.bathrooms,
         amenities: value.amenities,
+        accessibility: value.accessibility,
       });
       break;
     case 5:

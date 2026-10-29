@@ -2,7 +2,12 @@
 // server from kind + id, never taken from the page), who may send it is the
 // `report:create` policy, and everything else is services/reports.js.
 const { can } = require("../policies");
-const { REPORT_REASONS, REPORT_KINDS, LIMITS } = require("../config/reports");
+const {
+  REPORT_REASONS,
+  REASON_VALUES,
+  REPORT_KINDS,
+  LIMITS,
+} = require("../config/reports");
 const {
   createReport,
   describeTarget,
@@ -49,6 +54,12 @@ module.exports.newForm = async (req, res) => {
   await renderForm(req, res, {
     kind: text(req.query.kind),
     id: text(req.query.id),
+    // A link may suggest a reason ("Report inaccurate accessibility information"); only a listed one counts.
+    values: {
+      reason: REASON_VALUES.includes(text(req.query.reason))
+        ? text(req.query.reason)
+        : "",
+    },
   });
 };
 

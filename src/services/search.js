@@ -61,6 +61,11 @@ function buildFilter(params = {}) {
   if (Array.isArray(params.amenities) && params.amenities.length) {
     filter.amenities = { $all: params.amenities };
   }
+  // Accessibility features are declared by hosts (P15-T05): a listing must
+  // declare ALL the ones asked for. Listings that declare nothing never match.
+  if (Array.isArray(params.access) && params.access.length) {
+    filter.accessibility = { $all: params.access };
+  }
   if (params.instantBook === true) filter.instantBook = true;
 
   const category = categoryClause(params.category);

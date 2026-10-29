@@ -33,3 +33,14 @@ These need a browser, a keyboard and ideally a screen reader (NVDA on Windows is
 
 ## When you add a page
 Add it to one of the three `a11y.*.test.js` files with a realistic view model. If it uses a new colour pair for text, add the pair to `TEXT_PAIRS` in `contrast.test.js`. If it has a script that moves or redraws things, add a keyboard test next to the date picker's.
+
+## Host-declared accessibility features (P15-T05)
+
+This is a different thing from the rest of this file: not how well Dimora's own pages work for people using assistive technology, but what a **host says about the place**.
+
+- **What:** six optional features a host can tick in the rooms step of the wizard and in the edit page: step-free entrance, step-free bathroom, elevator, wide doorways, grab rails in the bathroom, accessible parking (`ACCESSIBILITY_FEATURES` in `src/config/constants.js`). Stored as `Listing.accessibility` (a list of those keys; no migration, old listings simply have none).
+- **No claim of checking.** The host's form, the listing page, the filter panel and the filter chips all say the information is declared by the host, and the listing page adds "Dimora has not checked these details." Nothing on the site uses words such as verified, certified or guaranteed for it, and a test fails if the notice stops saying so.
+- **Search:** `?access=elevator&access=grab_rails` (also `access[]`) keeps only public listings that declared **all** the asked features. A listing that declared nothing never matches, which means the filter cannot find places whose host never filled it in: an empty result says nothing about the place. Each feature is a chip ("Elevator (declared)"), counts in the Filters badge, and is one of the groups the empty-result suggestions can remove.
+- **Wrong or inaccurate information:** the listing page shows "Report inaccurate accessibility information" (not to the host, not when signed out guests cannot report). It opens the ordinary report form with the reason "Inaccurate or misleading" already chosen; moderators handle it like any other report ([docs/AUTHORIZATION.md](AUTHORIZATION.md), P14-T04).
+- **Not built:** the card's optional host photo evidence (the photo manager has alt text and captions, so a host can already describe a feature in a photo, but nothing links a photo to a feature); free-text details (door width in centimetres, number of steps); features in the comparison workspace and on the search map list; demo data does not declare any feature.
+- **Not checked by a person:** the host form and filter panel with a screen reader and a keyboard (the groups are real `fieldset`/`legend` with labelled checkboxes; this was not run in a browser).

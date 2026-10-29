@@ -19,11 +19,12 @@ const {
   VIBES,
   CANCELLATION_POLICIES,
   AMENITIES,
+  ACCESSIBILITY_FEATURES,
 } = require("../config/constants");
 
 // URL key -> wizard step number. Photos have their own routes.
 const SECTIONS = Object.freeze({ basics: 1, location: 2, details: 3, pricing: 5 });
-const LISTS = { PROPERTY_TYPES, ROOM_TYPES, VIBES, CANCELLATION_POLICIES, AMENITIES };
+const LISTS = { PROPERTY_TYPES, ROOM_TYPES, VIBES, CANCELLATION_POLICIES, AMENITIES, ACCESSIBILITY_FEATURES };
 
 const editUrl = (listing, key) => `/listings/${listing._id}/edit${key ? `#${key}` : ""}`;
 

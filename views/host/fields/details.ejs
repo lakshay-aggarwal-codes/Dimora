@@ -23,3 +23,18 @@
         </div>
         <% if (errors.amenities) { %><div id="amenities-error" class="invalid-feedback d-block"><%= errors.amenities %></div><% } %>
     </fieldset>
+
+    <fieldset class="amenity-fieldset mb-3"<% if (errors.accessibility) { %> aria-describedby="accessibility-hint accessibility-error"<% } else { %> aria-describedby="accessibility-hint"<% } %>>
+        <legend class="h5">Accessibility features</legend>
+        <p class="text-muted" id="accessibility-hint">Optional. Tick only what is true today. Guests see these marked &ldquo;Declared by the host&rdquo; and Dimora does not check them, so leave out anything you are not sure of.</p>
+        <div class="amenity-grid">
+            <% const access = [].concat(values.accessibility || []); %>
+            <% (lists.ACCESSIBILITY_FEATURES || []).forEach((feature) => { %>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="accessibility" id="accessibility-<%= feature.value %>" value="<%= feature.value %>"<% if (access.includes(feature.value)) { %> checked<% } %>>
+                <label class="form-check-label" for="accessibility-<%= feature.value %>"><%= feature.label %></label>
+            </div>
+            <% }) %>
+        </div>
+        <% if (errors.accessibility) { %><div id="accessibility-error" class="invalid-feedback d-block"><%= errors.accessibility %></div><% } %>
+    </fieldset>

@@ -145,8 +145,9 @@ describe("the filter panel", () => {
     expect(count(panel, /name="roomType"/g)).toBe(3);
     expect(count(panel, /name="amenities"/g)).toBe(14);
     expect(panel).toContain('name="instantBook" value="true"');
-    expect(count(panel, /<fieldset/g)).toBe(3);
-    expect(count(panel, /<legend/g)).toBe(3);
+    expect(count(panel, /name="access"/g)).toBe(6);
+    expect(count(panel, /<fieldset/g)).toBe(4);
+    expect(count(panel, /<legend/g)).toBe(4);
   });
 
   test("shows the current choices", async () => {

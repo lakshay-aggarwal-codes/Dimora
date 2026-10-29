@@ -73,6 +73,21 @@ const AMENITIES = [
   { value: "pets_allowed", label: "Pets allowed", group: "Good to know" },
 ];
 
+// Accessibility features (P15-T05). The HOST declares them; Dimora does not
+// check them, and the pages say so (ACCESSIBILITY_NOTICE). Kept apart from
+// AMENITIES so a feature is never shown as a verified fact.
+const ACCESSIBILITY_FEATURES = [
+  { value: "step_free_entrance", label: "Step-free entrance" },
+  { value: "step_free_bathroom", label: "Step-free bathroom" },
+  { value: "elevator", label: "Elevator" },
+  { value: "wide_doorway", label: "Wide doorways" },
+  { value: "grab_rails", label: "Grab rails in the bathroom" },
+  { value: "accessible_parking", label: "Accessible parking" },
+];
+
+const ACCESSIBILITY_NOTICE =
+  "Declared by the host. Dimora has not checked these details.";
+
 const values = (list) => list.map((item) => item.value);
 
 module.exports = {
@@ -83,6 +98,9 @@ module.exports = {
   CANCELLATION_TERMS,
   AMENITIES,
   AMENITY_GROUPS,
+  ACCESSIBILITY_FEATURES,
+  ACCESSIBILITY_NOTICE,
+  ACCESSIBILITY_VALUES: values(ACCESSIBILITY_FEATURES),
   PROPERTY_TYPE_VALUES: values(PROPERTY_TYPES),
   VIBE_VALUES: values(VIBES),
   ROOM_TYPE_VALUES: values(ROOM_TYPES),

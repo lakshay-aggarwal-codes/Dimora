@@ -152,6 +152,7 @@ function parseListingQuery(
     propertyType: pick(raw, ["type", "propertyType"]),
     roomType: pick(raw, ["roomType"]),
     amenities: pick(raw, ["amenities", "amenities[]"]),
+    access: pick(raw, ["access", "access[]"]),
     instantBook: pick(raw, ["instantBook"]),
     category: pick(raw, ["category"]),
   };

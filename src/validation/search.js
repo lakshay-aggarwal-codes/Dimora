@@ -7,6 +7,7 @@ const {
   PROPERTY_TYPE_VALUES,
   ROOM_TYPE_VALUES,
   AMENITY_VALUES,
+  ACCESSIBILITY_VALUES,
 } = require("../config/constants");
 const { CATEGORY_SLUGS } = require("../config/categories");
 
@@ -46,6 +47,7 @@ const searchSchema = Joi.object({
   propertyType: oneOrMany(PROPERTY_TYPE_VALUES, "Property type"),
   roomType: oneOrMany(ROOM_TYPE_VALUES, "Room type"),
   amenities: oneOrMany(AMENITY_VALUES, "Amenities"),
+  access: oneOrMany(ACCESSIBILITY_VALUES, "Accessibility features"),
   instantBook: Joi.boolean().truthy("1", "true", "on").falsy("0", "false", "off", ""),
   // One category from the strip (P05-T04); anything else, including a list or an
   // object, is refused.
@@ -97,6 +99,7 @@ const KNOWN = [
   "propertyType",
   "roomType",
   "amenities",
+  "access",
   "instantBook",
   "category",
   "sort",

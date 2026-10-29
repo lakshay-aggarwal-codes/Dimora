@@ -26,7 +26,12 @@ const {
   PANEL_FIELDS,
 } = require("../utils/filterChips");
 const { getCategory } = require("../config/categories");
-const { PROPERTY_TYPES, ROOM_TYPES, AMENITIES } = require("../config/constants");
+const {
+  PROPERTY_TYPES,
+  ROOM_TYPES,
+  AMENITIES,
+  ACCESSIBILITY_FEATURES,
+} = require("../config/constants");
 
 const PAGE_SIZE = 12;
 
@@ -112,7 +117,7 @@ module.exports.index = async (req, res) => {
       values: pageState,
       typed: parsed.drawer,
       fields: PANEL_FIELDS,
-      lists: { PROPERTY_TYPES, ROOM_TYPES, AMENITIES },
+      lists: { PROPERTY_TYPES, ROOM_TYPES, AMENITIES, ACCESSIBILITY_FEATURES },
     },
     hiddenFields,
     mapQuery: new URLSearchParams(queryPairs(pageState)).toString(),

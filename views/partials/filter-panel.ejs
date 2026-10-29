@@ -17,7 +17,8 @@
     const checkboxGroups = [
         { name: "type", legend: "Property type", items: lists.PROPERTY_TYPES || [] },
         { name: "roomType", legend: "What guests get", items: lists.ROOM_TYPES || [] },
-        { name: "amenities", legend: "Amenities", items: lists.AMENITIES || [] }
+        { name: "amenities", legend: "Amenities", items: lists.AMENITIES || [] },
+        { name: "access", legend: "Accessibility (declared by hosts)", items: lists.ACCESSIBILITY_FEATURES || [] }
     ];
 %>
 <details class="filter-panel" id="filter-panel"<% if (hasPanelError) { %> open<% } %>>
@@ -49,8 +50,9 @@
         <div class="row g-3 mt-1">
             <% checkboxGroups.forEach((group) => { %>
             <div class="col-12 col-md-4">
-                <fieldset class="filter-group">
+                <fieldset class="filter-group"<% if (group.name === "access") { %> aria-describedby="access-note"<% } %>>
                     <legend class="filter-group-legend"><%= group.legend %></legend>
+                    <% if (group.name === "access") { %><p class="small text-body-secondary mb-1" id="access-note">Hosts declare these. Dimora has not checked them.</p><% } %>
                     <% if (errs[group.name]) { %><div class="form-error" id="<%= group.name %>-error"><%= errs[group.name] %></div><% } %>
                     <% group.items.forEach((item) => { %>
                     <div class="form-check">

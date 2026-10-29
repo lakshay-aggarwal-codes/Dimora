@@ -9,6 +9,8 @@ const { getGeocodingClient } = require("../services/geocoding");
 const { deleteImage } = require("../config/cloudinary");
 const { galleryOf, replaceCover } = require("../services/images");
 const { publicPointOf } = require("../utils/geo");
+const { accessibilityLabels } = require("../utils/accessibility");
+const { ACCESSIBILITY_NOTICE } = require("../config/constants");
 const { isPublic } = require("../utils/visibility");
 const { softDeleteListing } = require("../services/lifecycle");
 const { stayRulesFor } = require("../services/bookingRules");
@@ -165,19 +167,6 @@ module.exports.showListings = async (req, res) => {
   // review, services/ratings.js); a listing that has none yet is counted from
   // the reviews it holds.
   const reviewList = newestFirst(listing.reviews);
-  // Which of these reviews the signed-in guest can still edit (P12-T03): their
-  // own, visible, inside the edit window. `edit` decides again on the PUT.
-  const editDays = req.app.locals.reviewEditDays;
-  const editableReviewIds =
-    req.user && !preview
-      ? reviewList
-          .filter(
-            (r) =>
-              can("review:edit", req.user, r) &&
-              reviewService.isEditable(r, new Date(), editDays),
-          )
-          .map((r) => String(r._id))
-      : [];
   const ratingSummary =
     listing.ratingCount > 0
       ? {
@@ -191,10 +180,13 @@ module.exports.showListings = async (req, res) => {
     listing,
     reviewable,
     reviewList,
-    editableReviewIds,
-    editDays,
     ratingSummary,
     gallery: galleryOf(listing),
+    // Host-declared, not verified (P15-T05).
+    accessibility: {
+      labels: accessibilityLabels(listing.accessibility),
+      notice: ACCESSIBILITY_NOTICE,
+    },
     // The public (approximate) point only: the precise one never reaches a page.
     mapPoint: publicPointOf(listing),
     // Stored places around the stay (P15-T02): read from the listing, no network.
