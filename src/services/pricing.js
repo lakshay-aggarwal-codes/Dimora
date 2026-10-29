@@ -12,7 +12,25 @@
 //   nights, subtotalMinor (the nights), cleaningMinor, serviceFeeMinor,
 //   taxMinor, totalMinor, avgPerNightMinor, currency, taxMode, taxIncluded
 //   breakdownVersion for stored snapshots (bump it when the shape changes)
-// Always: totalMinor === the sum of the lines that are not `included`.
+// Always: totalMinor === the sum of the lines that are not `included` (the
+// length discount line is negative).
+//
+// PRICE RULES (P08-T04), in the order they apply. Each shows as its own line.
+//   1. Per night: a seasonal rate whose dates cover the night replaces the base
+//      nightly price (seasons may not overlap; if stored data overlaps anyway,
+//      the one that starts first wins). Lines: `season_nights` /
+//      `season_weekend_nights`, with `label` (the season's name) and a `key`.
+//   2. Weekend nights (config.weekendDays, the night that STARTS Friday or
+//      Saturday): when the listing has a weekend markup (`pricing.weekendBps`),
+//      the night costs the price from step 1 plus that percentage, in a season
+//      too. Without a markup, a legacy absolute `pricing.weekendNightlyMinor`
+//      applies to non-seasonal nights only. Lines: `weekend_nights`.
+//   3. Length discount: a stay of 28+ nights gets the monthly percentage, of 7+
+//      the weekly one; only the larger that applies, never both. It is taken
+//      from the nights (steps 1 and 2) and never from the cleaning fee. Line:
+//      `length_discount` (negative).
+//   4. Cleaning fee, then service fee and tax on (nights - discount + cleaning);
+//      the tax slab uses the average night price after the discount.
 const defaultConfig = require("../config/pricing");
 const {
   percentOf,
@@ -25,7 +43,12 @@ const {
 const { eachNight, parseDateOnly } = require("../utils/dates");
 const { ValidationError, QuoteRefusedError } = require("../utils/errors");
 
+// Additive changes (new line codes, optional fields) keep version 1: an older
+// stored snapshot is still read correctly.
 const BREAKDOWN_VERSION = 1;
+const MAX_DISCOUNT_BPS = 5000; // 50 %
+const DEFAULT_WEEKLY_NIGHTS = 7;
+const DEFAULT_MONTHLY_NIGHTS = 28;
 const TAX_MODES = ["exclusive", "inclusive"];
 
 const NO_PRICE =
@@ -100,7 +123,51 @@ function priceOf(listing, config) {
     weekend: hasWeekend ? weekendValue : nightly,
     cleaning: hasCleaning ? cleaningValue : 0,
     currency,
+    ...rulesOf(listing),
   };
+}
+
+const BAD_RULES = "This listing has invalid price rules, so it cannot be booked yet.";
+
+/** The optional rules (P08-T04); anything unreadable refuses the quote rather than guessing. */
+function rulesOf(listing) {
+  const optionalBps = (path, max) => {
+    const value = read(listing, path);
+    if (value === undefined || value === null) return 0;
+    if (!Number.isInteger(value) || value < 0 || value > max) throw new QuoteRefusedError(BAD_RULES);
+    return value;
+  };
+  const weekendBps = optionalBps("pricing.weekendBps", MAX_BPS);
+  const weeklyBps = optionalBps("pricing.discounts.weeklyBps", MAX_DISCOUNT_BPS);
+  const monthlyBps = optionalBps("pricing.discounts.monthlyBps", MAX_DISCOUNT_BPS);
+
+  const raw = read(listing, "pricing.seasonalRates");
+  const seasons = [];
+  for (const entry of Array.isArray(raw) ? raw : []) {
+    let from;
+    let to;
+    try {
+      from = asDate(entry && entry.from, "Season start");
+      to = asDate(entry && entry.to, "Season end");
+    } catch {
+      throw new QuoteRefusedError(BAD_RULES); // stored data, not user input
+    }
+    const nightly = entry && entry.nightlyMinor;
+    if (
+      !(from instanceof Date) ||
+      !(to instanceof Date) ||
+      Number.isNaN(from.getTime()) ||
+      Number.isNaN(to.getTime()) ||
+      to < from ||
+      !Number.isSafeInteger(nightly) ||
+      nightly < 1
+    ) {
+      throw new QuoteRefusedError(BAD_RULES);
+    }
+    seasons.push({ name: String((entry && entry.name) || "Season"), from, to, nightlyMinor: nightly });
+  }
+  seasons.sort((a, b) => a.from - b.from || a.to - b.to);
+  return { weekendBps, weeklyBps, monthlyBps, seasons };
 }
 
 function asDate(value, label) {
@@ -131,33 +198,67 @@ function quote({ listing, checkIn, checkOut, guests } = {}, { config = defaultCo
   }
   const price = priceOf(listing, config);
 
-  const weekendNights = nights.filter((night) => config.weekendDays.includes(night.getUTCDay())).length;
-  const weekdayNights = nights.length - weekendNights;
+  // Steps 1 and 2: the price of every night, then one line per distinct group.
+  const seasonOf = (night) => price.seasons.findIndex((x) => night >= x.from && night <= x.to);
+  const groups = new Map(); // key -> {season index or -1, weekend, unit, quantity}
+  for (const night of nights) {
+    const index = seasonOf(night);
+    const base = index === -1 ? price.nightly : price.seasons[index].nightlyMinor;
+    const weekend = config.weekendDays.includes(night.getUTCDay());
+    let unit = base;
+    if (weekend) {
+      if (price.weekendBps > 0) unit = base + percentOf(base, price.weekendBps);
+      else if (index === -1) unit = price.weekend;
+    }
+    const key = `${index}:${weekend ? "we" : "wd"}`;
+    const group = groups.get(key) || { index, weekend, unit, quantity: 0 };
+    group.quantity += 1;
+    groups.set(key, group);
+  }
+  // Base lines first (weekdays, weekends), then each season in date order.
+  const ordered = [...groups.values()].sort(
+    (a, b) => a.index - b.index || Number(a.weekend) - Number(b.weekend),
+  );
 
   const lines = [];
-  if (weekdayNights > 0) {
-    lines.push({
-      code: "nights",
-      quantity: weekdayNights,
-      unitMinor: price.nightly,
-      amountMinor: multiplyMinor(price.nightly, weekdayNights),
-    });
-  }
-  if (weekendNights > 0) {
-    lines.push({
-      code: "weekend_nights",
-      quantity: weekendNights,
-      unitMinor: price.weekend,
-      amountMinor: multiplyMinor(price.weekend, weekendNights),
-    });
+  for (const group of ordered) {
+    const line = {
+      code: group.index === -1 ? (group.weekend ? "weekend_nights" : "nights") : group.weekend ? "season_weekend_nights" : "season_nights",
+      quantity: group.quantity,
+      unitMinor: group.unit,
+      amountMinor: multiplyMinor(group.unit, group.quantity),
+    };
+    if (group.index !== -1) {
+      line.key = `season_${group.index + 1}_${group.weekend ? "weekend" : "weekday"}`;
+      line.label = price.seasons[group.index].name;
+    }
+    lines.push(line);
   }
   const subtotalMinor = sumMinor(lines.map((line) => line.amountMinor));
-  const avgPerNightMinor = divideRound(subtotalMinor, nights.length);
+
+  // Step 3: the larger of the length discounts that apply, never both.
+  const weeklyFrom = config.weeklyNights ?? DEFAULT_WEEKLY_NIGHTS;
+  const monthlyFrom = config.monthlyNights ?? DEFAULT_MONTHLY_NIGHTS;
+  const monthly = nights.length >= monthlyFrom ? price.monthlyBps : 0;
+  const weekly = nights.length >= weeklyFrom ? price.weeklyBps : 0;
+  const discountBps = Math.max(monthly, weekly);
+  const discountMinor = discountBps > 0 ? percentOf(subtotalMinor, discountBps) : 0;
+  if (discountMinor > 0) {
+    lines.push({
+      code: "length_discount",
+      kind: monthly >= weekly ? "monthly" : "weekly",
+      rateBps: discountBps,
+      baseMinor: subtotalMinor,
+      amountMinor: -discountMinor,
+    });
+  }
+  const discountedMinor = subtotalMinor - discountMinor;
+  const avgPerNightMinor = divideRound(discountedMinor, nights.length);
 
   const cleaningMinor = price.cleaning;
   if (cleaningMinor > 0) lines.push({ code: "cleaning", amountMinor: cleaningMinor });
 
-  const accommodationMinor = sumMinor([subtotalMinor, cleaningMinor]);
+  const accommodationMinor = sumMinor([discountedMinor, cleaningMinor]);
   const serviceFeeMinor = percentOf(accommodationMinor, config.serviceFeeBps);
   if (serviceFeeMinor > 0) {
     lines.push({
@@ -180,12 +281,16 @@ function quote({ listing, checkIn, checkOut, guests } = {}, { config = defaultCo
     lines.push(line);
   }
 
-  const totalMinor = sumMinor(lines.filter((line) => !line.included).map((line) => line.amountMinor));
+  // The discount line is negative, so it is taken off after adding the others.
+  const totalMinor =
+    sumMinor(lines.filter((line) => !line.included && line.amountMinor >= 0).map((line) => line.amountMinor)) -
+    discountMinor;
 
   return {
     lines,
     nights: nights.length,
     subtotalMinor,
+    ...(discountMinor > 0 ? { discountMinor } : {}),
     cleaningMinor,
     serviceFeeMinor,
     taxMinor,
@@ -198,4 +303,4 @@ function quote({ listing, checkIn, checkOut, guests } = {}, { config = defaultCo
   };
 }
 
-module.exports = { quote, BREAKDOWN_VERSION, assertConfig };
+module.exports = { quote, BREAKDOWN_VERSION, assertConfig, MAX_DISCOUNT_BPS };

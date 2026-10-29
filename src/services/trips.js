@@ -176,6 +176,12 @@ function lineLabel(line, formatMoney, currency) {
       return `${formatMoney(line.unitMinor, currency)} × ${plural(line.quantity, "night", "nights")}`;
     case "weekend_nights":
       return `${formatMoney(line.unitMinor, currency)} × ${plural(line.quantity, "weekend night", "weekend nights")}`;
+    case "season_nights":
+      return `${line.label ? line.label + ": " : ""}${formatMoney(line.unitMinor, currency)} × ${plural(line.quantity, "night", "nights")}`;
+    case "season_weekend_nights":
+      return `${line.label ? line.label + ": " : ""}${formatMoney(line.unitMinor, currency)} × ${plural(line.quantity, "weekend night", "weekend nights")}`;
+    case "length_discount":
+      return `${line.kind === "monthly" ? "Monthly" : "Weekly"} stay discount (${line.rateBps / 100}%)`;
     case "cleaning":
       return "Cleaning fee";
     case "service_fee":
@@ -205,15 +211,6 @@ function describeReview(review) {
     out.rating = review.review.rating;
     out.comment = review.review.comment || "";
     out.legacy = Boolean(review.review.legacy);
-    // Editing (P12-T03) and the host's reply, if there is one.
-    out.id = review.review._id ? String(review.review._id) : "";
-    out.editable = Boolean(review.editable);
-    out.editUntil = review.editUntil ? formatStayDate(review.editUntil) : null;
-    out.edited = Boolean(review.review.editedAt);
-    out.reply =
-      review.review.reply && review.review.reply.text
-        ? String(review.review.reply.text)
-        : "";
   }
   return out;
 }

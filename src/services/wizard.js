@@ -8,6 +8,7 @@
 const { validateStep } = require("../validation/wizard");
 const { galleryOf } = require("./images");
 const { rupeesToMinor, minorToRupees } = require("../utils/listingFields");
+const { seasonFormValues } = require("../utils/priceRules");
 
 const STEPS = Object.freeze([
   { n: 1, key: "basics", title: "The basics" },
@@ -59,10 +60,10 @@ function formValues(listing, n) {
         beds: get(listing, "capacity.beds"),
         bathrooms: get(listing, "capacity.bathrooms"),
         amenities: [...(listing.amenities || [])],
-        accessibility: [...(listing.accessibility || [])],
       };
     case 5: {
-      const nightly = minorToRupees(listing.get("pricing.nightlyMinor"));
+      const nightlyMinor = listing.get("pricing.nightlyMinor");
+      const nightly = minorToRupees(nightlyMinor);
       const cleaning = minorToRupees(listing.get("pricing.cleaningFeeMinor"));
       return {
         price: nightly === null ? "" : nightly,
@@ -77,11 +78,31 @@ function formValues(listing, n) {
         instantBook: Boolean(listing.instantBook),
         houseRules: get(listing, "houseRules"),
         noSpecialRules: Boolean(listing.noSpecialRules),
+        ...priceRuleValues(listing, nightlyMinor),
       };
     }
     default:
       return {};
   }
+}
+
+/** The price-rule form values (P08-T04). An older absolute weekend price shows as its percentage. */
+function priceRuleValues(listing, nightlyMinor) {
+  const bps = listing.get("pricing.weekendBps");
+  const absolute = listing.get("pricing.weekendNightlyMinor");
+  let weekendPercent = 0;
+  if (Number.isInteger(bps)) weekendPercent = Math.round(bps / 100);
+  else if (Number.isInteger(absolute) && Number.isInteger(nightlyMinor) && nightlyMinor > 0 && absolute > nightlyMinor) {
+    weekendPercent = Math.min(100, Math.round(((absolute - nightlyMinor) / nightlyMinor) * 100));
+  }
+  const weekly = listing.get("pricing.discounts.weeklyBps");
+  const monthly = listing.get("pricing.discounts.monthlyBps");
+  return {
+    weekendPercent,
+    weeklyDiscountPercent: Number.isInteger(weekly) ? Math.round(weekly / 100) : 0,
+    monthlyDiscountPercent: Number.isInteger(monthly) ? Math.round(monthly / 100) : 0,
+    ...seasonFormValues(listing.get("pricing.seasonalRates")),
+  };
 }
 
 const hasPoint = (listing) => {
@@ -173,7 +194,6 @@ function applyStep(listing, n, value, { geometry } = {}) {
         "capacity.beds": value.beds,
         "capacity.bathrooms": value.bathrooms,
         amenities: value.amenities,
-        accessibility: value.accessibility,
       });
       break;
     case 5:
@@ -181,6 +201,13 @@ function applyStep(listing, n, value, { geometry } = {}) {
         "pricing.nightlyMinor": rupeesToMinor(value.price),
         "pricing.cleaningFeeMinor": rupeesToMinor(value.cleaningFee) ?? 0,
         "pricing.currency": "INR",
+        // Price rules (P08-T04). An older absolute weekend price is replaced by
+        // the percentage the form showed for it.
+        "pricing.weekendBps": value.weekendPercent > 0 ? value.weekendPercent * 100 : undefined,
+        "pricing.weekendNightlyMinor": undefined,
+        "pricing.discounts.weeklyBps": value.weeklyDiscountPercent > 0 ? value.weeklyDiscountPercent * 100 : undefined,
+        "pricing.discounts.monthlyBps": value.monthlyDiscountPercent > 0 ? value.monthlyDiscountPercent * 100 : undefined,
+        "pricing.seasonalRates": value.seasons && value.seasons.length > 0 ? value.seasons : undefined,
         minNights: value.minNights,
         maxNights: value.maxNights,
         advanceNoticeHours: value.advanceNoticeHours,

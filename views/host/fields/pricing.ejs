@@ -6,6 +6,25 @@
         <div class="col-12 col-md-6"><%- include("../../partials/form-field.ejs", { id: "price", type: "number", label: "Price per night (₹)", value: values.price, error: errors.price, required: true, hint: "At least ₹100.", attrs: { min: 100, max: 1000000, step: "any" } }) %></div>
         <div class="col-12 col-md-6"><%- include("../../partials/form-field.ejs", { id: "cleaningFee", type: "number", label: "Cleaning fee (₹)", value: values.cleaningFee, error: errors.cleaningFee, hint: "Charged once per stay. Leave 0 for none.", attrs: { min: 0, max: 1000000, step: "any" } }) %></div>
     </div>
+    <fieldset class="price-rules mb-3">
+        <legend class="h6">Price rules <span class="text-body-secondary fw-normal">(optional)</span></legend>
+        <p class="form-text">Each rule shows as its own line in the guest's price. They apply in this order: a season's price replaces the nightly price for its dates; weekend nights (Friday and Saturday) then cost the percentage more; a long-stay discount is taken from the nights, never from the cleaning fee; the service fee and taxes are worked out last.</p>
+        <div class="row">
+            <div class="col-12 col-md-4"><%- include("../../partials/form-field.ejs", { id: "weekendPercent", type: "number", label: "Weekend increase (%)", value: values.weekendPercent, error: errors.weekendPercent, hint: "Added to Friday and Saturday nights. 0 for none.", attrs: { min: 0, max: 100, step: 1 } }) %></div>
+            <div class="col-6 col-md-4"><%- include("../../partials/form-field.ejs", { id: "weeklyDiscountPercent", type: "number", label: "Discount for 7+ nights (%)", value: values.weeklyDiscountPercent, error: errors.weeklyDiscountPercent, hint: "Up to 50. 0 for none.", attrs: { min: 0, max: 50, step: 1 } }) %></div>
+            <div class="col-6 col-md-4"><%- include("../../partials/form-field.ejs", { id: "monthlyDiscountPercent", type: "number", label: "Discount for 28+ nights (%)", value: values.monthlyDiscountPercent, error: errors.monthlyDiscountPercent, hint: "Up to 50. Replaces the weekly one for 28+ nights.", attrs: { min: 0, max: 50, step: 1 } }) %></div>
+        </div>
+        <h3 class="h6 mt-2">Seasonal prices</h3>
+        <p class="form-text">A different nightly price for a range of dates, both days included. Up to 5 seasons; they cannot overlap. Leave a row empty to skip it.</p>
+        <% for (let n = 1; n <= 5; n += 1) { %>
+        <div class="row">
+            <div class="col-12 col-md-3"><%- include("../../partials/form-field.ejs", { id: "season" + n + "Name", label: "Season " + n + " name", value: values["season" + n + "Name"], error: errors["season" + n + "Name"], placeholder: "Winter holidays", attrs: { maxlength: 40 } }) %></div>
+            <div class="col-6 col-md-3"><%- include("../../partials/form-field.ejs", { id: "season" + n + "From", type: "date", label: "From", value: values["season" + n + "From"], error: errors["season" + n + "From"] }) %></div>
+            <div class="col-6 col-md-3"><%- include("../../partials/form-field.ejs", { id: "season" + n + "To", type: "date", label: "To (included)", value: values["season" + n + "To"], error: errors["season" + n + "To"] }) %></div>
+            <div class="col-12 col-md-3"><%- include("../../partials/form-field.ejs", { id: "season" + n + "Price", type: "number", label: "Price per night (₹)", value: values["season" + n + "Price"], error: errors["season" + n + "Price"], attrs: { min: 100, max: 1000000, step: "any" } }) %></div>
+        </div>
+        <% } %>
+    </fieldset>
     <div class="row">
         <div class="col-6 col-md-3"><%- include("../../partials/form-field.ejs", { id: "minNights", type: "number", label: "Minimum nights", value: values.minNights, error: errors.minNights, required: true, attrs: { min: 1, max: 365, step: 1 } }) %></div>
         <div class="col-6 col-md-3"><%- include("../../partials/form-field.ejs", { id: "maxNights", type: "number", label: "Maximum nights", value: values.maxNights, error: errors.maxNights, required: true, attrs: { min: 1, max: 365, step: 1 } }) %></div>

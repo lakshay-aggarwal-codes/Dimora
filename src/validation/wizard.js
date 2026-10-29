@@ -9,8 +9,9 @@ const {
   VIBE_VALUES,
   CANCELLATION_POLICY_VALUES,
   AMENITY_VALUES,
-  ACCESSIBILITY_VALUES,
 } = require("../config/constants");
+
+const { parseSeasons, SEASON_FIELD_NAMES } = require("../utils/priceRules");
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -144,17 +145,6 @@ const details = Joi.object({
       "array.includes": "Choose amenities from the list.",
       "array.unique": "Each amenity can be chosen once.",
     }),
-  accessibility: Joi.array()
-    .single()
-    .items(Joi.string().valid(...ACCESSIBILITY_VALUES))
-    .unique()
-    .default([])
-    .label("Accessibility features")
-    .messages({
-      "any.only": "Choose accessibility features from the list.",
-      "array.includes": "Choose accessibility features from the list.",
-      "array.unique": "Each accessibility feature can be chosen once.",
-    }),
 });
 
 const pricing = Joi.object({
@@ -176,6 +166,14 @@ const pricing = Joi.object({
     .truthy("on", "1", "true")
     .falsy("off", "0", "false", "")
     .default(false),
+  // Price rules (P08-T04), all optional: blank means none.
+  weekendPercent: optionalWhole("Weekend increase", 0, 100, 0),
+  weeklyDiscountPercent: optionalWhole("Weekly discount", 0, 50, 0),
+  monthlyDiscountPercent: optionalWhole("Monthly discount", 0, 50, 0),
+  // Season rows are checked together by parseSeasons (validateStep), not here.
+  ...Object.fromEntries(
+    SEASON_FIELD_NAMES.map((name) => [name, Joi.string().trim().allow("").max(60).default("")]),
+  ),
 })
   .custom((value, helpers) => {
     if (value.minNights > value.maxNights) {
@@ -202,8 +200,19 @@ function validateStep(step, body) {
     abortEarly: false,
     errors: { wrap: { label: false } },
   });
-  if (!error) return { value, errors: {} };
-  const errors = {};
+  // Seasonal prices (step 5) are several boxes that must agree with each other.
+  const seasonResult = step === 5 ? parseSeasons(body ?? {}) : { seasons: [], errors: {} };
+  if (!error) {
+    if (Object.keys(seasonResult.errors).length > 0) {
+      return { value: undefined, errors: seasonResult.errors };
+    }
+    if (step === 5) {
+      for (const name of SEASON_FIELD_NAMES) delete value[name];
+      value.seasons = seasonResult.seasons;
+    }
+    return { value, errors: {} };
+  }
+  const errors = { ...seasonResult.errors };
   for (const detail of error.details) {
     // A rule about several fields has an empty path: show it by the first one.
     const field =

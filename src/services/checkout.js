@@ -30,6 +30,12 @@ function lineLabel(line, currency) {
       return `${formatMoney(line.unitMinor, currency)} × ${plural(line.quantity, "night", "nights")}`;
     case "weekend_nights":
       return `${formatMoney(line.unitMinor, currency)} × ${plural(line.quantity, "weekend night", "weekend nights")}`;
+    case "season_nights":
+      return `${line.label ? line.label + ": " : ""}${formatMoney(line.unitMinor, currency)} × ${plural(line.quantity, "night", "nights")}`;
+    case "season_weekend_nights":
+      return `${line.label ? line.label + ": " : ""}${formatMoney(line.unitMinor, currency)} × ${plural(line.quantity, "weekend night", "weekend nights")}`;
+    case "length_discount":
+      return `${line.kind === "monthly" ? "Monthly" : "Weekly"} stay discount (${line.rateBps / 100}%)`;
     case "cleaning":
       return "Cleaning fee";
     case "service_fee":
@@ -44,11 +50,11 @@ function lineLabel(line, currency) {
 // The lines of the quote the guest saw, carried in a hidden field only so the
 // page can highlight what changed. Strict format "code:amount;code:amount";
 // anything else is ignored. It is display only and never used for a price.
-const PREVIOUS_LINE = /^[a-z_]{1,30}:\d{1,15}$/;
+const PREVIOUS_LINE = /^[a-z0-9_]{1,40}:-?\d{1,15}$/;
 
 function encodeLines(quote) {
   return quote.lines
-    .map((line) => `${line.code}:${line.amountMinor}`)
+    .map((line) => `${line.key || line.code}:${line.amountMinor}`)
     .join(";");
 }
 
@@ -97,7 +103,7 @@ function buildCheckoutView(
     included: Boolean(line.included),
     // A line is highlighted when it is new or its amount differs from what was shown.
     changed:
-      changed && before.size > 0 && before.get(line.code) !== line.amountMinor,
+      changed && before.size > 0 && before.get(line.key || line.code) !== line.amountMinor,
   }));
   const policyValue = listing.cancellationPolicy;
   const policy = CANCELLATION_POLICIES.find((p) => p.value === policyValue);

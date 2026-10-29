@@ -36,6 +36,12 @@
         return formatMoney(line.unitMinor, currency) + " × " + plural(line.quantity, "night", "nights");
       case "weekend_nights":
         return formatMoney(line.unitMinor, currency) + " × " + plural(line.quantity, "weekend night", "weekend nights");
+      case "season_nights":
+        return (line.label ? line.label + ": " : "") + formatMoney(line.unitMinor, currency) + " × " + plural(line.quantity, "night", "nights");
+      case "season_weekend_nights":
+        return (line.label ? line.label + ": " : "") + formatMoney(line.unitMinor, currency) + " × " + plural(line.quantity, "weekend night", "weekend nights");
+      case "length_discount":
+        return (line.kind === "monthly" ? "Monthly" : "Weekly") + " stay discount (" + line.rateBps / 100 + "%)";
       case "cleaning":
         return "Cleaning fee";
       case "service_fee":

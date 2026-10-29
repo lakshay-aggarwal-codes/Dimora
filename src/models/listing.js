@@ -196,8 +196,6 @@ const listingSchema = new Schema(
     },
 
     amenities: { type: [{ type: String, trim: true, maxlength: 60 }] },
-    // Declared by the host, never verified (P15-T05); keys from ACCESSIBILITY_FEATURES.
-    accessibility: { type: [{ type: String, trim: true, maxlength: 40 }] },
     houseRules: { type: String, trim: true, maxlength: 2000 },
     // The host explicitly says there are no special rules (a readiness item).
     noSpecialRules: { type: Boolean, default: false },
@@ -238,6 +236,50 @@ const listingSchema = new Schema(
       nightlyMinor: minorAmount(MIN_NIGHTLY_MINOR, "pricing.nightlyMinor"),
       weekendNightlyMinor: minorAmount(MIN_NIGHTLY_MINOR, "pricing.weekendNightlyMinor"),
       cleaningFeeMinor: { ...minorAmount(0, "pricing.cleaningFeeMinor"), default: 0 },
+      // Price rules (P08-T04), applied in the order documented in
+      // src/services/pricing.js. Weekend markup: percent added to a weekend
+      // night's price, in basis points (2000 = 20 %).
+      weekendBps: {
+        type: Number,
+        validate: { validator: (v) => v === undefined || v === null || (Number.isInteger(v) && v >= 0 && v <= 10000), message: "Weekend markup must be a whole number of basis points from 0 to 10000." },
+      },
+      // At most 5 seasons, which may not overlap; `from` and `to` are date-only
+      // (UTC midnight) and both inclusive.
+      seasonalRates: {
+        type: [
+          new Schema(
+            {
+              name: { type: String, required: true, trim: true, maxlength: 40 },
+              from: { type: Date, required: true },
+              to: { type: Date, required: true },
+              nightlyMinor: minorAmount(MIN_NIGHTLY_MINOR, "pricing.seasonalRates.nightlyMinor"),
+            },
+            { _id: false },
+          ),
+        ],
+        validate: [
+          { validator: (v) => !v || v.length <= 5, message: "A listing can have at most 5 seasonal prices." },
+          {
+            validator: (v) => !v || v.every((x) => x.from <= x.to),
+            message: "A season cannot end before it starts.",
+          },
+          {
+            validator: (v) => {
+              const sorted = [...(v || [])].sort((a, b) => a.from - b.from);
+              return sorted.every((x, i) => i === 0 || x.from > sorted[i - 1].to);
+            },
+            message: "Seasonal prices cannot overlap.",
+          },
+        ],
+        default: undefined,
+      },
+      // Whole-percent discounts for long stays, in basis points (1000 = 10 %),
+      // at most 50 %. A stay of 28+ nights gets the monthly one, 7+ the weekly
+      // one; the larger applies, never both.
+      discounts: {
+        weeklyBps: { type: Number, min: 0, max: 5000, validate: integer },
+        monthlyBps: { type: Number, min: 0, max: 5000, validate: integer },
+      },
       currency: {
         type: String,
         default: "INR",

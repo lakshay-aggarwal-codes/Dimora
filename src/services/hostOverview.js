@@ -27,8 +27,12 @@ const {
 const RECEIVABLE_CODES = Object.freeze([
   "nights",
   "weekend_nights",
+  "season_nights",
+  "season_weekend_nights",
   "cleaning",
 ]);
+// A negative line the host gives up (P08-T04): taken off what they receive.
+const DISCOUNT_CODE = "length_discount";
 const WEEK_DAYS = 7;
 const OCCUPANCY_DAYS = 30;
 const LIST_LIMIT = 5;
@@ -42,7 +46,7 @@ function hostReceivableMinor(pricingSnapshot) {
     pricingSnapshot && Array.isArray(pricingSnapshot.lines)
       ? pricingSnapshot.lines
       : [];
-  return lines
+  const gross = lines
     .filter(
       (l) =>
         l &&
@@ -51,6 +55,10 @@ function hostReceivableMinor(pricingSnapshot) {
         l.amountMinor > 0,
     )
     .reduce((total, l) => total + l.amountMinor, 0);
+  const discount = lines
+    .filter((l) => l && l.code === DISCOUNT_CODE && Number.isSafeInteger(l.amountMinor) && l.amountMinor < 0)
+    .reduce((total, l) => total - l.amountMinor, 0);
+  return Math.max(0, gross - discount);
 }
 
 /** A whole percent, or null when there is nothing to divide by. */
