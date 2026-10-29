@@ -8,3 +8,6 @@ Dimora_Full_Datasets.zip
 # Playwright (P17-T03)
 playwright-report/
 test-results/
+
+test-summary.txt
+lint-summary.txt
