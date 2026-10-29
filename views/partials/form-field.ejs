@@ -29,7 +29,7 @@
     const feedbackId = `${id}-feedback`;
     const errorId = `${id}-error`;
     const describedBy = [hintText ? hintId : "", feedbackText ? feedbackId : "", errorText ? errorId : ""].filter(Boolean).join(" ");
-    const ALLOWED_ATTRS = ["minlength", "maxlength", "min", "max", "step", "pattern", "inputmode", "rows", "accept", "multiple"];
+    const ALLOWED_ATTRS = ["minlength", "maxlength", "min", "max", "step", "pattern", "inputmode", "rows", "accept", "multiple", "data-destination-autocomplete"];
     const extra = Object.entries(typeof attrs === "object" && attrs ? attrs : {})
         .filter(([key, v]) => ALLOWED_ATTRS.includes(key) && v !== undefined && v !== null && v !== false);
     const controlClass = (fieldType === "select" ? "form-select" : "form-control") + (errorText ? " is-invalid" : "");

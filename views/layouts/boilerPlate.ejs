@@ -7,21 +7,6 @@
     <meta name="csrf-token" content="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
     <title><%= fullTitle(typeof pageTitle !== 'undefined' ? pageTitle : '') %></title>
     <meta name="description" content="<%= metaDescription(typeof pageDescription !== 'undefined' ? pageDescription : '') %>">
-    <%
-        const seoCanonical = typeof seoUrl === 'function' ? seoUrl() : '';
-        const seoRobotsValue = typeof seoRobots === 'function' ? seoRobots() : '';
-        const seoImage = typeof pageImage === 'string' && /^https:\/\//.test(pageImage) ? pageImage : '';
-    %>
-    <% if (seoRobotsValue) { %><meta name="robots" content="<%= seoRobotsValue %>">
-    <% } %><% if (seoCanonical) { %><link rel="canonical" href="<%= seoCanonical %>">
-    <meta property="og:site_name" content="Dimora">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="<%= fullTitle(typeof pageTitle !== 'undefined' ? pageTitle : '') %>">
-    <meta property="og:description" content="<%= metaDescription(typeof pageDescription !== 'undefined' ? pageDescription : '') %>">
-    <meta property="og:url" content="<%= seoCanonical %>">
-    <% if (seoImage) { %><meta property="og:image" content="<%= seoImage %>">
-    <% } %><meta name="twitter:card" content="<%= seoImage ? 'summary_large_image' : 'summary' %>">
-    <% } %>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css"
@@ -58,6 +43,7 @@
 
             <script src="/js/script.js"></script>
             <script src="/js/save-button.js"></script>
+            <script src="/js/destination-autocomplete.js"></script>
 </body>
 
 </html>

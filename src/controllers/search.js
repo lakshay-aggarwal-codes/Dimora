@@ -17,6 +17,7 @@ const { ValidationError } = require("../utils/errors");
 const { queryPairs, listingsUrl, hiddenFields } = require("../utils/searchUrl");
 const { sortSpec } = require("../services/search");
 const { suggestForEmptyResults } = require("../services/suggestions");
+const { suggestDestinations } = require("../services/destinations");
 const { formatDateOnly, todayIn, DEFAULT_TIMEZONE } = require("../utils/dates");
 const {
   activeChips,
@@ -27,7 +28,6 @@ const {
 } = require("../utils/filterChips");
 const { getCategory } = require("../config/categories");
 const { PROPERTY_TYPES, ROOM_TYPES, AMENITIES } = require("../config/constants");
-const { RADII_KM } = require("../services/area");
 
 const PAGE_SIZE = 12;
 
@@ -113,7 +113,7 @@ module.exports.index = async (req, res) => {
       values: pageState,
       typed: parsed.drawer,
       fields: PANEL_FIELDS,
-      lists: { PROPERTY_TYPES, ROOM_TYPES, AMENITIES, RADII_KM },
+      lists: { PROPERTY_TYPES, ROOM_TYPES, AMENITIES },
     },
     hiddenFields,
     mapQuery: new URLSearchParams(queryPairs(pageState)).toString(),
@@ -141,6 +141,15 @@ module.exports.index = async (req, res) => {
 // `bbox` it covers every place. `meta` says how many matched and whether the
 // list was cut. Wrong filter values are ignored as on the page; a wrong bbox is
 // a 400.
+// Suggestions for the destination boxes (P05-T06). `q` is whatever was typed; a
+// missing, repeated or too short `q` is an empty list, not an error.
+module.exports.destinations = async (req, res) => {
+  const q = typeof req.query.q === "string" ? req.query.q : "";
+  const suggestions = await suggestDestinations({ Listing, q });
+  res.set("Cache-Control", "private, max-age=30");
+  res.json({ suggestions });
+};
+
 module.exports.mapData = async (req, res) => {
   let boxes = null;
   if (req.query.bbox !== undefined) {

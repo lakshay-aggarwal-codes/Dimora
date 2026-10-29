@@ -93,6 +93,14 @@ function tooManyEmails(req, res, next) {
   );
 }
 
+function tooManySuggestions(req, res, next) {
+  next(
+    new AppError(429, "Too many suggestion requests. Please wait a moment.", {
+      code: "rate_limited",
+    }),
+  );
+}
+
 function tooManyQuotes(req, res, next) {
   next(
     new AppError(429, "Too many price checks. Please wait a minute and try again.", {
@@ -150,6 +158,9 @@ function createAuthLimiters() {
     // Password-reset and "send the confirmation link again" (P02-T05): 10 an
     // hour per IP, on top of the per-account limits in services/emailTokens.js.
     emailLink: rateLimit({ ...common, handler: tooManyEmails, windowMs: 60 * 60 * 1000, limit: 10 }),
+    // Destination suggestions (P05-T06): a few per second while typing, and
+    // the script waits 250 ms between keystrokes.
+    destinations: rateLimit({ ...common, handler: tooManySuggestions, windowMs: 60 * 1000, limit: 120 }),
     // Price checks (P08-T02): a guest picking dates makes a few per minute.
     quote: rateLimit({ ...common, handler: tooManyQuotes, windowMs: 60 * 1000, limit: 60 }),
     // Messages and "Contact host" (P11-T02): 20 a minute per signed-in member.

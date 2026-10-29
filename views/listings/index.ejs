@@ -29,7 +29,7 @@
     <form method="GET" action="/listings" class="search-panel" role="search" aria-label="Search stays" novalidate>
         <div class="row g-3">
             <div class="col-12 col-md-4">
-                <%- include("../partials/form-field.ejs", { id: "dest", name: "dest", label: "Where to?", type: "search", value: f.dest, error: errs.dest, placeholder: "City, state or country", attrs: { maxlength: 100 } }) %>
+                <%- include("../partials/form-field.ejs", { id: "dest", name: "dest", label: "Where to?", type: "search", value: f.dest, error: errs.dest, placeholder: "City, state or country", attrs: { maxlength: 100, "data-destination-autocomplete": true } }) %>
             </div>
             <div class="col-12 col-sm-6 col-md-2">
                 <%- include("../partials/form-field.ejs", { id: "in", name: "in", label: "Check-in", type: "date", value: f.in, error: errs.in, attrs: { min: todayText } }) %>
@@ -140,20 +140,6 @@
         <% if (resultCount === 0) { %>No stays found<% } else if (range) { %>Showing <%- range.from %>&ndash;<%- range.to %> of <%= resultCount %> stays<%- destText %><% } else { %><%= resultCount %> <%= stayWord %><%- destText %><% } %>
         <% if (isFiltered) { %><a class="results-clear" href="/listings">Clear search</a><% } %>
     </p>
-
-    <% if (isFiltered && typeof currUser !== "undefined" && currUser) { %>
-    <details class="save-search mb-2" data-save-search>
-        <summary class="btn btn-outline-dark btn-sm">Save this search</summary>
-        <form action="/saved-searches" method="POST" class="d-flex flex-wrap gap-2 mt-2">
-            <%- include("../includes/csrf.ejs") %>
-            <% hidden(filterState, []).forEach(([name, value]) => { %><input type="hidden" name="<%= name %>" value="<%= value %>">
-            <% }) %>
-            <label class="visually-hidden" for="save-search-name">Name for this search</label>
-            <input class="form-control form-control-sm w-auto" id="save-search-name" name="name" maxlength="60" required placeholder="e.g. Goa in December">
-            <button type="submit" class="btn btn-dark btn-sm">Save</button>
-        </form>
-    </details>
-    <% } %>
 
     <% if (resultCount > 0 && !isOut && sortItems.length > 0) { %>
     <nav class="sort-bar" aria-label="Sort results">

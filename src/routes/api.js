@@ -15,6 +15,9 @@ router.get(
 
 router.get("/listings/:id/quote", wrapAsync(quoteController.show));
 
+// Destination suggestions for the search boxes (P05-T06); public data only.
+router.get("/destinations", wrapAsync(searchController.destinations));
+
 // GeoJSON of the stays on the search map (P06-T04); public data only.
 router.get("/search/map", wrapAsync(searchController.mapData));
 
