@@ -35,6 +35,7 @@
             <a class="btn btn-outline-dark" href="/listings/<%= listing._id %>?preview=1">Preview as a guest</a>
             <% if (listing.status === "published" || listing.status === "unpublished") { %>
             <a class="btn btn-outline-dark" href="/host/listings/<%= listing._id %>/calendar">Availability calendar</a>
+            <a class="btn btn-outline-dark" href="/host/listings/<%= listing._id %>/stats">Views and saves</a>
             <% } %>
 
             <% if (suspended) { %>

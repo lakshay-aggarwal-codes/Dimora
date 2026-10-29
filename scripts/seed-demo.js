@@ -5,7 +5,7 @@
 //   npm run seed:demo                     create or refresh (safe to run again)
 //   npm run seed:demo -- --reset          delete the demo host's places and everything
 //                                         attached to them (bookings, night ledger, reviews,
-//                                         saves, conversations), then create it all again
+//                                         saves, view statistics, conversations), then create it all again
 //   npm run seed:demo -- --rotate-passwords   give the existing demo accounts new passwords
 //   npm run seed:demo -- --yes            needed when MONGODB_URI is not on this computer
 //
@@ -33,6 +33,7 @@ const StayNight = require("../src/models/stayNight.js");
 const AvailabilityBlock = require("../src/models/availabilityBlock.js");
 const WishlistItem = require("../src/models/wishlistItem.js");
 const ListingStat = require("../src/models/listingStat.js");
+const ListingDayStat = require("../src/models/listingDayStat.js");
 const Conversation = require("../src/models/conversation.js");
 const Message = require("../src/models/message.js");
 const { SeedError, assertSeedAllowed, resolveMongoUri } = require("./seed.js");
@@ -118,6 +119,7 @@ async function resetDemoData(host) {
   await Review.deleteMany({ $or: [{ listing: { $in: ids } }, { _id: { $in: reviewIds } }] });
   await WishlistItem.deleteMany({ listing: { $in: ids } });
   await ListingStat.deleteMany({ listing: { $in: ids } });
+  await ListingDayStat.deleteMany({ listing: { $in: ids } });
   const removed = (await Listing.deleteMany({ owner: host._id })).deletedCount;
   await User.updateOne({ _id: host._id }, { $set: { hostCancellationCount: 0 } });
   return { removed };

@@ -1,0 +1,84 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    Listing statistics (P13-T03). Locals: listing, stats (services/listingStats
+    getStats: days, from, to, series [{day, views, saves, checkoutStarts}],
+    total, reservations, conversion|null, minViewsForConversion, savedNow).
+    The chart is a drawing of the table below it; the table is the accessible
+    version. Everything is printed escaped.
+%>
+<%
+    const W = 600, H = 80, PAD = 4;
+    const series = stats.series;
+    const max = Math.max(1, ...series.map((p) => p.views));
+    const step = series.length > 1 ? (W - 2 * PAD) / (series.length - 1) : 0;
+    const points = series
+        .map((p, i) => (PAD + i * step).toFixed(1) + "," + (H - PAD - (p.views / max) * (H - 2 * PAD)).toFixed(1))
+        .join(" ");
+    const peak = series.reduce((a, b) => (b.views > a.views ? b : a), series[0]);
+    const n = (v) => Number(v).toLocaleString("en-US");
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-10 mx-auto">
+        <p class="mb-1"><a href="/host/listings/<%= listing._id %>/status">&larr; <%= listing.title %></a></p>
+        <h1 class="h3">Views and saves</h1>
+        <p class="text-muted">The last <%= stats.days %> days, <%= stats.from %> to <%= stats.to %>. These numbers are approximate: a visit counts once per browser session per day, known bots and your own visits are left out, and the bot check is a rough guess.</p>
+
+        <section aria-labelledby="stat-totals">
+            <h2 class="h5 visually-hidden" id="stat-totals">Totals</h2>
+            <div class="row g-3 mb-3">
+                <div class="col-6 col-md-3"><div class="card h-100"><div class="card-body">
+                    <p class="h3 mb-0"><%= n(stats.total.views) %></p><p class="mb-0 small">Views</p>
+                </div></div></div>
+                <div class="col-6 col-md-3"><div class="card h-100"><div class="card-body">
+                    <p class="h3 mb-0"><%= n(stats.total.saves) %></p><p class="mb-0 small">Times saved</p>
+                    <p class="mb-0 small text-muted"><%= n(stats.savedNow) %> saved right now</p>
+                </div></div></div>
+                <div class="col-6 col-md-3"><div class="card h-100"><div class="card-body">
+                    <p class="h3 mb-0"><%= n(stats.total.checkoutStarts) %></p><p class="mb-0 small">Checkouts started</p>
+                </div></div></div>
+                <div class="col-6 col-md-3"><div class="card h-100"><div class="card-body">
+                    <p class="h3 mb-0"><%= n(stats.reservations) %></p><p class="mb-0 small">Bookings and requests</p>
+                    <p class="mb-0 small"><a href="/host/reservations">Open the inbox</a></p>
+                </div></div></div>
+            </div>
+            <p>
+                <% if (stats.conversion !== null) { %>
+                    <strong>Views that became a booking or request: <%= stats.conversion %>%</strong>
+                    <span class="text-muted small">(<%= n(stats.reservations) %> of <%= n(stats.total.views) %> views)</span>
+                <% } else { %>
+                    <span class="text-muted">The share of views that became a booking is shown once there are at least <%= stats.minViewsForConversion %> views in these days. Below that it says very little.</span>
+                <% } %>
+            </p>
+        </section>
+
+        <section aria-labelledby="stat-chart" class="mb-3">
+            <h2 class="h5" id="stat-chart">Views per day</h2>
+            <% if (stats.total.views === 0) { %>
+            <p class="text-muted">No views counted yet in these days.</p>
+            <% } else { %>
+            <svg class="stat-spark" viewBox="0 0 <%= W %> <%= H %>" width="100%" height="<%= H %>" role="img"
+                 aria-label="Views per day, <%= stats.from %> to <%= stats.to %>. Total <%= stats.total.views %>. Busiest day <%= peak.day %> with <%= peak.views %>. The table below has every day.">
+                <line x1="<%= PAD %>" y1="<%= H - PAD %>" x2="<%= W - PAD %>" y2="<%= H - PAD %>" stroke="currentColor" stroke-opacity="0.25" />
+                <polyline points="<%= points %>" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+            </svg>
+            <p class="small text-muted mb-0">Busiest day: <%= peak.day %>, <%= n(peak.views) %> <%= peak.views === 1 ? "view" : "views" %>.</p>
+            <% } %>
+        </section>
+
+        <details>
+            <summary>Day by day</summary>
+            <div class="table-responsive mt-2">
+                <table class="table table-sm">
+                    <caption class="visually-hidden">Views, saves and checkouts started for each of the last <%= stats.days %> days</caption>
+                    <thead><tr><th scope="col">Day</th><th scope="col" class="text-end">Views</th><th scope="col" class="text-end">Saved</th><th scope="col" class="text-end">Checkouts started</th></tr></thead>
+                    <tbody>
+                        <% series.slice().reverse().forEach((p) => { %>
+                        <tr><th scope="row" class="fw-normal"><%= p.day %></th><td class="text-end"><%= p.views %></td><td class="text-end"><%= p.saves %></td><td class="text-end"><%= p.checkoutStarts %></td></tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+        <p class="small text-muted mt-3">Days are counted in India time. "Times saved" counts new saves; someone removing a stay does not take it off a day's count, but the "saved right now" figure does go down.</p>
+    </div>
+</div>

@@ -66,6 +66,13 @@ function fakes({ listings = [] } = {}) {
         stat.set(String(f.listing), (stat.get(String(f.listing)) || 0) + update.$inc.saves);
       },
     },
+    // P13-T03: the real ones write to the database; the clamp is tested with the stats service.
+    stats: {
+      recordSave: async () => {},
+      clampSaves: async (id) => {
+        if ((stat.get(String(id)) || 0) < 0) stat.set(String(id), 0);
+      },
+    },
   };
   return { deps, items, lists, stat };
 }

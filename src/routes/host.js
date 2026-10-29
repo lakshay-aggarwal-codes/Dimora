@@ -7,6 +7,7 @@ const controller = require("../controllers/host");
 const availability = require("../controllers/availability");
 const reservations = require("../controllers/hostReservations");
 const hostCalendar = require("../controllers/hostCalendar");
+const hostStats = require("../controllers/hostStats");
 
 const router = express.Router();
 const mayCreate = [isLoggedIn, authorize("listing:create")];
@@ -54,6 +55,9 @@ router.post(
   ...mayEdit,
   wrapAsync(availability.unblock),
 );
+
+// Views, saves and checkout starts of one listing (P13-T03): only its host.
+router.get("/listings/:id/stats", ...mayEdit, wrapAsync(hostStats.show));
 
 // All listings in one month (P13-T02): any signed-in host; it only reads
 // that host's own listings.

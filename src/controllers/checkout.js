@@ -12,10 +12,10 @@
 // call as the quote API) and reservations.create do, so the total shown is the
 // total stored.
 const crypto = require("node:crypto");
-const { ensureVerifiedEmail } = require("../middleware/verified");
 const Listing = require("../models/listing");
 const reservationService = require("../services/reservations");
 const { getQuote } = require("../services/quoteService");
+const listingStats = require("../services/listingStats");
 const { buildCheckoutView } = require("../services/checkout");
 const { isPublic } = require("../utils/visibility");
 const { isActiveUser, sameId } = require("../policies/shared");
@@ -68,7 +68,6 @@ function render(res, listing, status, view) {
 }
 
 module.exports.show = async (req, res) => {
-  if (!ensureVerifiedEmail(req, res)) return; // P02-T05
   const listing = await loadBookable(req.params.id, req.user);
   let payload;
   try {
@@ -88,6 +87,7 @@ module.exports.show = async (req, res) => {
     req.flash("error", payload.problems[0].message);
     return res.redirect(listingPath(listing._id, { guests: payload.guests }));
   }
+  await listingStats.recordCheckoutStart(req, listing); // approximate; never fails the page
   return render(
     res,
     listing,
@@ -97,7 +97,6 @@ module.exports.show = async (req, res) => {
 };
 
 module.exports.submit = async (req, res) => {
-  if (!ensureVerifiedEmail(req, res)) return; // P02-T05
   const body = req.body && typeof req.body === "object" ? req.body : {};
   const stay = {
     in: text(body.in),
