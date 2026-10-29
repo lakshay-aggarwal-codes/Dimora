@@ -22,3 +22,7 @@ Payments are **simulated**. Checkout records an intent and an outcome through a 
 ## Alternative rejected
 
 Integrating a live gateway now, or a fake form that collects card fields. Rejected: a live gateway needs credentials, compliance and verified free-tier terms; collecting card-shaped data even as a mock trains the wrong pattern and is a security liability.
+
+## Implementation note (P16-T01)
+
+The interface is `services/payments.js` (`pay`, `refundRelease`) over `services/paymentProviders/simulated.js` (`charge`, `refund`). A booking starts as `awaiting_payment` and only a successful simulated payment moves it on; a refused one leaves it waiting with its nights held until the sweeper expires it. Attempts are stored in `PaymentAttempt` (one per booking and key, one live charge per booking, one refund per booking). The pay page asks for no card data at all.

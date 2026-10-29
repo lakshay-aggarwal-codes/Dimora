@@ -80,7 +80,9 @@ function setup({ options, blocks = [], deleteStaleDrafts } = {}) {
       statusHistory: [
         { from: null, to: status, at: createdAt, actor: "guest" },
       ],
-      ...(status === "pending"
+      // a request waits 24 h for the host; a booking waiting for its simulated
+      // payment (P16-T01) has a hold too (the caller passes a short one)
+      ...(status === "pending" || status === "awaiting_payment"
         ? { holdExpiresAt: hold || shift(createdAt, DAY) }
         : {}),
     };
@@ -141,6 +143,52 @@ function setup({ options, blocks = [], deleteStaleDrafts } = {}) {
     statusOf: (doc) => Reservation.docs.find((d) => d._id === doc._id).status,
   };
 }
+
+describe("expire: a booking waiting for its simulated payment (P16-T01)", () => {
+  const MIN = 60 * 1000;
+
+  test("a failed or abandoned payment keeps the nights held until the payment hold runs out, then they are released", async () => {
+    const ctx = setup();
+    const waiting = await ctx.add({
+      status: "awaiting_payment",
+      hold: at(15 * MIN),
+    });
+    // 14 minutes in (a payment was refused, the guest is still deciding): untouched
+    const early = await ctx.sweeper.runOnce({ now: at(14 * MIN) });
+    expect(early.expired).toBe(0);
+    expect(ctx.statusOf(waiting)).toBe("awaiting_payment");
+    expect(ctx.ledger.rows).toHaveLength(3);
+    ctx.consistent();
+    // 16 minutes in: expired, nights back on the calendar
+    const late = await ctx.sweeper.runOnce({ now: at(16 * MIN) });
+    expect(late.expired).toBe(1);
+    expect(late.errors).toEqual([]);
+    expect(ctx.statusOf(waiting)).toBe("expired");
+    expect(ctx.ledger.rows).toHaveLength(0);
+    expect(ctx.Reservation.docs[0].statusHistory.at(-1)).toEqual(
+      expect.objectContaining({
+        from: "awaiting_payment",
+        to: "expired",
+        actor: "system",
+      }),
+    );
+    ctx.consistent();
+  });
+
+  test("it is expired on its own short hold, not the 24 hours of a host request", async () => {
+    const ctx = setup();
+    const waiting = await ctx.add({
+      status: "awaiting_payment",
+      hold: at(15 * MIN),
+    });
+    const request = await ctx.add({ status: "pending" }); // 24 h
+    const result = await ctx.sweeper.runOnce({ now: at(HOUR) });
+    expect(result.expired).toBe(1);
+    expect(ctx.statusOf(waiting)).toBe("expired");
+    expect(ctx.statusOf(request)).toBe("pending");
+    ctx.consistent();
+  });
+});
 
 describe("expire: pending requests past their hold", () => {
   test("an unanswered request becomes expired and its nights are released", async () => {
@@ -697,5 +745,69 @@ describe("startSweeper", () => {
     runOnce.mockImplementationOnce(async () => summary({ completed: 1 }));
     await handle.tick();
     expect(log.info).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("expire: bookings that were not paid in time (P16-T01)", () => {
+  test("an unpaid booking past its payment hold becomes expired, its nights are released, with its own reason", async () => {
+    const ctx = setup();
+    const unpaid = await ctx.add({ status: "awaiting_payment", hold: at(-1000) });
+    const result = await ctx.sweeper.runOnce({ now: T0 });
+    expect(result.expired).toBe(1);
+    expect(result.errors).toEqual([]);
+    expect(ctx.statusOf(unpaid)).toBe("expired");
+    expect(ctx.ledger.rows).toHaveLength(0);
+    expect(ctx.Reservation.docs[0].statusHistory.at(-1)).toMatchObject({
+      from: "awaiting_payment",
+      to: "expired",
+      actor: "system",
+      note: "The payment was not completed in time.",
+    });
+    ctx.consistent();
+  });
+
+  test("while the payment hold is running the booking and its nights are left alone (15 minutes in, not 16)", async () => {
+    const ctx = setup();
+    const unpaid = await ctx.add({ status: "awaiting_payment", hold: at(15 * 60 * 1000) });
+    for (const minutes of [0, 14, 15]) {
+      const result = await ctx.sweeper.runOnce({ now: at(minutes * 60 * 1000) });
+      expect(result.expired).toBe(0);
+    }
+    expect(ctx.statusOf(unpaid)).toBe("awaiting_payment");
+    expect(ctx.ledger.rows).toHaveLength(3);
+    const later = await ctx.sweeper.runOnce({ now: at(16 * 60 * 1000) });
+    expect(later.expired).toBe(1);
+    expect(ctx.statusOf(unpaid)).toBe("expired");
+    ctx.consistent();
+  });
+
+  test("a failed payment leaves the nights held until the hold runs out, and no refund is asked for", async () => {
+    const ctx = setup();
+    const unpaid = await ctx.add({ status: "awaiting_payment", hold: at(10 * 60 * 1000) });
+    // (a failed attempt changes nothing on the booking: it is still awaiting_payment)
+    await ctx.sweeper.runOnce({ now: at(5 * 60 * 1000) });
+    expect(ctx.ledger.rows).toHaveLength(3);
+    await ctx.sweeper.runOnce({ now: at(11 * 60 * 1000) });
+    expect(ctx.statusOf(unpaid)).toBe("expired");
+    expect(ctx.ledger.rows).toHaveLength(0);
+  });
+
+  test("unpaid bookings and unanswered requests expire in the same run; running again changes nothing", async () => {
+    const ctx = setup();
+    await ctx.add({ status: "awaiting_payment", hold: at(-1000) });
+    await ctx.add({ status: "pending", hold: at(-1000), checkIn: "2026-12-10", checkOut: "2026-12-12" });
+    const first = await ctx.sweeper.runOnce({ now: T0 });
+    expect(first.expired).toBe(2);
+    const second = await ctx.sweeper.runOnce({ now: T0 });
+    expect(second.expired).toBe(0);
+    ctx.consistent();
+  });
+
+  test("an unpaid booking is never completed, whatever its dates", async () => {
+    const ctx = setup();
+    const unpaid = await ctx.add({ status: "awaiting_payment", hold: at(60 * 60 * 1000), checkIn: "2026-11-01", checkOut: "2026-11-03" });
+    const result = await ctx.sweeper.runOnce({ now: T0 });
+    expect(result.completed).toBe(0);
+    expect(ctx.statusOf(unpaid)).toBe("awaiting_payment");
   });
 });
