@@ -45,6 +45,11 @@ const {
 const { csrfProtection } = require("./middleware/csrf");
 const { inputGuard, URLENCODED_OPTIONS } = require("./middleware/inputGuard");
 const { recoverCheckout } = require("./middleware/checkoutRecovery");
+const { createHealthRouter } = require("./routes/health");
+const emailAuthRouter = require("./routes/emailAuth");
+const notificationPrefsRouter = require("./routes/notificationPrefs");
+const { createNotificationMailer } = require("./services/notificationEmail");
+const { createEmailService } = require("./services/email");
 
 const ROOT_DIR = path.join(__dirname, "..");
 
@@ -61,11 +66,17 @@ const ROOT_DIR = path.join(__dirname, "..");
  *   is needed.
  * @param {object} [options.logger] pino logger (default: JSON to stdout;
  *   silent when config.isTest).
+ * @param {{ send: Function }} [options.emailService] sends mail (default: the
+ *   transport in config.email; tests pass createMemoryEmailService()).
+ * @param {() => boolean} [options.isDbReady] answers /readyz (default: the
+ *   Mongoose connection is open). Tests pass a stub.
  */
 function createApp({
   config = loadEnv(),
   sessionStore,
   logger = createLogger({ level: config.isTest ? "silent" : "info" }),
+  isDbReady,
+  emailService,
 } = {}) {
   configureCloudinary(config.cloudinary);
   configureLocationSecret(config.sessionSecret); // keys the public-location offset (P06-T02)
@@ -75,6 +86,27 @@ function createApp({
   app.set("view engine", "ejs");
   app.set("views", path.join(ROOT_DIR, "views"));
   // <title> and meta description helpers used by views/layouts/boilerPlate.ejs
+  // Email (P02-T05). Without config.email (older test configs) nothing asks for
+  // a confirmed address.
+  app.locals.emailService =
+    emailService ||
+    createEmailService({ email: config.email, isProduction: Boolean(config.isProduction), logger });
+  app.locals.emailVerificationRequired = Boolean(config.email && config.email.verificationRequired);
+  app.locals.appBaseUrl = config.appBaseUrl;
+  app.locals.notificationSecret = config.sessionSecret; // keys the "stop these emails" links (P11-T05)
+  // Email copies of notifications (P11-T05): only with a real config.email
+  // (older test configs have none, so tests stay silent).
+  if (config.email) {
+    require("./services/notificationEvents").notifier.setMailer(
+      createNotificationMailer({
+        emailService: app.locals.emailService,
+        baseUrl: config.appBaseUrl,
+        secret: config.sessionSecret,
+        logger,
+      }),
+    );
+  }
+  app.locals.logger = logger;
   app.locals.fullTitle = fullTitle;
   app.locals.metaDescription = metaDescription;
   app.locals.imageUrl = imageUrl; // Cloudinary size/format presets for <img>
@@ -82,20 +114,21 @@ function createApp({
   app.locals.pagination = pagination;
   app.locals.hiddenFields = hiddenFields; // carries the search state through a form
   app.locals.listingsUrl = listingsUrl; // /listings?... links that keep the query // used by views/partials/pagination.ejs
-  // Review rules from the environment (P12-T01, P12-T03): days after check-out
-  // a stay can be reviewed, and days after posting a review can be edited.
-  app.locals.reviewWindowDays = config.reviews.windowDays;
-  app.locals.reviewEditDays = config.reviews.editDays;
 
   app.disable("x-powered-by");
-  // Behind one reverse proxy (Render, Railway, nginx...): needed for secure
-  // cookies and for rate limiting by the real client address.
-  if (config.isProduction) app.set("trust proxy", 1);
+  // Behind reverse proxies (Render, Railway, nginx...): needed for secure
+  // cookies and for rate limiting by the real client address. The number of
+  // hops is TRUST_PROXY_HOPS (default 1); see docs/DEPLOYMENT.md.
+  if (config.isProduction) app.set("trust proxy", config.trustProxyHops || 1);
 
   app.engine("ejs", ejsMate);
   // Before static files so every response carries the security headers.
   app.use(assignCspNonce);
   app.use(securityHeaders({ isProduction: Boolean(config.isProduction) }));
+  // Health checks (P19-T03): before the request log, the session and CSRF, so
+  // a check every few seconds writes no log line, creates no session and needs
+  // no cookie or token.
+  app.use(createHealthRouter({ isDbReady }));
   app.use(express.static(path.join(ROOT_DIR, "public")));
 
   // After static files (so assets are not logged), before everything else so
@@ -181,6 +214,8 @@ function createApp({
   const limiters = createAuthLimiters();
   app.post("/login", limiters.login);
   app.post("/signup", limiters.signup);
+  app.post("/forgot-password", limiters.emailLink);
+  app.post("/verify-email/resend", limiters.emailLink);
 
   app.use("/api/listings/:id/quote", limiters.quote);
   app.post("/reports", limiters.report); // counts, then lets the reports router answer
@@ -196,6 +231,8 @@ function createApp({
   app.use("/", profileRouter);
   app.use("/", tripsRouter);
   app.use("/", pagesRouter);
+  app.use("/", emailAuthRouter);
+  app.use("/", notificationPrefsRouter);
   app.use("/", useRouter);
 
   app.all("/{*splat}", (req, res, next) => {

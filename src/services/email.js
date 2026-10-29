@@ -20,7 +20,7 @@ class EmailError extends Error {
   }
 }
 
-function checkMessage({ to, subject, text }) {
+function checkMessage({ to, subject, text, headers }) {
   if (typeof to !== "string" || !/^[^\s@,;<>]+@[^\s@,;<>]+$/.test(to)) {
     throw new EmailError("invalid recipient");
   }
@@ -28,6 +28,14 @@ function checkMessage({ to, subject, text }) {
     throw new EmailError("invalid subject");
   }
   if (typeof text !== "string" || !text) throw new EmailError("empty message");
+  if (headers !== undefined) {
+    const ok =
+      headers && typeof headers === "object" && !Array.isArray(headers) &&
+      Object.entries(headers).every(
+        ([k, v]) => /^[A-Za-z][A-Za-z0-9-]{0,60}$/.test(k) && typeof v === "string" && !/[\r\n]/.test(v),
+      );
+    if (!ok) throw new EmailError("invalid headers");
+  }
 }
 
 function createMemoryEmailService() {
@@ -77,6 +85,7 @@ function createEmailService({
               subject: message.subject,
               text: message.text,
               ...(message.html ? { html: message.html } : {}),
+              ...(message.headers ? { headers: message.headers } : {}),
             }),
             signal: AbortSignal.timeout(TIMEOUT_MS),
           });

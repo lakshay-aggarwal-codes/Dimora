@@ -41,4 +41,33 @@ function passwordChanged({ name }) {
   };
 }
 
-module.exports = { verifyEmail, resetPassword, passwordChanged, escapeHtml };
+/**
+ * An email copy of an in-app notification (P11-T05). `link` is an absolute
+ * address on this site; `unsubscribeLink` is omitted for essential messages.
+ */
+function notification({ name, title, body, link, groupLabel, unsubscribeLink }) {
+  const text = [
+    `Hi ${name},`,
+    "",
+    title,
+    ...(body ? ["", body] : []),
+    "",
+    `Open it on Dimora: ${link}`,
+    "",
+    unsubscribeLink
+      ? `You get this email because of your "${groupLabel}" notification setting. Stop these emails: ${unsubscribeLink}`
+      : `You get this email because it is about something you run on Dimora (${groupLabel}). It cannot be turned off.`,
+  ].join("\n");
+  const footer = unsubscribeLink
+    ? `<p style="color:#666;font-size:13px">You get this email because of your &ldquo;${escapeHtml(groupLabel)}&rdquo; notification setting. <a href="${escapeHtml(unsubscribeLink)}">Stop these emails</a>.</p>`
+    : `<p style="color:#666;font-size:13px">You get this email because it is about something you run on Dimora (${escapeHtml(groupLabel)}). It cannot be turned off.</p>`;
+  return {
+    subject: String(title).replace(/[\r\n]+/g, " ").slice(0, 150),
+    text,
+    html: wrap(
+      `<p>Hi ${escapeHtml(name)},</p><p><strong>${escapeHtml(title)}</strong></p>${body ? `<p>${escapeHtml(body)}</p>` : ""}${button(link, "Open on Dimora")}${footer}`,
+    ),
+  };
+}
+
+module.exports = { verifyEmail, resetPassword, passwordChanged, notification, escapeHtml };

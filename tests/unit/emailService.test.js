@@ -101,3 +101,17 @@ test("the memory transport keeps what was sent", async () => {
   assert.equal(svc.outbox.length, 1);
   assert.equal(svc.outbox[0].to, "ann@example.com");
 });
+
+test("optional headers (List-Unsubscribe) are passed to Resend and must be plain single-line text (P11-T05)", async () => {
+  const calls = [];
+  const fetchImpl = async (url, init) => (calls.push({ url, init }), { ok: true, status: 200 });
+  const svc = createEmailService({ email: { transport: "resend", from: "Dimora <hi@example.com>", resendApiKey: "re_key_123" }, fetchImpl });
+  await svc.send({ ...MESSAGE, headers: { "List-Unsubscribe": "<https://x.test/u/abc>" } });
+  assert.deepEqual(JSON.parse(calls[0].init.body).headers, { "List-Unsubscribe": "<https://x.test/u/abc>" });
+  await svc.send(MESSAGE);
+  assert.equal("headers" in JSON.parse(calls[1].init.body), false);
+  for (const headers of [{ "X-A": "a\r\nBcc: x@y.z" }, { "bad name": "a" }, { A: 5 }, ["a"], null]) {
+    await assert.rejects(() => svc.send({ ...MESSAGE, headers }), EmailError);
+  }
+  assert.equal(calls.length, 2);
+});

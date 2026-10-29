@@ -41,3 +41,24 @@ test("the password-changed note has no link to click", () => {
   assert.equal(/https?:\/\//.test(m.text), false);
   assert.equal(/href=/.test(m.html), false);
 });
+
+test("notification email: title, body, absolute link, escaped HTML and the stop link (P11-T05)", () => {
+  const { notification } = require("../../src/emails/templates");
+  const m = notification({
+    name: "Ravi",
+    title: "Booked: <b>Sea</b>\nhouse",
+    body: "12 Nov <script>",
+    link: "https://dimora.test/trips/1",
+    groupLabel: "Bookings",
+    unsubscribeLink: "https://dimora.test/email/unsubscribe/tok",
+  });
+  assert.equal(m.subject.includes("\n"), false);
+  assert.ok(m.text.includes("https://dimora.test/trips/1"));
+  assert.ok(m.text.includes("Stop these emails: https://dimora.test/email/unsubscribe/tok"));
+  assert.equal(m.html.includes("<script>"), false);
+  assert.equal(m.html.includes("<b>Sea"), false);
+  assert.ok(m.html.includes("Stop these emails"));
+  const essential = notification({ name: "R", title: "t", link: "https://dimora.test/", groupLabel: "Decisions" });
+  assert.equal(essential.text.includes("unsubscribe"), false);
+  assert.ok(essential.text.includes("cannot be turned off"));
+});

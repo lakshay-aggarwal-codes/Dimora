@@ -240,10 +240,23 @@ const dbConnected = () => require("mongoose").connection.readyState === 1;
 
 /**
  * @param {object} [deps] `notify` (default: services/notifications), `connected`
- *   (default: the Mongoose connection is open), `logger`
+ *   (default: the Mongoose connection is open), `logger`, `mailer`
  */
-function createNotifier({ notify, connected = dbConnected, logger = console } = {}) {
+function createNotifier({ notify, connected = dbConnected, logger = console, mailer = null } = {}) {
   const send = notify || ((...args) => require("./notifications").notify(...args));
+  // Email copies (P11-T05): `{ deliver({ userId, type, payload }) }`, set once the
+  // app has an email service. Sent in the background: a slow mail provider must
+  // not slow down a booking. `pending` lets tests and shutdown wait for them.
+  let emailer = mailer;
+  const pending = new Set();
+  function queueEmail(p) {
+    if (!emailer) return;
+    const job = Promise.resolve()
+      .then(() => emailer.deliver({ userId: p.userId, type: p.type, payload: p.payload }))
+      .catch((err) => logger.warn(`notification email ${p.type} failed: ${err && err.message}`))
+      .finally(() => pending.delete(job));
+    pending.add(job);
+  }
   /** Sends the plan for `event`. Never throws. @returns {Promise<number>} how many were stored */
   async function dispatch(event, ctx) {
     let sent = 0;
@@ -253,6 +266,7 @@ function createNotifier({ notify, connected = dbConnected, logger = console } = 
         try {
           await send(p.userId, p.type, p.ref, p.payload);
           sent += 1;
+          queueEmail(p); // only for a notification that was stored
         } catch (err) {
           logger.warn(`notification ${p.type} was not stored: ${err && err.message}`);
         }
@@ -262,7 +276,16 @@ function createNotifier({ notify, connected = dbConnected, logger = console } = 
     }
     return sent;
   }
-  return { dispatch };
+  return {
+    dispatch,
+    setMailer(next) {
+      emailer = next || null;
+    },
+    /** Resolves when every email started so far has finished (tests, shutdown). */
+    async idle() {
+      while (pending.size) await Promise.all([...pending]);
+    },
+  };
 }
 
 module.exports = { plan, createNotifier, notifier: createNotifier(), EVENT_NAMES, clip };

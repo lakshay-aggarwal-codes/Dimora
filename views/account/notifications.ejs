@@ -1,0 +1,35 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    Notification settings (P11-T05). Locals: groups [{ key, label, description,
+    essential, enabled }], emailConfirmed. In-app notifications are always on;
+    only the email copy has switches. Everything is escaped.
+%>
+<div class="row mt-3">
+    <div class="col-12 col-lg-7 col-xl-6">
+        <h1 class="h3">Notification settings</h1>
+        <p class="text-body-secondary"><a href="/account">&larr; Account settings</a> &middot; <a href="/notifications">Your notifications</a></p>
+        <p>Notifications always appear on the site (the bell). Here you choose which ones are also sent to your email address.</p>
+
+        <% if (!emailConfirmed) { %>
+        <div class="alert alert-warning" role="status" data-email-unconfirmed>
+            Your email address is not confirmed, so no emails are sent to it yet. <a href="/verify-email/needed">Send me the confirmation link</a>.
+        </div>
+        <% } %>
+
+        <form action="/account/notifications" method="POST" data-notification-prefs>
+            <%- include("../includes/csrf.ejs") %>
+            <fieldset>
+                <legend class="h5">Send me an email for</legend>
+                <% groups.forEach((g) => { %>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="pref-<%= g.key %>" name="<%= g.key %>" value="on"<%= g.enabled ? " checked" : "" %><%= g.essential ? " disabled" : "" %> aria-describedby="pref-<%= g.key %>-help">
+                    <label class="form-check-label" for="pref-<%= g.key %>"><%= g.label %><% if (g.essential) { %> (always on)<% } %></label>
+                    <div class="form-text" id="pref-<%= g.key %>-help"><%= g.description %></div>
+                </div>
+                <% }) %>
+            </fieldset>
+            <button type="submit" class="btn btn-dark">Save settings</button>
+        </form>
+        <p class="form-text mt-3">Every optional email also has a &ldquo;stop these emails&rdquo; link at the bottom.</p>
+    </div>
+</div>

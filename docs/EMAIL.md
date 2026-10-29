@@ -12,6 +12,26 @@ Tokens: 32 random bytes (base64url). Only the SHA-256 hash is stored (`EmailToke
 
 A successful reset also confirms the address (the link was read there) and lifts the failed-login lock (P02-T02).
 
+## Notification emails and preferences (P11-T05)
+
+Every in-app notification (P11-T04) can also be emailed. **In-app is always on**; only the email copy has switches (`/account/notifications`, linked from Account settings).
+
+| Group | Notifications | Switch |
+|---|---|---|
+| Bookings | requested, booked, changed dates, accepted, declined, expired, cancelled | on by default, can be turned off |
+| Reminders | check-in tomorrow | on by default, can be turned off |
+| Reviews | review available | on by default, can be turned off |
+| Decisions about your listings | listing suspended / restored | **always on** (about something the member runs); no stop link |
+
+Rules (`src/services/notificationEmail.js`, groups in `src/config/notificationPrefs.js`):
+- The email is sent only to an **active account with a confirmed address** (`emailVerifiedAt`). Nothing is sent to an unconfirmed address, even if the preference is on.
+- It is a copy of a notification that was **stored**; sending runs in the background and a failure is logged (no address, no link) and never affects the booking or admin action.
+- Every optional email has a **"stop these emails"** link and a `List-Unsubscribe` header. The link carries a signed token (HMAC-SHA256 of member + group, keyed from `SESSION_SECRET`; no database row). Opening it only shows a button; the POST switches that group off. Changing `SESSION_SECRET` invalidates old links (the member can still use the settings page). Not implemented: one-click `List-Unsubscribe-Post` (the app-wide CSRF check would refuse a mail provider's POST).
+- Choices are stored on the member (`User.notificationEmail.{bookings,reminders,reviews}`); unset = the group default. Account deletion removes them with the account.
+- Messages carry the title, the text and a link back to the site: nothing the member could not already read in the app. Texts are escaped in the HTML part.
+
+Volume: the free Resend plan allows 100 emails a day (see below). There is no counter in the app: past the limit sending fails, is logged, and the in-app notification still exists. With `EMAIL_TRANSPORT=console` nothing is delivered (development: the message is in the log).
+
 ## Settings
 
 | Key | Default | Meaning |

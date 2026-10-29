@@ -71,6 +71,14 @@ const userSchema = new mongoose.Schema(
       validate: Number.isInteger,
     },
 
+    // Which notification emails the member wants (P11-T05). Unset = the
+    // group's default (config/notificationPrefs.js); in-app is always on.
+    notificationEmail: {
+      bookings: { type: Boolean },
+      reminders: { type: Boolean },
+      reviews: { type: Boolean },
+    },
+
     // null = not verified. Set by the verification flow (P02-T05).
     emailVerifiedAt: {
       type: Date,

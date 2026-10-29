@@ -7,7 +7,7 @@
 <div class="row mt-3">
     <div class="col-12 col-lg-7 col-xl-6">
         <h1 class="h3">Account settings</h1>
-        <p class="text-body-secondary">Signed in as <strong><%= currUser.username %></strong>. <a href="/users/<%= currUser._id %>">View your public profile</a> · <a href="/account/profile">Edit profile</a></p>
+        <p class="text-body-secondary">Signed in as <strong><%= currUser.username %></strong>. <a href="/users/<%= currUser._id %>">View your public profile</a> · <a href="/account/profile">Edit profile</a> · <a href="/account/notifications">Notification settings</a></p>
 
         <% if (typeof emailVerificationRequired !== "undefined" && emailVerificationRequired && !currUser.emailVerifiedAt) { %>
         <div class="alert alert-warning" role="status" data-email-unverified>
