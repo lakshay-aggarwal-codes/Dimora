@@ -6,11 +6,20 @@
 
     <h2>What we store</h2>
     <ul>
-        <li><strong>Account:</strong> your username, email address, and your password in scrambled (hashed) form. We cannot read your password.</li>
+        <li><strong>Account:</strong> your username, email address, and your password in scrambled (hashed) form. We cannot read your password. We use your email address to send you a link to confirm it and, if you ask, a link to reset your password.</li>
         <li><strong>What you post:</strong> listings (title, description, price, place, photo) and reviews (rating and comment). Listings and reviews are public and show your username.</li>
         <li><strong>Location:</strong> when you save a listing, its place name is sent to Mapbox to find map coordinates.</li>
         <li><strong>Session:</strong> a cookie that keeps you logged in, and a copy of your session in our database. It expires after seven days.</li>
-        <li><strong>Server logs:</strong> a request id, the page address (without the part after <code>?</code>), the method and the status code. Passwords, cookies and form contents are not logged.</li>
+        <li><strong>Server logs:</strong> a request id, the page address (without the part after <code>?</code>, and with the secret part of confirmation and reset links hidden), the method and the status code. Passwords, cookies and form contents are not logged. How long the hosting company keeps these logs is up to that company.</li>
+    </ul>
+
+    <h2>How long we keep it</h2>
+    <ul>
+        <li>Your account, until you delete it. Deleting it replaces your username, name, email, bio and picture with placeholders and makes the password unusable. Your bookings, reviews and messages stay, but no longer carry your name.</li>
+        <li>Your session, seven days. Confirmation and reset links work once and expire after a day and an hour.</li>
+        <li>Listings, bookings and reviews stay until removed by an administrator; a deleted listing is hidden, not erased. Unfinished drafts you have not touched for 90 days are deleted.</li>
+        <li>Saved stays are removed when you remove them or delete your account. Notifications you have read are deleted after 30 days.</li>
+        <li>The site owner keeps backup copies of the database on a private computer. A backup made before you deleted your account still contains your old details until the owner deletes that backup.</li>
     </ul>
 
     <h2>What we do not do</h2>
@@ -20,7 +29,7 @@
     <p>The site loads fonts, styles and scripts from Google Fonts, jsDelivr and cdnjs, maps from Mapbox, and photos from Cloudinary and Unsplash. When your browser fetches these, those companies can see your IP address and browser details, as with any website. Photos you upload are stored with Cloudinary.</p>
 
     <h2>Your choices</h2>
-    <p>You can log out at any time. There is no self-service account deletion yet. To have your account, listings or reviews removed, or to ask what is stored about you, open an issue on the <a href="https://github.com/lakshay-aggarwal-codes/Dimora/issues" rel="noopener noreferrer">project page</a> or contact whoever gave you the link to this site.</p>
+    <p>You can log out at any time, change your password and delete your account from the account page. To have listings or reviews removed, or to ask what is stored about you, open an issue on the <a href="https://github.com/lakshay-aggarwal-codes/Dimora/issues" rel="noopener noreferrer">project page</a> or contact whoever gave you the link to this site.</p>
 
     <h2>Changes</h2>
     <p>This project changes as it is built. If what we store changes, this page changes with it.</p>

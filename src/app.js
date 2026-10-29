@@ -47,8 +47,7 @@ const { inputGuard, URLENCODED_OPTIONS } = require("./middleware/inputGuard");
 const { recoverCheckout } = require("./middleware/checkoutRecovery");
 const { createHealthRouter } = require("./routes/health");
 const emailAuthRouter = require("./routes/emailAuth");
-const notificationPrefsRouter = require("./routes/notificationPrefs");
-const { createNotificationMailer } = require("./services/notificationEmail");
+const { redactPath } = require("./utils/redactPath");
 const { createEmailService } = require("./services/email");
 
 const ROOT_DIR = path.join(__dirname, "..");
@@ -93,19 +92,6 @@ function createApp({
     createEmailService({ email: config.email, isProduction: Boolean(config.isProduction), logger });
   app.locals.emailVerificationRequired = Boolean(config.email && config.email.verificationRequired);
   app.locals.appBaseUrl = config.appBaseUrl;
-  app.locals.notificationSecret = config.sessionSecret; // keys the "stop these emails" links (P11-T05)
-  // Email copies of notifications (P11-T05): only with a real config.email
-  // (older test configs have none, so tests stay silent).
-  if (config.email) {
-    require("./services/notificationEvents").notifier.setMailer(
-      createNotificationMailer({
-        emailService: app.locals.emailService,
-        baseUrl: config.appBaseUrl,
-        secret: config.sessionSecret,
-        logger,
-      }),
-    );
-  }
   app.locals.logger = logger;
   app.locals.fullTitle = fullTitle;
   app.locals.metaDescription = metaDescription;
@@ -146,7 +132,7 @@ function createApp({
         req: (req) => ({
           id: req.id,
           method: req.method,
-          url: (req.url || "").split("?")[0],
+          url: redactPath(req.url),
         }),
         res: (res) => ({ statusCode: res.statusCode }),
       },
@@ -232,7 +218,6 @@ function createApp({
   app.use("/", tripsRouter);
   app.use("/", pagesRouter);
   app.use("/", emailAuthRouter);
-  app.use("/", notificationPrefsRouter);
   app.use("/", useRouter);
 
   app.all("/{*splat}", (req, res, next) => {

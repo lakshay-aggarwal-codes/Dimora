@@ -27,13 +27,16 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "seed": "node scripts/seed.js",
-    "seed:demo": "node scripts/seed-demo.js",
     "migrate": "node scripts/migrate.js",
     "migrate:dry": "node scripts/migrate.js --dry-run",
     "import:airbnb": "node scripts/import-dataset.js",
     "nearby:refresh": "node scripts/refresh-nearby.js",
     "sweep": "node scripts/sweep.js",
-    "make-admin": "node scripts/make-admin.js"
+    "make-admin": "node scripts/make-admin.js",
+    "preflight": "node scripts/preflight.js",
+    "data:snapshot": "node scripts/data-snapshot.js",
+    "data:compare": "node scripts/data-snapshot.js --compare",
+    "smoke:deploy": "node scripts/smoke-deploy.js"
   },
   "dependencies": {
     "@mapbox/mapbox-sdk": "^0.16.2",

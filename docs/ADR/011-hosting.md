@@ -9,7 +9,7 @@ Dimora is a college project with no budget. It needs a Node host, a MongoDB data
 ## Decision
 
 - **App:** Render free web service from the repository's `render.yaml`. It sleeps after 15 minutes of no traffic (about one minute to wake), has 750 free instance hours a month per workspace, an ephemeral file system, no shell and no pre-deploy command.
-- **Database:** MongoDB Atlas Free (0.5 GB, 100 operations a second, paused after 30 days without a connection, optional daily snapshots).
+- **Database:** MongoDB Atlas Free (0.5 GB, 100 operations a second, paused after 30 days without a connection, **no Atlas backups on Free clusters**: `mongodump`/`mongorestore` by hand, docs/RECOVERY.md).
 - **Images:** Cloudinary Free (25 credits a month).
 - **Migrations** run in the build command (`npm ci && npm run migrate`), because the pre-deploy command is paid-only. Every migration is therefore additive and backward compatible.
 - **Health:** `/healthz` (liveness, no database) is the host's check; `/readyz` (database connected) is for monitors.
@@ -20,6 +20,7 @@ Dimora is a college project with no budget. It needs a Node host, a MongoDB data
 - The first visitor after a quiet spell waits about a minute; background jobs (sweeper, nearby retry) only run while the service is awake and catch up when it wakes.
 - Nothing may be stored on local disk.
 - A rollback never reverses a migration.
+- Backups are the owner's job (`mongodump`); Atlas does not take snapshots of a Free cluster.
 - None of the free plans is promised to stay free; the deployment document is dated and must be re-read before relying on it.
 
 ## Rejected

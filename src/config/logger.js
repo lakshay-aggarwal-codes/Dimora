@@ -17,6 +17,21 @@ const REDACT_PATHS = [
   "*.salt",
   "err.keyValue",
   "err.config",
+  // Password forms (P02-T04) and one-time email links (P02-T05).
+  "newPassword",
+  "currentPassword",
+  "confirmPassword",
+  "*.newPassword",
+  "*.currentPassword",
+  "*.confirmPassword",
+  "token",
+  "*.token",
+  "tokenHash",
+  "*.tokenHash",
+  "*.apiSecret",
+  "*.resendApiKey",
+  "*.sessionSecret",
+  "*.mongodbUri",
 ];
 
 /**
