@@ -2,6 +2,7 @@
 const service = require("../services/wishlists");
 const lists = require("../services/wishlistLists");
 const searches = require("../services/savedSearches");
+const shared = require("../services/sharedLists");
 const { ValidationError, ConflictError } = require("../utils/errors");
 const { safeRedirectPath } = require("../utils/safeRedirect");
 
@@ -161,4 +162,36 @@ module.exports.deleteSearch = async (req, res) => {
   await searches.remove(req.user._id, req.params.id);
   req.flash("success", "Saved search deleted.");
   return res.redirect("/saved-searches");
+};
+
+// ---- Share links (P10-T04) ------------------------------------------------
+
+module.exports.share = (req, res) =>
+  act(req, res, {
+    run: () => shared.enableShare(req.user._id, req.params.id),
+    ok: (r) => (r.created ? "Share link created. Anyone who has it can see this list." : "This list is already shared."),
+    back: listPath(req.params.id),
+  });
+
+module.exports.revokeShare = (req, res) =>
+  act(req, res, {
+    run: () => shared.revokeShare(req.user._id, req.params.id),
+    ok: "Sharing stopped. The old link no longer works.",
+    back: listPath(req.params.id),
+  });
+
+// Public. Read-only; the link is the credential, so the page must not be
+// indexed, cached or leaked through the Referer header.
+module.exports.showShared = async (req, res) => {
+  const data = await shared.viewShared(req.params.token);
+  res.set({
+    "Cache-Control": "private, no-store",
+    "X-Robots-Tag": "noindex, nofollow",
+    "Referrer-Policy": "no-referrer",
+  });
+  res.render("wishlists/shared.ejs", {
+    ...data,
+    pageTitle: data.name,
+    pageDescription: "A list of stays shared on Dimora.",
+  });
 };

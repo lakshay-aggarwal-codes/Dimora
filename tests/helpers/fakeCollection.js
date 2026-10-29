@@ -7,11 +7,11 @@ const newId = () => (++counter).toString(16).padStart(24, "0");
 const same = (a, b) => String(a) === String(b);
 
 function matches(doc, filter) {
-  return Object.entries(filter || {}).every(([key, want]) =>
-    want && typeof want === "object" && Object.hasOwn(want, "$in")
-      ? want.$in.some((w) => same(doc[key], w))
-      : same(doc[key], want),
-  );
+  return Object.entries(filter || {}).every(([key, want]) => {
+    if (want && typeof want === "object" && Object.hasOwn(want, "$in")) return want.$in.some((w) => same(doc[key], w));
+    if (want && typeof want === "object" && Object.hasOwn(want, "$exists")) return (doc[key] !== undefined) === Boolean(want.$exists);
+    return same(doc[key], want);
+  });
 }
 
 class FakeCollection {

@@ -1,0 +1,28 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+    A list shared by link (P10-T04), public and read-only. Locals: name,
+    ownerName, items (listing cards), hidden (how many stays are no longer
+    available). Nothing private is passed in: no email, no notes, no ids of the
+    owner. Everything is escaped.
+%>
+<div class="row mt-3">
+    <div class="col-12">
+        <h1 class="h3 mb-1"><%= name %></h1>
+        <p class="text-body-secondary" data-shared-by>A list of stays shared by <%= ownerName %>. You are looking at a read-only copy.</p>
+
+        <% if (items.length === 0) { %>
+            <%- include("../partials/empty-state.ejs", { title: "No stays to show", message: "There are no available stays in this list right now.", icon: "fa-heart", actionHref: "/listings", actionLabel: "Browse stays", headingLevel: 2 }) %>
+        <% } else { %>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-1" data-shared-items>
+            <% items.forEach((item) => { %>
+            <div class="col" data-listing-id="<%= item.id %>">
+                <%- include("../partials/listing-card.ejs", { item, savedIds: new Set() }) %>
+            </div>
+            <% }) %>
+        </div>
+        <% } %>
+        <% if (hidden > 0) { %>
+        <p class="small text-body-secondary mt-3" data-shared-hidden><%= hidden %> stay<%= hidden === 1 ? " is" : "s are" %> no longer available and not shown.</p>
+        <% } %>
+    </div>
+</div>

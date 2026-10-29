@@ -20,7 +20,6 @@ function models(deps = {}) {
     Wishlist: deps.Wishlist || require("../models/wishlist"),
     WishlistItem: deps.WishlistItem || require("../models/wishlistItem"),
     ListingStat: deps.ListingStat || require("../models/listingStat"),
-    stats: deps.stats || require("./listingStats"),
     Listing: deps.Listing || require("../models/listing"),
     now: deps.now || (() => new Date()),
   };
@@ -55,7 +54,7 @@ async function ensureDefaultList(userId, deps) {
  * @returns {Promise<{ saved: boolean, changed: boolean }>}
  */
 async function setSaved(userId, listingId, saved, deps) {
-  const { WishlistItem, ListingStat, Listing, stats, now } = models(deps);
+  const { WishlistItem, ListingStat, Listing, now } = models(deps);
   if (typeof saved !== "boolean") {
     throw new ValidationError("Say whether to save or to remove this stay.");
   }
@@ -76,7 +75,6 @@ async function setSaved(userId, listingId, saved, deps) {
         { $inc: { saves: -removed } },
         { upsert: true },
       );
-      await stats.clampSaves(listingId); // never below zero (P13-T03)
     }
     return { saved: false, changed: removed > 0 };
   }
@@ -123,7 +121,6 @@ async function setSaved(userId, listingId, saved, deps) {
       { $inc: { saves: 1 } },
       { upsert: true },
     );
-    await stats.recordSave(listingId); // daily count for the host (P13-T03)
   }
   return { saved: true, changed: created };
 }
@@ -144,12 +141,22 @@ async function savedIdsFor(userId, deps) {
  * deleted, suspended) stays in the list as "no longer available" so the member
  * sees what happened and can remove it; it is never dropped silently.
  */
-async function overview(userId, deps) {
+async function overview(userId, deps, { listId } = {}) {
   const { WishlistItem, Listing } = models(deps);
-  const rows = await WishlistItem.find({ owner: userId })
+  // Without `listId`: every stay the member saved, each once. With it: the
+  // stays of that one list (the caller has checked the list is theirs).
+  const filter = listId ? { owner: userId, wishlist: listId } : { owner: userId };
+  const found = await WishlistItem.find(filter)
     .sort({ createdAt: -1 })
     .limit(LIMITS.maxLists * LIMITS.maxItems)
     .lean();
+  const seen = new Set();
+  const rows = found.filter((row) => {
+    const key = String(row.listing);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
   const listings = rows.length
     ? await Listing.find({ _id: { $in: rows.map((row) => row.listing) } })
         .select("title image location country pricing status deletedAt")
@@ -164,6 +171,7 @@ async function overview(userId, deps) {
       available,
       title: (listing && listing.title) || "A stay that was removed",
       savedAt: row.createdAt,
+      note: row.note || "",
       card: available ? toCardItem(listing) : null,
     };
   });
@@ -174,7 +182,38 @@ async function overview(userId, deps) {
   };
 }
 
+/**
+ * The member's lists with how many stays each holds, the default one first
+ * (P10-T02). A member who never saved anything has none yet.
+ * @returns {Promise<Array<{ id: string, name: string, isDefault: boolean, count: number }>>}
+ */
+async function listsFor(userId, deps) {
+  const { Wishlist, WishlistItem } = models(deps);
+  const lists = await Wishlist.find({ owner: userId })
+    .sort({ isDefault: -1, name: 1 })
+    .limit(LIMITS.maxLists)
+    .lean();
+  if (lists.length === 0) return [];
+  const rows = await WishlistItem.find({ owner: userId })
+    .select("wishlist")
+    .limit(LIMITS.maxLists * LIMITS.maxItems)
+    .lean();
+  const counts = new Map();
+  for (const row of rows) {
+    const key = String(row.wishlist);
+    counts.set(key, (counts.get(key) || 0) + 1);
+  }
+  return lists.map((list) => ({
+    id: String(list._id),
+    name: list.name,
+    isDefault: Boolean(list.isDefault),
+    count: counts.get(String(list._id)) || 0,
+    shareToken: list.shareToken || null, // for the owner's own page (P10-T04)
+  }));
+}
+
 module.exports = {
+  listsFor,
   setSaved,
   savedIdsFor,
   overview,

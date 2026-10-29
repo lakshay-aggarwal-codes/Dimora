@@ -10,6 +10,11 @@ const wishlistSchema = new Schema(
     owner: { type: Schema.Types.ObjectId, ref: "User", required: true },
     name: { type: String, trim: true, maxlength: 60, default: DEFAULT_NAME },
     isDefault: { type: Boolean, default: false },
+    // A read-only share link (P10-T04): /shared/lists/<shareToken>. Unset = not
+    // shared. The token is a capability like a "anyone with the link" address:
+    // 24 random bytes, unique, removed when the owner stops sharing.
+    shareToken: { type: String },
+    sharedAt: { type: Date },
   },
   { timestamps: true },
 );
@@ -20,5 +25,9 @@ wishlistSchema.index(
   { unique: true, partialFilterExpression: { isDefault: true } },
 );
 wishlistSchema.index({ owner: 1, name: 1 }, { unique: true });
+wishlistSchema.index(
+  { shareToken: 1 },
+  { unique: true, partialFilterExpression: { shareToken: { $type: "string" } } },
+);
 
 module.exports = mongoose.model("Wishlist", wishlistSchema);
