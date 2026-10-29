@@ -177,3 +177,56 @@ describe("GET /compare page", () => {
     expect(res.text).not.toContain("compare-table");
   });
 });
+
+describe("GET /compare nearby rows (P15-T03)", () => {
+  const stop = { name: "Central <i>Station</i>", kindLabel: "railway station", distanceLabel: "\u2248 450 m straight-line" };
+  const shop = { name: null, kindLabel: "convenience", distanceLabel: "\u2248 1.2 km straight-line" };
+  const nearbyResult = () => {
+    const base = result();
+    base.columns[0].nearby = { fetchedOn: "2026-10-20", transit: stop, grocery: null };
+    base.columns[1].nearby = { fetchedOn: "2026-10-25", transit: null, grocery: shop };
+    base.nearby = {
+      rows: [
+        { id: "transit", label: "Nearest transit", empty: "None found nearby" },
+        { id: "grocery", label: "Nearest grocery", empty: "None found nearby" },
+      ],
+      source: "OpenStreetMap contributors",
+      from: "2026-10-20",
+      to: "2026-10-25",
+    };
+    return base;
+  };
+
+  test("shows the nearest transit and grocery per stay, escaped, with the source and dates", async () => {
+    jest.spyOn(service, "compare").mockResolvedValue(nearbyResult());
+    const res = await request(app(undefined)).get(`/compare?ids=${idA},${idB},${idC}`);
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("Nearest transit");
+    expect(res.text).toContain("Nearest grocery");
+    expect(res.text).toContain("Central &lt;i&gt;Station&lt;/i&gt;");
+    expect(res.text).not.toContain("<i>Station</i>");
+    expect(res.text).toContain("railway station");
+    expect(res.text).toContain("450 m straight-line");
+    expect(res.text).toContain("convenience"); // no name: the kind stands in
+    expect(res.text).toContain("1.2 km straight-line");
+    expect(res.text).toContain("None found nearby");
+    expect(res.text).toContain("OpenStreetMap contributors");
+    expect(res.text).toContain("between 2026-10-20 and 2026-10-25");
+  });
+
+  test("a stay with no stored data says so; an unavailable column shows a dash", async () => {
+    const data = nearbyResult();
+    data.columns[1].nearby = null;
+    jest.spyOn(service, "compare").mockResolvedValue(data);
+    const res = await request(app(undefined)).get(`/compare?ids=${idA},${idB},${idC}`);
+    expect(res.text).toContain("Not available yet");
+  });
+
+  test("with no nearby data anywhere the rows and the note are left out", async () => {
+    jest.spyOn(service, "compare").mockResolvedValue(result());
+    const res = await request(app(undefined)).get(`/compare?ids=${idA},${idB},${idC}`);
+    expect(res.status).toBe(200);
+    expect(res.text).not.toContain("Nearest transit");
+    expect(res.text).not.toContain("OpenStreetMap");
+  });
+});

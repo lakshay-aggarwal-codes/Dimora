@@ -2,7 +2,8 @@
 <%#
     Stay comparison (P10-T03). Locals (src/services/compare.js compare):
     ids, dates {in,out,guests}|null, columns, removable, removeHref {id: url},
-    place {text,name,note}|null, amenities, cheapestId, blocked (string|null).
+    place {text,name,note}|null, amenities, nearby {rows,source,from,to}|null (P15-T03),
+    cheapestId, blocked (string|null).
     Every value is printed escaped (the equals-sign tag); only whitelisted fields get here.
 %>
 <% const money = (minor, currency) => formatMoney(minor, currency); %>
@@ -136,6 +137,25 @@
                     <% columns.forEach((c) => { %><td><%= c.available && c.distance ? c.distance : '\u2014' %></td><% }) %>
                 </tr>
                 <% } %>
+                <% if (typeof nearby !== "undefined" && nearby) { %>
+                <% nearby.rows.forEach((row) => { %>
+                <tr>
+                    <th scope="row"><%= row.label %>
+                        <span class="compare-sub">Straight line from the stay&rsquo;s approximate location, not a route.</span></th>
+                    <% columns.forEach((c) => { %>
+                    <td>
+                        <% if (!c.available) { %>&mdash;
+                        <% } else if (!c.nearby) { %><span class="text-body-secondary">Not available yet</span>
+                        <% } else if (!c.nearby[row.id]) { %><span class="text-body-secondary"><%= row.empty %></span>
+                        <% } else { %>
+                            <strong><%= c.nearby[row.id].name || c.nearby[row.id].kindLabel %></strong>
+                            <span class="compare-sub"><%= c.nearby[row.id].name ? c.nearby[row.id].kindLabel + ", " : "" %><%= c.nearby[row.id].distanceLabel %></span>
+                        <% } %>
+                    </td>
+                    <% }) %>
+                </tr>
+                <% }) %>
+                <% } %>
                 <tr>
                     <th scope="row">Cancellation</th>
                     <% columns.forEach((c) => { %>
@@ -176,6 +196,9 @@
             </tbody>
         </table>
         </div>
+        <% if (typeof nearby !== "undefined" && nearby) { %>
+        <p class="compare-sub mt-2">Nearby places: &copy; <%= nearby.source %>, saved <%= nearby.from === nearby.to ? "on " + nearby.from : "between " + nearby.from + " and " + nearby.to %>. They may be out of date.</p>
+        <% } %>
         <% } %>
     </div>
 </div>

@@ -15,6 +15,8 @@ const {
 } = require("../config/constants");
 const { parseCompareQuery } = require("../validation/compareQuery");
 const { QuoteRefusedError } = require("../utils/errors");
+const { neighborhoodFor } = require("./neighborhood");
+const { SOURCE: NEARBY_SOURCE } = require("../config/nearby");
 
 const label = (list, value) => (list.find((i) => i.value === value) || {}).label;
 
@@ -125,6 +127,31 @@ async function quoteFor(deps, listing, dates, now) {
   }
 }
 
+// The two nearby rows (P15-T03): the nearest place of each category, read from
+// what the host's listing already stored (P15-T01). Nothing is fetched here.
+// Distances come from neighborhoodFor: measured from the public (approximate)
+// point and rounded to 50 m, so a row never gives away more than the listing
+// page does.
+const NEARBY_ROWS = Object.freeze([
+  { id: "transit", label: "Nearest transit", empty: "None found nearby" },
+  { id: "grocery", label: "Nearest grocery", empty: "None found nearby" },
+]);
+
+/** { fetchedOn, transit, grocery }; each of the two is null (none found) or { name, kindLabel, distanceLabel }. null = nothing stored. */
+function nearbyFor(listing) {
+  const hood = neighborhoodFor(listing);
+  if (!hood) return null;
+  const nearest = (id) => {
+    const category = hood.categories.find((c) => c.id === id);
+    if (!category) return null;
+    const { name, kindLabel, distanceLabel: distance } = category.items[0];
+    return { name, kindLabel, distanceLabel: distance };
+  };
+  const out = { fetchedOn: hood.fetchedOn };
+  for (const row of NEARBY_ROWS) out[row.id] = nearest(row.id);
+  return out;
+}
+
 function toColumn(id, listing) {
   if (!isPublic(listing)) {
     return { id, available: false, amenities: [] };
@@ -159,6 +186,20 @@ function toColumn(id, listing) {
       average: Number(listing.ratingAvg) || 0,
       count: Number(listing.ratingCount) || 0,
     },
+    nearby: nearbyFor(listing),
+  };
+}
+
+/** The rows to show, or null when no stay in the comparison has nearby data. */
+function nearbySection(columns) {
+  const withData = columns.filter((c) => c.available && c.nearby);
+  if (!withData.length) return null;
+  const dates = withData.map((c) => c.nearby.fetchedOn).sort();
+  return {
+    rows: NEARBY_ROWS.map(({ id, label, empty }) => ({ id, label, empty })),
+    source: NEARBY_SOURCE,
+    from: dates[0],
+    to: dates[dates.length - 1],
   };
 }
 
@@ -195,6 +236,7 @@ async function compare({ query, now = new Date(), deps: override = {} }) {
     ),
     place: null,
     amenities: [],
+    nearby: null,
     cheapestId: null,
     blocked: null,
   };
@@ -245,6 +287,7 @@ async function compare({ query, now = new Date(), deps: override = {} }) {
     ).id;
   }
   base.amenities = amenityMatrix(columns);
+  base.nearby = nearbySection(columns);
   return base;
 }
 
@@ -254,4 +297,7 @@ module.exports = {
   compareUrl,
   distanceLabel,
   feesPercent,
+  nearbyFor,
+  nearbySection,
+  NEARBY_ROWS,
 };
