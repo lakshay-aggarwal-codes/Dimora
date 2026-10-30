@@ -29,7 +29,7 @@
                 <label class="form-label" for="audit-target">Target</label>
                 <select class="form-select" id="audit-target" name="targetType">
                     <option value="">Any</option>
-                    <% (targetTypes || []).forEach((t) => { %>
+                    <% (typeof targetTypes !== "undefined" && targetTypes ? targetTypes : []).forEach((t) => { %>
                     <option value="<%= t %>" <%= f.targetType === t ? "selected" : "" %>><%= t %></option>
                     <% }) %>
                 </select>

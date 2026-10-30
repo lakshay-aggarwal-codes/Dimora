@@ -96,6 +96,7 @@ function addReview(ListingModel, listingId, review) {
   return ListingModel.updateOne(
     { _id: listingId },
     ratingUpdate({ add: { reviewId: review._id, stars: review.rating } }),
+    { updatePipeline: true },
   );
 }
 
@@ -104,6 +105,7 @@ function removeReview(ListingModel, listingId, review) {
   return ListingModel.updateOne(
     { _id: listingId },
     ratingUpdate({ remove: { reviewId: review._id, stars: review.rating } }),
+    { updatePipeline: true },
   );
 }
 
@@ -112,6 +114,7 @@ function changeRating(ListingModel, listingId, { from, to }) {
   return ListingModel.updateOne(
     { _id: listingId },
     ratingUpdate({ change: { from, to } }),
+    { updatePipeline: true },
   );
 }
 

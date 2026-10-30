@@ -26,6 +26,7 @@ const POLICIES = {
   "reservation:view": reservation.view,
   "reservation:respond": reservation.respond,
   "reservation:cancel": reservation.cancel,
+  "reservation:modify": reservation.modify,
   "report:create": report.create,
   "conversation:start": conversation.start,
   "conversation:view": conversation.view,

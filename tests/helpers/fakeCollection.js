@@ -1,105 +1,134 @@
-// A tiny in-memory stand-in for a Mongoose model, enough for the wishlist
-// services' unit tests (no mongod). Filters are plain equality on ids and
-// values; `unique` lists field sets that must not repeat (a repeat throws a
-// duplicate-key error, code 11000, like the real index).
-let counter = 0;
-const newId = () => (++counter).toString(16).padStart(24, "0");
-const same = (a, b) => String(a) === String(b);
+// A tiny in-memory stand-in for a Mongoose model (P11-T02 tests): enough of
+// find/findOne/findById/create/updateOne/countDocuments for the messaging
+// service, including $or/$and/$in/$ne/$lt/$gt, dotted paths, $inc/$set, sort,
+// skip, limit, and a unique key that throws the driver's duplicate-key error.
+const isId = (v) => v && typeof v === "object" && typeof v.toHexString === "function";
+const same = (a, b) => {
+  if (a === null || a === undefined || b === null || b === undefined) {
+    return (a === null || a === undefined) && (b === null || b === undefined);
+  }
+  return String(a) === String(b);
+};
+const getPath = (row, path) =>
+  path.split(".").reduce((o, k) => (o === null || o === undefined ? undefined : o[k]), row);
+function setPath(row, path, value) {
+  const keys = path.split(".");
+  let o = row;
+  for (const k of keys.slice(0, -1)) {
+    if (typeof o[k] !== "object" || o[k] === null) o[k] = {};
+    o = o[k];
+  }
+  o[keys[keys.length - 1]] = value;
+}
+const isPlain = (v) =>
+  v && typeof v === "object" && Object.getPrototypeOf(v) === Object.prototype;
+const copy = (v) =>
+  Array.isArray(v) ? v.map(copy) : isPlain(v) ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, copy(x)])) : v;
 
-function matches(doc, filter) {
-  return Object.entries(filter || {}).every(([key, want]) => {
-    if (want && typeof want === "object" && Object.hasOwn(want, "$in")) return want.$in.some((w) => same(doc[key], w));
-    if (want && typeof want === "object" && Object.hasOwn(want, "$exists")) return (doc[key] !== undefined) === Boolean(want.$exists);
-    return same(doc[key], want);
+// Dates by time, numbers as numbers, anything else (ids) as text.
+function order(a, b) {
+  if (a instanceof Date || b instanceof Date) return Number(a) - Number(b);
+  if (typeof a === "number" || typeof b === "number") return Number(a) - Number(b);
+  return String(a) < String(b) ? -1 : String(a) > String(b) ? 1 : 0;
+}
+
+function matches(row, filter) {
+  return Object.entries(filter).every(([key, cond]) => {
+    if (key === "$or") return cond.some((f) => matches(row, f));
+    if (key === "$and") return cond.every((f) => matches(row, f));
+    const value = getPath(row, key);
+    if (isPlain(cond)) {
+      return Object.entries(cond).every(([op, x]) => {
+        if (op === "$in") return x.some((y) => same(value, y));
+        if (op === "$ne") return !same(value, x);
+        if (op === "$exists") return (value !== undefined) === x;
+        if (op === "$lt") return value !== undefined && order(value, x) < 0;
+        if (op === "$lte") return value !== undefined && order(value, x) <= 0;
+        if (op === "$gt") return value !== undefined && order(value, x) > 0;
+        if (op === "$gte") return value !== undefined && order(value, x) >= 0;
+        throw new Error(`fakeCollection: unsupported operator ${op}`);
+      });
+    }
+    return same(value, isId(cond) ? String(cond) : cond);
   });
 }
 
-class FakeCollection {
-  constructor({ unique = [], partial = {} } = {}) {
-    this.docs = [];
-    this.unique = unique;
-    this.partial = partial; // fieldset -> predicate: the unique rule only covers docs it accepts
-  }
+const compare = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 
-  query(rows) {
-    let out = rows;
+function fakeCollection({ uniqueKey, defaults = () => ({}), start = new Date("2026-10-01T10:00:00Z") } = {}) {
+  const rows = [];
+  const filters = [];
+  let seq = 0;
+  const hex = (n) => n.toString(16).padStart(24, "0");
+  const found = (filter) => {
+    filters.push(filter);
+    return rows.filter((r) => matches(r, filter));
+  };
+  const query = (list) => {
+    let result = list;
     const q = {
+      select: () => q,
       sort: (spec) => {
-        const [[key, dir]] = Object.entries(spec);
-        out = [...out].sort((a, b) => (a[key] > b[key] ? 1 : a[key] < b[key] ? -1 : 0) * (dir < 0 ? -1 : 1));
+        const entries = Object.entries(spec);
+        result = result.slice().sort((a, b) => {
+          for (const [k, dir] of entries) {
+            const c = compare(getPath(a, k), getPath(b, k));
+            if (c !== 0) return c * dir;
+          }
+          return 0;
+        });
         return q;
       },
-      limit: (n) => ((out = out.slice(0, n)), q),
-      select: () => q,
-      lean: () => q,
-      then: (res, rej) => Promise.resolve(out.map((d) => ({ ...d }))).then(res, rej),
+      skip: (n) => ((result = result.slice(n)), q),
+      limit: (n) => ((result = result.slice(0, n)), q),
+      lean: async () => result.map(copy),
     };
     return q;
-  }
-
-  find(filter) { return this.query(this.docs.filter((d) => matches(d, filter))); }
-  findOne(filter) {
-    const found = this.docs.find((d) => matches(d, filter));
-    const q = this.query(found ? [found] : []);
-    return { lean: () => ({ then: (res, rej) => Promise.resolve(found ? { ...found } : null).then(res, rej) }), then: (res, rej) => Promise.resolve(found ? { ...found } : null).then(res, rej), select: () => q };
-  }
-  async countDocuments(filter) { return this.docs.filter((d) => matches(d, filter)).length; }
-
-  checkUnique(doc, ignore) {
-    for (const fields of this.unique) {
-      const rule = this.partial[fields.join("+")];
-      if (rule && !rule(doc)) continue;
-      const clash = this.docs.some((d) => d !== ignore && (!rule || rule(d)) && fields.every((f) => same(d[f], doc[f])));
-      if (clash) throw Object.assign(new Error("E11000 duplicate key"), { code: 11000 });
-    }
-  }
-
-  async create(doc) {
-    const row = { _id: newId(), createdAt: new Date(), ...doc };
-    this.checkUnique(row);
-    this.docs.push(row);
-    return { ...row };
-  }
-
-  async updateOne(filter, update, opts = {}) {
-    const doc = this.docs.find((d) => matches(d, filter));
-    if (!doc) {
-      if (opts.upsert) {
-        const row = { _id: newId(), ...update.$setOnInsert };
-        this.checkUnique(row);
-        this.docs.push(row);
-        return { matchedCount: 0, upsertedCount: 1 };
+  };
+  // findOne / findById: select() and lean() give one row or null.
+  const single = (list) => {
+    const q = { select: () => q, lean: async () => (list[0] ? copy(list[0]) : null) };
+    return q;
+  };
+  const model = {
+    rows,
+    // Puts rows with chosen _ids in place (users, listings, bookings).
+    seed(...docs) {
+      docs.forEach((d) => rows.push(copy(d)));
+      return model;
+    },
+    filters,
+    find: (filter) => query(found(filter)),
+    findOne: (filter) => single(found(filter)),
+    findById: (id) => single(found({ _id: id })),
+    async create(doc) {
+      if (uniqueKey && rows.some((r) => same(r[uniqueKey], doc[uniqueKey]))) {
+        throw Object.assign(new Error("E11000 duplicate key"), { code: 11000 });
       }
-      return { matchedCount: 0, upsertedCount: 0 };
-    }
-    const next = { ...doc, ...(update.$set || {}) };
-    for (const k of Object.keys(update.$unset || {})) delete next[k];
-    this.checkUnique(next, doc);
-    Object.assign(doc, next);
-    for (const k of Object.keys(update.$unset || {})) delete doc[k];
-    return { matchedCount: 1, modifiedCount: 1, upsertedCount: 0 };
-  }
-
-  // Upsert only (what ensureDefaultList needs); returns a query with .lean().
-  findOneAndUpdate(filter, update) {
-    const run = async () => {
-      const doc = this.docs.find((d) => matches(d, filter)) || (await this.create({ ...(update.$setOnInsert || {}) }));
-      return { ...doc };
-    };
-    return { lean: run, then: (res, rej) => run().then(res, rej) };
-  }
-
-  async deleteMany(filter) {
-    const before = this.docs.length;
-    this.docs = this.docs.filter((d) => !matches(d, filter));
-    return { deletedCount: before - this.docs.length };
-  }
-
-  async deleteOne(filter) {
-    const i = this.docs.findIndex((d) => matches(d, filter));
-    if (i >= 0) this.docs.splice(i, 1);
-    return { deletedCount: i >= 0 ? 1 : 0 };
-  }
+      seq += 1;
+      const row = copy({
+        ...defaults(),
+        ...doc,
+        _id: hex(seq),
+        createdAt: new Date(start.getTime() + seq * 1000),
+      });
+      rows.push(row);
+      return copy(row);
+    },
+    async countDocuments(filter) {
+      return found(filter).length;
+    },
+    async updateOne(filter, update) {
+      const row = found(filter)[0];
+      if (!row) return { matchedCount: 0, modifiedCount: 0 };
+      for (const [k, v] of Object.entries(update.$inc || {})) setPath(row, k, (getPath(row, k) || 0) + v);
+      for (const [k, v] of Object.entries(update.$set || {})) setPath(row, k, v);
+      return { matchedCount: 1, modifiedCount: 1 };
+    },
+  };
+  return model;
 }
 
-module.exports = { FakeCollection, newId };
+// Two helpers with the same file name existed (a factory function for the messaging
+// tests, a class for the wishlist tests); both are exported from here.
+module.exports = { fakeCollection, matches, ...require("./fakeCollectionClass") };

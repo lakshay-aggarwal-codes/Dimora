@@ -151,8 +151,9 @@ module.exports.showListings = async (req, res) => {
       can("listing:edit", req.user, listing) ||
       isAdmin(req.user));
   if (!visible) {
-    req.flash("error", "Listing you requested for does not exist");
-    return res.redirect("/listings");
+    // The normal 404 page: a draft, an unpublished, a suspended, a deleted and
+    // a missing listing all look the same to a visitor.
+    throw new NotFoundError("That listing does not exist.");
   }
 
   // Only the validated coordinates reach the page (as data- attributes); the
