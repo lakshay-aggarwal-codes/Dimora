@@ -26,7 +26,7 @@
         rings[ring.id] = ring;
       }
     });
-  } catch (err) {
+  } catch {
     rings = {};
   }
 

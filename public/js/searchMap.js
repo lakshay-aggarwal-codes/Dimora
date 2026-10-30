@@ -1,3 +1,4 @@
+/* global mapboxgl */
 // Search map and list/map toggle on /listings (P06-T04).
 //
 // Progressive enhancement: the page works as a list without this script. The
@@ -53,7 +54,7 @@
     try {
       const value = getComputedStyle(document.documentElement).getPropertyValue(name);
       return value && value.trim() ? value.trim() : fallback;
-    } catch (err) {
+    } catch {
       return fallback;
     }
   }

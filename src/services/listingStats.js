@@ -103,7 +103,7 @@ const recordCheckoutStart = (req, listing, options) => count("c", req, listing, 
 async function recordSave(listingId, { now, deps } = {}) {
   try {
     await bump(listingId, "saves", { now, deps });
-  } catch (err) {
+  } catch {
     // statistics must never break saving
   }
 }
@@ -113,7 +113,7 @@ async function clampSaves(listingId, { deps } = {}) {
   try {
     const { ListingStat } = models(deps);
     await ListingStat.updateOne({ listing: listingId, saves: { $lt: 0 } }, { $set: { saves: 0 } });
-  } catch (err) {
+  } catch {
     // see above
   }
 }

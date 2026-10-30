@@ -7,7 +7,7 @@ const { MongoStore } = require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
-
+const { canonicalUrl, robotsMeta, absoluteUrl } = require("./utils/seo");
 const { loadEnv } = require("./config/env");
 const { configureCloudinary } = require("./config/cloudinary");
 const pinoHttp = require("pino-http");
@@ -46,6 +46,7 @@ const { csrfProtection } = require("./middleware/csrf");
 const { inputGuard, URLENCODED_OPTIONS } = require("./middleware/inputGuard");
 const { recoverCheckout } = require("./middleware/checkoutRecovery");
 const { createHealthRouter } = require("./routes/health");
+const { createSeoRouter } = require("./routes/seo");
 const emailAuthRouter = require("./routes/emailAuth");
 const { redactPath } = require("./utils/redactPath");
 const notificationPrefsRouter = require("./routes/notificationPrefs");

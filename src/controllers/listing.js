@@ -204,6 +204,14 @@ module.exports.showListings = async (req, res) => {
     hostTrust = null;
   }
 
+  const gallery = galleryOf(listing);
+  // A draft or unpublished listing, seen by its host or an admin, is not for
+  // search engines (P18-T05).
+  if (!isPublic(listing)) {
+    res.locals.seoUrl = () => "";
+    res.locals.seoRobots = () => "noindex, nofollow";
+  }
+
   res.render("listings/show.ejs", {
     listing,
     hostTrust,
