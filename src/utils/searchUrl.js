@@ -13,6 +13,7 @@ const ORDER = [
   "maxPrice",
   "type",
   "amenities",
+  "access",
   "minRating",
   "sort",
   "purpose",

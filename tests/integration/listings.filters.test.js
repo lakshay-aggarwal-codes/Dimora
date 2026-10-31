@@ -92,13 +92,15 @@ describe("the category strip", () => {
     expect(stripLinks(res.text).filter((link) => link.active)).toHaveLength(1);
   });
 
-  test("two categories at once or an operator are refused the same way", async () => {
+  test("two categories at once are ignored; an operator is refused before the search runs (P17-T02)", async () => {
     const { find } = stubListingSearch(docs(1));
-    for (const url of ["/listings?category=beach&category=cabins", "/listings?category[$ne]=beach"]) {
-      const res = await get(url);
-      expect(res.status).toBe(200);
-      expect(find.mock.calls.at(-1)[0]).toEqual({ status: "published", deletedAt: null });
-    }
+    const dup = await get("/listings?category=beach&category=cabins");
+    expect(dup.status).toBe(200);
+    expect(find.mock.calls.at(-1)[0]).toEqual({ status: "published", deletedAt: null });
+    const calls = find.mock.calls.length;
+    const op = await get("/listings?category[$ne]=beach");
+    expect(op.status).toBe(400);
+    expect(find.mock.calls.length).toBe(calls);
   });
 });
 

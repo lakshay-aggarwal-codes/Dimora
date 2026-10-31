@@ -37,7 +37,8 @@ router
     wrapAsync(listingController.createListing),
   );
 
-// EDIT - Show edit form
+// EDIT - the edit page (a form per section) and one route to save a section.
+// A changed address is looked up and confirmed first (controllers/sections.js).
 router.get(
   "/:id/edit",
   isLoggedIn,

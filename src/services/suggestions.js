@@ -50,6 +50,13 @@ const GROUPS = [
     label: () => "Remove the amenity filters",
   },
   {
+    key: "access",
+    urlKeys: ["access"],
+    serviceKeys: ["access"],
+    active: (p) => Array.isArray(p.searchParams.access) && p.searchParams.access.length > 0,
+    label: () => "Remove the accessibility filters",
+  },
+  {
     key: "price",
     urlKeys: ["minPrice", "maxPrice"],
     serviceKeys: ["minPrice", "maxPrice"],

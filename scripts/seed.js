@@ -15,6 +15,7 @@ const Review = require("../src/models/review.js");
 const User = require("../src/models/user.js");
 const { data: sampleListings } = require("./seed-data.js");
 const { keysForListing } = require("../src/utils/searchKeys");
+const { classificationFor } = require("./seed-classification.js");
 const {
   rupeesToMinor,
   addressFromLegacy,
@@ -72,6 +73,8 @@ function buildSeedListings(ownerId) {
     return {
       ...item,
       status: "published",
+      // Property type, setting and pool, so the category strip has results.
+      ...classificationFor(item.title),
       pricing: { nightlyMinor: rupeesToMinor(price), currency: "INR" },
       address,
       images: imagesFromCover(item.image),

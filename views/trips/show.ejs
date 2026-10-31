@@ -61,6 +61,29 @@
             </dl>
         </section>
 
+        <% if (trip.change) { %>
+        <section class="trip-section no-print" aria-labelledby="trip-change" data-change-section>
+            <h2 class="h5" id="trip-change">Change your dates</h2>
+            <p class="mb-2">
+                Need other dates? You see the new price and the difference before anything changes. The new nights are held first: if they are not free, your booking stays exactly as it is.
+                <% if (trip.change.reapproval) { %>Because the host has not answered yet, the host decides again on the new dates and gets 24 hours from the change.<% } %>
+            </p>
+            <a class="btn btn-outline-dark btn-sm" href="<%= trip.change.url %>">Change dates</a>
+        </section>
+        <% } %>
+
+        <% if (trip.changes.length) { %>
+        <section class="trip-section" aria-labelledby="trip-changes" data-changes>
+            <h2 class="h5" id="trip-changes">Changes to this booking</h2>
+            <ul class="mb-0">
+                <% trip.changes.forEach((c) => { %>
+                <li><%= c.atText %>: dates moved from <%= c.fromText %> to <%= c.toText %> (<%= c.differenceText %>)<% if (c.reapproval) { %>; sent back to the host<% } %>.</li>
+                <% }) %>
+            </ul>
+            <p class="small text-body-secondary mt-2 mb-0">Price differences are recorded only. Dimora does not take or return money yet (payments are simulated).</p>
+        </section>
+        <% } %>
+
         <section class="trip-section" aria-labelledby="trip-where">
             <h2 class="h5" id="trip-where">Where</h2>
             <% if (trip.revealed && trip.address) { %>

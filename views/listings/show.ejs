@@ -210,7 +210,44 @@
                 <%- include("../partials/neighborhood.ejs", { neighborhood }) %>
                 <% } %>
             </div>
+
+            <aside class="col-12 col-lg-5" aria-labelledby="summary-heading">
+                <h2 id="summary-heading" class="visually-hidden">Price and location</h2>
+
+                <div class="listing-panel">
+                    <% if (hasPrice) { %>
+                        <p class="listing-price">&#8377; <%= listing.price.toLocaleString("en-IN") %> <span class="price-unit">/ night</span></p>
+                    <% } else { %>
+                        <p class="listing-price">Price not available</p>
+                    <% } %>
+
+                    <% if (canEditListing || canDeleteListing) { %>
+                        <div class="listing-actions">
+                            <% if (canEditListing) { %>
+                                <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark">Edit</a>
+                            <% } %>
+                            <% if (canDeleteListing) { %>
+                                <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+                                    <%- include("../includes/csrf.ejs") %>
+                                    <button type="submit" class="btn btn-dark">Delete</button>
+                                </form>
+                            <% } %>
+                        </div>
+                    <% } %>
+                </div>
+
+                <section class="mt-4" aria-labelledby="map-heading">
+                    <h2 id="map-heading" class="h4">Where you'll be</h2>
+                    <% if (typeof mapPoint !== 'undefined' && mapPoint) { %>
+                        <div id="map" data-token="<%= mapPublicToken %>" data-lng="<%= mapPoint.lng %>"
+                            data-lat="<%= mapPoint.lat %>" data-title="<%= listing.title %>"></div>
+                    <% } else { %>
+                        <p class="text-muted">The map is not available for this listing yet.</p>
+                    <% } %>
+                </section>
+            </aside>
         </div>
+        <%}%>
 
         <!-- Reviews: full width below -->
         <section aria-labelledby="reviews-heading" class="mt-5">
@@ -219,36 +256,14 @@
             <p class="review-summary"><%- include("../partials/rating.ejs", { rating: summary.average, count: summary.count }) %></p>
             <% } %>
 
-            <% if (currUser) { %>
-            <form method="post" action="/listings/<%= listing.id %>/reviews" novalidate class="needs-validation detail-review-form">
-                <%- include("../includes/csrf.ejs") %>
-                <div class="mb-3">
-                    <p class="form-label" aria-hidden="true">Rating</p>
-                    <fieldset class="starability-slot" aria-describedby="rating-feedback">
-                        <legend class="visually-hidden">Rating, from 1 to 5 stars</legend>
-                        <input type="radio" id="first-rate1" name="review[rating]" value="1" required />
-                        <label for="first-rate1" title="Terrible">1 star</label>
-                        <input type="radio" id="first-rate2" name="review[rating]" value="2" required />
-                        <label for="first-rate2" title="Not good">2 stars</label>
-                        <input type="radio" id="first-rate3" name="review[rating]" value="3" required />
-                        <label for="first-rate3" title="Average">3 stars</label>
-                        <input type="radio" id="first-rate4" name="review[rating]" value="4" required />
-                        <label for="first-rate4" title="Very good">4 stars</label>
-                        <input type="radio" id="first-rate5" name="review[rating]" value="5" required />
-                        <label for="first-rate5" title="Amazing">5 stars</label>
-                    </fieldset>
-                    <div id="rating-feedback" class="text-danger small" role="alert" data-rating-feedback hidden>
-                        Please choose a rating.
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="comment">Comment</label>
-                    <textarea class="form-control" id="comment" name="review[comment]" rows="5"
-                        aria-describedby="comment-feedback" required></textarea>
-                    <div class="invalid-feedback" id="comment-feedback">Please write a comment.</div>
-                </div>
-                <button type="submit" class="btn btn-outline-dark">Submit review</button>
-            </form>
+            <%# A review is offered only to a guest with a completed, unreviewed stay inside the review window (P12-T01); `reviewable` comes from the controller and the POST checks it again. %>
+            <% if (!guestPreview && typeof reviewable !== "undefined" && reviewable) { %>
+            <%- include("../partials/review-form.ejs", {
+                action: "/listings/" + listing.id + "/reviews",
+                reservationId: reviewable.reservationId,
+                idPrefix: "first",
+                intro: reviewable.reviewUntil ? "How was your stay? You can review it until " + new Date(reviewable.reviewUntil).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" }) + "." : ""
+            }) %>
             <% } %>
 
             <% if (reviews.length > 0) { %>
@@ -258,6 +273,7 @@
                 <div class="col">
                     <article class="review-card" id="review-<%= review._id %>">
                         <h3 class="h6">@ <%= reviewer %></h3>
+                        <% if (review.createdAt && typeof review.createdAt.getTime === "function" && !Number.isNaN(review.createdAt.getTime())) { %><p class="review-date small text-body-secondary mb-1"><time datetime="<%= review.createdAt.toISOString() %>"><%= new Intl.DateTimeFormat("en-IN", { month: "short", year: "numeric", timeZone: "UTC" }).format(review.createdAt) %></time></p><% } %>
                         <p class="review-rating">
                             <span aria-hidden="true"><%= review.rating %> &#9733;</span>
                             <span class="visually-hidden">Rated <%= review.rating %> out of 5</span>

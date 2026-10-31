@@ -3,6 +3,7 @@
 //
 //   reserveNights(listingId, nights, source, holdExpiresAt?, { now }?)
 //   releaseNights(sourceId)
+//   confirmNights(sourceId)
 //   availableRanges(listingId, from, to, { now }?)
 //   nightsInRange(listingId, from, to, { now }?)       (P07-T03: calendar)
 //   releaseBlockedNights(listingId, from, to)          (P07-T03: unblock)
@@ -192,6 +193,20 @@ function createLedgerService({
     requireId(sourceId, "sourceId");
     const { deletedCount } = await model.deleteMany({ "source.id": sourceId });
     return { released: deletedCount };
+  }
+
+  /**
+   * A pending request was accepted: its nights no longer expire. Safe to call
+   * twice.
+   * @returns {Promise<{confirmed: number}>}
+   */
+  async function confirmNights(sourceId) {
+    requireId(sourceId, "sourceId");
+    const result = await model.updateMany(
+      { "source.id": sourceId },
+      { $unset: { holdExpiresAt: 1 } },
+    );
+    return { confirmed: result.modifiedCount || 0 };
   }
 
   /**
@@ -533,6 +548,7 @@ function createLedgerService({
   return {
     reserveNights,
     releaseNights,
+    confirmNights,
     availableRanges,
     unavailableListingIdsFlexible,
     nightsInRange,

@@ -10,6 +10,7 @@ const {
   PROPERTY_TYPES,
   ROOM_TYPES,
   AMENITIES,
+  ACCESSIBILITY_FEATURES,
 } = require("../config/constants");
 const { CATEGORIES, getCategory } = require("../config/categories");
 const { listingsUrl } = require("./searchUrl");
@@ -24,6 +25,7 @@ const PANEL_FIELDS = Object.freeze([
   "roomType",
   "bedrooms",
   "amenities",
+  "access",
   "instantBook",
 ]);
 
@@ -31,6 +33,7 @@ const labelOf = (list) => new Map(list.map((item) => [item.value, item.label]));
 const PROPERTY_LABELS = labelOf(PROPERTY_TYPES);
 const ROOM_LABELS = labelOf(ROOM_TYPES);
 const AMENITY_LABELS = labelOf(AMENITIES);
+const ACCESS_LABELS = labelOf(ACCESSIBILITY_FEATURES);
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -101,6 +104,9 @@ function activeChips(state = {}) {
   for (const value of asList(state.amenities)) {
     add(`amenity:${value}`, AMENITY_LABELS.get(value) ?? value, { amenities: without(state.amenities, value) });
   }
+  for (const value of asList(state.access)) {
+    add(`access:${value}`, `${ACCESS_LABELS.get(value) ?? value} (declared)`, { access: without(state.access, value) });
+  }
   if (state.instantBook === true) add("instantBook", "Instant book", { instantBook: undefined });
   if (typeof state.minRating === "number") {
     add("minRating", `Rated ${state.minRating}+`, { minRating: undefined });
@@ -119,6 +125,7 @@ function filterCount(state = {}) {
   count += asList(state.roomType).length;
   if (Number.isInteger(state.bedrooms) && state.bedrooms > 0) count += 1;
   count += asList(state.amenities).length;
+  count += asList(state.access).length;
   if (state.instantBook === true) count += 1;
   return count;
 }

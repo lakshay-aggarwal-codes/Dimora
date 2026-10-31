@@ -24,6 +24,13 @@ const { stayRulesFor } = require("../services/bookingRules");
 const { todayIn, tryParseDateOnly, formatDateOnly } = require("../utils/dates");
 const { evaluateReadiness } = require("../services/readiness");
 const { NotFoundError, ConflictError } = require("../utils/errors");
+const { groupAmenities } = require("../utils/amenities");
+const { listingJsonLd } = require("../utils/structuredData");
+const {
+  PROPERTY_TYPES,
+  ROOM_TYPES,
+  CANCELLATION_POLICIES,
+} = require("../config/constants");
 const {
   rupeesToMinor,
   addressFromLegacy,
@@ -121,8 +128,18 @@ function newestFirst(reviews) {
   );
 }
 
+// The text of a stored value, from one of the shared lists (null if unknown).
+const labelOf = (list, value) => {
+  const hit = list.find((item) => item.value === value);
+  return hit ? hit.label : null;
+};
+
 module.exports.showListings = async (req, res) => {
   const { id } = req.params;
+  // Not an id at all: the same 404 as a missing listing, without a database call.
+  if (typeof id !== "string" || !/^[0-9a-f]{24}$/i.test(id)) {
+    throw new NotFoundError("That listing does not exist.");
+  }
 
   const listing = await Listing.findById(id)
     .populate({
@@ -144,7 +161,7 @@ module.exports.showListings = async (req, res) => {
 
   // A deleted listing is gone for everyone. A draft or unpublished one is
   // visible to its host and to admins only; to everyone else it looks exactly
-  // like a listing that does not exist.
+  // like a listing that does not exist (the normal 404 page).
   const visible =
     listing &&
     !listing.deletedAt &&
@@ -256,6 +273,16 @@ module.exports.showListings = async (req, res) => {
     neighborhood: neighborhoodFor(listing),
     guestView: preview,
     datePicker: datePickerFor(listing, req.query),
+    ratingSummary,
+    amenityGroups: groupAmenities(listing.amenities),
+    facts: {
+      propertyType: labelOf(PROPERTY_TYPES, listing.propertyType),
+      roomType: labelOf(ROOM_TYPES, listing.roomType),
+      cancellation: labelOf(CANCELLATION_POLICIES, listing.cancellationPolicy),
+    },
+    structuredData: publicPage
+      ? listingJsonLd(listing, { gallery, rating: ratingSummary })
+      : null,
     readiness:
       !isPublic(listing) && can("listing:edit", req.user, listing)
         ? evaluateReadiness(listing)

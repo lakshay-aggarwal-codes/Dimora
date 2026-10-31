@@ -4,6 +4,7 @@ const { testConfig } = require("../helpers/config");
 const Listing = require("../../src/models/listing");
 const { stubListingSearch } = require("../helpers/listingSearch");
 const { buildListingData } = require("../helpers/factories");
+const { stubListings } = require("../helpers/listingsStub");
 
 test("GET /listings renders the index with the listings returned by the model", async () => {
   const doc = new Listing(

@@ -110,6 +110,11 @@ const listingSchema = new Schema(
     // the category strip on /listings filters on it (P05-T04).
     vibe: { type: String, enum: VIBES },
 
+    // The setting around the place (beach, mountain, ...). Optional: the host
+    // chooses it in the basics step; the category strip on /listings reads it
+    // (P05-T04). Listings that never set it simply match no vibe category.
+    vibe: { type: String, enum: VIBES },
+
     // Mirror of the cover photo (images[0]), kept in step by the media service
     // (src/services/images.js) because older pages and the cards still read it.
     // images[] is the source of truth.
@@ -196,6 +201,8 @@ const listingSchema = new Schema(
     },
 
     amenities: { type: [{ type: String, trim: true, maxlength: 60 }] },
+    // Declared by the host, never verified (P15-T05); keys from ACCESSIBILITY_FEATURES.
+    accessibility: { type: [{ type: String, trim: true, maxlength: 40 }] },
     houseRules: { type: String, trim: true, maxlength: 2000 },
     // The host explicitly says there are no special rules (a readiness item).
     noSpecialRules: { type: Boolean, default: false },
@@ -290,7 +297,9 @@ const listingSchema = new Schema(
     // The old rupee price, kept as it was stored before migration 003.
     legacyPrice: { type: Number },
 
-    // Denormalised from reviews; recomputed by the review code (P12-T02).
+    // Denormalised from reviews (P12-T02): changed only by services/ratings.js,
+    // in one atomic update together with `reviews`. ratingAvg = sum / count.
+    ratingSum: { type: Number, default: 0, min: 0, validate: integer },
     ratingAvg: { type: Number, default: 0, min: 0, max: 5 },
     ratingCount: { type: Number, default: 0, min: 0, validate: integer },
 
@@ -323,6 +332,34 @@ const listingSchema = new Schema(
     stateKey: { type: String, maxlength: 100 },
     countryKey: { type: String, maxlength: 100 },
     locationKey: { type: String, maxlength: 320 },
+
+    // Set only on listings imported from a sample dataset (scripts/import-dataset.js);
+    // the import matches on it, so running it twice never duplicates.
+    importedFrom: {
+      source: { type: String, maxlength: 40 },
+      id: { type: String, maxlength: 64 },
+    },
+
+    // Places around the listing, from OpenStreetMap (P15-T01). Written only by
+    // src/services/nearby.js; distances are straight lines from the PUBLIC
+    // (approximate) point. `key` says which precise point the data is for.
+    nearby: {
+      fetchedAt: { type: Date },
+      attemptedAt: { type: Date },
+      source: { type: String, maxlength: 60 },
+      key: { type: String, maxlength: 32 },
+      failures: { type: Number, default: 0, min: 0 },
+      nextRetryAt: { type: Date },
+      items: [
+        {
+          _id: false,
+          category: { type: String, maxlength: 20 },
+          name: { type: String, maxlength: 100 },
+          kind: { type: String, maxlength: 40 },
+          distanceM: { type: Number, min: 0 },
+        },
+      ],
+    },
 
     // Soft delete: the row stays, the pages stop showing it (P04-T05).
     deletedAt: { type: Date },
@@ -450,9 +487,15 @@ listingSchema.index(
   },
 );
 
+// Deleting a listing removes the reviews written before bookings existed. A
+// review of a real stay (it has a reservation) is kept: it stays attached to
+// the listing's id and to the snapshot taken when it was written (P12-T01).
 listingSchema.post("findOneAndDelete", async (listing) => {
   if (listing) {
-    await Review.deleteMany({ _id: { $in: listing.reviews } });
+    await Review.deleteMany({
+      _id: { $in: listing.reviews },
+      reservation: { $exists: false },
+    });
   }
 });
 

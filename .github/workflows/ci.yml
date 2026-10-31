@@ -44,6 +44,10 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # Fails when a committed secret is found (P17-T04).
+      - name: Secret scan
+        run: npm run scan:secrets
+
       # One worker: every database suite starts its own mongod, and on a cold
       # cache parallel workers would all download the binary at once.
       - name: Test

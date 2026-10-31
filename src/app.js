@@ -31,12 +31,15 @@ const reviewRouter = require("./routes/review");
 const useRouter = require("./routes/user");
 const profileRouter = require("./routes/profile");
 const tripsRouter = require("./routes/trips");
+const notificationsRouter = require("./routes/notifications");
+const conversationsRouter = require("./routes/conversations");
 const reportsRouter = require("./routes/reports");
 const wishlistsRouter = require("./routes/wishlists");
 const compareRouter = require("./routes/compare");
 const pagesRouter = require("./routes/pages");
 const apiRouter = require("./routes/api");
 const adminRouter = require("./routes/admin");
+const accountRouter = require("./routes/account");
 const {
   assignCspNonce,
   securityHeaders,
@@ -96,8 +99,8 @@ function createApp({
   app.locals.emailVerificationRequired = Boolean(config.email && config.email.verificationRequired);
   app.locals.appBaseUrl = config.appBaseUrl;
   // How long after a stay a review may be written, and edited (P12-T01, P12-T03).
-  app.locals.reviewWindowDays = config.reviews.windowDays;
-  app.locals.reviewEditDays = config.reviews.editDays;
+  app.locals.reviewWindowDays = config.reviews && config.reviews.windowDays;
+  app.locals.reviewEditDays = config.reviews && config.reviews.editDays;
   app.locals.notificationSecret = config.sessionSecret; // keys the "stop these emails" links (P11-T05)
   // Email copies of notifications (P11-T05): only with a real config.email
   // (older test configs have none, so tests stay silent).
@@ -240,6 +243,17 @@ function createApp({
   app.use("/api/listings/:id/quote", limiters.quote);
   app.use("/api/destinations", limiters.destinations);
   app.post("/reports", limiters.report); // counts, then lets the reports router answer
+  // Sending a message or starting a conversation (P11-T02); counts, then the router answers.
+  app.post(
+    [
+      "/api/conversations/:id/messages",
+      "/api/listings/:id/conversations",
+      "/api/reservations/:id/conversation",
+      "/listings/:id/contact",
+      "/conversations/:id/messages",
+    ],
+    limiters.message,
+  );
   app.use("/api", apiRouter);
   app.use("/admin", adminRouter);
   app.use("/host", hostRouter);
@@ -251,10 +265,13 @@ function createApp({
   app.use("/", compareRouter);
   app.use("/", profileRouter);
   app.use("/", tripsRouter);
+  app.use("/", notificationsRouter);
+  app.use("/", conversationsRouter);
   app.use("/", pagesRouter);
   app.use("/", emailAuthRouter);
   app.use("/", notificationPrefsRouter);
   app.use("/", useRouter);
+  app.use("/", accountRouter);
 
   app.all("/{*splat}", (req, res, next) => {
     next(new NotFoundError());

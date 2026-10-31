@@ -178,6 +178,7 @@ module.exports.index = async (req, res) => {
     page,
     totalPages,
     filtered,
+    suggestions,
     today: formatDateOnly(todayIn(DEFAULT_TIMEZONE, now)),
     pageTitle: filtered
       ? "Search results"

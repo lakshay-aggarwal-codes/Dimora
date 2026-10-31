@@ -8,6 +8,7 @@ const { buildListingData } = require("../helpers/factories");
 const Listing = require("../../src/models/listing");
 const { stubListingSearch } = require("../helpers/listingSearch");
 const { evaluateReadiness } = require("../../src/services/readiness");
+const { stubListings } = require("../helpers/listingsStub");
 
 const VIEWS = path.join(__dirname, "..", "..", "views");
 const renderPartial = (name, locals) =>

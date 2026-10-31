@@ -79,6 +79,10 @@ const reservationSchema = new Schema(
     // original reservation (unique with the guest).
     idempotencyKey: { type: String, required: true, minlength: 8, maxlength: 64 },
 
+    // Set once by the sweeper when "check-in tomorrow" was sent (P11-T04), so
+    // a repeated pass or a second instance sends it only once.
+    reminders: { checkIn: { type: Date } },
+
     cancelReason: { type: String, trim: true, maxlength: 500 },
     cancelledBy: { type: String, enum: ACTORS },
     // What a cancellation refunds (P09-T03), written in the same update that

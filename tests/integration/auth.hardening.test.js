@@ -96,8 +96,8 @@ describe("signup validation (no database needed)", () => {
       .post("/signup")
       .type("form")
       .send("username[$ne]=x&email=a@example.com&password=a-long-pass-phrase");
-    expect(res.status).toBe(302);
-    expect(res.headers.location).toBe("/signup");
+    // The input guard (P17-T02) refuses operator-shaped fields before the route runs.
+    expect(res.status).toBe(400);
     expect(register).not.toHaveBeenCalled();
   });
 

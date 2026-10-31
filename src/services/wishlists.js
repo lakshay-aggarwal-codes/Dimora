@@ -20,6 +20,7 @@ function models(deps = {}) {
     Wishlist: deps.Wishlist || require("../models/wishlist"),
     WishlistItem: deps.WishlistItem || require("../models/wishlistItem"),
     ListingStat: deps.ListingStat || require("../models/listingStat"),
+    stats: deps.stats || require("./listingStats"),
     Listing: deps.Listing || require("../models/listing"),
     now: deps.now || (() => new Date()),
   };
@@ -54,7 +55,7 @@ async function ensureDefaultList(userId, deps) {
  * @returns {Promise<{ saved: boolean, changed: boolean }>}
  */
 async function setSaved(userId, listingId, saved, deps) {
-  const { WishlistItem, ListingStat, Listing, now } = models(deps);
+  const { WishlistItem, ListingStat, Listing, stats, now } = models(deps);
   if (typeof saved !== "boolean") {
     throw new ValidationError("Say whether to save or to remove this stay.");
   }
@@ -75,6 +76,7 @@ async function setSaved(userId, listingId, saved, deps) {
         { $inc: { saves: -removed } },
         { upsert: true },
       );
+      await stats.clampSaves(listingId); // never below zero (P13-T03)
     }
     return { saved: false, changed: removed > 0 };
   }
@@ -121,6 +123,7 @@ async function setSaved(userId, listingId, saved, deps) {
       { $inc: { saves: 1 } },
       { upsert: true },
     );
+    await stats.recordSave(listingId); // daily count for the host (P13-T03)
   }
   return { saved: true, changed: created };
 }

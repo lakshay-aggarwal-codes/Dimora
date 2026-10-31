@@ -26,6 +26,7 @@
     "format:check": "prettier --check .",
     "test": "jest",
     "test:coverage": "jest --coverage",
+    "test:e2e": "playwright test",
     "seed": "node scripts/seed.js",
     "seed:demo": "node scripts/seed-demo.js",
     "migrate": "node scripts/migrate.js",

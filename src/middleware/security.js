@@ -23,6 +23,7 @@ const MAPBOX_TILES = "https://*.tiles.mapbox.com";
 const MAPBOX_EVENTS = "https://events.mapbox.com";
 const CLOUDINARY = "https://res.cloudinary.com";
 const UNSPLASH = "https://images.unsplash.com"; // seed data pictures
+const MUSCACHE = "https://a0.muscache.com"; // pictures of imported sample_airbnb listings
 
 /**
  * helmet with a CSP that allows only this site, the CDNs above, Mapbox and
@@ -47,6 +48,7 @@ function securityHeaders({ isProduction = false } = {}) {
           "blob:",
           CLOUDINARY,
           UNSPLASH,
+          MUSCACHE,
           MAPBOX,
           MAPBOX_TILES,
         ],

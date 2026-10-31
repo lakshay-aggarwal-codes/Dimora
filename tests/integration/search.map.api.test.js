@@ -61,8 +61,10 @@ describe("GET /api/search/map", () => {
 
   test("a wrong filter value is ignored, like on the page, and does not stop the map", async () => {
     stubListings([stay(1)]);
-    const res = await get("?guests=abc&minPrice[$gt]=1&bbox=73,15,75,16");
+    const res = await get("?guests=abc&bbox=73,15,75,16");
     expect(res.status).toBe(200);
+    // An operator-shaped value is refused by the input guard (P17-T02), not ignored.
+    expect((await get("?minPrice[$gt]=1&bbox=73,15,75,16")).status).toBe(400);
   });
 
   test("without bbox it covers every place", async () => {

@@ -9,6 +9,7 @@ const {
   VIBE_VALUES,
   CANCELLATION_POLICY_VALUES,
   AMENITY_VALUES,
+  ACCESSIBILITY_VALUES,
 } = require("../config/constants");
 
 const { parseSeasons, SEASON_FIELD_NAMES } = require("../utils/priceRules");
@@ -144,6 +145,17 @@ const details = Joi.object({
       "any.only": "Choose amenities from the list.",
       "array.includes": "Choose amenities from the list.",
       "array.unique": "Each amenity can be chosen once.",
+    }),
+  accessibility: Joi.array()
+    .single()
+    .items(Joi.string().valid(...ACCESSIBILITY_VALUES))
+    .unique()
+    .default([])
+    .label("Accessibility features")
+    .messages({
+      "any.only": "Choose accessibility features from the list.",
+      "array.includes": "Choose accessibility features from the list.",
+      "array.unique": "Each accessibility feature can be chosen once.",
     }),
 });
 

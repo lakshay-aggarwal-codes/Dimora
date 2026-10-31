@@ -8,6 +8,7 @@
         const currentPage = typeof page === "number" ? page : 1;
         const pageCount = typeof totalPages === "number" ? totalPages : 1;
         const isFiltered = typeof filtered !== "undefined" ? filtered : false;
+        const hasSuggestions = typeof suggestions !== "undefined" && suggestions !== null;
         const todayText = typeof today === "string" && today ? today : undefined;
         const hidden = typeof hiddenFields === "function" ? hiddenFields : () => [];
     %>
@@ -268,6 +269,8 @@
 
     <script src="/js/filters.js"></script>
     <script src="/js/searchMap.js"></script>
+
+    <%- include("../partials/pagination.ejs", { page: results.page, totalPages: results.totalPages, baseUrl: "/listings", query: results.params }) %>
 
     <script nonce="<%= typeof cspNonce !== 'undefined' ? cspNonce : '' %>">
         // Previous and next category navigation

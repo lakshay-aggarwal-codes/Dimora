@@ -60,7 +60,7 @@
                     <% columns.forEach((c) => { %>
                     <th scope="col" class="compare-col">
                         <% if (c.available) { %>
-                            <% if (c.imageUrl) { %><img src="<%= c.imageUrl %>" alt="" class="compare-img"><% } %>
+                            <% if (c.imageUrl) { %><img src="<%= typeof imageUrl === 'function' ? imageUrl(c.imageUrl, 'thumb') : c.imageUrl %>" alt="" class="compare-img" width="200" height="150" loading="lazy" decoding="async"><% } %>
                             <a class="compare-title" href="<%= c.href %>"><%= c.title %></a>
                             <% if (c.where) { %><span class="compare-where"><%= c.where %></span><% } %>
                         <% } else { %>

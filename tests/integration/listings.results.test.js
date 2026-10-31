@@ -111,11 +111,13 @@ describe("pagination", () => {
 
   test("an invalid page number falls back to page 1", async () => {
     const { calls } = stubListings(docs(3));
-    for (const q of ["?page=abc", "?page=0", "?page=-3", "?page=1.5", "?page[$gt]=1"]) {
+    for (const q of ["?page=abc", "?page=0", "?page=-3", "?page=1.5"]) {
       const res = await get(q);
       expect(res.status).toBe(200);
       expect(calls.skip).toBe(0);
     }
+    // An operator-shaped page is refused by the input guard (P17-T02).
+    expect((await get("?page[$gt]=1")).status).toBe(400);
   });
 });
 
