@@ -25,6 +25,8 @@ function setup(responder = () => PAN) {
     return Promise.resolve({ ok: true, json: async () => responder(url) });
   };
   window.eval(SOURCE);
+  // jsdom reports "loading" while the page is parsed, so the script waits for this event; send it.
+  window.document.dispatchEvent(new window.Event("DOMContentLoaded"));
   const input = window.document.getElementById("d");
   const list = () => window.document.querySelector(".dest-ac-list");
   const type = async (text, wait = 320) => {
@@ -159,5 +161,6 @@ test("a browser without fetch is left alone", () => {
   const dom = new JSDOM(`<input id="d" data-destination-autocomplete>`, { runScripts: "outside-only", url: "http://localhost/" });
   dom.window.fetch = undefined;
   dom.window.eval(SOURCE);
+  dom.window.document.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
   assert.equal(dom.window.document.getElementById("d").getAttribute("role"), null);
 });

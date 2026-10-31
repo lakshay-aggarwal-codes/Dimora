@@ -6,6 +6,7 @@ const { loadTrust } = require("../services/trust");
 const ListingStat = require("../models/listingStat");
 const { VARIANTS, recordClick } = require("../services/rankingStats");
 const reviewService = require("../services/reviews");
+const listingStats = require("../services/listingStats");
 const { summarizeRatings } = require("../utils/ratings");
 const { can } = require("../policies");
 const { searchPage } = require("../services/search");
@@ -156,6 +157,12 @@ module.exports.showListings = async (req, res) => {
     throw new NotFoundError("That listing does not exist.");
   }
 
+  // Host statistics (P13-T03): one approximate view per session per day. Never
+  // fails the page, and never counts the host, previews or non-public listings.
+  if (!preview && isPublic(listing)) {
+    await listingStats.recordView(req, listing);
+  }
+
   // Only the validated coordinates reach the page (as data- attributes); the
   // whole listing document is never serialised into a script.
   // Offer the review form only to a guest with a completed, unreviewed stay
@@ -174,6 +181,19 @@ module.exports.showListings = async (req, res) => {
   // review, services/ratings.js); a listing that has none yet is counted from
   // the reviews it holds.
   const reviewList = newestFirst(listing.reviews);
+  // Which of these reviews the signed-in guest can still edit (P12-T03): their
+  // own, visible, inside the edit window. `edit` decides again on the PUT.
+  const editDays = req.app.locals.reviewEditDays;
+  const editableReviewIds =
+    req.user && !preview
+      ? reviewList
+          .filter(
+            (r) =>
+              can("review:edit", req.user, r) &&
+              reviewService.isEditable(r, new Date(), editDays),
+          )
+          .map((r) => String(r._id))
+      : [];
   const ratingSummary =
     listing.ratingCount > 0
       ? {
@@ -218,6 +238,8 @@ module.exports.showListings = async (req, res) => {
     hostTrust,
     reviewable,
     reviewList,
+    editableReviewIds,
+    editDays,
     ratingSummary,
     gallery,
     // The first photo, large, for the Open Graph tags (P18-T05); only an https

@@ -95,6 +95,9 @@ function createApp({
     createEmailService({ email: config.email, isProduction: Boolean(config.isProduction), logger });
   app.locals.emailVerificationRequired = Boolean(config.email && config.email.verificationRequired);
   app.locals.appBaseUrl = config.appBaseUrl;
+  // How long after a stay a review may be written, and edited (P12-T01, P12-T03).
+  app.locals.reviewWindowDays = config.reviews.windowDays;
+  app.locals.reviewEditDays = config.reviews.editDays;
   app.locals.notificationSecret = config.sessionSecret; // keys the "stop these emails" links (P11-T05)
   // Email copies of notifications (P11-T05): only with a real config.email
   // (older test configs have none, so tests stay silent).
