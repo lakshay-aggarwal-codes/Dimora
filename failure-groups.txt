@@ -1,0 +1,50 @@
+﻿  92x Error: expect(received).toBe(expected) // Object.is equality | Expected: 200
+       in: tests\integration\a11y.public.test.js, tests\integration\accessibility.page.test.js, tests\integration\admin.overview.db.test.js, tests\integration\admin.users.db.test.js
+  15x Error: Cannot set headers after they are sent to the client |     at ServerResponse.setHeader (node:_http_outgoing:647:11)
+       in: tests\integration\authz.db.test.js, tests\integration\host.wizard.db.test.js, tests\integration\images.routes.db.test.js, tests\integration\listings.crud.db.test.js
+   8x Error: expect(received).toEqual(expected) // deep equality | - Expected  - 1
+       in: tests\unit\cssArchitecture.test.js, tests\unit\docsApi.test.js, tests\unit\responsiveMotion.test.js, tests\unit\searchQuery.test.js
+   7x assert.strictEqual(received, expected) | Expected value to strictly be equal to:
+       in: tests\integration\destinations.db.test.js, tests\integration\emailAuth.db.test.js, tests\integration\purpose.db.test.js, tests\integration\trust.db.test.js
+   6x MongoBulkWriteError: EN duplicate key error collection: dimora_test.staynights index: listing_1_date_1 dup key: { listing: ObjectId('ID'), date: new Date(N) } |     at OrderedBulkOperation.handleWriteError (C:\Users\Lakshay\Deskto
+       in: tests\integration\queryPlans.db.test.js
+   6x Error: expect(received).toEqual(expected) // deep equality | - Expected  - 0
+       in: tests\unit\checkoutView.test.js, tests\unit\filterChips.test.js, tests\unit\nearby.test.js, tests\unit\routeMatrix.test.js
+   6x ReferenceError: window is not defined |     at Object.load (evalmachine.<anonymous>:156:7)
+       in: tests\unit\mapScript.test.js
+   5x Error: expect(received).toEqual(expected) // deep equality | - Expected  - 7
+       in: tests\integration\listings.filters.test.js, tests\integration\listings.search.test.js, tests\unit\docsApi.test.js
+   4x Error: expect(received).toBe(expected) // Object.is equality | Expected: 1
+       in: tests\integration\listing.detail.test.js, tests\integration\search.flex.test.js, tests\unit\sweeper.test.js
+   4x Error: expect(received).toBe(expected) // Object.is equality | Expected: 302
+       in: tests\integration\admin.users.db.test.js, tests\integration\host.wizard.db.test.js, tests\integration\listing.lifecycle.db.test.js
+   4x Error: expect(received).toBe(expected) // Object.is equality | Expected: true
+       in: tests\integration\authz.db.test.js, tests\integration\listings.results.test.js, tests\unit\reviews.edit.service.test.js
+   4x assert.match(received, expected) | Expected value match to:
+       in: tests\integration\purpose.db.test.js
+   4x BSONError: Argument passed in does not match the accepted types |     at new ObjectId (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\bson\src\objectid.ts:241:13)
+       in: tests\integration\review.migration.db.test.js
+   3x Error: expect(received).toEqual(expected) // deep equality | - Expected  -  1
+       in: tests\unit\docsApi.test.js, tests\unit\noUserDate.test.js, tests\unit\routeMatrix.test.js
+   3x Error: expect(received).toBe(expected) // Object.is equality | Expected: 2
+       in: tests\integration\pages.responsive.test.js, tests\integration\search.suggestions.db.test.js, tests\unit\sweeper.test.js
+   3x Error: expect(received).toContain(expected) // indexOf | Expected substring: "No stays yet"
+       in: tests\integration\listings.empty.test.js, tests\integration\listings.results.test.js, tests\integration\listings.search.test.js
+   3x TypeError: Cannot read properties of null (reading '1') |     at mapPoint (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\listings.publicLocation.test.js:46:54)
+       in: tests\integration\listings.publicLocation.test.js
+   2x Error: expect(received).toHaveLength(expected) | Expected length: 5
+       in: tests\integration\listings.results.test.js, tests\integration\reviews.ui.db.test.js
+   2x Error: expect(received).toContain(expected) // indexOf | Expected substring: "No stays match your search"
+       in: tests\integration\listings.filters.test.js, tests\integration\listings.results.test.js
+   2x Error: expect(received).not.toThrow() | Error name:    "SyntaxError"
+       in: tests\integration\lifecycle.views.test.js, tests\unit\viewsCompile.test.js
+   2x Error: expect(received).toBe(expected) // Object.is equality | Expected: "Goa"
+       in: tests\integration\listings.search.test.js
+   2x Error: expect(received).toBeUndefined() | Received: [ValidationError: Listing validation failed: title: Path `title` is required.]
+       in: tests\unit\wizard.priceRules.test.js
+   2x Error: expect(received).toContain(expected) // indexOf | Expected substring: "Free stay"
+       in: tests\integration\listings.availability.db.test.js
+   2x Error: expect(received).toContain(expected) // indexOf | Expected substring: "Taken stay"
+       in: tests\integration\listings.availability.db.test.js
+   2x Error: expect(received).not.toContain(expected) // indexOf | Expected value: not [Function isLoggedIn]
+       in: tests\unit\routeMatrix.test.js
