@@ -211,43 +211,7 @@
                 <% } %>
             </div>
 
-            <aside class="col-12 col-lg-5" aria-labelledby="summary-heading">
-                <h2 id="summary-heading" class="visually-hidden">Price and location</h2>
-
-                <div class="listing-panel">
-                    <% if (hasPrice) { %>
-                        <p class="listing-price">&#8377; <%= listing.price.toLocaleString("en-IN") %> <span class="price-unit">/ night</span></p>
-                    <% } else { %>
-                        <p class="listing-price">Price not available</p>
-                    <% } %>
-
-                    <% if (canEditListing || canDeleteListing) { %>
-                        <div class="listing-actions">
-                            <% if (canEditListing) { %>
-                                <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark">Edit</a>
-                            <% } %>
-                            <% if (canDeleteListing) { %>
-                                <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
-                                    <%- include("../includes/csrf.ejs") %>
-                                    <button type="submit" class="btn btn-dark">Delete</button>
-                                </form>
-                            <% } %>
-                        </div>
-                    <% } %>
-                </div>
-
-                <section class="mt-4" aria-labelledby="map-heading">
-                    <h2 id="map-heading" class="h4">Where you'll be</h2>
-                    <% if (typeof mapPoint !== 'undefined' && mapPoint) { %>
-                        <div id="map" data-token="<%= mapPublicToken %>" data-lng="<%= mapPoint.lng %>"
-                            data-lat="<%= mapPoint.lat %>" data-title="<%= listing.title %>"></div>
-                    <% } else { %>
-                        <p class="text-muted">The map is not available for this listing yet.</p>
-                    <% } %>
-                </section>
-            </aside>
         </div>
-        <%}%>
 
         <!-- Reviews: full width below -->
         <section aria-labelledby="reviews-heading" class="mt-5">

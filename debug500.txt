@@ -1,0 +1,49 @@
+﻿
+>       [DEBUG_500] GET /listings/64b0f0f0f0f0f0f0f0f0aaaa 
+         ReferenceError: publicPage is not defined
+            at publicPage (C:\Users\Lakshay\Desktop\WebDev\project\src\controllers\listing.js:283:21)
+  System.Management.Automation.RemoteException
+      [0m [90m 110 |[39m [36mfunction[39m createErrorHandler({ isProduction[33m,[39m logger }) {
+       [90m 111 |[39m   [36mreturn[39m [36mfunction[39m errorHandler(err[33m,[39m req[33m,[39m 
+res[33m,[39m next) {
+>     [31m[1m>[22m[39m[90m 112 |[39m     [36mif[39m (process[33m.[39menv[33m.[39m[33mDEBUG_500[39m) 
+console[33m.[39merror([32m'[DEBUG_500]'[39m[33m,[39m req[33m.[39mmethod[33m,[39m 
+req[33m.[39moriginalUrl[33m,[39m [32m'\n'[39m[33m,[39m err [33m&&[39m err[33m.[39mstack [33m?[39m 
+err[33m.[39mstack[33m.[39msplit([32m'\n'[39m)[33m.[39mslice([35m0[39m[33m,[39m 
+[35m8[39m)[33m.[39mjoin([32m'\n'[39m) [33m:[39m err)[33m;[39m
+       [90m     |[39m                                        [31m[1m^[22m[39m
+       [90m 113 |[39m     [36mif[39m (res[33m.[39mheadersSent) {
+       [90m 114 |[39m       [36mreturn[39m next(err)[33m;[39m
+       [90m 115 |[39m     }[0m
+  System.Management.Automation.RemoteException
+        at error (src/middleware/errors.js:112:40)
+        at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+        at trimPrefix (node_modules/router/index.js:340:13)
+        at node_modules/router/index.js:297:9
+>       [DEBUG_500] GET /listings?destination=Nowhere 
+         ReferenceError: C:\Users\Lakshay\Desktop\WebDev\project\views\listings\index.ejs:273
+            271|     <script src="/js/searchMap.js"></script>
+            272| 
+         >> 273|     <%- include("../partials/pagination.ejs", { page: results.page, totalPages: results.totalPages, 
+baseUrl: "/listings", query: results.params }) %>
+            274| 
+            275|     <script nonce="<%= typeof cspNonce !== 'undefined' ? cspNonce : '' %>">
+            276|         // Previous and next category navigation
+  System.Management.Automation.RemoteException
+      [0m [90m 110 |[39m [36mfunction[39m createErrorHandler({ isProduction[33m,[39m logger }) {
+>     [31m[1m>[22m[39m[90m 112 |[39m     [36mif[39m (process[33m.[39menv[33m.[39m[33mDEBUG_500[39m) 
+console[33m.[39merror([32m'[DEBUG_500]'[39m[33m,[39m req[33m.[39mmethod[33m,[39m 
+req[33m.[39moriginalUrl[33m,[39m [32m'\n'[39m[33m,[39m err [33m&&[39m err[33m.[39mstack [33m?[39m 
+err[33m.[39mstack[33m.[39msplit([32m'\n'[39m)[33m.[39mslice([35m0[39m[33m,[39m 
+[35m8[39m)[33m.[39mjoin([32m'\n'[39m) [33m:[39m err)[33m;[39m
+       [90m     |[39m                                        [31m[1m^[22m[39m
+       [90m 113 |[39m     [36mif[39m (res[33m.[39mheadersSent) {
+       [90m 114 |[39m       [36mreturn[39m next(err)[33m;[39m
+       [90m 115 |[39m     }[0m
+  System.Management.Automation.RemoteException
+        at error (src/middleware/errors.js:112:40)
+        at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+        at trimPrefix (node_modules/router/index.js:340:13)
+        at node_modules/router/index.js:297:9
+
+
