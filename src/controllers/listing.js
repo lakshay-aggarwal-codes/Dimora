@@ -243,6 +243,8 @@ module.exports.showListings = async (req, res) => {
   }
 
   const gallery = galleryOf(listing);
+  // Public facts only on a page anyone can see: never a draft, never the host's preview.
+  const publicPage = isPublic(listing) && !preview;
   // A draft or unpublished listing, seen by its host or an admin, is not for
   // search engines (P18-T05).
   if (!isPublic(listing)) {
@@ -273,7 +275,6 @@ module.exports.showListings = async (req, res) => {
     neighborhood: neighborhoodFor(listing),
     guestView: preview,
     datePicker: datePickerFor(listing, req.query),
-    ratingSummary,
     amenityGroups: groupAmenities(listing.amenities),
     facts: {
       propertyType: labelOf(PROPERTY_TYPES, listing.propertyType),
