@@ -274,10 +274,11 @@ describeDb("listing lifecycle", () => {
         listing.title,
       );
       expect((await createAgent().get("/")).text).not.toContain(listing.title);
+      // The normal 404 page for everyone, the owner included (P04-T05, P04-T07).
       expect((await createAgent().get(`/listings/${listing._id}`)).status).toBe(
-        302,
+        404,
       );
-      expect((await agent.get(`/listings/${listing._id}`)).status).toBe(404); // gone for the owner too
+      expect((await agent.get(`/listings/${listing._id}`)).status).toBe(404);
       expect((await agent.get(status(listing))).status).toBe(404);
     });
 

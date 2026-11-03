@@ -1,0 +1,9 @@
+﻿>     [DEBUG_EDIT] TypeError: Cannot read properties of undefined (reading 'catch')
+          at C:\Users\Lakshay\Desktop\WebDev\project\src\utils\wrapAsync.js:3:23
+          at Layer.handleRequest (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\router\lib\layer.js:152:17)
+          at next (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\router\lib\route.js:157:13)
+          at next (C:\Users\Lakshay\Desktop\WebDev\project\src\middleware\authorize.js:72:5)
+          at processTicksAndRejections (node:internal/process/task_queues:104:5)
+  
+      [0m [90m 110 |[39m [36mfunction[39m createErrorHandler({ isProduction[33m,[39m logger }) {
+       [90m 111 |[39m   [36mreturn[39m [36mfunction[39m errorHandler(err[33m,[39m req[33m,[39m res[33m,[39m next) {

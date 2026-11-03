@@ -43,6 +43,7 @@ function renderEdit(res, listing, { failed, status = 200 } = {}) {
     errors,
     formError: failed && failed.formError,
     failedKey: failed && failed.key,
+    sections: SECTIONS,
     lists: LISTS,
     gallery: galleryOf(listing),
     maxImages: MAX_IMAGES,

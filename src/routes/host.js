@@ -9,6 +9,7 @@ const reservations = require("../controllers/hostReservations");
 const hostCalendar = require("../controllers/hostCalendar");
 const hostStats = require("../controllers/hostStats");
 const hostReport = require("../controllers/hostReport");
+const hostOverview = require("../controllers/hostOverview");
 
 const router = express.Router();
 const mayCreate = [isLoggedIn, authorize("listing:create")];
@@ -56,6 +57,9 @@ router.post(
   ...mayEdit,
   wrapAsync(availability.unblock),
 );
+
+// The overview tiles (P13-T01): any signed-in member; it only reads their own data.
+router.get("/", isLoggedIn, wrapAsync(hostOverview.show));
 
 // Earnings and occupancy per listing for a range of months, page and CSV
 // (P13-T04): any signed-in host; it only reads that host's own data.

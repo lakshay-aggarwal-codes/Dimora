@@ -189,7 +189,7 @@ describe("the most data", () => {
 
   test("the host card", () => {
     expect(html).toContain("Hosted by Ann &lt;i&gt;Host&lt;/i&gt;");
-    expect(html).toContain("Member since 2023");
+    expect(html).toMatch(/Member since (?:[A-Za-z]+ )?2023/);
     expect(html).toMatch(/host-avatar" aria-hidden="true">A</);
   });
 

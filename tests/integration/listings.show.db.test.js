@@ -59,6 +59,10 @@ describeDb("listing detail page (database)", () => {
       title: "Legacy Home",
       owner: owner._id,
       reviews: [],
+      // Old documents have no geometry or price, but since the status lifecycle
+      // (P04-T01) every stored listing has a status; a visitor only sees published ones.
+      status: "published",
+      deletedAt: null,
     });
     const res = await createAgent().get(`/listings/${_id}`);
     expect(res.status).toBe(200);
