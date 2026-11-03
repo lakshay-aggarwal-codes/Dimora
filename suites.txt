@@ -1,108 +1,80 @@
-﻿integration\notificationPrefs.routes.test.js  [1]  opening the link shows a button and changes NOTHING
-    Error: expect(received).toContain(expected) // indexOf | Expected substring: "Stop <strong>Bookings</strong> emails" | Received string:    "<!DOCTYPE html> | <html lang=\"en\">Â·
-unit\sweeper.test.js  [6]  a failed or abandoned payment keeps the nights held until the payment hold runs out, then they are released
+﻿unit\sweeper.test.js  [6]  a failed or abandoned payment keeps the nights held until the payment hold runs out, then they are released
     Error: expect(received).toHaveLength(expected) | Expected length: 3 | Received length: 0 | Received array:  []
+unit\trips.service.test.js  [1]  open and closed carry the last day; done carries the review
+    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 1 | + Received  + 0 | @@ -1,11 +1,10 @@
+unit\docsReadme.test.js  [2]  lists exactly the keys the settings code reads
+    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 6 | + Received  + 0 | @@ -2,22 +2,16 @@
+integration\notificationPrefs.routes.test.js  [1]  opening the link shows a button and changes NOTHING
+    Error: expect(received).toContain(expected) // indexOf | Expected substring: "Stop <strong>Bookings</strong> emails" | Received string:    "<!DOCTYPE html> | <html lang=\"en\">Â·
+unit\wizard.priceRules.test.js  [2]  good rules pass
+    Error: expect(received).toBeUndefined() | Received: [ValidationError: Listing validation failed: title: Path `title` is required.]
+unit\cssArchitecture.test.js  [3]  components.css has no colours or literal animation times
+    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 1 | + Received  + 4 | - Array []
+unit\noUserDate.test.js  [1]  application code only builds dates through src/utils/dates.js
+    Error: expect(received).toEqual(expected) // deep equality | - Expected  -  1 | + Received  + 23 | - Array []
+unit\mapScript.test.js  [6]  on load it draws one polygon whose edge is the given radius from the centre
+    ReferenceError: window is not defined
+unit\nearby.test.js  [1]  only the host controller imports the nearby service; no public controller, route or view helper does
+    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 0 | + Received  + 2 |   Array [
+unit\filterChips.test.js  [1]  PANEL_FIELDS are the URL names of the panel's inputs
+    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 0 | + Received  + 1 | @@ -4,7 +4,8 @@
+unit\responsiveMotion.test.js  [1]  every table is inside a .table-responsive wrapper
+    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 1 | + Received  + 1 |   Object {
+unit\reviews.edit.service.test.js  [1]  the window is configurable per service and per call
+    Error: expect(received).toBe(expected) // Object.is equality | Expected: true | Received: false
+unit\securityReview.static.test.js  [1]  only the allow-listed expressions are printed raw
+    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 1 | + Received  + 7 | - Array []
+unit\responsiveViews.test.js  [1]  categories are links inside a labelled nav, not clickable divs
+    Error: expect(received).toMatch(expected) | Expected pattern: /<a class="filter<%= category\.active[^>]*href="<%= category\.href %>"/ | Received string:  "<% layout(\"layouts/boilerPlate\") %> |     <%
+unit\checkoutView.test.js  [1]  anything that is not in the strict format is ignored
+    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 0 | + Received  + 4 | @@ -2,9 +2,13 @@
+unit\searchQuery.test.js  [1]  empty values mean 'not set'; unknown names and prototype keys are ignored
+    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 1 | + Received  + 3 | - Object {}
 integration\rating.migration.db.test.js  [1]  only whole 1 to 5 ratings count; listings already right are left alone; safe to run twice
     Error: expect(received).toMatchObject(expected) | - Expected  - 3 | + Received  + 3 |   Object {
 integration\review.migration.db.test.js  [4]  a dry run only counts
     BSONError: Argument passed in does not match the accepted types
-unit\trips.service.test.js  [1]  open and closed carry the last day; done carries the review
-    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 1 | + Received  + 0 | @@ -1,11 +1,10 @@
-unit\docsApi.test.js  [5]  lists every route the app serves, and no route it does not
-    Error: expect(received).toEqual(expected) // deep equality | - Expected  -  1 | + Received  + 62 |   Object {
 integration\flexibleDates.db.test.js  [1]  an expired hold counts as free, a live hold does not
     TypeError: holdExpiresAt must be in the future
+unit\docsApi.test.js  [5]  lists every route the app serves, and no route it does not
+    Error: expect(received).toEqual(expected) // deep equality | - Expected  -  1 | + Received  + 63 |   Object {
 unit\docsDemo.test.js  [1]  it says routers are unreachable only while that is true
     Error: expect(received).not.toMatch(expected) | Expected pattern: not /require\(["'][^"']*routes\/conversations["']\)/ | Received string:      "const path = require(\"node:path\"); | const express = require(\"express\");
-unit\reviews.edit.service.test.js  [1]  the window is configurable per service and per call
-    Error: expect(received).toBe(expected) // Object.is equality | Expected: true | Received: false
-unit\docsReadme.test.js  [2]  lists exactly the keys the settings code reads
-    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 6 | + Received  + 0 | @@ -2,22 +2,16 @@
-integration\listing.detail.test.js  [1]  the host card
-    Error: expect(received).toContain(expected) // indexOf | Expected substring: "Member since 2023" | Received string:    "<!DOCTYPE html> | <html lang=\"en\">Â·
-unit\wizard.priceRules.test.js  [2]  good rules pass
-    Error: expect(received).toBeUndefined() | Received: [ValidationError: Listing validation failed: title: Path `title` is required.]
-integration\queryPlans.db.test.js  [6]  every hot query keeps what it promises, as MongoDB itself plans it
-    MongoBulkWriteError: E11000 duplicate key error collection: dimora_test.staynights index: listing_1_date_1 dup key: { listing: ObjectId('6ae71a21ab6da1afc794853e'), date: new Date(1793491200000) }
-unit\searchQuery.test.js  [1]  empty values mean 'not set'; unknown names and prototype keys are ignored
-    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 1 | + Received  + 3 | - Object {}
-unit\nearby.test.js  [1]  only the host controller imports the nearby service; no public controller, route or view helper does
-    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 0 | + Received  + 2 |   Array [
-integration\modifications.db.test.js  [1]  ten parallel changes of one booking to different dates: exactly one wins and the ledger follows it
-    Error: expect(received).toHaveLength(expected) | Expected length: 1 | Received length: 2 | Received array:  ["won", "won"]
-unit\cssArchitecture.test.js  [3]  components.css has no colours or literal animation times
-    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 1 | + Received  + 4 | - Array []
-unit\responsiveMotion.test.js  [1]  every table is inside a .table-responsive wrapper
-    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 1 | + Received  + 1 |   Object {
-unit\noUserDate.test.js  [1]  application code only builds dates through src/utils/dates.js
-    Error: expect(received).toEqual(expected) // deep equality | - Expected  -  1 | + Received  + 23 | - Array []
-unit\responsiveViews.test.js  [1]  categories are links inside a labelled nav, not clickable divs
-    Error: expect(received).toMatch(expected) | Expected pattern: /<a class="filter<%= category\.active[^>]*href="<%= category\.href %>"/ | Received string:  "<% layout(\"layouts/boilerPlate\") %> |     <%
-integration\reviews.routes.test.js  [4]  a signed-in member with no stay to review sees an explanation, not a form
-    Error: expect(received).toContain(expected) // indexOf | Expected substring: "Reviews come from guests who stayed here." | Received string:    "<!DOCTYPE html> | <html lang=\"en\">Â·
-unit\securityReview.static.test.js  [1]  only the allow-listed expressions are printed raw
-    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 1 | + Received  + 7 | - Array []
-unit\checkoutView.test.js  [1]  anything that is not in the strict format is ignored
-    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 0 | + Received  + 4 | @@ -2,9 +2,13 @@
-integration\listings.results.test.js  [1]  sort links keep the search and start again at page 1
-    Error: expect(received).toHaveLength(expected) | Expected length: 5 | Received length: 9 | Received array:  ["/listings?dest=Goa&guests=2", "/listings?dest=Goa&guests=2&sort=price_asc", "/listings?dest=Goa&guests=2&sort=price_desc", "/listings?dest=Goa&guests=2&sort=rating", "/listings?dest=Goa&guests=2&sort=newest", "
-integration\listings.search.test.js  [2]  unknown parameters and operator-looking ones change nothing
-    Error: expect(received).toBe(expected) // Object.is equality | Expected: 200 | Received: 400
-integration\listings.filters.test.js  [2]  has every control the filters need, named like the URL
-    Error: expect(received).toBe(expected) // Object.is equality | Expected: 6 | Received: 0
-unit\mapScript.test.js  [6]  on load it draws one polygon whose edge is the given radius from the centre
-    ReferenceError: window is not defined
-unit\routeMatrix.test.js  [7]  no route is missing from tests/helpers/routeMatrix.js, and no entry is left over
-    Error: expect(received).toEqual(expected) // deep equality | - Expected  -  1 | + Received  + 11 |   Object {
-unit\filterChips.test.js  [1]  PANEL_FIELDS are the URL names of the panel's inputs
-    Error: expect(received).toEqual(expected) // deep equality | - Expected  - 0 | + Received  + 1 | @@ -4,7 +4,8 @@
-integration\hostOverview.routes.test.js  [8]  signed out: a redirect to log in
-    Error: expect(received).toContain(expected) // indexOf | Expected value: 404 | Received array: [301, 302, 303]
-integration\conversations.routes.test.js  [1]  an older page (?before=) is not polled
-    Error: expect(received).not.toContain(expected) // indexOf | Expected substring: not "data-poll-seconds" | Received string:        "<!DOCTYPE html> | <html lang=\"en\">
 integration\listings.index.cards.test.js  [1]  each listing is a card with its link, title, place and formatted price
-    Error: expect(received).toContain(expected) // indexOf | Expected substring: "href=\"/listings/6ae71a2606263650c5985946\"" | Received string:    "<!DOCTYPE html> | <html lang=\"en\">Â·
+    Error: expect(received).toContain(expected) // indexOf | Expected substring: "href=\"/listings/6ae949abb784f465ddefd22a\"" | Received string:    "<!DOCTYPE html> | <html lang=\"en\">Â·
 integration\admin.test.js  [1]  the viewer has no form, button or link that could change an entry
     Error: expect(received).not.toMatch(expected) | Expected pattern: not /<form/ | Received string:      "id=\"main\" class=\"container\" tabindex=\"-1\"> | <div class=\"row mt-3\">
 integration\pages.responsive.test.js  [1]  reviews are a list of articles with an accessible rating
     Error: expect(received).toBe(expected) // Object.is equality | Expected: 2 | Received: 0
-integration\reports.views.test.js  [1]  a signed-in member has Your reports
-    Error: expect(received).toMatch(expected) | Expected pattern: /<a class="dropdown-item" href="\/reports"[^>]*>Your reports<\/a>/ | Received string:  "<!DOCTYPE html> | <html lang=\"en\">Â·
-integration\listings.show.db.test.js  [1]  a legacy listing stored without geometry or price still renders
-    Error: expect(received).toBe(expected) // Object.is equality | Expected: 200 | Received: 404
+integration\queryPlans.db.test.js  [6]  every hot query keeps what it promises, as MongoDB itself plans it
+    MongoBulkWriteError: E11000 duplicate key error collection: dimora_test.staynights index: listing_1_date_1 dup key: { listing: ObjectId('6ae949aa99b005f3c0e21c94'), date: new Date(1793664000000) }
 integration\csrf.test.js  [0]  (suite)
       â— Test suite failed to run |     A router is mounted without a known path: mount it with app.use('/path', router) in createApp, or extend this test. |       50 |         const mount = mounts.find((m) => m.router === layer.handle); |       51 |         if (!mount) {
+integration\listings.results.test.js  [1]  sort links keep the search and start again at page 1
+    Error: expect(received).toHaveLength(expected) | Expected length: 5 | Received length: 9 | Received array:  ["/listings?dest=Goa&guests=2", "/listings?dest=Goa&guests=2&sort=price_asc", "/listings?dest=Goa&guests=2&sort=price_desc", "/listings?dest=Goa&guests=2&sort=rating", "/listings?dest=Goa&gues
+integration\listings.search.test.js  [2]  unknown parameters and operator-looking ones change nothing
+    Error: expect(received).toBe(expected) // Object.is equality | Expected: 200 | Received: 400
+integration\modifications.db.test.js  [1]  ten parallel changes of one booking to different dates: exactly one wins and the ledger follows it
+    Error: expect(received).toHaveLength(expected) | Expected length: 1 | Received length: 2 | Received array:  ["won", "won"]
+integration\listings.filters.test.js  [2]  has every control the filters need, named like the URL
+    Error: expect(received).toBe(expected) // Object.is equality | Expected: 6 | Received: 0
+unit\routeMatrix.test.js  [7]  no route is missing from tests/helpers/routeMatrix.js, and no entry is left over
+    Error: expect(received).toEqual(expected) // deep equality | - Expected  -  1 | + Received  + 12 |   Object {
+integration\conversations.routes.test.js  [1]  an older page (?before=) is not polled
+    Error: expect(received).not.toContain(expected) // indexOf | Expected substring: not "data-poll-seconds" | Received string:        "<!DOCTYPE html> | <html lang=\"en\">
 integration\host.report.db.test.js  [1]  bad months give a 400, never a crash or someone else's data
     Error: expect(received).toBe(expected) // Object.is equality | Expected: 400 | Received: 200
-integration\reviews.ui.db.test.js  [1]  a signed-in member with no stay sees no review form (P12-T01)
-    Error: expect(received).toContain(expected) // indexOf | Expected substring: "Reviews come from guests who stayed here." | Received string:    "<!DOCTYPE html> | <html lang=\"en\">Â·
-integration\admin.users.db.test.js  [1]  suspend: status, listings hidden, sessions gone, login refused, one audit row
-    Error: expect(received).toBe(expected) // Object.is equality | Expected: 302 | Received: 403
-integration\images.routes.db.test.js  [5]  upload adds photos at the end and shows a message on the edit page
-    Error: Cannot set headers after they are sent to the client
 integration\emailAuth.db.test.js  [4]  asking again is throttled, and a new link replaces the old one
     assert.strictEqual(received, expected) | Expected value to strictly be equal to: |   2 | Received:
+integration\admin.users.db.test.js  [1]  suspend: status, listings hidden, sessions gone, login refused, one audit row
+    Error: expect(received).toBe(expected) // Object.is equality | Expected: 302 | Received: 403
 integration\account.db.test.js  [2]  a member with nothing open: anonymised, logged out, old credentials dead, no PII in the stored document
     Error: expect(received).toBe(expected) // Object.is equality | Expected: "/login" | Received: undefined
-integration\listings.sections.db.test.js  [2]  shows a form for every section and the photo manager
-    Error: Cannot set headers after they are sent to the client | Error: expect(received).toBe(expected) // Object.is equality | Expected: 200 | Received: 500
-integration\listings.crud.db.test.js  [2]  the edit form renders
-    Error: Cannot set headers after they are sent to the client | Error: expect(received).toBe(expected) // Object.is equality | Expected: 200 | Received: 500
-integration\listing.lifecycle.db.test.js  [1]  the listing disappears for everyone; the row and its reviews stay
-    Error: expect(received).toBe(expected) // Object.is equality | Expected: 302 | Received: 404
 integration\search.suggestions.db.test.js  [1]  a search where the destination is the problem offers popular destinations only
     Error: expect(received).not.toContain(expected) // indexOf | Expected substring: not "Try this instead" | Received string:        "<!DOCTYPE html> | <html lang=\"en\">
-integration\a11y.members.test.js  [1]  a booking page: confirmed with a review form, and pending
-    TypeError: C:\Users\Lakshay\Desktop\WebDev\project\views\trips\show.ejs:75 |     73|         <% } %> |     74|  |  >> 75|         <% if (trip.changes.length) { %>
-integration\availability.db.test.js  [1]  a draft has no calendar link
-    Error: expect(received).not.toContain(expected) // indexOf | Expected substring: not "/calendar" | Received string:        "<!DOCTYPE html> | <html lang=\"en\">
 integration\admin.overview.db.test.js  [2]  malformed input never breaks the page
     Error: expect(received).toBe(expected) // Object.is equality | Expected: 200 | Received: 400
+integration\availability.db.test.js  [1]  a draft has no calendar link
+    Error: expect(received).not.toContain(expected) // indexOf | Expected substring: not "/calendar" | Received string:        "<!DOCTYPE html> | <html lang=\"en\">
 integration\seed.demo.db.test.js  [1]  bookings carry real snapshots, back-dated times and the host's answers
-    Error: expect(received).toBeLessThan(expected) | Expected: < 1793530404068 | Received:   1793530405184
-integration\host.wizard.db.test.js  [7]  a later step redirects to the first unfinished one with a message
-    Error: Cannot set headers after they are sent to the client
-integration\authz.db.test.js  [1]  owner -> 200
-    Error: Cannot set headers after they are sent to the client | Error: expect(received).toBe(expected) // Object.is equality | Expected: 200 | Received: 500
-unit\bookingStress.test.js  [1]  seed 2: 1,000 operations, zero invariant violations
-    Error: thrown: "Exceeded timeout of 15000 ms for a test. | Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout." | [cause]: Error: thrown: "Exceeded timeout of 15000 ms for a test. | Add a timeout value to this test to increase the
+    Error: expect(received).toBeLessThan(expected) | Expected: < 1793673648118 | Received:   1793673649859
