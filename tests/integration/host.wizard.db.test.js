@@ -407,8 +407,8 @@ describeDb("listing wizard", () => {
       expect((await anon.get("/listings")).text).not.toContain(BASICS.title);
       expect((await anon.get("/")).text).not.toContain(BASICS.title);
       const direct = await anon.get(`/listings/${draft._id}`);
-      expect(direct.status).toBe(302);
-      expect(direct.headers.location).toBe("/listings");
+      // The normal 404 page for a draft, like for any listing that is not public (P04-T07).
+      expect(direct.status).toBe(404);
       const { agent: stranger } = await host();
       expect((await stranger.get(`/listings/${draft._id}`)).status).toBe(404);
     });
@@ -428,7 +428,7 @@ describeDb("listing wizard", () => {
         status: "unpublished",
       });
       const res = await createAgent().get(`/listings/${listing._id}`);
-      expect(res.status).toBe(302);
+      expect(res.status).toBe(404);
       expect((await createAgent().get("/listings")).text).not.toContain(
         listing.title,
       );

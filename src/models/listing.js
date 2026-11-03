@@ -67,15 +67,6 @@ const imageSchema = new Schema({
   order: { type: Number, min: 0, validate: integer, default: 0 },
 });
 
-const nearbyItemSchema = new Schema(
-  {
-    name: { type: String },
-    category: { type: String },
-    distanceMeters: { type: Number, min: 0 },
-  },
-  { _id: false },
-);
-
 const count = (def, min, max) => ({
   type: Number,
   default: def,
@@ -106,10 +97,6 @@ const listingSchema = new Schema(
 
     propertyType: { type: String, enum: PROPERTY_TYPES },
     roomType: { type: String, enum: ROOM_TYPES },
-    // The setting a host chose (beach, mountain, ...). Optional, no default;
-    // the category strip on /listings filters on it (P05-T04).
-    vibe: { type: String, enum: VIBES },
-
     // The setting around the place (beach, mountain, ...). Optional: the host
     // chooses it in the basics step; the category strip on /listings reads it
     // (P05-T04). Listings that never set it simply match no vibe category.
@@ -302,12 +289,6 @@ const listingSchema = new Schema(
     ratingSum: { type: Number, default: 0, min: 0, validate: integer },
     ratingAvg: { type: Number, default: 0, min: 0, max: 5 },
     ratingCount: { type: Number, default: 0, min: 0, validate: integer },
-
-    // Nearby places cache (P15-T01).
-    nearby: {
-      fetchedAt: { type: Date },
-      items: { type: [nearbyItemSchema] },
-    },
 
     reviews: [
       {

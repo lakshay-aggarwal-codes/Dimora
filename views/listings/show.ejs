@@ -11,7 +11,8 @@
         const canReport = (owner) => !signedIn || can("report:create", { owner });
         const canDeleteListing = !guestPreview && can("listing:delete", listing);
         const place = [listing.location, listing.country].filter(Boolean).join(", ");
-        const reviews = Array.isArray(listing.reviews) ? listing.reviews : [];
+        // Newest first, with the "before bookings existed" flag (P12-T02); the stored list is the fallback.
+        const reviews = typeof reviewList !== "undefined" && Array.isArray(reviewList) ? reviewList : (Array.isArray(listing.reviews) ? listing.reviews : []);
         // Ids of the reviews the signed-in guest can still edit (P12-T03).
         const editableIds = typeof editableReviewIds !== "undefined" && Array.isArray(editableReviewIds) ? editableReviewIds : [];
         const summary = typeof ratingSummary !== "undefined" && ratingSummary ? ratingSummary : { average: null, count: 0 };
@@ -245,6 +246,7 @@
                             <span class="visually-hidden">Rated <%= review.rating %> out of 5</span>
                         </p>
                         <p class="review-comment"><%= review.comment %></p>
+                        <% if (review.legacy) { %><p class="review-legacy small text-body-secondary">Posted before bookings existed on Dimora</p><% } %>
                         <% if (review.editedAt) { %><p class="small text-body-secondary mb-2">Edited</p><% } %>
                         <% const hostReply = review.reply && review.reply.text ? review.reply : null; %>
                         <% if (hostReply) { %>
