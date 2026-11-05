@@ -28,6 +28,7 @@
     "test:coverage": "jest --coverage",
     "test:e2e": "playwright test",
     "seed": "node scripts/seed.js",
+    "explain": "node scripts/explain-queries.js",
     "seed:demo": "node scripts/seed-demo.js",
     "migrate": "node scripts/migrate.js",
     "migrate:dry": "node scripts/migrate.js --dry-run",

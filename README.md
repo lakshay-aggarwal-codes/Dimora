@@ -51,6 +51,12 @@ Set in `.env` (never commit it). `.env.example` has a comment for each.
 | `SWEEPER_ENABLED` | no | `true` | the housekeeping job (see [The sweeper](#the-sweeper)) |
 | `SWEEPER_INTERVAL_SECONDS` | no | `60` | how often it runs, 5 to 3600 |
 | `REVIEW_WINDOW_DAYS` | no | `30` | days after check-out a guest can still review the stay (1 to 365) |
+| `REVIEW_EDIT_DAYS` | no | `7` | days after posting a review its author can still edit it (1 to 90) |
+| `TRUST_PROXY_HOPS` | no | `1` | how many reverse proxies sit in front of the app in production (1 to 5); see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
+| `EMAIL_TRANSPORT` | no | `console` | `console` writes the message to the log, `resend` sends through Resend's HTTPS API ([docs/EMAIL.md](docs/EMAIL.md)) |
+| `EMAIL_FROM` | with `resend` | | the sender address, on a domain verified at Resend |
+| `RESEND_API_KEY` | with `resend` | | Resend API key (secret) |
+| `EMAIL_VERIFICATION_REQUIRED` | no | `true` | `false` stops asking for a confirmed email before publishing or booking |
 
 Old names (`ATLASDB_URL`, `CLOUD_NAME`, `CLOUD_API_KEY`, `CLOUD_API_SECRET`, `MAP_TOKEN`) still work with a warning.
 
@@ -78,6 +84,15 @@ Old names (`ATLASDB_URL`, `CLOUD_NAME`, `CLOUD_API_KEY`, `CLOUD_API_SECRET`, `MA
 | `npm run migrate:dry` | show what the migrations would do |
 | `npm run sweep` | run the housekeeping job once and print what it did |
 | `npm run explain` | MongoDB `explain` for every hot query ([docs/PERFORMANCE.md](docs/PERFORMANCE.md)) |
+| `npm run preflight` | check the production settings without printing a secret |
+| `npm run smoke:deploy` | wake the deployed site and check health, pages and headers: `npm run smoke:deploy -- https://your-site` |
+| `npm run data:snapshot` | write a fingerprint of the database: `npm run data:snapshot -- --out before.json` |
+| `npm run data:compare` | compare two fingerprints: `npm run data:compare -- before.json after.json` |
+| `npm run report:ranking` | click-through of the Best-match orderings ([docs/RANKING.md](docs/RANKING.md)) |
+| `npm run seed:demo` | demonstration data (development only) |
+| `npm run import:airbnb` | import a listing dataset (see Database) |
+| `npm run nearby:refresh` | refresh the cached nearby places |
+| `npm run test:e2e` | end-to-end tests in a browser |
 | `npm run make-admin` | make an existing account an admin: `npm run make-admin -- <email>` |
 
 ### The sweeper
@@ -199,7 +214,7 @@ Notes: a `STAYNIGHT` is one night of one listing held by one reservation or one 
 
 ## API
 
-The server renders pages, so most routes are pages and form posts. Three are JSON (`/api/listings/:id/availability`, `/api/listings/:id/quote`, `/api/search/map`). The full list of the 67 routes, who may call each and what it does, is in [docs/API.md](docs/API.md).
+The server renders pages, so most routes are pages and form posts. Three are JSON (`/api/listings/:id/availability`, `/api/listings/:id/quote`, `/api/search/map`). The full list of the 130 routes, who may call each and what it does, is in [docs/API.md](docs/API.md).
 
 ## Known limitations
 

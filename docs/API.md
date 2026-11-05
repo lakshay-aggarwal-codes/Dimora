@@ -81,6 +81,67 @@ Every route the app serves, read from the routers themselves. The server renders
 | GET | `/admin/users/:id` | admin (anyone else gets a 404) | One member's account page and admin history |
 | POST | `/admin/users/:id/reinstate` | admin (anyone else gets a 404) | Reinstate an account (reason required; audited) |
 | POST | `/admin/users/:id/suspend` | admin (anyone else gets a 404) | Suspend an account (reason required; audited) |
+| GET | `/account` | signed in | Account page: profile, password, notification settings and account deletion |
+| POST | `/account/delete` | signed in | Delete the account (anonymised; refused while bookings are open) |
+| GET | `/account/notifications` | signed in | Notification settings: which emails to receive |
+| POST | `/account/notifications` | signed in | Save the notification settings |
+| POST | `/account/password` | signed in | Change the password (needs the current one) |
+| GET | `/admin/reports` | admin | Reports queue: open reports and their reasons |
+| GET | `/admin/reports/:id` | admin | One report with the thing it is about |
+| POST | `/admin/reports/:id/dismiss` | admin | Dismiss a report with a note (audited) |
+| POST | `/admin/reports/:id/resolve` | admin | Resolve a report with a note (audited) |
+| GET | `/admin/reservations` | admin | Look up reservations by code, listing or member (read only) |
+| GET | `/admin/reservations/:id` | admin | One reservation with its status history and nights (read only) |
+| POST | `/admin/reviews/:id/hide` | admin | Hide a review from the public pages, with a reason (audited) |
+| POST | `/admin/reviews/:id/restore` | admin | Show a hidden review again (audited) |
+| GET | `/api/conversations` | anyone | JSON: the signed-in member's conversations (401 JSON without a login) |
+| GET | `/api/conversations/:id/messages` | anyone | JSON: the messages of a conversation, for its two members only (401 JSON without a login) |
+| POST | `/api/conversations/:id/messages` | anyone | JSON: send a message in a conversation, rate-limited (401 JSON without a login) |
+| GET | `/api/destinations` | anyone | JSON: destination suggestions for the search boxes, from public stays only |
+| POST | `/api/listings/:id/conversations` | anyone | JSON: start a conversation with a listing's host (401 JSON without a login) |
+| GET | `/api/notifications/count` | anyone | JSON: the number of unread notifications (0 when signed out) |
+| POST | `/api/reservations/:id/conversation` | anyone | JSON: open the conversation of a booking (401 JSON without a login) |
+| GET | `/compare` | anyone | Compare up to four saved stays side by side |
+| GET | `/conversations/:id` | signed in | A conversation page (its two members only) |
+| POST | `/conversations/:id/messages` | signed in | Send a message from the conversation page |
+| POST | `/email/unsubscribe` | anyone | Confirm "stop these emails" from an email link (the link is the proof) |
+| GET | `/email/unsubscribe/:token` | anyone | The page behind an unsubscribe link: a button, nothing changes yet |
+| GET | `/forgot-password` | anyone | Forgot-password form |
+| POST | `/forgot-password` | anyone | Send a reset link if the address has an account; the answer is always the same (rate-limited) |
+| GET | `/host` | signed in | Host overview: requests waiting, listings, the next arrivals |
+| POST | `/host/listings/:id/nearby/refresh` | signed in | Refresh the nearby places of a listing (its host only) |
+| GET | `/host/listings/:id/stats` | signed in | Views and saves of a listing, approximate (its host only) |
+| GET | `/host/report` | signed in | Earnings and occupancy by month for the host's listings |
+| GET | `/host/report.csv` | signed in | The earnings and occupancy report as a CSV download |
+| POST | `/listings/:id/contact` | signed in | Send a first message to a listing's host |
+| PUT | `/listings/:id/reviews/:reviewId` | signed in | Edit a review within the edit window (its author only) |
+| DELETE | `/listings/:id/reviews/:reviewId/reply` | signed in | Remove the host's reply to a review (that host only) |
+| POST | `/listings/:id/reviews/:reviewId/reply` | signed in | Write or change the host's reply to a review (that host only) |
+| POST | `/listings/:id/save` | signed in | Save or unsave a stay (toggle) |
+| GET | `/messages` | signed in | The message inbox: conversations, newest first |
+| GET | `/notifications` | signed in | The notification list |
+| POST | `/notifications/:id/read` | signed in | Mark one notification as read |
+| POST | `/notifications/read-all` | signed in | Mark all notifications as read |
+| POST | `/reset-password` | anyone | Set a new password with a reset link (works once) |
+| GET | `/reset-password/:token` | anyone | The reset form behind an emailed link; opening it changes nothing |
+| GET | `/saved-searches` | signed in | The member's saved searches |
+| POST | `/saved-searches` | signed in | Save the current search |
+| POST | `/saved-searches/:id/delete` | signed in | Delete a saved search |
+| GET | `/shared/lists/:token` | anyone | A read-only shared wishlist, found by its secret link |
+| GET | `/trips/:id/change` | signed in | Change the dates of a booking: the form and the new price |
+| POST | `/trips/:id/change` | signed in | Apply the date change (the guest who booked only) |
+| POST | `/verify-email` | anyone | Confirm the email address with an emailed link (works once) |
+| GET | `/verify-email/:token` | anyone | The page behind a confirmation link: a button, nothing changes yet |
+| GET | `/verify-email/needed` | signed in | Why a confirmed address is needed, and how to get the link again |
+| POST | `/verify-email/resend` | signed in | Send the confirmation link again (once a minute, five an hour) |
+| GET | `/wishlists` | signed in | The member's wishlists |
+| POST | `/wishlists` | signed in | Create a wishlist |
+| POST | `/wishlists/:id/delete` | signed in | Delete a wishlist |
+| POST | `/wishlists/:id/items/:listingId/move` | signed in | Move a saved stay to another wishlist |
+| POST | `/wishlists/:id/items/:listingId/note` | signed in | Write a private note on a saved stay |
+| POST | `/wishlists/:id/rename` | signed in | Rename a wishlist |
+| POST | `/wishlists/:id/share` | signed in | Create the secret read-only link of a wishlist |
+| POST | `/wishlists/:id/share/revoke` | signed in | Turn the secret link of a wishlist off |
 
 ## The JSON routes
 
@@ -89,6 +150,13 @@ Every route the app serves, read from the routers themselves. The server renders
 | `GET /api/listings/:id/availability` | `from`, `to` (`YYYY-MM-DD`) | `{ from, to, unavailable: [dates], rules }`: the nights nobody can book in that range (a booking, a pending request and a host block look the same: never who or why) and the stay rules the date picker applies. Never cached |
 | `GET /api/listings/:id/quote` | `in`, `out` (`YYYY-MM-DD`), `guests` | `{ in, out, guests, bookable, problems, quote, expectedTotalMinor }`. `quote` is the price built by the pricing service (integer paise: lines, taxes, total); `problems` are the reasons a stay cannot be booked (nights taken, minimum stay, notice...). When the nights are taken the answer also has `alternatives: { radiusDays, windows }`: up to 3 free stays of the same length within 14 days. This is the same price the checkout charges (and the booking stores) |
 | `GET /api/search/map` | the same query as `/listings` | GeoJSON of the public points of the stays in the search (never the exact address) |
+| `GET /api/conversations` | none | `{ conversations: [...] }` the member's conversations, newest first (401 JSON when signed out) |
+| `GET /api/conversations/:id/messages` | `before` (optional) | `{ messages: [...] }` of a conversation, for its two members only |
+| `POST /api/conversations/:id/messages` | JSON body `{ body }` | the saved message (rate-limited, 401 JSON when signed out) |
+| `POST /api/listings/:id/conversations` | JSON body `{ body }` | start a conversation with the host of a listing |
+| `POST /api/reservations/:id/conversation` | none | open the conversation of a booking |
+| `GET /api/destinations` | `q` (two letters or more) | `{ suggestions: [{ label, dest, count }] }` places with public stays (never a draft) |
+| `GET /api/notifications/count` | none | `{ count }` unread notifications (0 when signed out) |
 
 ## Keeping this file true
 

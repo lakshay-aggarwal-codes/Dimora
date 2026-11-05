@@ -84,13 +84,14 @@ describe("docs/API.md", () => {
 
   test("the routes the table calls JSON are the ones under /api, and only those", () => {
     const section = api.slice(api.indexOf("## The JSON routes"));
-    const jsonRoutes = [...section.matchAll(/^\| `GET (\/api\/[^`]+)`/gm)]
-      .map((m) => m[1])
+    // Method and path: the conversation API also has POST routes (P11-T02).
+    const jsonRoutes = [...section.matchAll(/^\| `(GET|POST|PUT|PATCH|DELETE) (\/api\/[^`]+)`/gm)]
+      .map((m) => `${m[1]} ${m[2]}`)
       .sort();
     expect(jsonRoutes).toEqual(
       real
         .filter((r) => r.path.startsWith("/api/"))
-        .map((r) => r.path)
+        .map((r) => `${r.method} ${r.path}`)
         .sort(),
     );
   });
