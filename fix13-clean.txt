@@ -1,0 +1,785 @@
+﻿node.exe : (node:48952) [MONGOOSE] Warning: Mongoose: `Document.prototype.validateSync()` is deprecated and will be removed in 
+Mongoose 10. Use `Document.prototype.validate()` instead.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:48952) [M...ate()` instead.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS tests/unit/wizard.priceRules.test.js
+(node:48952) [MONGOOSE] Warning: Mongoose: `Document.prototype.validateSync()` is deprecated and will be removed in Mongoose 10. Use 
+`Document.prototype.validate()` instead.
+(node:48952) [MONGOOSE] Warning: Mongoose: `Document.prototype.validateSync()` is deprecated and will be removed in Mongoose 10. Use 
+`Document.prototype.validate()` instead.
+(node:48952) [MONGOOSE] Warning: Mongoose: `Document.prototype.validateSync()` is deprecated and will be removed in Mongoose 10. Use 
+`Document.prototype.validate()` instead.
+(node:48952) [MONGOOSE] Warning: Mongoose: `Document.prototype.validateSync()` is deprecated and will be removed in Mongoose 10. Use 
+`Document.prototype.validate()` instead.
+(node:48952) [MONGOOSE] Warning: Mongoose: `Document.prototype.validateSync()` is deprecated and will be removed in Mongoose 10. Use 
+`Document.prototype.validate()` instead.
+(node:48952) [MONGOOSE] Warning: Mongoose: `Document.prototype.validateSync()` is deprecated and will be removed in Mongoose 10. Use 
+`Document.prototype.validate()` instead.
+(node:48952) [MONGOOSE] Warning: Mongoose: `Document.prototype.validateSync()` is deprecated and will be removed in Mongoose 10. Use 
+`Document.prototype.validate()` instead.
+(node:48952) [MONGOOSE] Warning: Mongoose: `Document.prototype.validateSync()` is deprecated and will be removed in Mongoose 10. Use 
+`Document.prototype.validate()` instead.
+(node:48952) [MONGOOSE] Warning: Mongoose: `Document.prototype.validateSync()` is deprecated and will be removed in Mongoose 10. Use 
+`Document.prototype.validate()` instead.
+(node:48952) [MONGOOSE] Warning: Mongoose: `Document.prototype.validateSync()` is deprecated and will be removed in Mongoose 10. Use 
+`Document.prototype.validate()` instead.
+(node:48952) [MONGOOSE] Warning: Mongoose: `Document.prototype.validateSync()` is deprecated and will be removed in Mongoose 10. Use 
+`Document.prototype.validate()` instead.
+(node:28320) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+FAIL tests/integration/listings.index.cards.test.js
+  ΓùÅ each listing is a card with its link, title, place and formatted price
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "href=\"/listings/6aec7b9661f715e0fd86a7ee\""
+    Received string:    "<!DOCTYPE html>
+    <html lang=\"en\">┬╖
+    <head>
+        <meta charset=\"UTF-8\">
+        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+        <meta name=\"csrf-token\" content=\"euh0XnN089Ium5nTqxMZcY4DesGz0AZeUF2oH-G0EjA\">
+        <title>Explore stays | Dimora</title>
+        <meta name=\"description\" content=\"Browse places to stay on Dimora.\">┬╖┬╖┬╖┬╖┬╖
+        <link rel=\"canonical\" href=\"http://localhost:0/listings\">
+        <meta property=\"og:site_name\" content=\"Dimora\">
+        <meta property=\"og:type\" content=\"website\">
+        <meta property=\"og:title\" content=\"Explore stays | Dimora\">
+        <meta property=\"og:description\" content=\"Browse places to stay on Dimora.\">
+        <meta property=\"og:url\" content=\"http://localhost:0/listings\">
+        <meta name=\"twitter:card\" content=\"summary\">┬╖┬╖┬╖┬╖┬╖
+        <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css\" rel=\"stylesheet\"
+            integrity=\"sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB\" crossorigin=\"anonymous\">
+        <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css\"
+            integrity=\"sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg==\"
+            crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\">
+        <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">
+        <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>
+        <link href=\"https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap\"
+            rel=\"stylesheet\">
+        <!-- Dimora styles come after Bootstrap so they override it without !important -->
+        <link rel=\"stylesheet\" href=\"/css/tokens.css\">
+        <link rel=\"stylesheet\" href=\"/css/base.css\">
+        <link rel=\"stylesheet\" href=\"/css/components.css\">
+        <link href=\"/css/rating.css\" rel=\"stylesheet\">
+        <link href=\"https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.css\" rel=\"stylesheet\">
+        <script src=\"https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.js\"></script>
+    </head>┬╖
+    <body>
+        <a class=\"visually-hidden-focusable skip-link\" href=\"#main\">Skip to main content</a>┬╖┬╖┬╖┬╖┬╖┬╖
+    <header class=\"site-header sticky-top\">
+        <nav class=\"navbar navbar-expand-md\" aria-label=\"Main\">
+            <div class=\"container-fluid\">
+                <a class=\"navbar-brand\" href=\"/\">
+                    <i class=\"fa-regular fa-compass\" aria-hidden=\"true\"></i>
+                    <span class=\"brand-name\">Dimora</span>
+                </a>
+                <button class=\"navbar-toggler\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#site-nav\"
+                    aria-controls=\"site-nav\" aria-expanded=\"false\" aria-label=\"Toggle navigation\">
+                    <span class=\"navbar-toggler-icon\"></span>
+                </button>┬╖
+                <div class=\"collapse navbar-collapse\" id=\"site-nav\">
+                    <ul class=\"navbar-nav\">
+                        <li class=\"nav-item\">
+                            <a class=\"nav-link\" href=\"/listings\" aria-current=\"page\">Explore</a>
+                        </li>
+                    </ul>┬╖
+                    <div class=\"navbar-nav search\">
+                        <form action=\"/listings\" method=\"GET\" role=\"search\" aria-label=\"Quick search\">
+                            <label class=\"visually-hidden\" for=\"nav-search\">Search destinations</label>
+                            <input class=\"form-control search-input\" id=\"nav-search\" type=\"search\" name=\"dest\"
+                                placeholder=\"Search destinations\" autocomplete=\"off\" data-destination-autocomplete>
+                            <button class=\"btn btn-search\" type=\"submit\">
+                                <i class=\"fa-solid fa-magnifying-glass\" aria-hidden=\"true\"></i>
+                                <span>Search</span>
+                            </button>
+                        </form>
+                    </div>┬╖
+                    <ul class=\"navbar-nav ms-md-auto align-items-md-center\">
+                        <li class=\"nav-item\">
+                            <a class=\"nav-link\" href=\"/host/listings/new\">Dimora your home</a>
+                        </li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                            <li class=\"nav-item\">
+                                <a class=\"nav-link nav-strong\" href=\"/signup\">Sign up</a>
+                            </li>
+                            <li class=\"nav-item\">
+                                <a class=\"nav-link nav-strong\" href=\"/login\">Log in</a>
+                            </li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>┬╖┬╖
+        <main id=\"main\" class=\"container\" tabindex=\"-1\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+        <h1 class=\"visually-hidden\">Explore places to stay</h1>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+        <form method=\"GET\" action=\"/listings\" class=\"search-panel\" role=\"search\" aria-label=\"Search stays\" novalidate>
+            <div class=\"row g-3\">
+                <div class=\"col-12 col-md-4\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    <div class=\"form-field mb-3\">
+        <label for=\"dest\" class=\"form-label\">Where to?</label>┬╖┬╖┬╖┬╖┬╖
+        <input class=\"form-control\" id=\"dest\" name=\"dest\" type=\"search\" placeholder=\"City, state or country\" 
+maxlength=\"100\" data-destination-autocomplete=\"data-destination-autocomplete\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    </div>┬╖
+                </div>
+                <div class=\"col-12 col-sm-6 col-md-2\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    <div class=\"form-field mb-3\">
+        <label for=\"in\" class=\"form-label\">Check-in</label>┬╖┬╖┬╖┬╖┬╖
+        <input class=\"form-control\" id=\"in\" name=\"in\" type=\"date\" min=\"2026-11-05\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    </div>┬╖
+                </div>
+                <div class=\"col-12 col-sm-6 col-md-2\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    <div class=\"form-field mb-3\">
+        <label for=\"out\" class=\"form-label\">Check-out</label>┬╖┬╖┬╖┬╖┬╖
+        <input class=\"form-control\" id=\"out\" name=\"out\" type=\"date\" min=\"2026-11-05\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    </div>┬╖
+                </div>
+                <div class=\"col-12 col-sm-6 col-md-2\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    <div class=\"form-field mb-3\">
+        <label for=\"guests\" class=\"form-label\">Guests</label>┬╖┬╖┬╖┬╖┬╖
+        <input class=\"form-control\" id=\"guests\" name=\"guests\" type=\"number\" min=\"1\" max=\"16\" step=\"1\" 
+inputmode=\"numeric\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    </div>┬╖
+                </div>
+                <div class=\"col-12 col-sm-6 col-md-2 search-panel-submit\">
+                    <button type=\"submit\" class=\"btn btn-dark w-100\">Search</button>
+                </div>
+            </div>
+            <div class=\"form-check mt-2\">
+                <input class=\"form-check-input\" type=\"checkbox\" name=\"flex\" value=\"3\" id=\"flex\" 
+aria-describedby=\"flex-help\">
+                <label class=\"form-check-label\" for=\"flex\">Available ┬▒3 days</label>
+                <span class=\"form-text d-block\" id=\"flex-help\">Needs both dates. Also shows stays of the same length that start up 
+to 3 days earlier or later.</span>
+            </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+        </form>┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+        <!-- Category links and tax toggle -->
+        <div id=\"filters\">┬╖
+            <nav class=\"filter-nav\" aria-label=\"Categories\">┬╖
+                <button type=\"button\" class=\"filter-arrow\" id=\"filters-prev\" aria-label=\"Previous categories\" disabled>
+                    <i class=\"fa-solid fa-chevron-left\" aria-hidden=\"true\"></i>
+                </button>┬╖
+                <ul class=\"filter-container\" id=\"filter-container\" role=\"list\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    <li>
+                        <a class=\"filter is-active\" href=\"/listings\" aria-current=\"true\">
+                            <i class=\"fa-solid fa-border-all\" aria-hidden=\"true\"></i>
+                            <span>All stays</span>
+                        </a>
+                    </li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    <li>
+                        <a class=\"filter\" href=\"/listings?category=beach\">
+                            <i class=\"fa-solid fa-umbrella-beach\" aria-hidden=\"true\"></i>
+                            <span>Beach</span>
+                        </a>
+                    </li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    <li>
+                        <a class=\"filter\" href=\"/listings?category=mountains\">
+                            <i class=\"fa-solid fa-mountain-sun\" aria-hidden=\"true\"></i>
+                            <span>Mountains</span>
+                        </a>
+                    </li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    <li>
+                        <a class=\"filter\" href=\"/listings?category=lakefront\">
+                            <i class=\"fa-solid fa-water\" aria-hidden=\"true\"></i>
+                            <span>Lakefront</span>
+                        </a>
+                    </li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    <li>
+                        <a class=\"filter\" href=\"/listings?category=desert\">
+                            <i class=\"fa-solid fa-sun\" aria-hidden=\"true\"></i>
+                            <span>Desert</span>
+                        </a>
+                    </li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    <li>
+                        <a class=\"filter\" href=\"/listings?category=countryside\">
+                            <i class=\"fa-solid fa-tree\" aria-hidden=\"true\"></i>
+                            <span>Countryside</span>
+                        </a>
+                    </li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    <li>
+                        <a class=\"filter\" href=\"/listings?category=city\">
+                            <i class=\"fa-solid fa-city\" aria-hidden=\"true\"></i>
+                            <span>City</span>
+                        </a>
+                    </li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    <li>
+                        <a class=\"filter\" href=\"/listings?category=farm-stays\">
+                            <i class=\"fa-solid fa-tractor\" aria-hidden=\"true\"></i>
+                            <span>Farm stays</span>
+                        </a>
+                    </li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    <li>
+                        <a class=\"filter\" href=\"/listings?category=cabins\">
+                            <i class=\"fa-solid fa-house-chimney\" aria-hidden=\"true\"></i>
+                            <span>Cabins</span>
+                        </a>
+                    </li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    <li>
+                        <a class=\"filter\" href=\"/listings?category=villas\">
+                            <i class=\"fa-solid fa-landmark\" aria-hidden=\"true\"></i>
+                            <span>Villas</span>
+                        </a>
+                    </li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    <li>
+                        <a class=\"filter\" href=\"/listings?category=apartments\">
+                            <i class=\"fa-solid fa-building\" aria-hidden=\"true\"></i>
+                            <span>Apartments</span>
+                        </a>
+                    </li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    <li>
+                        <a class=\"filter\" href=\"/listings?category=amazing-pools\">
+                            <i class=\"fa-solid fa-person-swimming\" aria-hidden=\"true\"></i>
+                            <span>Amazing pools</span>
+                        </a>
+                    </li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    <li>
+                        <a class=\"filter\" href=\"/listings?category=rooms\">
+                            <i class=\"fa-solid fa-bed\" aria-hidden=\"true\"></i>
+                            <span>Rooms</span>
+                        </a>
+                    </li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                </ul>┬╖
+                <button type=\"button\" class=\"filter-arrow\" id=\"filters-next\" aria-label=\"Next categories\">
+                    <i class=\"fa-solid fa-chevron-right\" aria-hidden=\"true\"></i>
+                </button>┬╖
+            </nav>┬╖
+            <!-- The tax toggle sits outside the category nav -->
+            <div class=\"tax-toggle\">
+                <div class=\"form-check form-switch\">
+                    <input class=\"form-check-input\" type=\"checkbox\" role=\"switch\" id=\"switchMdLabel\">
+                    <label class=\"form-check-label\" for=\"switchMdLabel\">Display Total after Taxes</label>
+                </div>
+            </div>┬╖
+        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    <details class=\"filter-panel\" id=\"filter-panel\">
+        <summary class=\"filter-panel-toggle\">
+            <i class=\"fa-solid fa-sliders\" aria-hidden=\"true\"></i>
+            <span>Filters</span>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+        </summary>┬╖
+        <form method=\"GET\" action=\"/listings\" class=\"filter-panel-form\" aria-label=\"Filters\" data-loading-form novalidate>
+            <div class=\"row g-3\">
+                <div class=\"col-12 col-md-6\" data-radius-field>
+                    <label class=\"form-label\" for=\"radius\">Distance around the destination</label>
+                    <select class=\"form-select\" id=\"radius\" name=\"radius\" aria-describedby=\"radius-help\">
+                        <option value=\"\">Only the destination itself</option>
+                        <option value=\"5\">Within 5 km</option><option value=\"10\">Within 10 km</option><option value=\"25\">Within 
+25 km</option><option value=\"50\">Within 50 km</option>
+                    </select>
+                    <div class=\"form-text\" id=\"radius-help\">Needs a destination. Measured from the middle of the stays found 
+there, using their approximate locations.</div>
+                </div>
+            </div>
+            <div class=\"row g-3 mt-1\">
+                <div class=\"col-6 col-md-3\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    <div class=\"form-field mb-3\">
+        <label for=\"minPrice\" class=\"form-label\">Lowest price a night (Γé╣)</label>┬╖┬╖┬╖┬╖┬╖
+        <input class=\"form-control\" id=\"minPrice\" name=\"minPrice\" type=\"number\" min=\"0\" max=\"1000000\" step=\"1\" 
+inputmode=\"numeric\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    </div>┬╖
+                </div>
+                <div class=\"col-6 col-md-3\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    <div class=\"form-field mb-3\">
+        <label for=\"maxPrice\" class=\"form-label\">Highest price a night (Γé╣)</label>┬╖┬╖┬╖┬╖┬╖
+        <input class=\"form-control\" id=\"maxPrice\" name=\"maxPrice\" type=\"number\" min=\"0\" max=\"1000000\" step=\"1\" 
+inputmode=\"numeric\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    </div>┬╖
+                </div>
+                <div class=\"col-6 col-md-3\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    <div class=\"form-field mb-3\">
+        <label for=\"bedrooms\" class=\"form-label\">Bedrooms (at least)</label>┬╖┬╖┬╖┬╖┬╖
+        <input class=\"form-control\" id=\"bedrooms\" name=\"bedrooms\" type=\"number\" min=\"0\" max=\"50\" step=\"1\" 
+inputmode=\"numeric\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    </div>┬╖
+                </div>
+                <div class=\"col-6 col-md-3 filter-panel-instant\">
+                    <div class=\"form-check\">
+                        <input class=\"form-check-input\" type=\"checkbox\" name=\"instantBook\" value=\"true\" id=\"instantBook\">
+                        <label class=\"form-check-label\" for=\"instantBook\">Instant book only</label>
+                    </div>
+                </div>
+            </div>┬╖
+            <div class=\"row g-3 mt-1\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                <div class=\"col-12 col-md-4\">
+                    <fieldset class=\"filter-group\">
+                        <legend class=\"filter-group-legend\">Property type</legend>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬
+╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"type\" value=\"house\" id=\"type-house\">
+                            <label class=\"form-check-label\" for=\"type-house\">House</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"type\" value=\"apartment\" 
+id=\"type-apartment\">
+                            <label class=\"form-check-label\" for=\"type-apartment\">Apartment</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"type\" value=\"villa\" id=\"type-villa\">
+                            <label class=\"form-check-label\" for=\"type-villa\">Villa</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"type\" value=\"cabin\" id=\"type-cabin\">
+                            <label class=\"form-check-label\" for=\"type-cabin\">Cabin</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"type\" value=\"cottage\" id=\"type-cottage\">
+                            <label class=\"form-check-label\" for=\"type-cottage\">Cottage</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"type\" value=\"farm_stay\" 
+id=\"type-farm_stay\">
+                            <label class=\"form-check-label\" for=\"type-farm_stay\">Farm stay</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"type\" value=\"hotel\" id=\"type-hotel\">
+                            <label class=\"form-check-label\" for=\"type-hotel\">Hotel or guest house</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"type\" value=\"other\" id=\"type-other\">
+                            <label class=\"form-check-label\" for=\"type-other\">Something else</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    </fieldset>
+                </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                <div class=\"col-12 col-md-4\">
+                    <fieldset class=\"filter-group\">
+                        <legend class=\"filter-group-legend\">What guests get</legend>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬
+╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"roomType\" value=\"entire_place\" 
+id=\"roomType-entire_place\">
+                            <label class=\"form-check-label\" for=\"roomType-entire_place\">The whole place</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"roomType\" value=\"private_room\" 
+id=\"roomType-private_room\">
+                            <label class=\"form-check-label\" for=\"roomType-private_room\">A private room</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"roomType\" value=\"shared_room\" 
+id=\"roomType-shared_room\">
+                            <label class=\"form-check-label\" for=\"roomType-shared_room\">A shared room</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    </fieldset>
+                </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                <div class=\"col-12 col-md-4\">
+                    <fieldset class=\"filter-group\">
+                        <legend class=\"filter-group-legend\">Amenities</legend>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬
+╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"amenities\" value=\"wifi\" 
+id=\"amenities-wifi\">
+                            <label class=\"form-check-label\" for=\"amenities-wifi\">Wi-Fi</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"amenities\" value=\"kitchen\" 
+id=\"amenities-kitchen\">
+                            <label class=\"form-check-label\" for=\"amenities-kitchen\">Kitchen</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"amenities\" value=\"washer\" 
+id=\"amenities-washer\">
+                            <label class=\"form-check-label\" for=\"amenities-washer\">Washing machine</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"amenities\" value=\"air_conditioning\" 
+id=\"amenities-air_conditioning\">
+                            <label class=\"form-check-label\" for=\"amenities-air_conditioning\">Air conditioning</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"amenities\" value=\"heating\" 
+id=\"amenities-heating\">
+                            <label class=\"form-check-label\" for=\"amenities-heating\">Heating</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"amenities\" value=\"tv\" id=\"amenities-tv\">
+                            <label class=\"form-check-label\" for=\"amenities-tv\">TV</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"amenities\" value=\"workspace\" 
+id=\"amenities-workspace\">
+                            <label class=\"form-check-label\" for=\"amenities-workspace\">Dedicated workspace</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"amenities\" value=\"free_parking\" 
+id=\"amenities-free_parking\">
+                            <label class=\"form-check-label\" for=\"amenities-free_parking\">Free parking</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"amenities\" value=\"pool\" 
+id=\"amenities-pool\">
+                            <label class=\"form-check-label\" for=\"amenities-pool\">Pool</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"amenities\" value=\"gym\" id=\"amenities-gym\">
+                            <label class=\"form-check-label\" for=\"amenities-gym\">Gym</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"amenities\" value=\"balcony\" 
+id=\"amenities-balcony\">
+                            <label class=\"form-check-label\" for=\"amenities-balcony\">Balcony or terrace</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"amenities\" value=\"smoke_alarm\" 
+id=\"amenities-smoke_alarm\">
+                            <label class=\"form-check-label\" for=\"amenities-smoke_alarm\">Smoke alarm</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"amenities\" value=\"first_aid_kit\" 
+id=\"amenities-first_aid_kit\">
+                            <label class=\"form-check-label\" for=\"amenities-first_aid_kit\">First aid kit</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"amenities\" value=\"pets_allowed\" 
+id=\"amenities-pets_allowed\">
+                            <label class=\"form-check-label\" for=\"amenities-pets_allowed\">Pets allowed</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    </fieldset>
+                </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                <div class=\"col-12 col-md-4\">
+                    <fieldset class=\"filter-group\" aria-describedby=\"access-note\">
+                        <legend class=\"filter-group-legend\">Accessibility (declared by hosts)</legend>
+                        <p class=\"small text-body-secondary mb-1\" id=\"access-note\">Hosts declare these. Dimora has not checked 
+them.</p>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"access\" value=\"step_free_entrance\" 
+id=\"access-step_free_entrance\">
+                            <label class=\"form-check-label\" for=\"access-step_free_entrance\">Step-free entrance</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"access\" value=\"step_free_bathroom\" 
+id=\"access-step_free_bathroom\">
+                            <label class=\"form-check-label\" for=\"access-step_free_bathroom\">Step-free bathroom</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"access\" value=\"elevator\" 
+id=\"access-elevator\">
+                            <label class=\"form-check-label\" for=\"access-elevator\">Elevator</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"access\" value=\"wide_doorway\" 
+id=\"access-wide_doorway\">
+                            <label class=\"form-check-label\" for=\"access-wide_doorway\">Wide doorways</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"access\" value=\"grab_rails\" 
+id=\"access-grab_rails\">
+                            <label class=\"form-check-label\" for=\"access-grab_rails\">Grab rails in the bathroom</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <div class=\"form-check\">
+                            <input class=\"form-check-input\" type=\"checkbox\" name=\"access\" value=\"accessible_parking\" 
+id=\"access-accessible_parking\">
+                            <label class=\"form-check-label\" for=\"access-accessible_parking\">Accessible parking</label>
+                        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    </fieldset>
+                </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+            </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+            <div class=\"filter-panel-actions\">
+                <button type=\"submit\" class=\"btn btn-dark\">Show stays</button>
+                <a class=\"btn btn-outline-secondary\" href=\"/listings\">Reset filters</a>
+            </div>
+        </form>
+    </details>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+        <p class=\"search-status\" id=\"search-status\" role=\"status\" hidden></p>┬╖┬╖┬╖┬╖┬╖┬╖
+        <div class=\"search-view-bar\">
+            <button type=\"button\" class=\"btn btn-outline-dark\" id=\"map-toggle\" aria-controls=\"search-map-panel\" 
+aria-pressed=\"false\" hidden>Show map</button>
+        </div>┬╖
+        <div class=\"search-split\" id=\"search-split\" data-view=\"list\">
+        <div id=\"results\" class=\"results-region\">┬╖┬╖┬╖┬╖┬╖
+        <p class=\"results-count\" role=\"status\">
+            2 stays┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+        </p>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+        <nav class=\"sort-bar\" aria-label=\"Sort results\">
+            <span class=\"sort-label\">Sort by</span>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+            <a class=\"sort-link is-current\" href=\"/listings\" aria-current=\"true\">Best match</a>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+            <a class=\"sort-link\" href=\"/listings?sort=price_asc\">Price: low to high</a>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+            <a class=\"sort-link\" href=\"/listings?sort=price_desc\">Price: high to low</a>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+            <a class=\"sort-link\" href=\"/listings?sort=rating\">Top rated</a>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+            <a class=\"sort-link\" href=\"/listings?sort=newest\">Newest</a>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+        </nav>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+        <nav class=\"sort-bar purpose-bar\" aria-label=\"Plan for a trip purpose\" data-purpose-bar>
+            <span class=\"sort-label\">Plan for</span>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+            <a class=\"sort-link is-current\" href=\"/listings\" aria-current=\"true\">Any trip</a>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+            <a class=\"sort-link\" href=\"/listings?purpose=work\">Work trip</a>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+            <a class=\"sort-link\" href=\"/listings?purpose=family\">Family trip</a>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+            <a class=\"sort-link\" href=\"/listings?purpose=weekend\">Weekend getaway</a>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+        </nav>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+        <!-- All listing cards: one column on phones, two from md, three from lg -->┬╖┬╖┬╖┬╖┬╖
+        <div class=\"row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-3\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+            <div class=\"col\" data-listing-id=\"6aec7b9661f715e0fd86a7ee\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    <div class=\"listing-card-wrap\">
+    <a href=\"/listings/6aec7b9661f715e0fd86a7ee?from=default\" class=\"listing-link\">
+        <div class=\"card h-100 listing-card\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+            <img src=\"https://res.cloudinary.test/dimora_DEV/seed1.jpg\" width=\"800\" height=\"600\" loading=\"lazy\" 
+decoding=\"async\" class=\"card-img-top listing-card-img\" alt=\"\">
+            <div class=\"card-body\">
+                <p class=\"card-text\">
+                    <b class=\"listing-card-title\">Seaside Cottage</b>
+                    <span class=\"listing-card-where\">Goa, India</span>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    <span class=\"price\"><span class=\"price-amount\">Γé╣4,500</span> <span class=\"price-unit\">/ night</span> <i 
+class=\"tax-info\">+18% GST</i></span>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                </p>
+            </div>
+        </div>
+    </a>┬╖┬╖┬╖
+    <div class=\"save-form\">
+        <a class=\"save-button\" href=\"/login\" aria-label=\"Log in to save Seaside Cottage\">
+            <i class=\"fa-regular fa-heart\" aria-hidden=\"true\"></i>
+        </a>
+    </div>┬╖┬╖
+    </div>┬╖
+            </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+            <div class=\"col\" data-listing-id=\"6aec7b9661f715e0fd86a7ef\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    <div class=\"listing-card-wrap\">
+    <a href=\"/listings/6aec7b9661f715e0fd86a7ef?from=default\" class=\"listing-link\">
+        <div class=\"card h-100 listing-card\">┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+            <img src=\"https://res.cloudinary.test/dimora_DEV/seed2.jpg\" width=\"800\" height=\"600\" loading=\"lazy\" 
+decoding=\"async\" class=\"card-img-top listing-card-img\" alt=\"\">
+            <div class=\"card-body\">
+                <p class=\"card-text\">
+                    <b class=\"listing-card-title\">Hill Cabin</b>
+                    <span class=\"listing-card-where\">New Delhi, India</span>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+    <span class=\"price\"><span class=\"price-amount\">Γé╣1,200</span> <span class=\"price-unit\">/ night</span> <i 
+class=\"tax-info\">+18% GST</i></span>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                </p>
+            </div>
+        </div>
+    </a>┬╖┬╖┬╖
+    <div class=\"save-form\">
+        <a class=\"save-button\" href=\"/login\" aria-label=\"Log in to save Hill Cabin\">
+            <i class=\"fa-regular fa-heart\" aria-hidden=\"true\"></i>
+        </a>
+    </div>┬╖┬╖
+    </div>┬╖
+            </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+        </div>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+        </div>┬╖
+        <section class=\"search-map-panel\" id=\"search-map-panel\" aria-labelledby=\"search-map-heading\" hidden>
+            <h2 id=\"search-map-heading\" class=\"visually-hidden\">Map of these stays</h2>
+            <p class=\"search-map-help text-body-secondary\">Circles and prices show the approximate area of each stay, not its 
+address. The list shows the same stays.</p>
+            <div class=\"search-map-tools\">
+                <div class=\"form-check\">
+                    <input class=\"form-check-input\" type=\"checkbox\" id=\"map-follow\">
+                    <label class=\"form-check-label\" for=\"map-follow\">Search as I move the map</label>
+                </div>
+                <button type=\"button\" class=\"btn btn-sm btn-dark\" id=\"map-search-area\" hidden>Search this area</button>
+            </div>
+            <p class=\"search-map-status\" id=\"map-status\" role=\"status\" aria-live=\"polite\"></p>
+            <div id=\"search-map\" role=\"region\" aria-label=\"Map of the stays in these results\"
+                data-token=\"pk.test-public\"
+                data-endpoint=\"/api/search/map\"
+                data-query=\"\"></div>
+        </section>
+        </div>┬╖
+        <script src=\"/js/filters.js\"></script>
+        <script src=\"/js/searchMap.js\"></script>┬╖
+        <script nonce=\"9ZszX7uovETJm1NgdqaOAg==\">
+            // Previous and next category navigation
+            const filterContainer = document.getElementById(\"filter-container\");
+            const prevButton = document.getElementById(\"filters-prev\");
+            const nextButton = document.getElementById(\"filters-next\");┬╖
+            if (filterContainer && prevButton && nextButton) {
+                const scrollAmount = 300;┬╖
+                prevButton.addEventListener(\"click\", () => {
+                    filterContainer.scrollBy({
+                        left: -scrollAmount,
+                        behavior: \"smooth\"
+                    });
+                });┬╖
+                nextButton.addEventListener(\"click\", () => {
+                    filterContainer.scrollBy({
+                        left: scrollAmount,
+                        behavior: \"smooth\"
+                    });
+                });┬╖
+                function updateFilterButtons() {
+                    const maxScroll = Math.max(
+                        0,
+                        filterContainer.scrollWidth - filterContainer.clientWidth
+                    );┬╖
+                    prevButton.disabled = filterContainer.scrollLeft <= 1;
+                    nextButton.disabled =
+                        filterContainer.scrollLeft >= maxScroll - 1;
+                }┬╖
+                filterContainer.addEventListener(\"scroll\", updateFilterButtons);
+                window.addEventListener(\"resize\", updateFilterButtons);┬╖
+                updateFilterButtons();
+            }┬╖
+            // Display tax information based on the toggle state
+            const taxSwitch = document.getElementById(\"switchMdLabel\");
+            const taxInfo = document.querySelectorAll(\".tax-info\");┬╖
+            if (taxSwitch) {
+                function updateTaxInfo() {
+                    taxInfo.forEach((info) => {
+                        info.style.display = taxSwitch.checked ? \"inline\" : \"none\";
+                    });
+                }┬╖
+                taxSwitch.addEventListener(\"change\", updateTaxInfo);
+                updateTaxInfo();
+            }
+        </script>┬╖
+        </main>┬╖
+        <footer class=\"site-footer\">
+        <div class=\"footer-inner\">
+            <nav aria-label=\"Footer\">
+                <ul class=\"footer-links\">
+                    <li><a href=\"/listings\">Explore</a></li>
+                    <li><a href=\"/host/listings/new\">List your place</a></li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                        <li><a href=\"/login\">Log in</a></li>
+                        <li><a href=\"/signup\">Sign up</a></li>┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+                    <li><a href=\"/about\">About</a></li>
+                    <li><a href=\"/privacy\">Privacy</a></li>
+                    <li><a href=\"/terms\">Terms</a></li>
+                </ul>
+            </nav>
+            <p class=\"footer-copy\">&copy; 2026 Dimora, a college project</p>
+        </div>
+    </footer>┬╖┬╖
+                <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js\"
+                    integrity=\"sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI\"
+                    crossorigin=\"anonymous\"></script>┬╖
+                <script src=\"/js/script.js\"></script>
+                <script src=\"/js/save-button.js\"></script>
+                <script src=\"/js/destination-autocomplete.js\"></script>
+    </body>┬╖
+    </html>
+    "
+
+      25 |   expect(res.text.match(/class="card h-100 
+listing-card"/g)).toHaveLength(2);
+      26 |   for (const doc of docs)
+    > 27 |     
+expect(res.text).toContain(`href="/listings/${doc._id}"`);
+         |                      ^
+      28 |   expect(res.text).toContain("Γé╣4,500");
+      29 |   expect(res.text).toContain("Γé╣1,200");
+      30 |   expect(res.text).toContain("Goa, India");
+
+      at Object.toContain (tests/integration/listings.index.cards.test.js:27:22)
+
+FAIL tests/integration/listings.results.test.js
+  ΓùÅ sorting ΓÇ║ sort links keep the search and start again at page 1
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 5
+    Received length: 9
+    Received array:  ["/listings?dest=Goa&guests=2", "/listings?dest=Goa&guests=2&sort=price_asc", 
+"/listings?dest=Goa&guests=2&sort=price_desc", "/listings?dest=Goa&guests=2&sort=rating", "/listings?dest=Goa&guests=2&sort=newest", 
+"/listings?dest=Goa&guests=2&sort=rating", "/listings?dest=Goa&guests=2&sort=rating&purpose=work", 
+"/listings?dest=Goa&guests=2&sort=rating&purpose=family", "/listings?dest=Goa&guests=2&sort=rating&purpose=weekend"]
+
+      58 |     const { text } = await 
+get("?destination=Goa&guests=2&page=3&sort=rating");
+      59 |     const sortLinks = [...text.matchAll(/class="sort-link[^"]*" 
+href="([^"]+)"/g)].map((m) => m[1].replace(/&amp;/g, 
+"&"));
+    > 60 |     expect(sortLinks).toHaveLength(5);
+         |                       ^
+      61 |     for (const link of sortLinks) {
+      62 |       expect(link).toContain("dest=Goa");
+      63 |       expect(link).toContain("guests=2");
+
+      at Object.toHaveLength (tests/integration/listings.results.test.js:60:23)
+
+FAIL tests/integration/listings.search.test.js
+  ΓùÅ the filters reach the query ΓÇ║ unknown parameters and operator-looking ones change nothing
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 400
+
+      83 |       "/listings?foo=1&category=beaches&guests[$gt]=1&dest[$ne]=x&$where=1",
+      84 |     );
+    > 85 |     expect(res.status).toBe(200);
+         |                        ^
+      86 |     expect(find).toHaveBeenCalledWith({ status: "published", 
+deletedAt: null });
+      87 |   });
+      88 | });
+
+      at Object.toBe (tests/integration/listings.search.test.js:85:24)
+
+  ΓùÅ the rest of the state travels through the search form ΓÇ║ other filters become hidden inputs, page does not
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 2
+
+    @@ -2,6 +2,8 @@
+        "minPrice=1000",
+        "type=villa",
+        "amenities=wifi",
+        "amenities=pool",
+        "sort=price_asc",
+    +   "dest=Goa",
+    +   "sort=price_asc",
+      ]
+
+      221 |       ...html.matchAll(/<input type="hidden" name="([^"]+)" 
+value="([^"]*)">/g),
+      222 |     ].map((m) => `${m[1]}=${m[2]}`);
+    > 223 |     expect(hidden).toEqual([
+          |                    ^
+      224 |       "minPrice=1000",
+      225 |       "type=villa",
+      226 |       "amenities=wifi",
+
+      at Object.toEqual (tests/integration/listings.search.test.js:223:20)
+
+FAIL tests/integration/listings.filters.test.js (5.305 s)
+  ΓùÅ the filter panel ΓÇ║ carries the rest of the search as hidden inputs, and never the page
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 8
+    + Received  + 0
+
+    @@ -2,18 +2,10 @@
+        Array [
+          "dest",
+          "Goa",
+        ],
+        Array [
+    -     "in",
+    -     "2099-01-10",
+    -   ],
+    -   Array [
+    -     "out",
+    -     "2099-01-12",
+    -   ],
+    -   Array [
+          "guests",
+          "2",
+        ],
+        Array [
+          "category",
+
+      173 |     const panel = panelHtml((await get("/listings?dest=Goa&in=20
+99-01-10&out=2099-01-12&guests=2&category=beach&sort=rating&page=2")).text);
+      174 |     const hidden = [...panel.matchAll(/<input type="hidden" 
+name="([^"]+)" value="([^"]*)">/g)].map((m) => [m[1], m[2]]);
+    > 175 |     expect(hidden).toEqual([
+          |                    ^
+      176 |       ["dest", "Goa"],
+      177 |       ["in", "2099-01-10"],
+      178 |       ["out", "2099-01-12"],
+
+      at Object.toEqual (tests/integration/listings.filters.test.js:175:20)
+
+PASS tests/unit/routeMatrix.test.js (5.597 s)
+
+Test Suites: 4 failed, 2 passed, 6 total
+Tests:       5 failed, 301 passed, 306 total
+Snapshots:   0 total
+Time:        7.076 s, estimated 17 s
+Ran all test suites matching tests/unit/routeMatrix.test.js|tests/unit/wizard.priceRules.test.js|tests/integration/listings.filters.tes
+t.js|tests/integration/listings.search.test.js|tests/integration/listings.results.test.js|tests/integration/listings.index.cards.test.j
+s.
+

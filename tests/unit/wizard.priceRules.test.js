@@ -80,7 +80,7 @@ describe("step 5 price rules", () => {
 
 describe("the Listing model's own checks", () => {
   const season = (name, from, to, nightlyMinor = 200000) => ({ name, from: new Date(`${from}T00:00:00Z`), to: new Date(`${to}T00:00:00Z`), nightlyMinor });
-  const check = (pricing) => new Listing({ pricing: { nightlyMinor: 100000, ...pricing } }).validateSync();
+  const check = (pricing) => new Listing({ title: "Rules test", pricing: { nightlyMinor: 100000, ...pricing } }).validateSync();
   const messages = (e) => Object.values((e && e.errors) || {}).map((x) => x.message);
 
   test("good rules pass", () => {

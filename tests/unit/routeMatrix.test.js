@@ -29,13 +29,14 @@ function routesOf(router, mount, { flagNested = true } = {}) {
   const found = [];
   for (const layer of router.stack) {
     if (layer.route) {
-      const handlers = layer.route.stack.map((l) => l.handle);
       const methods = Object.keys(layer.route.methods).filter((m) => METHODS.includes(m));
       // app.all(): older routers flag `_all`, newer ones list every method.
       const verbs = layer.route.methods._all || !methods.length || methods.length === METHODS.length ? ["ALL"] : methods.map((m) => m.toUpperCase());
       for (const path of [].concat(layer.route.path)) {
         for (const verb of verbs) {
-          found.push({ key: `${verb} ${join(mount, path)}`, handlers, mount, router });
+          // only the handlers that answer THIS method (a route can chain .get().put().delete())
+          const own = verb === "ALL" ? layer.route.stack : layer.route.stack.filter((l) => !l.method || l.method === verb.toLowerCase());
+          found.push({ key: `${verb} ${join(mount, path)}`, handlers: own.map((l) => l.handle), mount, router });
         }
       }
     } else if (flagNested && layer.handle && layer.handle.stack) {
