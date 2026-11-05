@@ -77,13 +77,18 @@ describe("the filters reach the query", () => {
     );
   });
 
-  test("unknown parameters and operator-looking ones change nothing", async () => {
+  test("unknown parameters change nothing", async () => {
     const { find } = stubListingSearch(docs(1));
-    const res = await get(
-      "/listings?foo=1&category=beaches&guests[$gt]=1&dest[$ne]=x&$where=1",
-    );
+    const res = await get("/listings?foo=1&bar=2");
     expect(res.status).toBe(200);
     expect(find).toHaveBeenCalledWith({ status: "published", deletedAt: null });
+  });
+
+  test("operator-looking ones are refused with 400 before any query (inputGuard, P17-T02)", async () => {
+    const { find } = stubListingSearch(docs(1));
+    const res = await get("/listings?foo=1&guests[$gt]=1&dest[$ne]=x&$where=1");
+    expect(res.status).toBe(400);
+    expect(find).not.toHaveBeenCalled();
   });
 });
 
@@ -217,8 +222,10 @@ describe("the rest of the state travels through the search form", () => {
         "/listings?dest=Goa&type=villa&amenities=wifi&amenities=pool&minPrice=1000&sort=price_asc&page=2",
       )
     ).text;
+    // the search form only: the save-search form further down carries the whole state
+    const form = (html.match(/<form method="GET" action="\/listings" class="search-panel"[\s\S]*?<\/form>/) || [""])[0];
     const hidden = [
-      ...html.matchAll(/<input type="hidden" name="([^"]+)" value="([^"]*)">/g),
+      ...form.matchAll(/<input type="hidden" name="([^"]+)" value="([^"]*)">/g),
     ].map((m) => `${m[1]}=${m[2]}`);
     expect(hidden).toEqual([
       "minPrice=1000",

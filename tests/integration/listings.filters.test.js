@@ -6,6 +6,11 @@ const { buildListingData } = require("../helpers/factories");
 const Listing = require("../../src/models/listing");
 const ledger = require("../../src/services/ledger");
 const { CATEGORIES } = require("../../src/config/categories");
+const { todayIn, addDays, formatDateOnly } = require("../../src/utils/dates");
+
+// Search dates must lie inside the booking window (today .. 365 days ahead).
+const IN = formatDateOnly(addDays(todayIn(), 30));
+const OUT = formatDateOnly(addDays(todayIn(), 32));
 
 const docs = (n) =>
   Array.from({ length: n }, (_, i) => new Listing(buildListingData({ title: `Stay number ${i + 1}` })));
@@ -170,12 +175,12 @@ describe("the filter panel", () => {
 
   test("carries the rest of the search as hidden inputs, and never the page", async () => {
     stubListingSearch(docs(1));
-    const panel = panelHtml((await get("/listings?dest=Goa&in=2099-01-10&out=2099-01-12&guests=2&category=beach&sort=rating&page=2")).text);
+    const panel = panelHtml((await get(`/listings?dest=Goa&in=${IN}&out=${OUT}&guests=2&category=beach&sort=rating&page=2`)).text);
     const hidden = [...panel.matchAll(/<input type="hidden" name="([^"]+)" value="([^"]*)">/g)].map((m) => [m[1], m[2]]);
     expect(hidden).toEqual([
       ["dest", "Goa"],
-      ["in", "2099-01-10"],
-      ["out", "2099-01-12"],
+      ["in", IN],
+      ["out", OUT],
       ["guests", "2"],
       ["category", "beach"],
       ["sort", "rating"],

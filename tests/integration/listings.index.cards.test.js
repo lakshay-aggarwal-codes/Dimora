@@ -24,7 +24,7 @@ test("each listing is a card with its link, title, place and formatted price", a
   expect(res.status).toBe(200);
   expect(res.text.match(/class="card h-100 listing-card"/g)).toHaveLength(2);
   for (const doc of docs)
-    expect(res.text).toContain(`href="/listings/${doc._id}"`);
+    expect(res.text).toContain(`href="/listings/${doc._id}`); // a ?from= suffix may follow
   expect(res.text).toContain("₹4,500");
   expect(res.text).toContain("₹1,200");
   expect(res.text).toContain("Goa, India");

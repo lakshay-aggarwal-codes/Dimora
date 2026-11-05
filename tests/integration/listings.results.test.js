@@ -56,7 +56,9 @@ describe("sorting", () => {
   test("sort links keep the search and start again at page 1", async () => {
     stubListings(docs(12), { total: 40 });
     const { text } = await get("?destination=Goa&guests=2&page=3&sort=rating");
-    const sortLinks = [...text.matchAll(/class="sort-link[^"]*" href="([^"]+)"/g)].map((m) => m[1].replace(/&amp;/g, "&"));
+    // the sort bar only: the trip-purpose bar below it reuses the sort-link class
+    const bar = (text.match(/<nav class="sort-bar" aria-label="Sort results">[\s\S]*?<\/nav>/) || [""])[0];
+    const sortLinks = [...bar.matchAll(/class="sort-link[^"]*" href="([^"]+)"/g)].map((m) => m[1].replace(/&amp;/g, "&"));
     expect(sortLinks).toHaveLength(5);
     for (const link of sortLinks) {
       expect(link).toContain("dest=Goa");
