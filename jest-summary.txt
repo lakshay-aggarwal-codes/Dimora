@@ -1,0 +1,40 @@
+﻿15x  Error: expect(received).toEqual(expected) // deep equality
+    cssArchitecture.test.js, nearby.test.js, noUserDate.test.js, responsiveMotion.test.js, securityReview.static.test.js, searchQuery.test.js, filterChips.test.js, checkoutView.test.js, trips.service.test.js, listings.search.test.js, listings.filters.test.js, routeMatrix.test.js
+14x  Error: expect(received).toBe(expected) // Object.is equality
+    reviews.edit.service.test.js, sweeper.test.js, pages.responsive.test.js, listings.search.test.js, listings.filters.test.js, host.report.db.test.js, admin.users.db.test.js, account.db.test.js, admin.overview.db.test.js
+6x  ReferenceError: window is not defined
+    mapScript.test.js
+5x  Error: expect(received).not.toContain(expected) // indexOf
+    conversations.routes.test.js, routeMatrix.test.js, search.suggestions.db.test.js, availability.db.test.js
+4x  BSONError: Argument passed in does not match the accepted types
+    review.migration.db.test.js
+4x  Error: expect(received).toHaveLength(expected)
+    sweeper.test.js, modifications.db.test.js, listings.results.test.js
+4x  assert.strictEqual(received, expected)
+    emailAuth.db.test.js
+2x  Error: expect(received).not.toMatch(expected)
+    docsDemo.test.js, admin.test.js
+2x  Error: expect(received).toBeUndefined()
+    wizard.priceRules.test.js
+2x  Error: expect(received).toContain(expected) // indexOf
+    notificationPrefs.routes.test.js, listings.index.cards.test.js
+1x  MongoBulkWriteError: E11000 duplicate key error collection: dimora_test.staynights index: listing_1_date_1 dup key: { listing: ObjectId('6aec35a8e9150e6e07037ab5'), date:
+    queryPlans.db.test.js
+1x  MongoBulkWriteError: E11000 duplicate key error collection: dimora_test.staynights index: listing_1_date_1 dup key: { listing: ObjectId('6aec35a9e9150e6e07037bed'), date:
+    queryPlans.db.test.js
+1x  Error: expect(received).toBeLessThan(expected)
+    seed.demo.db.test.js
+1x  Error: expect(received).toMatch(expected)
+    responsiveViews.test.js
+1x  MongoBulkWriteError: E11000 duplicate key error collection: dimora_test.staynights index: listing_1_date_1 dup key: { listing: ObjectId('6aec35a8e9150e6e0703797d'), date:
+    queryPlans.db.test.js
+1x  TypeError: holdExpiresAt must be in the future
+    flexibleDates.db.test.js
+1x  Error: expect(received).toMatchObject(expected)
+    rating.migration.db.test.js
+1x  MongoBulkWriteError: E11000 duplicate key error collection: dimora_test.staynights index: listing_1_date_1 dup key: { listing: ObjectId('6aec35a7e9150e6e070375d5'), date:
+    queryPlans.db.test.js
+1x  MongoBulkWriteError: E11000 duplicate key error collection: dimora_test.staynights index: listing_1_date_1 dup key: { listing: ObjectId('6aec35a8e9150e6e07037845'), date:
+    queryPlans.db.test.js
+1x  MongoBulkWriteError: E11000 duplicate key error collection: dimora_test.staynights index: listing_1_date_1 dup key: { listing: ObjectId('6aec35a7e9150e6e0703770d'), date:
+    queryPlans.db.test.js
