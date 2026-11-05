@@ -136,9 +136,9 @@ function createApp({
   // Health checks (P19-T03): before the request log, the session and CSRF, so
   // a check every few seconds writes no log line, creates no session and needs
   // no cookie or token.
-  app.use(createHealthRouter({ isDbReady }));
+  app.use("/", createHealthRouter({ isDbReady }));
   // /robots.txt and /sitemap.xml (P18-T05): no session, no cookie, cached.
-  app.use(createSeoRouter({ baseUrl: config.appBaseUrl }));
+  app.use("/", createSeoRouter({ baseUrl: config.appBaseUrl }));
   // What the layout needs for <link rel="canonical">, <meta name="robots"> and
   // the Open Graph tags (P18-T05). They are functions because the status of the
   // answer is only known when the page is rendered (an error page has no
