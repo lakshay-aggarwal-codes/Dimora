@@ -80,7 +80,6 @@
   var note = root.querySelector("[data-ring-note]");
   var EARTH_RADIUS_M = 6371008.8;
   var SOURCE_ID = "nearby-distance";
-  var shown = false;
 
   function circleRing(lng, lat, radiusM) {
     var rad = function (d) { return (d * Math.PI) / 180; };
@@ -117,7 +116,6 @@
     if (!detail || !detail.map || !checkbox) return;
     var map = detail.map;
     clearRing(map);
-    shown = false;
     if (!checkbox.checked || !current || !rings[current]) {
       if (note) note.textContent = "";
       return;
@@ -141,7 +139,6 @@
         minLat = Math.min(minLat, p[1]); maxLat = Math.max(maxLat, p[1]);
       });
       map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 24, maxZoom: 15 });
-      shown = true;
       if (note) {
         note.textContent =
           "Dashed circle: the nearest " + ring.label.toLowerCase() +

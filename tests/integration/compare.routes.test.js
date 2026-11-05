@@ -17,13 +17,6 @@ const { hiddenFields, listingsUrl } = require("../../src/utils/searchUrl");
 afterEach(() => jest.restoreAllMocks());
 
 const ROOT = path.join(__dirname, "..", "..");
-const member = {
-  _id: new ObjectId(),
-  username: "asha",
-  role: "member",
-  status: "active",
-};
-
 function app(user) {
   const a = express();
   a.set("view engine", "ejs");

@@ -1,0 +1,550 @@
+﻿== cssArchitecture.test.js | components.css has no colours or literal animation times
+Error: expect(received).toEqual(expected) // deep equality
+- Expected  - 1
++ Received  + 4
+- Array []
++ Array [
++   "hex colour: #fff",
++   "colour function: rgba(",
++ ]
+== cssArchitecture.test.js | every other stylesheet in public/css is clean too
+Error: expect(received).toEqual(expected) // deep equality
+- Expected  - 1
++ Received  + 4
+  Object {
+    "file": "components.css",
+-   "found": Array [],
++   "found": Array [
++     "hex colour: #fff",
+== cssArchitecture.test.js | every var(--x) used in base, components and rating is defined
+Error: expect(received).toEqual(expected) // deep equality
+- Expected  - 1
++ Received  + 7
+- Array []
++ Array [
++   "components.css: --bs-body-bg",
++   "components.css: --bs-body-color",
++   "components.css: --bs-border-color",
+== nearby.test.js | only the host controller imports the nearby service; no public controller, route or view helper does
+Error: expect(received).toEqual(expected) // deep equality
+- Expected  - 0
++ Received  + 2
+  Array [
+    "controllers/host.js",
++   "services/compare.js",
++   "services/neighborhood.js",
+  ]
+== noUserDate.test.js | application code only builds dates through src/utils/dates.js
+Error: expect(received).toEqual(expected) // deep equality
+- Expected  -  1
++ Received  + 23
+- Array []
++ Array [
++   "src/services/emailTokens.js:40 new Date(<argument>): createdAt: { $gte: new Date(now.getTime() - 60 * 60 * 1000) },",
++   "src/services/emailTokens.js:47 new Date(<argument>): const sinceLast = now.getTime() - new Date(recent[0].createdAt).getTime();",
++   "src/services/emailTokens.js:51 new Date(<argument>): const oldest = new Date(recent[recent.length - 1].createdAt).getTime();",
+== responsiveViews.test.js | categories are links inside a labelled nav, not clickable divs
+Error: expect(received).toMatch(expected)
+Expected pattern: /<a class="filter<%= category\.active[^>]*href="<%= category\.href %>"/
+Received string:  "<% layout(\"layouts/boilerPlate\") %>
+    <%
+        // Defaults let this view be rendered with only `allListings` (older tests).
+        const f = typeof form !== \"undefined\" ? form : {};
+        const errs = typeof errors !== \"undefined\" ? errors : {};
+        const filterState = typeof pageState !== \"undefined\" ? pageState : {};
+== responsiveMotion.test.js | every table is inside a .table-responsive wrapper
+Error: expect(received).toEqual(expected) // deep equality
+- Expected  - 1
++ Received  + 1
+  Object {
+    "file": "views/compare/index.ejs",
+-   "wrapped": true,
++   "wrapped": false,
+  }
+== securityReview.static.test.js | only the allow-listed expressions are printed raw
+Error: expect(received).toEqual(expected) // deep equality
+- Expected  - 1
++ Received  + 7
+- Array []
++ Array [
++   "views\\conversations\\show.ejs: <%- messages.length > 0 ? \" hidden\" : \"\" %>",
++   "views\\notifications\\index.ejs: <%- show === 'all' ? ' aria-current=\"page\"' : '' %>",
++   "views\\notifications\\index.ejs: <%- show === 'unread' ? ' aria-current=\"page\"' : '' %>",
+== searchQuery.test.js | empty values mean 'not set'; unknown names and prototype keys are ignored
+Error: expect(received).toEqual(expected) // deep equality
+- Expected  - 1
++ Received  + 3
+- Object {}
++ Object {
++   "category": "Category is not one of the choices.",
++ }
+    at Object.toEqual (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\searchQuery.test.js:88:20)
+== mapScript.test.js | on load it draws one polygon whose edge is the given radius from the centre
+ReferenceError: window is not defined
+    at Object.load (evalmachine.<anonymous>:156:7)
+    at Object.load (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\mapScript.test.js:88:18)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+    at _callCircusTest (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1167:40)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== mapScript.test.js | a missing or absurd radius falls back to 1000 m
+ReferenceError: window is not defined
+    at Object.load (evalmachine.<anonymous>:156:7)
+    at Object.load (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\mapScript.test.js:109:20)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+    at _callCircusTest (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1167:40)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== mapScript.test.js | a circle across the antimeridian stays one continuous ring
+ReferenceError: window is not defined
+    at Object.load (evalmachine.<anonymous>:156:7)
+    at Object.load (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\mapScript.test.js:118:18)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+    at _callCircusTest (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1167:40)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== mapScript.test.js | an error after the map loaded (one failed tile) is ignored
+ReferenceError: window is not defined
+    at Object.load (evalmachine.<anonymous>:156:7)
+    at Object.load (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\mapScript.test.js:164:18)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+    at _callCircusTest (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1167:40)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== mapScript.test.js | a map that never loads falls back after the timeout; a loaded one does not
+ReferenceError: window is not defined
+    at Object.load (evalmachine.<anonymous>:156:7)
+    at Object.load (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\mapScript.test.js:177:21)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+    at _callCircusTest (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1167:40)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== mapScript.test.js | never creates a pin or a popup
+ReferenceError: window is not defined
+    at Object.load (evalmachine.<anonymous>:156:7)
+    at Object.load (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\mapScript.test.js:185:18)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+    at _callCircusTest (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1167:40)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== filterChips.test.js | PANEL_FIELDS are the URL names of the panel's inputs
+Error: expect(received).toEqual(expected) // deep equality
+- Expected  - 0
++ Received  + 1
+@@ -4,7 +4,8 @@
+    "maxPrice",
+    "type",
+    "roomType",
+    "bedrooms",
+== checkoutView.test.js | anything that is not in the strict format is ignored
+Error: expect(received).toEqual(expected) // deep equality
+- Expected  - 0
++ Received  + 4
+@@ -2,9 +2,13 @@
+    Array [
+      "nights",
+      1,
+    ],
+== wizard.priceRules.test.js | good rules pass
+Error: expect(received).toBeUndefined()
+Received: [ValidationError: Listing validation failed: title: Path `title` is required.]
+    at Object.toBeUndefined (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\wizard.priceRules.test.js:87:149)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+    at _callCircusTest (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1167:40)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== wizard.priceRules.test.js | at most 5 seasons, none ending before it starts, none overlapping
+Error: expect(received).toBeUndefined()
+Received: [ValidationError: Listing validation failed: title: Path `title` is required.]
+    at Object.toBeUndefined (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\wizard.priceRules.test.js:103:122)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+    at _callCircusTest (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1167:40)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== reviews.edit.service.test.js | the window is configurable per service and per call
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: true
+Received: false
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\reviews.edit.service.test.js:252:55)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== sweeper.test.js | a failed or abandoned payment keeps the nights held until the payment hold runs out, then they are released
+Error: expect(received).toHaveLength(expected)
+Expected length: 3
+Received length: 0
+Received array:  []
+    at Object.toHaveLength (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\sweeper.test.js:160:29)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== sweeper.test.js | it is expired on its own short hold, not the 24 hours of a host request
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: 1
+Received: 0
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\sweeper.test.js:186:28)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== sweeper.test.js | an unpaid booking past its payment hold becomes expired, its nights are released, with its own reason
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: 1
+Received: 0
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\sweeper.test.js:756:28)
+== sweeper.test.js | while the payment hold is running the booking and its nights are left alone (15 minutes in, not 16)
+Error: expect(received).toHaveLength(expected)
+Expected length: 3
+Received length: 0
+Received array:  []
+    at Object.toHaveLength (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\sweeper.test.js:777:29)
+== sweeper.test.js | a failed payment leaves the nights held until the hold runs out, and no refund is asked for
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: "expired"
+Received: "awaiting_payment"
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\sweeper.test.js:791:34)
+== sweeper.test.js | unpaid bookings and unanswered requests expire in the same run; running again changes nothing
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: 2
+Received: 1
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\sweeper.test.js:800:27)
+== trips.service.test.js | open and closed carry the last day; done carries the review
+Error: expect(received).toEqual(expected) // deep equality
+- Expected  - 1
++ Received  + 0
+@@ -1,11 +1,10 @@
+  Object {
+    "comment": "Nice",
+    "editUntil": null,
+    "editable": false,
+== notificationPrefs.routes.test.js | opening the link shows a button and changes NOTHING
+Error: expect(received).toContain(expected) // indexOf
+Expected substring: "Stop <strong>Bookings</strong> emails"
+Received string:    "<!DOCTYPE html>
+<html lang=\"en\">Â·
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <meta name=\"csrf-token\" content=\"tok\">
+== rating.migration.db.test.js | only whole 1 to 5 ratings count; listings already right are left alone; safe to run twice
+Error: expect(received).toMatchObject(expected)
+- Expected  - 3
++ Received  + 3
+  Object {
+-   "modified": 3,
+-   "scanned": 4,
+-   "toUpdate": 3,
++   "modified": 6,
+== review.migration.db.test.js | a dry run only counts
+BSONError: Argument passed in does not match the accepted types
+    at new ObjectId (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\bson\src\objectid.ts:241:13)
+    at seed (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\review.migration.db.test.js:17:19)
+    at Object.seed (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\review.migration.db.test.js:57:31)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+    at _callCircusTest (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1167:40)
+== review.migration.db.test.js | upgrades every review, keeps content, and is safe to run twice
+BSONError: Argument passed in does not match the accepted types
+    at new ObjectId (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\bson\src\objectid.ts:241:13)
+    at seed (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\review.migration.db.test.js:17:19)
+    at Object.seed (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\review.migration.db.test.js:69:64)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+    at _callCircusTest (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1167:40)
+== review.migration.db.test.js | a review of a stay is not marked legacy
+BSONError: Argument passed in does not match the accepted types
+    at new ObjectId (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\bson\src\objectid.ts:241:13)
+    at seed (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\review.migration.db.test.js:17:19)
+    at Object.seed (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\review.migration.db.test.js:104:31)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+    at _callCircusTest (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1167:40)
+== review.migration.db.test.js | builds the unique index: one review per reservation, any number without one
+BSONError: Argument passed in does not match the accepted types
+    at new ObjectId (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\bson\src\objectid.ts:241:13)
+    at seed (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\review.migration.db.test.js:17:19)
+    at Object.seed (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\review.migration.db.test.js:117:11)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+    at _callCircusTest (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1167:40)
+== docsDemo.test.js | it says routers are unreachable only while that is true
+Error: expect(received).not.toMatch(expected)
+Expected pattern: not /require\(["'][^"']*routes\/conversations["']\)/
+Received string:      "const path = require(\"node:path\");
+const express = require(\"express\");
+const methodOverride = require(\"method-override\");
+const ejsMate = require(\"ejs-mate\");
+const session = require(\"express-session\");
+const { MongoStore } = require(\"connect-mongo\");
+== flexibleDates.db.test.js | an expired hold counts as free, a live hold does not
+TypeError: holdExpiresAt must be in the future
+    at normalizeHold (C:\Users\Lakshay\Desktop\WebDev\project\src\services\ledger.js:109:13)
+    at Object.normalizeHold (C:\Users\Lakshay\Desktop\WebDev\project\src\services\ledger.js:146:18)
+    at reserveNights (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\flexibleDates.db.test.js:40:12)
+    at Object.take (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\flexibleDates.db.test.js:81:11)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== listings.index.cards.test.js | each listing is a card with its link, title, place and formatted price
+Error: expect(received).toContain(expected) // indexOf
+Expected substring: "href=\"/listings/6aec35a80d64d65667f00c7f\""
+Received string:    "<!DOCTYPE html>
+<html lang=\"en\">Â·
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <meta name=\"csrf-token\" content=\"DHUqq1v3e8Ez2VZJiOc33SxvKMyPz_o3QIxppLfMSSY\">
+== queryPlans.db.test.js | every hot query keeps what it promises, as MongoDB itself plans it
+MongoBulkWriteError: E11000 duplicate key error collection: dimora_test.staynights index: listing_1_date_1 dup key: { listing: ObjectId('6aec35a7e9150e6e070375d5'), date: new Date(1793836800000) }
+    at OrderedBulkOperation.handleWriteError (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1205:13)
+    at executeCommands (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:589:19)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1188:16
+    at MongoClient.withSession (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\mongo_client.ts:945:14)
+    at OrderedBulkOperation.execute (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1187:14)
+    at Collection.bulkWrite (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\collection.ts:391:12)
+== queryPlans.db.test.js | the search with dates reads only the index (no documents) and the date index is the one used
+MongoBulkWriteError: E11000 duplicate key error collection: dimora_test.staynights index: listing_1_date_1 dup key: { listing: ObjectId('6aec35a7e9150e6e0703770d'), date: new Date(1793836800000) }
+    at OrderedBulkOperation.handleWriteError (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1205:13)
+    at executeCommands (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:589:19)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1188:16
+    at MongoClient.withSession (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\mongo_client.ts:945:14)
+    at OrderedBulkOperation.execute (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1187:14)
+    at Collection.bulkWrite (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\collection.ts:391:12)
+== queryPlans.db.test.js | the search orders sort nothing in memory
+MongoBulkWriteError: E11000 duplicate key error collection: dimora_test.staynights index: listing_1_date_1 dup key: { listing: ObjectId('6aec35a8e9150e6e07037845'), date: new Date(1793836800000) }
+    at OrderedBulkOperation.handleWriteError (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1205:13)
+    at executeCommands (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:589:19)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1188:16
+    at MongoClient.withSession (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\mongo_client.ts:945:14)
+    at OrderedBulkOperation.execute (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1187:14)
+    at Collection.bulkWrite (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\collection.ts:391:12)
+== queryPlans.db.test.js | the planner's index for each query is one the checker expected, where the checker names one for a promised order
+MongoBulkWriteError: E11000 duplicate key error collection: dimora_test.staynights index: listing_1_date_1 dup key: { listing: ObjectId('6aec35a8e9150e6e0703797d'), date: new Date(1793836800000) }
+    at OrderedBulkOperation.handleWriteError (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1205:13)
+    at executeCommands (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:589:19)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1188:16
+    at MongoClient.withSession (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\mongo_client.ts:945:14)
+    at OrderedBulkOperation.execute (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1187:14)
+    at Collection.bulkWrite (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\collection.ts:391:12)
+== queryPlans.db.test.js | migration 010's indexes exist after the models are initialised, and the dropped ones do not
+MongoBulkWriteError: E11000 duplicate key error collection: dimora_test.staynights index: listing_1_date_1 dup key: { listing: ObjectId('6aec35a8e9150e6e07037ab5'), date: new Date(1793836800000) }
+    at OrderedBulkOperation.handleWriteError (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1205:13)
+    at executeCommands (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:589:19)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1188:16
+    at MongoClient.withSession (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\mongo_client.ts:945:14)
+    at OrderedBulkOperation.execute (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1187:14)
+    at Collection.bulkWrite (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\collection.ts:391:12)
+== queryPlans.db.test.js | migration 010 on a database that has the old indexes: new ones appear, old ones go, and it can run twice
+MongoBulkWriteError: E11000 duplicate key error collection: dimora_test.staynights index: listing_1_date_1 dup key: { listing: ObjectId('6aec35a9e9150e6e07037bed'), date: new Date(1793836800000) }
+    at OrderedBulkOperation.handleWriteError (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1205:13)
+    at executeCommands (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:589:19)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1188:16
+    at MongoClient.withSession (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\mongo_client.ts:945:14)
+    at OrderedBulkOperation.execute (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\bulk\common.ts:1187:14)
+    at Collection.bulkWrite (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\collection.ts:391:12)
+== modifications.db.test.js | ten parallel changes of one booking to different dates: exactly one wins and the ledger follows it
+Error: expect(received).toHaveLength(expected)
+Expected length: 1
+Received length: 2
+Received array:  ["won", "won"]
+    at Object.toHaveLength (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\modifications.db.test.js:113:49)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== pages.responsive.test.js | reviews are a list of articles with an accessible rating
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: 2
+Received: 0
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\pages.responsive.test.js:191:59)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== listings.results.test.js | sort links keep the search and start again at page 1
+Error: expect(received).toHaveLength(expected)
+Expected length: 5
+Received length: 9
+Received array:  ["/listings?dest=Goa&guests=2", "/listings?dest=Goa&guests=2&sort=price_asc", "/listings?dest=Goa&guests=2&sort=price_desc", "/listings?dest=Goa&guests=2&sort=rating", "/listings?dest=Goa&guests=2&sort=newest", "/listings?dest=Goa&guests=2&sort=rating", "/listings?dest=Goa&guests=2&sort=rating&purpose=work", "/listings?dest=Goa&guests=2&sort=rating&purpose=family", "/listings?dest=Goa&guests=2&sort=rating&purpose=weekend"]
+    at Object.toHaveLength (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\listings.results.test.js:60:23)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== admin.test.js | the viewer has no form, button or link that could change an entry
+Error: expect(received).not.toMatch(expected)
+Expected pattern: not /<form/
+Received string:      "id=\"main\" class=\"container\" tabindex=\"-1\">
+<div class=\"row mt-3\">
+    <div class=\"col-12\">
+        <p class=\"mb-1\"><a href=\"/admin\">&larr; Admin</a></p>
+        <h1 class=\"h3\">Audit log</h1>
+        <p class=\"text-muted\">Newest first. Entries cannot be edited or deleted.
+== listings.search.test.js | unknown parameters and operator-looking ones change nothing
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: 200
+Received: 400
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\listings.search.test.js:85:24)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== listings.search.test.js | other filters become hidden inputs, page does not
+Error: expect(received).toEqual(expected) // deep equality
+- Expected  - 0
++ Received  + 2
+@@ -2,6 +2,8 @@
+    "minPrice=1000",
+    "type=villa",
+    "amenities=wifi",
+    "amenities=pool",
+== conversations.routes.test.js | an older page (?before=) is not polled
+Error: expect(received).not.toContain(expected) // indexOf
+Expected substring: not "data-poll-seconds"
+Received string:        "<!DOCTYPE html>
+<html lang=\"en\">
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <meta name=\"csrf-token\" content=\"t\">
+== listings.filters.test.js | has every control the filters need, named like the URL
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: 6
+Received: 0
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\listings.filters.test.js:150:44)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== listings.filters.test.js | carries the rest of the search as hidden inputs, and never the page
+Error: expect(received).toEqual(expected) // deep equality
+- Expected  - 8
++ Received  + 0
+@@ -2,18 +2,10 @@
+    Array [
+      "dest",
+      "Goa",
+    ],
+== routeMatrix.test.js | GET /listings is public: no login guard in front of it
+Error: expect(received).not.toContain(expected) // indexOf
+Expected value: not [Function isLoggedIn]
+Received array:     [[Function withSavedIds], [Function anonymous], [Function isLoggedIn], [Function authorizeMiddleware], [Function multerMiddleware], [Function inputGuard], [Function anonymous], [Function anonymous], [Function anonymous], [Function geocodeListing], [Function uploadToCloudinary], [Function anonymous]]
+    at toContain (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\routeMatrix.test.js:132:34)
+    at Object.<anonymous> (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-each\build\index.js:80:140)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+== routeMatrix.test.js | GET /listings/:id is public: no login guard in front of it
+Error: expect(received).not.toContain(expected) // indexOf
+Expected value: not [Function isLoggedIn]
+Received array:     [[Function withSavedIds], [Function anonymous], [Function isLoggedIn], [Function authorizeMiddleware], [Function multerMiddleware], [Function inputGuard], [Function anonymous], [Function anonymous], [Function geocodeListing], [Function uploadToCloudinary], [Function anonymous], [Function isLoggedIn], [Function authorizeMiddleware], [Function anonymous]]
+    at toContain (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\routeMatrix.test.js:132:34)
+    at Object.<anonymous> (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-each\build\index.js:80:140)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+== routeMatrix.test.js | PUT /listings/:id: isLoggedIn, then authorize with the named action
+Error: expect(received).toEqual(expected) // deep equality
+- Expected  - 0
++ Received  + 1
+  Array [
+    "listing:edit",
++   "listing:delete",
+  ]
+    at toEqual (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\routeMatrix.test.js:158:92)
+== routeMatrix.test.js | DELETE /listings/:id: isLoggedIn, then authorize with the named action
+Error: expect(received).toEqual(expected) // deep equality
+- Expected  - 0
++ Received  + 1
+  Array [
++   "listing:edit",
+    "listing:delete",
+  ]
+    at toEqual (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\routeMatrix.test.js:158:92)
+== host.report.db.test.js | bad months give a 400, never a crash or someone else's data
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: 400
+Received: 200
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\host.report.db.test.js:103:66)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== emailAuth.db.test.js | asking again is throttled, and a new link replaces the old one
+assert.strictEqual(received, expected)
+Expected value to strictly be equal to:
+  2
+Received:
+  1
+    at Object.equal (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\emailAuth.db.test.js:93:14)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== emailAuth.db.test.js | the link sets a new password once; the old one stops working; the lock is lifted
+assert.strictEqual(received, expected)
+Expected value to strictly be equal to:
+  0
+Received:
+  1
+    at Object.equal (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\emailAuth.db.test.js:195:14)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== emailAuth.db.test.js | a new request replaces the old link; an expired or invented link fails
+assert.strictEqual(received, expected)
+Expected value to strictly be equal to:
+  2
+Received:
+  1
+    at Object.equal (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\emailAuth.db.test.js:224:14)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== emailAuth.db.test.js | five emails an hour per account, one a minute
+assert.strictEqual(received, expected)
+Expected value to strictly be equal to:
+  5
+Received:
+  1
+Message:
+  sent 1
+1 !== 5
+== admin.users.db.test.js | suspend: status, listings hidden, sessions gone, login refused, one audit row
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: 302
+Received: 403
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\admin.users.db.test.js:74:26)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== account.db.test.js | a member with nothing open: anonymised, logged out, old credentials dead, no PII in the stored document
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: "/login"
+Received: undefined
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\account.db.test.js:137:42)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== account.db.test.js | the only administrator cannot delete the account
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: "active"
+Received: "deleted"
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\account.db.test.js:247:54)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== search.suggestions.db.test.js | a search where the destination is the problem offers popular destinations only
+Error: expect(received).not.toContain(expected) // indexOf
+Expected substring: not "Try this instead"
+Received string:        "<!DOCTYPE html>
+<html lang=\"en\">
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <meta name=\"csrf-token\" content=\"5Nuvj1xjvfrYMrk1cS_ysMdjBw1eLwvtLSzLM9_NnMk\">
+== availability.db.test.js | a draft has no calendar link
+Error: expect(received).not.toContain(expected) // indexOf
+Expected substring: not "/calendar"
+Received string:        "<!DOCTYPE html>
+<html lang=\"en\">
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <meta name=\"csrf-token\" content=\"dGS5wv4iqWDKxsGzhIcvQ0bDJsTXyjp2at4cPHePgls\">
+== admin.overview.db.test.js | malformed input never breaks the page
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: 200
+Received: 400
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\admin.overview.db.test.js:174:52)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== admin.overview.db.test.js | the page applies them, keeps them in the form and clears them
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: 200
+Received: 400
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\admin.overview.db.test.js:300:85)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== seed.demo.db.test.js | bookings carry real snapshots, back-dated times and the host's answers
+Error: expect(received).toBeLessThan(expected)
+Expected: < 1793865131916
+Received:   1793865133354
+    at Object.toBeLessThan (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\seed.demo.db.test.js:95:47)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)

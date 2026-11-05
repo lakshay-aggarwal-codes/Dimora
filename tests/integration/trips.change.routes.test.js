@@ -9,7 +9,6 @@ const request = require("supertest");
 const ejsMate = require("ejs-mate");
 const { ObjectId } = require("mongoose").Types;
 const Reservation = require("../../src/models/reservation");
-const User = require("../../src/models/user");
 const modifications = require("../../src/services/modifications");
 const tripsRouter = require("../../src/routes/trips");
 const hostRouter = require("../../src/routes/host");

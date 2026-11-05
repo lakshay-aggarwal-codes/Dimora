@@ -53,6 +53,7 @@ function keyFor(point) {
 }
 
 // Control characters and bidi overrides can hide or reorder text.
+// eslint-disable-next-line no-control-regex
 const UNSAFE_CHARS = /[\u0000-\u001F\u007F-\u009F\u200E\u200F\u202A-\u202E\u2066-\u2069]/g;
 
 /** Plain text, one line, at most 100 characters. HTML is NOT removed: every view escapes with <%= %>. */

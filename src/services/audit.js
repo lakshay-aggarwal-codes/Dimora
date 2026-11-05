@@ -134,7 +134,9 @@ async function listAudit({ page, ...rawFilters } = {}) {
     .limit(PAGE_SIZE)
     .populate("actor", "username displayName")
     .lean();
-  const { fromDate, toDate, ...shown } = f;
+  const shown = { ...f };
+  delete shown.fromDate;
+  delete shown.toDate;
   return { rows, page: current, totalPages, total, pageSize: PAGE_SIZE, filters: shown };
 }
 
