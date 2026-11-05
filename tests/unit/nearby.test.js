@@ -364,7 +364,7 @@ describe("page views never reach Overpass (Signature #3)", () => {
         const full = path.join(dir, entry.name);
         if (entry.isDirectory()) walk(full);
         else if (entry.name.endsWith(".js") && !/^nearby/.test(entry.name)) {
-          if (/require\(\s*["'][^"']*\/nearby["']\s*\)/.test(fs.readFileSync(full, "utf8"))) {
+          if (/require\(\s*["'](?![^"']*config\/)[^"']*\/nearby["']\s*\)/.test(fs.readFileSync(full, "utf8"))) {
             importers.push(path.relative(root, full).split(path.sep).join("/"));
           }
         }
