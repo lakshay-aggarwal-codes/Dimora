@@ -47,14 +47,17 @@ function run({ dataset, withMapbox = true, mapThrows = false, fallback = "Approx
   };
 
   const errors = [];
+  const events = [];
   const sandbox = {
     document,
+    window: { dispatchEvent: (event) => events.push(event.type) },
+    CustomEvent: function CustomEvent(type) { this.type = type; },
     console: { error: (...args) => errors.push(args) },
     setTimeout: (fn, ms) => { calls.timers.push({ fn, ms }); return calls.timers.length; },
   };
   if (withMapbox) sandbox.mapboxgl = mapboxgl;
   vm.runInNewContext(SOURCE, sandbox);
-  return { calls, mapEl, errors };
+  return { calls, mapEl, errors, events };
 }
 
 const VALID = { token: "pk.x", lng: "77.209", lat: "28.6139", radius: "1000", title: "Seaside Cottage" };

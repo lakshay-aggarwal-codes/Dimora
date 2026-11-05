@@ -10,6 +10,7 @@ const { data: sampleListings } = require("./seed-data.js");
 const { classificationFor } = require("./seed-classification.js");
 const { keysForListing } = require("../src/utils/searchKeys");
 const { rupeesToMinor } = require("../src/utils/listingFields");
+const { instantAfter } = require("../src/utils/dates.js");
 
 // Demo-only accounts. The addresses end in .invalid, which never resolves.
 // Passwords are NOT stored here: each is generated at random when the account
@@ -199,18 +200,18 @@ const MS_HOUR = 60 * 60 * 1000;
  *  answer happened at, from `now`. Pure. */
 function planReservations(today, now) {
   const day = (offset) => {
-    const d = new Date(today.getTime() + offset * 24 * MS_HOUR);
+    const d = instantAfter(today, offset * 24 * MS_HOUR);
     return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
   };
   return SCENARIOS.map((s) => {
-    const bookedAt = new Date(now.getTime() - s.bookedAgoHours * MS_HOUR);
+    const bookedAt = instantAfter(now, -s.bookedAgoHours * MS_HOUR);
     return {
       ...s,
       idempotencyKey: `demo-${s.key}`,
       checkIn: day(s.inDays),
       checkOut: day(s.inDays + s.nights),
       bookedAt,
-      respondedAt: s.respondAfterHours === undefined ? undefined : new Date(bookedAt.getTime() + s.respondAfterHours * MS_HOUR),
+      respondedAt: s.respondAfterHours === undefined ? undefined : instantAfter(bookedAt, s.respondAfterHours * MS_HOUR),
     };
   });
 }

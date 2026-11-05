@@ -240,15 +240,16 @@ describe("edit: the author changes their own review", () => {
   });
 
   test("the window is configurable per service and per call", async () => {
-    const old = reviewDoc({ createdAt: new Date(NOW.getTime() - 10 * DAY) });
+    // a fresh document each time: the fake model edits the one it is given
+    const old = () => reviewDoc({ createdAt: new Date(NOW.getTime() - 10 * DAY) });
     await denied(
-      setup({ review: old }).edit(),
+      setup({ review: old() }).edit(),
       ConflictError,
       "review_edit_window_closed",
     );
-    const t = setup({ review: old, editDays: 14 });
+    const t = setup({ review: old(), editDays: 14 });
     expect((await t.edit()).changed).toBe(true);
-    const t2 = setup({ review: old });
+    const t2 = setup({ review: old() });
     expect((await t2.edit({ editDays: 30 })).changed).toBe(true);
   });
 

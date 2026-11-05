@@ -164,6 +164,11 @@ function todayIn(timeZone = DEFAULT_TIMEZONE, now = new Date()) {
   return new Date(Date.UTC(get("year"), get("month") - 1, get("day")));
 }
 
+/** A Date for a stored instant (a Date, epoch milliseconds or an ISO timestamp); an invalid Date for anything else. */
+function toInstant(value) {
+  return value instanceof Date ? new Date(value.getTime()) : new Date(value);
+}
+
 /** The instant `ms` milliseconds after `instant` (holds, expiries). */
 function instantAfter(instant, ms) {
   if (!(instant instanceof Date) || !Number.isFinite(instant.getTime())) {
@@ -348,6 +353,7 @@ module.exports = {
   eachNight,
   todayIn,
   instantAfter,
+  toInstant,
   wallClockIn,
   parseClockTime,
   zonedInstant,

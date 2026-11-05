@@ -8,6 +8,8 @@
 // Pages that belong to one signed-in person, to staff, or to the machinery of
 // the site. robots.txt asks crawlers to stay out of them and the page itself
 // says "noindex" (robots.txt alone does not remove a page from a search engine).
+const { toInstant } = require("./dates");
+
 const PRIVATE_PREFIXES = Object.freeze([
   "/account",
   "/admin",
@@ -104,7 +106,7 @@ const xmlEscape = (text) =>
 
 /** "2026-10-29" from a Date (UTC), or "" for anything else. */
 function lastmod(value) {
-  const date = value instanceof Date ? value : new Date(value);
+  const date = toInstant(value);
   return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
 }
 

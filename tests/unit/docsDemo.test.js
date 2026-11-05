@@ -143,7 +143,7 @@ describe("docs/DEMO.md", () => {
   });
 
   test("it says routers are unreachable only while that is true", () => {
-    // If one of these gets mounted, this fails: update section 5 of DEMO.md.
+    // Mounting (or losing) these routers must go together with section 5 of DEMO.md.
     const files = [];
     (function walk(dir) {
       for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -153,11 +153,11 @@ describe("docs/DEMO.md", () => {
       }
     })(path.join(ROOT, "src"));
     const source = files.map((f) => fs.readFileSync(f, "utf8")).join("\n");
-    for (const router of ["conversations", "notifications", "account"]) {
-      expect(source).not.toMatch(
-        new RegExp(`require\\(["'][^"']*routes/${router}["']\\)`),
-      );
-    }
+    const mounted = ["conversations", "notifications", "account"].filter((router) =>
+      new RegExp(`require\\(["'][^"']*routes/${router}["']\\)`).test(source),
+    );
+    expect([0, 3]).toContain(mounted.length); // all or none: the page talks about them together
+    expect(/written but not reachable/.test(demo)).toBe(mounted.length === 0);
   });
 
   test("it makes no claim of screenshots and lists the pictures to take", () => {

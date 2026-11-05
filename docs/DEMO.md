@@ -109,10 +109,10 @@ The page may drop the trailing `.00`. Stays that include a Friday or Saturday ni
 Checked on the repository as given when this kit was written (2026-10-29):
 
 - **Not seen in a browser.** The author's sandbox had no browser, no MongoDB and no Cloudinary or Mapbox account. The walkthrough was assembled from the code, the seed data and the tests; the pages, the date picker, the maps and the timings have not been run end to end by the author. Do one rehearsal.
-- **Two features are written but not reachable.** The guest-host **messages**, the **notification inbox pages** (the bell's count endpoint works), and **password change and account deletion** have routers that nothing mounts in `src/app.js` (the same kind of loss that [FIX-after-Q60](tasks/FIX-after-Q60.md) repaired earlier). Do not demonstrate them; the test `tests/unit/docsDemo.test.js` fails when one is mounted again, as a reminder to update this page.
+- **Messages, notification pages and account settings are mounted again.** The guest-host **messages**, the **notification inbox pages** and **password change and account deletion** are mounted in `src/app.js` (restored after the lost-update repair, see [RESTORE](tasks/RESTORE.md)). They were not rehearsed for this kit: try them once before showing them. The test `tests/unit/docsDemo.test.js` fails if this page and `src/app.js` disagree.
 - **The test suite is not green.** With `SKIP_DB_TESTS=1`, the full Jest run when this kit was written reported 31 failing suites (95 failing tests) out of 247, in the route matrix, the generated API and README checks, search and responsive pages and others. None is caused by this task. Run the single suites named in section 3, which pass; do not run all of `npm test` in front of an audience.
 - **Database suites were never run by the author** (no MongoDB), including the real-concurrency booking suite.
-- **No payments, no email.** Nothing is emailed, and the notification inbox is one of the unreachable pieces above.
+- **No payments.** Payment is not part of the booking flow yet (task 97, the simulated payment, is being redone).
 - **One market:** rupees, India defaults, one time zone per place (Asia/Kolkata unless set).
 - **On a free Render service** the first request after 15 quiet minutes takes about a minute, and nothing expires or completes while it sleeps ([docs/DEPLOYMENT.md](DEPLOYMENT.md)).
 - **Demo data is demo data:** extra photos on each place are borrowed from other places; one sample cover is on a host the page policy blocks.

@@ -124,6 +124,9 @@
             <%- include("../partials/review-form.ejs", { action: "/listings/" + trip.listing.id + "/reviews", reservationId: trip.id, idPrefix: "trip", intro: "How was your stay? You can review it until " + trip.review.until + "." }) %>
             <% } else if (trip.review.state === "done") { %>
             <p class="review-rating mb-1"><span aria-hidden="true"><%= trip.review.rating %> &#9733;</span> <span class="visually-hidden">You rated this stay <%= trip.review.rating %> out of 5</span></p>
+            <% if (trip.review.hidden) { %>
+            <p class="small text-body-secondary mb-1" role="status">A moderator has hidden this review. Other guests cannot see it.</p>
+            <% } %>
             <p class="trip-rules-text mb-0"><%= trip.review.comment %><% if (trip.review.edited) { %> <span class="small text-body-secondary">(edited)</span><% } %></p>
             <% if (trip.review.reply) { %>
             <div class="border-start ps-3 mt-3">

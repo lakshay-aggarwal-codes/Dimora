@@ -1,0 +1,15 @@
+﻿node.exe : PASS tests/unit/app.smoke.test.js
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (PASS tests/unit/app.smoke.test.js:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+PASS tests/unit/bookingStress.test.js (10.27 s)
+
+Test Suites: 2 passed, 2 total
+Tests:       16 passed, 16 total
+Snapshots:   0 total
+Time:        10.858 s, estimated 80 s
+Ran all test suites matching tests/unit/app.smoke.test.js|tests/unit/bookingStress.test.js.
+

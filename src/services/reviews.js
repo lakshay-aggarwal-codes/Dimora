@@ -30,6 +30,8 @@ const {
   todayIn,
   addDays,
   isAfter,
+  instantAfter,
+  toInstant,
 } = require("../utils/dates");
 const { isActiveUser, sameId } = require("../policies/shared");
 const ratings = require("./ratings");
@@ -82,7 +84,7 @@ function parseReply(raw) {
 /** When a review was posted: `createdAt`, else the time its id was created. */
 function postedAt(review) {
   const created =
-    review && review.createdAt ? new Date(review.createdAt) : null;
+    review && review.createdAt ? toInstant(review.createdAt) : null;
   if (created && !Number.isNaN(created.getTime())) return created;
   return review && review._id && typeof review._id.getTimestamp === "function"
     ? review._id.getTimestamp()
@@ -92,7 +94,7 @@ function postedAt(review) {
 /** The moment the author can no longer edit this review (null if its age is unknown). */
 function editDeadline(review, editDays = DEFAULT_EDIT_DAYS) {
   const posted = postedAt(review);
-  return posted ? new Date(posted.getTime() + editDays * DAY_MS) : null;
+  return posted ? instantAfter(posted, editDays * DAY_MS) : null;
 }
 
 /** Can the author still edit? (Ownership and status are checked elsewhere.) */
@@ -363,7 +365,7 @@ function createReviewService({
       return { review: current, changed: false };
     }
 
-    const cutoff = new Date(now.getTime() - days * DAY_MS);
+    const cutoff = instantAfter(now, -days * DAY_MS);
     const before = await ReviewModel.findOneAndUpdate(
       {
         _id: current._id,

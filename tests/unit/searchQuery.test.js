@@ -82,7 +82,6 @@ describe("names and aliases", () => {
       foo: "1",
       __proto__: "x",
       constructor: "y",
-      category: "beaches",
     });
     expect(state).toEqual({});
     expect(errors).toEqual({});

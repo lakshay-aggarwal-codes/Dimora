@@ -25,6 +25,8 @@ describe("views: raw (unescaped) output", () => {
     [/^range\.(from|to)$/, "page numbers (numbers computed on the server)"],
     [/^destText$/, "built in views/listings/index.ejs with every & < > \" ' escaped"],
     [/^structuredData$/, "JSON-LD: must come from listingJsonLd / jsonForScript (src/utils/structuredData.js); not yet set by any controller"],
+    [/^[\w.]+(?: (?:===|>) (?:'[a-z]+'|\d+))? \? (?:"[^"<>&']*"|'[^'<>&]*') : (?:""|'')$/, "a fixed attribute string chosen by a condition: no variable text in it"],
+    [/^hidden$/, "views/notifications/index.ejs builds it from fixed input tags and Number(page)"],
   ];
 
   test("only the allow-listed expressions are printed raw", () => {

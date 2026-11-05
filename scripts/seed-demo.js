@@ -44,7 +44,7 @@ const { createReviewService } = require("../src/services/reviews.js");
 const { cancelBooking } = require("../src/services/cancellations.js");
 const { promoteToAdmin } = require("../src/services/adminBootstrap.js");
 const { configureLocationSecret } = require("../src/utils/geo.js");
-const { todayIn, DEFAULT_TIMEZONE } = require("../src/utils/dates.js");
+const { todayIn, DEFAULT_TIMEZONE, instantAfter, toInstant, parseDateOnly } = require("../src/utils/dates.js");
 const { AppError } = require("../src/utils/errors.js");
 
 const MS_HOUR = 60 * 60 * 1000;
@@ -170,7 +170,7 @@ async function advance(plan, reservation, ctx) {
       break;
     case "expired":
       if (status === "pending") {
-        const lapsed = new Date(plan.bookedAt.getTime() + PENDING_HOLD_MS + 5 * 60 * 1000);
+        const lapsed = instantAfter(plan.bookedAt, PENDING_HOLD_MS + 5 * 60 * 1000);
         await service.transition(id, "expired", { actor: "system", now: lapsed });
       }
       break;
@@ -186,7 +186,7 @@ async function advance(plan, reservation, ctx) {
       break;
     case "completed":
       if (status === "confirmed") {
-        const endOfStay = new Date(Date.parse(`${plan.checkOut}T00:00:00Z`) + 12 * MS_HOUR);
+        const endOfStay = instantAfter(parseDateOnly(plan.checkOut), 12 * MS_HOUR);
         await service.transition(id, "completed", { actor: "system", now: endOfStay });
       }
       break;
@@ -208,7 +208,7 @@ async function addReview(plan, reservation, ctx) {
     now: ctx.now,
     windowDays: 365, // the stays are backdated; the app's own window applies to real guests
   });
-  const wrote = new Date(Math.min(ctx.now.getTime(), Date.parse(`${plan.checkOut}T00:00:00Z`) + 33 * MS_HOUR));
+  const wrote = toInstant(Math.min(ctx.now.getTime(), instantAfter(parseDateOnly(plan.checkOut), 33 * MS_HOUR).getTime()));
   await Review.updateOne({ _id: review._id }, { $set: { createdAt: wrote, updatedAt: wrote } }, { timestamps: false });
   return true;
 }

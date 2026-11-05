@@ -30,7 +30,7 @@ const {
 } = require("../config/notifications");
 const { safeRedirectPath } = require("../utils/safeRedirect");
 const { NotFoundError, ValidationError } = require("../utils/errors");
-const { DEFAULT_TIMEZONE } = require("../utils/dates");
+const { DEFAULT_TIMEZONE, instantAfter } = require("../utils/dates");
 
 const OBJECT_ID = /^[0-9a-f]{24}$/i;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -195,7 +195,7 @@ async function listFor(userId, { show, page } = {}, options) {
 const readUpdate = (now) => ({
   $set: {
     readAt: now,
-    deleteAfter: new Date(now.getTime() + READ_RETENTION_DAYS * DAY_MS),
+    deleteAfter: instantAfter(now, READ_RETENTION_DAYS * DAY_MS),
   },
 });
 

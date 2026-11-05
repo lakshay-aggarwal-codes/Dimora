@@ -8,6 +8,7 @@
 //   consume  uses it, atomically: of two requests with the same token one wins.
 const crypto = require("node:crypto");
 const { AppError } = require("../utils/errors");
+const { instantAfter, toInstant } = require("../utils/dates");
 
 const VERIFY = "verify_email";
 const RESET = "reset_password";
@@ -37,18 +38,18 @@ async function issue({ user, purpose, now = new Date(), ...over }) {
   const recent = await Model.find({
     user: user._id,
     purpose,
-    createdAt: { $gte: new Date(now.getTime() - 60 * 60 * 1000) },
+    createdAt: { $gte: instantAfter(now, -60 * 60 * 1000) },
   })
     .sort({ createdAt: -1 })
     .select("createdAt")
     .lean();
 
   if (recent.length > 0) {
-    const sinceLast = now.getTime() - new Date(recent[0].createdAt).getTime();
+    const sinceLast = now.getTime() - toInstant(recent[0].createdAt).getTime();
     if (sinceLast < MIN_GAP_MS) throw new EmailThrottledError(Math.ceil((MIN_GAP_MS - sinceLast) / 1000));
   }
   if (recent.length >= MAX_PER_HOUR) {
-    const oldest = new Date(recent[recent.length - 1].createdAt).getTime();
+    const oldest = toInstant(recent[recent.length - 1].createdAt).getTime();
     throw new EmailThrottledError(Math.max(1, Math.ceil((oldest + 60 * 60 * 1000 - now.getTime()) / 1000)));
   }
 
@@ -59,7 +60,7 @@ async function issue({ user, purpose, now = new Date(), ...over }) {
     purpose,
     email: user.email,
     tokenHash: hashToken(raw),
-    expiresAt: new Date(now.getTime() + TTL_MS[purpose]),
+    expiresAt: instantAfter(now, TTL_MS[purpose]),
   });
   return raw;
 }

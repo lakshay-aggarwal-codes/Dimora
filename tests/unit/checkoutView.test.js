@@ -214,7 +214,7 @@ describe("encodeLines / decodeLines", () => {
     ]);
   });
 
-  test("anything that is not in the strict format is ignored", () => {
+  test("anything that is not in the strict format is ignored (a negative line is a discount and is kept)", () => {
     expect(decodeLines("x".repeat(500)).size).toBe(0);
     expect(decodeLines(undefined).size).toBe(0);
     expect(decodeLines(["a:1"]).size).toBe(0);
@@ -222,6 +222,7 @@ describe("encodeLines / decodeLines", () => {
       ...decodeLines("nights:1;<script>:2;tax:-5;cleaning:1e9;ok_code:7"),
     ]).toEqual([
       ["nights", 1],
+      ["tax", -5],
       ["ok_code", 7],
     ]);
   });

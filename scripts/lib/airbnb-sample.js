@@ -7,6 +7,7 @@
 // Reviews are NOT mapped: the source has no star rating and no real author, and
 // Dimora reviews need a completed stay (ADR-010).
 const { keysForListing } = require("../../src/utils/searchKeys");
+const { toInstant } = require("../../src/utils/dates.js");
 
 /** Unwraps MongoDB extended JSON ({"$numberInt":"8"} -> 8, {"$date":..} -> Date). */
 function unwrap(value) {
@@ -18,7 +19,7 @@ function unwrap(value) {
   if ("$date" in value) {
     const inner = value.$date;
     const ms = typeof inner === "object" && inner ? Number(inner.$numberLong) : inner;
-    return new Date(ms);
+    return toInstant(ms);
   }
   return value;
 }

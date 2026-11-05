@@ -16,6 +16,7 @@
 // score. Dimora does no independent check of anybody, so none of those would be
 // true. docs/TRUST.md lists the copy and the rules for adding an indicator.
 const mongoose = require("mongoose");
+const { instantAfter } = require("../utils/dates");
 
 const MIN_DECIDED = 5;
 const WINDOW_DAYS = 365;
@@ -98,7 +99,7 @@ async function loadTrust(
   }
   let stats = null;
   if (ready && Reservation && user._id) {
-    const since = new Date(now.getTime() - WINDOW_DAYS * 24 * 60 * 60 * 1000);
+    const since = instantAfter(now, -WINDOW_DAYS * 24 * 60 * 60 * 1000);
     const [staysHosted, recent] = await Promise.all([
       Reservation.countDocuments({ host: user._id, status: "completed" }),
       Reservation.find({ host: user._id, createdAt: { $gte: since }, "statusHistory.from": "pending" })

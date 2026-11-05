@@ -227,7 +227,7 @@
                 action: "/listings/" + listing.id + "/reviews",
                 reservationId: reviewable.reservationId,
                 idPrefix: "first",
-                intro: reviewable.reviewUntil ? "How was your stay? You can review it until " + new Date(reviewable.reviewUntil).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" }) + "." : ""
+                intro: reviewable.reviewUntil ? "How was your stay? You can review it until " + reviewable.reviewUntil.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" }) + "." : ""
             }) %>
             <% } else if (currUser && !guestPreview) { %>
             <p class="small text-body-secondary detail-review-note">Reviews come from guests who stayed here. After your stay you can write one.</p>

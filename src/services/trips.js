@@ -212,6 +212,8 @@ function describeReview(review) {
     out.rating = review.review.rating;
     out.comment = review.review.comment || "";
     out.legacy = Boolean(review.review.legacy);
+    // A moderator hid it (P14-T04): the author is told.
+    out.hidden = review.review.status === "hidden";
     // Editing (P12-T03) and the host's reply, if there is one.
     out.id = review.review._id ? String(review.review._id) : "";
     out.editable = Boolean(review.editable);

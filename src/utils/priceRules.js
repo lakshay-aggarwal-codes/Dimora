@@ -2,7 +2,7 @@
 // nested names), so season N is four boxes: season1Name, season1From,
 // season1To, season1Price. This turns them into the stored shape and checks
 // them; the browser is never trusted. Pure: no database, no clock.
-const { tryParseDateOnly, formatDateOnly, nightsBetween } = require("./dates");
+const { tryParseDateOnly, formatDateOnly, nightsBetween, addDays } = require("./dates");
 const { rupeesToMinor, minorToRupees } = require("./listingFields");
 
 const MAX_SEASONS = 5;
@@ -52,7 +52,7 @@ function parseSeasons(body = {}) {
     if (!to) fail("to", "Use a date like 2027-01-05.");
     if (from && to) {
       if (to < from) fail("to", "A season cannot end before it starts.");
-      else if (nightsBetween(from, new Date(to.getTime() + 86400000)) > MAX_SPAN_DAYS) {
+      else if (nightsBetween(from, addDays(to, 1)) > MAX_SPAN_DAYS) {
         fail("to", `A season can last at most ${MAX_SPAN_DAYS} days.`);
       }
     }
