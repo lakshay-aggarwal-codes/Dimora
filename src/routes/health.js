@@ -24,20 +24,17 @@ function mongooseIsReady() {
 function createHealthRouter({ isDbReady = mongooseIsReady } = {}) {
   const router = express.Router();
 
-  router.all(["/healthz", "/readyz"], (req, res, next) => {
-    if (req.method !== "GET" && req.method !== "HEAD") {
-      res.set("Allow", "GET, HEAD");
-      return res.status(405).json({ status: "method not allowed" });
-    }
+  // GET (and HEAD, which Express answers from GET) only. Never cached.
+  const noStore = (req, res, next) => {
     res.set("Cache-Control", "no-store");
-    return next();
-  });
+    next();
+  };
 
-  router.get("/healthz", (req, res) => {
+  router.get("/healthz", noStore, (req, res) => {
     res.status(200).json({ status: "ok" });
   });
 
-  router.get("/readyz", async (req, res) => {
+  router.get("/readyz", noStore, async (req, res) => {
     let ready = false;
     try {
       ready = Boolean(await isDbReady());

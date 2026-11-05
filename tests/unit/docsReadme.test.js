@@ -126,7 +126,7 @@ describe("scripts table", () => {
   test("every npm script is in the table, with the command a person types, and nothing else is", () => {
     const listed = [
       ...section("Scripts").matchAll(
-        /^\| `(npm (?:run )?[a-z:-]+)(?: [^`]*)?` \|/gm,
+        /^\| `(npm (?:run )?[a-z0-9:-]+)(?: [^`]*)?` \|/gm,
       ),
     ].map((m) => m[1].replace(/^npm (run )?/, ""));
     expect(listed.sort()).toEqual(Object.keys(pkg.scripts).sort());

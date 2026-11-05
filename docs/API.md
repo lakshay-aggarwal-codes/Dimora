@@ -16,8 +16,6 @@ Every route the app serves, read from the routers themselves. The server renders
 | GET | `/about` | anyone | About page |
 | GET | `/privacy` | anyone | Privacy page |
 | GET | `/terms` | anyone | Terms page |
-| GET | `/robots.txt` | anyone | What crawlers may not visit, and the sitemap address (P18-T05) |
-| GET | `/sitemap.xml` | anyone | Public pages and every published listing, ids and dates only (P18-T05) |
 | GET | `/login` | anyone | Login form |
 | POST | `/login` | anyone | Log in (rate-limited per IP and per account) |
 | GET | `/signup` | anyone | Signup form |
@@ -142,6 +140,8 @@ Every route the app serves, read from the routers themselves. The server renders
 | POST | `/wishlists/:id/rename` | signed in | Rename a wishlist |
 | POST | `/wishlists/:id/share` | signed in | Create the secret read-only link of a wishlist |
 | POST | `/wishlists/:id/share/revoke` | signed in | Turn the secret link of a wishlist off |
+
+Four more routes are built inside the app and are not in the table above: `GET /robots.txt` and `GET /sitemap.xml` (search engines, public), `GET /healthz` and `GET /readyz` (the host's health checks, public, no session).
 
 ## The JSON routes
 

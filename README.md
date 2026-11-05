@@ -214,7 +214,7 @@ Notes: a `STAYNIGHT` is one night of one listing held by one reservation or one 
 
 ## API
 
-The server renders pages, so most routes are pages and form posts. Three are JSON (`/api/listings/:id/availability`, `/api/listings/:id/quote`, `/api/search/map`). The full list of the 130 routes, who may call each and what it does, is in [docs/API.md](docs/API.md).
+The server renders pages, so most routes are pages and form posts. Three are JSON (`/api/listings/:id/availability`, `/api/listings/:id/quote`, `/api/search/map`). The full list of the 128 routes, who may call each and what it does, is in [docs/API.md](docs/API.md).
 
 ## Known limitations
 

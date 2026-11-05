@@ -103,7 +103,10 @@ describe("docs/API.md", () => {
       .readdirSync(path.join(__dirname, "..", "..", "src", "routes"))
       .map((f) => f.replace(/\.js$/, ""));
     // every router file in src/routes is mounted (a router nobody mounts would be a dead page)
-    expect(files.filter((f) => !m.some((x) => x.file === f))).toEqual([]);
+    // Factories (createHealthRouter, createSeoRouter) are built inside createApp, so the reader
+    // cannot see them: /healthz, /readyz, /robots.txt and /sitemap.xml are described in prose.
+    const FACTORIES = new Set(["health", "seo"]);
+    expect(files.filter((f) => !FACTORIES.has(f) && !m.some((x) => x.file === f))).toEqual([]);
   });
 
   test("the guard reader sees a chained route per method (a public GET next to a private POST)", () => {

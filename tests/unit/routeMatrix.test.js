@@ -15,6 +15,8 @@ const { actions } = require("../../src/policies");
 
 const METHODS = ["get", "post", "put", "patch", "delete", "head", "options"];
 const OPEN_MUTATIONS = new Set(["POST /signup", "POST /login", "POST /logout"]);
+// Public by design: the emailed link or the address is the proof (P02-T05, P11-T05).
+const LINK_MUTATIONS = new Set(["POST /forgot-password", "POST /reset-password", "POST /verify-email", "POST /email/unsubscribe"]);
 
 // "/listings/:id" mounted at "/" or at a prefix, without double or trailing slashes.
 function join(mount, path) {
@@ -29,7 +31,8 @@ function routesOf(router, mount, { flagNested = true } = {}) {
     if (layer.route) {
       const handlers = layer.route.stack.map((l) => l.handle);
       const methods = Object.keys(layer.route.methods).filter((m) => METHODS.includes(m));
-      const verbs = layer.route.methods._all || !methods.length ? ["ALL"] : methods.map((m) => m.toUpperCase());
+      // app.all(): older routers flag `_all`, newer ones list every method.
+      const verbs = layer.route.methods._all || !methods.length || methods.length === METHODS.length ? ["ALL"] : methods.map((m) => m.toUpperCase());
       for (const path of [].concat(layer.route.path)) {
         for (const verb of verbs) {
           found.push({ key: `${verb} ${join(mount, path)}`, handlers, mount, router });
@@ -136,7 +139,8 @@ describe("the guards are the ones the matrix names", () => {
       .filter(([k, , m]) => m.access === "public" && !k.startsWith("GET "))
       .map(([k]) => k)
       .sort();
-    expect(mutating).toEqual([...OPEN_MUTATIONS].sort());
+    expect(mutating.filter((k) => !OPEN_MUTATIONS.has(k) && !LINK_MUTATIONS.has(k))).toEqual([]);
+    for (const k of OPEN_MUTATIONS) expect(mutating).toContain(k);
   });
 
   test.each(entries.filter(([, , m]) => m.access === "login"))("%s needs isLoggedIn", (key, route) => {
