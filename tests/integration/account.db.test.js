@@ -60,6 +60,8 @@ describeDb("password change and account deletion (database)", () => {
         newPassword: NEW_PASSWORD,
         confirmPassword: NEW_PASSWORD,
       });
+      // A wrong current password counts as a failed attempt; the lock asks for a short pause.
+      await new Promise((resolve) => setTimeout(resolve, 100));
       const ok = await post(createAgent(), "/login", {
         username: user.username,
         password,

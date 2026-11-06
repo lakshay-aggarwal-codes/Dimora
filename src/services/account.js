@@ -172,7 +172,9 @@ function anonymisedUpdate(id) {
       status: "deleted",
       emailVerifiedAt: null,
       // Unusable credentials: random values nobody knows, so no password matches.
-      hash: crypto.randomBytes(32).toString("hex"),
+      // As long as a real hash (the plugin's 512-byte key) so a login attempt fails cleanly
+      // instead of throwing inside the constant-time comparison.
+      hash: crypto.randomBytes(512).toString("hex"),
       salt: crypto.randomBytes(32).toString("hex"),
       attempts: 0,
     },
