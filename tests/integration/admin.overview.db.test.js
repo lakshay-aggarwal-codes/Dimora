@@ -171,7 +171,8 @@ describeDb("admin overview, reservation lookup and audit filters (database)", ()
         "/admin/reservations?page=abc",
         "/admin/reservations?status[]=x",
       ]) {
-        expect((await boss.agent.get(url)).status).toBe(200);
+        // 200, or 400 where inputGuard refuses an operator-shaped value (P17-T02): never a 500
+        expect([200, 400]).toContain((await boss.agent.get(url)).status);
       }
     });
 
@@ -297,7 +298,7 @@ describeDb("admin overview, reservation lookup and audit filters (database)", ()
       expect(res.text).toMatch(/Clear filters/);
       const none = await boss.agent.get("/admin/audit?action=zzz");
       expect(none.text).toMatch(/No entries match/);
-      expect((await boss.agent.get("/admin/audit?action[$ne]=x&actor[]=y")).status).toBe(200);
+      expect([200, 400]).toContain((await boss.agent.get("/admin/audit?action[$ne]=x&actor[]=y")).status); // 400 from inputGuard
     });
 
     test("the filters stay in the pagination links", async () => {

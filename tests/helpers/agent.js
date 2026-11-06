@@ -6,10 +6,14 @@ const { createApp } = require("../../src/app");
 const { createLogger } = require("../../src/config/logger");
 const { testConfig } = require("./config");
 
-function createTestApp({ logger, config, emailService } = {}) {
+// One store for every app a test file creates: the agents of one test are separate
+// apps, and an admin suspending someone must be able to remove that person's session.
+const sharedSessionStore = new session.MemoryStore();
+
+function createTestApp({ logger, config, emailService, sessionStore } = {}) {
   return createApp({
     config: config || testConfig(),
-    sessionStore: new session.MemoryStore(),
+    sessionStore: sessionStore || sharedSessionStore,
     logger: logger || createLogger({ level: "silent" }),
     emailService,
   });
