@@ -108,8 +108,10 @@ describe("admin views", () => {
       }),
     });
     const main = html.slice(html.indexOf('id="main"'), html.indexOf("<footer"));
-    expect(main).not.toMatch(/<form/);
-    expect(main).not.toMatch(/<button/);
+    // the only form is the GET filter; nothing posts, nothing but "Filter" is a button
+    for (const form of main.match(/<form[^>]*>/g) || []) expect(form).toMatch(/method="GET"/i);
+    const buttons = [...main.matchAll(/<button[^>]*>([^<]*)<\/button>/g)].map((m) => m[1].trim());
+    expect(buttons.every((label) => label === "Filter")).toBe(true);
     expect(main).not.toMatch(/method="post"/i);
   });
 

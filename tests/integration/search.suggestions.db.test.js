@@ -47,11 +47,13 @@ describeDb("suggestions for empty searches", () => {
     }
   });
 
-  test("a search where the destination is the problem offers popular destinations only", async () => {
+  test("a search where the destination is the problem offers popular destinations and searching everywhere", async () => {
     const page = await createAgent().get("/listings?dest=Nowhere");
     expect(page.text).toContain("Popular destinations");
     expect(page.text).toContain('href="/listings?dest=Panaji"');
-    expect(page.text).not.toContain("Try this instead");
+    // dropping the destination gives stays, so that one filter is offered (and no other)
+    expect(page.text).toContain("Search everywhere instead of");
+    expect(page.text).not.toContain("Remove the guest count");
   });
 
   test("the filter that removes most is offered first, with how many stays it gives", async () => {

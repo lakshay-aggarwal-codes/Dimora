@@ -388,7 +388,7 @@ describeDb("Host availability calendar", () => {
       const mine = await agent.get("/host/listings");
       expect(mine.text).not.toContain(`/host/listings/${listing._id}/calendar`);
       const status = await agent.get(`/host/listings/${listing._id}/status`);
-      expect(status.text).not.toContain("/calendar");
+      expect(status.text).not.toContain(`/host/listings/${listing._id}/calendar`); // the navbar has its own /host/calendar link
     });
   });
 });

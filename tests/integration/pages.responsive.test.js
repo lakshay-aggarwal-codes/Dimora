@@ -188,7 +188,7 @@ describe("detail page", () => {
       }),
     );
     const html = (await createAgent().get(`/listings/${OID}`)).text;
-    expect(count(html, /<article class="review-card">/g)).toBe(2);
+    expect(count(html, /<article class="review-card"[^>]*>/g)).toBe(2);
     expect(html).toContain("@ guest1");
     expect(html).toContain("@ Unknown User");
     expect(html).toContain("Rated 4 out of 5");

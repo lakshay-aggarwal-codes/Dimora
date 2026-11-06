@@ -2,8 +2,8 @@
 <%# Locals: token, group ({ label }). A button, not an automatic action: opening the link must not change anything. %>
     <div class="row mt-3">
         <div class="col-12 col-md-8 col-lg-6 mx-auto">
-            <h1>Stop these emails?</h1>
-            <p>Press the button to stop <strong><%= group.label %></strong> emails. The notifications still appear on the site, and you can change this any time under Account &rarr; Notification settings.</p>
+            <h1>Stop <strong><%= group.label %></strong> emails?</h1>
+            <p>Press the button to confirm. The notifications still appear on the site, and you can change this any time under Account &rarr; Notification settings.</p>
             <form method="post" action="/email/unsubscribe">
                 <%- include("../includes/csrf.ejs") %>
                 <input type="hidden" name="token" value="<%= token %>">
