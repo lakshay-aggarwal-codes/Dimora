@@ -78,7 +78,12 @@ describeDb("flexible dates (database)", () => {
   test("an expired hold counts as free, a live hold does not", async () => {
     const listing = await setup();
     await take(listing, 30, 3);
-    await take(listing, 27, 3, new Date(Date.now() - 3600000)); // already expired
+    await take(listing, 27, 3, new Date(Date.now() + 3600000));
+    // the ledger refuses a hold that is already over, so let this one lapse afterwards
+    await StayNight.updateMany(
+      { listing: listing._id, holdExpiresAt: { $ne: null } },
+      { $set: { holdExpiresAt: new Date(Date.now() - 3600000) } },
+    );
     const stay = { checkIn: day(30), checkOut: day(33), guests: 2 };
     expect((await suggestAlternatives(listing, stay)).windows[0].in).toBe(
       formatDateOnly(day(27)),

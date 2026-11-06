@@ -88,7 +88,7 @@ describeDb("email confirmation and password reset (database)", () => {
       await form(agent, "/verify-email/resend", {});
       assert.equal(mail.length, 1, "a second link within a minute is refused");
 
-      await EmailToken.updateMany({}, { $set: { createdAt: new Date(Date.now() - 120000) } });
+      await EmailToken.collection.updateMany({}, { $set: { createdAt: new Date(Date.now() - 120000) } });
       await form(agent, "/verify-email/resend", {});
       assert.equal(mail.length, 2);
       assert.equal((await form(agent, "/verify-email", { token: first })).status, 400, "the old link stops working");
@@ -190,9 +190,9 @@ describeDb("email confirmation and password reset (database)", () => {
 
       const fresh = createAgent({ config: testConfig() });
       await login(fresh, { username: user.username, password: NEW_PASSWORD });
-      await assert.rejects(() => login(createAgent({ config: testConfig() }), { username: user.username, password }));
       const stored = await User.findById(user._id);
-      assert.equal(stored.attempts, 0);
+      assert.equal(stored.attempts, 0); // checked before the refused login below counts as a failed attempt
+      await assert.rejects(() => login(createAgent({ config: testConfig() }), { username: user.username, password }));
       assert.ok(stored.emailVerifiedAt instanceof Date, "the link proved the address");
 
       assert.equal((await form(agent, "/reset-password", { token, newPassword: NEW_PASSWORD + "x", confirmPassword: NEW_PASSWORD + "x" })).status, 400);
@@ -219,7 +219,7 @@ describeDb("email confirmation and password reset (database)", () => {
       const { user } = await createUser({ email: "known@example.com" });
       await form(agent, "/forgot-password", { email: "known@example.com" });
       const first = tokenIn(mail[0]);
-      await EmailToken.updateMany({}, { $set: { createdAt: new Date(Date.now() - 120000) } });
+      await EmailToken.collection.updateMany({}, { $set: { createdAt: new Date(Date.now() - 120000) } });
       await form(agent, "/forgot-password", { email: "known@example.com" });
       assert.equal(mail.length, 2);
       assert.equal((await agent.get(`/reset-password/${first}`)).status, 400);
@@ -250,7 +250,7 @@ describeDb("email confirmation and password reset (database)", () => {
       await createUser({ email: "known@example.com" });
       for (let i = 0; i < 7; i++) {
         // Each request is two minutes after the one before (the per-minute gap is not what is tested here).
-        await EmailToken.updateMany({}, { $set: { createdAt: new Date(Date.now() - 2 * 60 * 1000) } });
+        await EmailToken.collection.updateMany({}, { $set: { createdAt: new Date(Date.now() - 2 * 60 * 1000) } });
         await form(agent, "/forgot-password", { email: "known@example.com" });
       }
       assert.equal(mail.length, 5, `sent ${mail.length}`);

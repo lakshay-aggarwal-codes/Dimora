@@ -12,6 +12,8 @@ describeDb("migration 009 (rating totals)", () => {
     const db = mongoose.connection.db;
     const reviews = db.collection("reviews");
     const listings = db.collection("listings");
+    await reviews.deleteMany({}); // raw collections: the shared clean-up only knows loaded models
+    await listings.deleteMany({});
     const r = [5, 4, 4.5, undefined, 0].map((rating) => ({
       _id: new ObjectId(),
       ...(rating === undefined ? {} : { rating }),

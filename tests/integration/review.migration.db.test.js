@@ -14,10 +14,12 @@ describeDb("migration 008 (reviews)", () => {
     const db = mongoose.connection.db;
     const reviews = db.collection("reviews");
     const listings = db.collection("listings");
-    const older = new ObjectId(
+    await reviews.deleteMany({}); // raw collections: the shared clean-up only knows loaded models
+    await listings.deleteMany({});
+    const older = ObjectId.createFromTime(
       Math.floor(Date.parse("2024-03-01T00:00:00Z") / 1000),
     );
-    const newer = new ObjectId(
+    const newer = ObjectId.createFromTime(
       Math.floor(Date.parse("2025-06-01T00:00:00Z") / 1000),
     );
     const orphan = new ObjectId();
