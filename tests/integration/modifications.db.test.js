@@ -107,7 +107,8 @@ describeDb("changing dates (database)", () => {
     const { book, change, nights } = await world();
     const booking = await book();
     const attempts = Array.from({ length: 10 }, (_, i) =>
-      change(booking, { in: D(20 + i * 4), out: D(23 + i * 4) }).then(() => "won", (e) => e),
+      // every attempt starts from the dates it saw (D(10)-D(13)); one that arrives after the winner is a conflict
+      change(booking, { in: D(20 + i * 4), out: D(23 + i * 4), expectedCheckIn: D(10), expectedCheckOut: D(13) }).then(() => "won", (e) => e),
     );
     const outcomes = await Promise.all(attempts);
     expect(outcomes.filter((o) => o === "won")).toHaveLength(1);

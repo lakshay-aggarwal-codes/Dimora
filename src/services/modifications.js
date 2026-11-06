@@ -257,9 +257,17 @@ function createModificationService({
     in: inRaw,
     out: outRaw,
     expectedTotalMinor,
+    expectedCheckIn, // optional: the dates the person saw (YYYY-MM-DD); a booking that moved since is a conflict
+    expectedCheckOut,
     now = new Date(),
   }) {
     const reservation = await load(id, user);
+    if (
+      (expectedCheckIn && expectedCheckIn !== formatDateOnly(reservation.checkIn)) ||
+      (expectedCheckOut && expectedCheckOut !== formatDateOnly(reservation.checkOut))
+    ) {
+      throw new ConflictError("That booking changed. Please reload and try again.", { code: "conflict" });
+    }
     const state = modifiability(reservation, now);
     if (!state.ok) throw new ConflictError(state.message, { code: state.code });
     const listing = await loadListing(reservation);

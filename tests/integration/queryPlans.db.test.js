@@ -62,7 +62,8 @@ describeDb("query plans (database)", () => {
       const checkIn = addDays(TODAY, i % 60);
       nights.push({
         listing: listing._id,
-        date: checkIn,
+        // one night per listing and day: the second 60 are moved 60 days on (unique index)
+        date: addDays(checkIn, i >= 60 ? 60 : 0),
         source: { kind: "reservation", id: oid() },
         createdAt: new Date(),
       });

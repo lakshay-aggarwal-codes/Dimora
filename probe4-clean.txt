@@ -1,0 +1,57 @@
+﻿  console.log
+    PROBE [{"id":"reviews.by_reservation","problems":["collection scan"],"plan":"COLLSCAN","indexes":[]}]
+
+      at Object.log (tests/integration/zzprobe.queryPlans.db.test.js:137:13)
+
+node.exe : FAIL tests/integration/zzprobe.queryPlans.db.test.js (5.369 s)
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (FAIL tests/inte...st.js (5.369 s):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  query plans (database)
+    ├ù every hot query keeps what it promises, as MongoDB itself plans it (753 ms)
+    Γùï skipped the search with dates reads only the index (no documents) and the date index is the one used
+    Γùï skipped the search orders sort nothing in memory
+    Γùï skipped the planner's index for each query is one the checker expected, where the checker names one for a promised order
+    Γùï skipped migration 010's indexes exist after the models are initialised, and the dropped ones do not
+    Γùï skipped migration 010 on a database that has the old indexes: new ones appear, old ones go, and it can run twice
+
+  ΓùÅ query plans (database) ΓÇ║ every hot query keeps what it promises, as MongoDB itself plans it
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 10
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "reviews.by_reservation",
+    +     "indexes": Array [],
+    +     "plan": "COLLSCAN",
+    +     "problems": Array [
+    +       "collection scan",
+    +     ],
+    +   },
+    + ]
+
+      135 |         });
+      136 |     }
+    > 137 |     console.log("PROBE", 
+JSON.stringify(failures)); expect(failures).toEqual([]);
+          |                                                                      ^
+      138 |   });
+      139 |
+      140 |   test("the search with dates reads only the index (no documents) and the date index is the one 
+used", async () => {
+
+      at Object.toEqual (tests/integration/zzprobe.queryPlans.db.test.js:137:70)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 5 skipped, 6 total
+Snapshots:   0 total
+Time:        5.85 s
+Ran all test suites matching tests/integration/zzprobe.queryPlans.db.test.js with tests matching "every hot query".
+
