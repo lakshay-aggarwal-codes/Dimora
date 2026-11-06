@@ -402,7 +402,7 @@ describe("the thread page keeps itself current (P11-T03)", () => {
     expect(older.status).toBe(200);
     expect(older.text).toContain("data-message-list");
     expect(older.text).not.toContain("data-messages-url");
-    expect(older.text).not.toContain("data-poll-seconds");
+    expect(older.text).not.toContain('data-poll-seconds="15"'); // the navbar bell has its own poll attribute
   });
 });
 

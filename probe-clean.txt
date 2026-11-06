@@ -1,0 +1,175 @@
+﻿node.exe : (node:30116) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:30116) [D...ray()` instead.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:16060) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:24852) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:30116) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 disconnect listeners added to [MemoryStore]. 
+MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:30116) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 connect listeners added to [MemoryStore]. 
+MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:24852) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use 
+`returnDocument: 'after'` instead.
+(node:24852) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 disconnect listeners added to [MemoryStore]. 
+MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:24852) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 connect listeners added to [MemoryStore]. 
+MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+FAIL tests/integration/zzprobe.host.report.db.test.js
+  ΓùÅ Console
+
+    console.log
+      PROBE report from=2026-13 400
+
+      at Object.log (tests/integration/zzprobe.host.report.db.test.js:103:70)
+
+    console.log
+      PROBE report from=abc&to=2026-02 400
+
+      at Object.log (tests/integration/zzprobe.host.report.db.test.js:103:70)
+
+    console.log
+      PROBE report from=2026-05&to=2026-01 400
+
+      at Object.log (tests/integration/zzprobe.host.report.db.test.js:103:70)
+
+    console.log
+      PROBE report from=2000-01&to=2000-02 400
+
+      at Object.log (tests/integration/zzprobe.host.report.db.test.js:103:70)
+
+    console.log
+      PROBE report from[]=2026-01 200
+
+      at Object.log (tests/integration/zzprobe.host.report.db.test.js:103:70)
+
+  ΓùÅ host earnings and occupancy report (database) ΓÇ║ bad months give a 400, never a crash or someone else's data
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 200
+
+      102 |     for (const q of ["from=2026-13", 
+"from=abc&to=2026-02", "from=2026-05&to=2026-01", 
+"from=2000-01&to=2000-02", "from[]=2026-01", "to=2026-10-01"]) {
+      103 |       { const r = await 
+host.agent.get(`/host/report?${q}`); console.log("PROBE 
+report", q, r.status); }
+    > 104 |       expect((await host.agent.get(`/host/report.
+csv?${q}`)).status).toBe(400);
+          |                                                                      ^
+      105 |     }
+      106 |   });
+      107 |
+
+      at Object.toBe (tests/integration/zzprobe.host.report.db.test.js:104:70)
+
+(node:24852) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use 
+`returnDocument: 'after'` instead.
+(node:24852) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use 
+`returnDocument: 'after'` instead.
+(node:24852) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use 
+`returnDocument: 'after'` instead.
+FAIL tests/integration/admin.users.db.test.js
+  ΓùÅ admin user management (database) ΓÇ║ suspend: status, listings hidden, sessions gone, login refused, one audit row
+
+    login helper: expected a redirect away from /login, got 302 /login
+
+      100 |     .send({ username, password });
+      101 |   if (res.status !== 302 || 
+res.headers.location === "/login") {
+    > 102 |     throw new Error(
+          |           ^
+      103 |       `login helper: expected a redirect away from /login, got ${res.status} 
+${res.headers.location}`,
+      104 |     );
+      105 |   }
+
+      at login (tests/helpers/agent.js:102:11)
+      at Object.<anonymous> (tests/integration/admin.users.db.test.js:80:5)
+
+(node:24852) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use 
+`returnDocument: 'after'` instead.
+FAIL tests/integration/zzprobe.account.db.test.js
+  ΓùÅ Console
+
+    console.log
+      PROBE del 302 / []
+
+      at Object.log (tests/integration/zzprobe.account.db.test.js:246:61)
+
+  ΓùÅ password change and account deletion (database) ΓÇ║ change password ΓÇ║ a wrong current password changes nothing
+
+    expect(received).not.toBe(expected) // Object.is equality
+
+    Expected: not "/login"
+
+      64 |         password,
+      65 |       });
+    > 66 |       
+expect(ok.headers.location).not.toBe("/login");
+         |                                       ^
+      67 |     });
+      68 |
+      69 |     test("repeated wrong current passwords lock the account's password checks, not just the 
+page", async () => {
+
+      at Object.toBe (tests/integration/zzprobe.account.db.test.js:66:39)
+
+  ΓùÅ password change and account deletion (database) ΓÇ║ delete account ΓÇ║ a member with nothing open: anonymised, logged out, old 
+credentials dead, no PII in the stored document
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "/login"
+    Received: undefined
+
+      135 |         password,
+      136 |       });
+    > 137 |       
+expect(asDeleted.headers.location).toBe("/login");
+          |                                          ^
+      138 |       expect((await 
+createAgent().get(`/users/${user._id}`)).status).toBe(404);
+      139 |       expect((await 
+other.agent.get("/account")).status).toBe(200); 
+// somebody else is unaffected
+      140 |     });
+
+      at Object.toBe (tests/integration/zzprobe.account.db.test.js:137:42)
+
+  ΓùÅ password change and account deletion (database) ΓÇ║ delete account ΓÇ║ the only administrator cannot delete the account
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "active"
+    Received: "deleted"
+
+      245 |       const { user, password, agent } = await member({ 
+role: "admin" });
+      246 |       const dr = await deleteWith(agent, password); 
+console.log("PROBE del", dr.status, 
+dr.headers.location, JSON.stringify(await User.find({ 
+role: "admin" }).select("username status role").lean()));
+    > 247 |       expect((await 
+User.findById(user._id)).status).toBe("active");
+          |                                                      ^
+      248 |     });
+      249 |   });
+      250 | });
+
+      at Object.toBe (tests/integration/zzprobe.account.db.test.js:247:54)
+
+Test Suites: 3 failed, 3 total
+Tests:       5 failed, 22 passed, 27 total
+Snapshots:   0 total
+Time:        5.555 s, estimated 15 s
+Ran all test suites matching 
+tests/integration/zzprobe.host.report.db.test.js|tests/integration/zzprobe.account.db.test.js|tests/integration/admin.users.db.test.js.
+
