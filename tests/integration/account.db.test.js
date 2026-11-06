@@ -11,6 +11,7 @@ const {
   buildUserData,
 } = require("../helpers/factories");
 const User = require("../../src/models/user");
+const { promoteToAdmin } = require("../../src/services/adminBootstrap");
 const Listing = require("../../src/models/listing");
 const Review = require("../../src/models/review");
 const Reservation = require("../../src/models/reservation");
@@ -242,7 +243,8 @@ describeDb("password change and account deletion (database)", () => {
     });
 
     test("the only administrator cannot delete the account", async () => {
-      const { user, password, agent } = await member({ role: "admin" });
+      const { user, password, agent } = await member();
+      await promoteToAdmin(user.email); // createUser has no role option
       await deleteWith(agent, password);
       expect((await User.findById(user._id)).status).toBe("active");
     });

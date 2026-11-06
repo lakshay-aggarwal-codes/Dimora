@@ -99,10 +99,17 @@ describeDb("host earnings and occupancy report (database)", () => {
 
   test("bad months give a 400, never a crash or someone else's data", async () => {
     const { host } = await world();
-    for (const q of ["from=2026-13", "from=abc&to=2026-02", "from=2026-05&to=2026-01", "from=2000-01&to=2000-02", "from[]=2026-01", "to=2026-10-01"]) {
+    for (const q of ["from=2026-13", "from=abc&to=2026-02", "from=2026-05&to=2026-01", "from=2000-01&to=2000-02", "to=2026-10-01"]) {
       expect((await host.agent.get(`/host/report?${q}`)).status).toBe(400);
       expect((await host.agent.get(`/host/report.csv?${q}`)).status).toBe(400);
     }
+  });
+
+  test("an array-shaped month is ignored like any unknown name, and the default range is used", async () => {
+    // Express 5 reads "from[]" as a name of its own, so it never reaches `from`.
+    const { host } = await world();
+    expect((await host.agent.get("/host/report?from[]=2026-01")).status).toBe(200);
+    expect((await host.agent.get("/host/report.csv?from[]=2026-01")).status).toBe(200);
   });
 
   test("an admin or any other member sees only their own listings", async () => {

@@ -1,0 +1,80 @@
+﻿node.exe : (node:18184) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:18184) [D...ray()` instead.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:40968) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:18184) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 disconnect listeners added to [MemoryStore]. 
+MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:18184) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 connect listeners added to [MemoryStore]. 
+MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:40968) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use 
+`returnDocument: 'after'` instead.
+(node:40968) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 disconnect listeners added to [MemoryStore]. 
+MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:40968) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 connect listeners added to [MemoryStore]. 
+MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:40968) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use 
+`returnDocument: 'after'` instead.
+(node:40968) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use 
+`returnDocument: 'after'` instead.
+(node:40968) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use 
+`returnDocument: 'after'` instead.
+FAIL tests/integration/admin.users.db.test.js (5.42 s)
+  ΓùÅ admin user management (database) ΓÇ║ suspend: status, listings hidden, sessions gone, login refused, one audit row
+
+    login helper: expected a redirect away from /login, got 302 /login
+
+      100 |     .send({ username, password });
+      101 |   if (res.status !== 302 || 
+res.headers.location === "/login") {
+    > 102 |     throw new Error(
+          |           ^
+      103 |       `login helper: expected a redirect away from /login, got ${res.status} 
+${res.headers.location}`,
+      104 |     );
+      105 |   }
+
+      at login (tests/helpers/agent.js:102:11)
+      at Object.<anonymous> (tests/integration/admin.users.db.test.js:80:5)
+
+FAIL tests/integration/zzprobe.account.db.test.js (5.795 s)
+  ΓùÅ Console
+
+    console.log
+      PROBE login66 302 /login Incorrect username or password. After several failed attempts an account is locked for a while.
+
+      at Object.log (tests/integration/zzprobe.account.db.test.js:67:15)
+
+  ΓùÅ password change and account deletion (database) ΓÇ║ delete account ΓÇ║ a member with nothing open: anonymised, logged out, old 
+credentials dead, no PII in the stored document
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "/login"
+    Received: undefined
+
+      136 |         password,
+      137 |       });
+    > 138 |       
+expect(asDeleted.headers.location).toBe("/login");
+          |                                          ^
+      139 |       expect((await 
+createAgent().get(`/users/${user._id}`)).status).toBe(404);
+      140 |       expect((await 
+other.agent.get("/account")).status).toBe(200); 
+// somebody else is unaffected
+      141 |     });
+
+      at Object.toBe (tests/integration/zzprobe.account.db.test.js:138:42)
+
+Test Suites: 2 failed, 2 total
+Tests:       2 failed, 19 passed, 21 total
+Snapshots:   0 total
+Time:        6.602 s
+Ran all test suites matching tests/integration/zzprobe.account.db.test.js|tests/integration/admin.users.db.test.js.
+
