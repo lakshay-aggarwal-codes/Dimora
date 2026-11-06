@@ -209,7 +209,8 @@ async function addReview(plan, reservation, ctx) {
     windowDays: 365, // the stays are backdated; the app's own window applies to real guests
   });
   const wrote = toInstant(Math.min(ctx.now.getTime(), instantAfter(parseDateOnly(plan.checkOut), 33 * MS_HOUR).getTime()));
-  await Review.updateOne({ _id: review._id }, { $set: { createdAt: wrote, updatedAt: wrote } }, { timestamps: false });
+  // the driver, not Mongoose: createdAt is immutable there and a $set of it is dropped
+  await Review.collection.updateOne({ _id: review._id }, { $set: { createdAt: wrote, updatedAt: wrote } });
   return true;
 }
 
@@ -236,10 +237,10 @@ async function runScenario(plan, ctx) {
       reservation = made.reservation;
       created = made.created;
       // Booked "then", not now: the booking page and the refund rules read createdAt.
-      await Reservation.updateOne(
+      // (through the driver: Mongoose drops a $set of the immutable createdAt)
+      await Reservation.collection.updateOne(
         { _id: reservation._id },
         { $set: { createdAt: plan.bookedAt, updatedAt: plan.bookedAt } },
-        { timestamps: false },
       );
     }
     reservation = await advance(plan, reservation, ctx);
