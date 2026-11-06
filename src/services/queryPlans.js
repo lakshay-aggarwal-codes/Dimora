@@ -532,7 +532,7 @@ function hotQueries() {
       { sort: { createdAt: -1 }, noSort: true },
     ),
     q("reviews.by_reservation", "Review", "reviews", "services/trips.js", {
-      reservation: { $in: [ID, OTHER] },
+      reservation: { $in: [ID, OTHER], $type: "objectId" },
     }),
     // ---- reports, moderation, audit (admin) ----
     q(

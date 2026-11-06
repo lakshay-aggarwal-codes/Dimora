@@ -360,7 +360,8 @@ async function listTrips(
     .map((r) => r._id);
   const reviewed = new Set();
   if (finished.length > 0) {
-    const found = await ReviewModel.find({ reservation: { $in: finished } })
+    // $type states what the partial unique index covers, so the planner may use it
+    const found = await ReviewModel.find({ reservation: { $in: finished, $type: "objectId" } })
       .select("reservation")
       .lean();
     for (const review of found) reviewed.add(String(review.reservation));
