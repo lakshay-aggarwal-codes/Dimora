@@ -1,0 +1,67 @@
+﻿node.exe : (node:20548) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:20548) [D...ray()` instead.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-deprecation ...` to show where the warning was created)
+  console.log
+    PROBE66 {"_id":"6aed4ec7d425216463d21a8f","attempts":1,"last":"2026-11-06T03:51:35.826Z"} 1793937095829
+
+      at Object.log (tests/integration/zzprobe.account.db.test.js:67:15)
+
+(node:20548) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use 
+`returnDocument: 'after'` instead.
+  console.log
+    PROBE137 302 /login Found. Redirecting to /login
+
+      at Object.log (tests/integration/zzprobe.account.db.test.js:133:15)
+
+(node:20548) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 disconnect listeners added to [MemoryStore]. 
+MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(node:20548) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 connect listeners added to [MemoryStore]. 
+MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+FAIL tests/integration/zzprobe.account.db.test.js
+  password change and account deletion (database)
+    change password
+      ΓêÜ the new password works, the old one does not (473 ms)
+      ΓêÜ a wrong current password changes nothing (209 ms)
+      ΓêÜ repeated wrong current passwords lock the account's password checks, not just the page (322 ms)
+    delete account
+      ├ù a member with nothing open: anonymised, logged out, old credentials dead, no PII in the stored document (402 ms)
+      ΓêÜ a wrong password, or no DELETE, deletes nothing (202 ms)
+      Γùï skipped a session on another device stops working
+      Γùï skipped the username and the email can be used again for a new account
+      Γùï skipped listings are unpublished and kept; reviews and stays stay, pointing to the deleted account
+      Γùï skipped blocked while a confirmed stay is ahead (as guest) and while a request waits (as host)
+      Γùï skipped the only administrator cannot delete the account
+
+  ΓùÅ password change and account deletion (database) ΓÇ║ delete account ΓÇ║ a member with nothing open: anonymised, logged out, old 
+credentials dead, no PII in the stored document
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "/login"
+    Received: undefined
+
+      136 |         password,
+      137 |       });
+    > 138 |       
+expect(asDeleted.headers.location).toBe("/login");
+          |                                          ^
+      139 |       expect((await 
+createAgent().get(`/users/${user._id}`)).status).toBe(404);
+      140 |       expect((await 
+other.agent.get("/account")).status).toBe(200); 
+// somebody else is unaffected
+      141 |     });
+
+      at Object.toBe (tests/integration/zzprobe.account.db.test.js:138:42)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 5 skipped, 4 passed, 10 total
+Snapshots:   0 total
+Time:        3.758 s, estimated 6 s
+Ran all test suites matching tests/integration/zzprobe.account.db.test.js with tests matching "nothing open|old one|still works|wrong".
+

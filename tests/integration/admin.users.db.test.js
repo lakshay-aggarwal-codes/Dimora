@@ -76,8 +76,11 @@ describeDb("admin user management (database)", () => {
     // The admin's own session is untouched.
     expect((await boss.agent.get("/admin/users")).status).toBe(200);
     // And a new login is refused.
+    // (the login helper throws on a refused login, so post the form directly)
     const again = createAgent();
-    await login(again, { username: host.user.username, password: host.password });
+    const refused = await again.post("/login").type("form").send({ username: host.user.username, password: host.password });
+    expect(refused.status).toBe(302);
+    expect(refused.headers.location).toBe("/login");
     expect((await again.get("/listings/new")).status).toBe(302);
 
     const logged = await rows("user.suspend");
