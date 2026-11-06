@@ -1,0 +1,170 @@
+﻿== sweeper.test.js | a failed or abandoned payment keeps the nights held until the payment hold runs out, then they are released
+Error: expect(received).toHaveLength(expected)
+Expected length: 3
+Received length: 0
+Received array:  []
+    at Object.toHaveLength (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\sweeper.test.js:160:29)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== sweeper.test.js | it is expired on its own short hold, not the 24 hours of a host request
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: 1
+Received: 0
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\sweeper.test.js:186:28)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== sweeper.test.js | an unpaid booking past its payment hold becomes expired, its nights are released, with its own reason
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: 1
+Received: 0
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\sweeper.test.js:756:28)
+== sweeper.test.js | while the payment hold is running the booking and its nights are left alone (15 minutes in, not 16)
+Error: expect(received).toHaveLength(expected)
+Expected length: 3
+Received length: 0
+Received array:  []
+    at Object.toHaveLength (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\sweeper.test.js:777:29)
+== sweeper.test.js | a failed payment leaves the nights held until the hold runs out, and no refund is asked for
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: "expired"
+Received: "awaiting_payment"
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\sweeper.test.js:791:34)
+== sweeper.test.js | unpaid bookings and unanswered requests expire in the same run; running again changes nothing
+Error: expect(received).toBe(expected) // Object.is equality
+Expected: 2
+Received: 1
+    at Object.toBe (C:\Users\Lakshay\Desktop\WebDev\project\tests\unit\sweeper.test.js:800:27)
+== rating.migration.db.test.js | only whole 1 to 5 ratings count; listings already right are left alone; safe to run twice
+Error: expect(received).toMatchObject(expected)
+- Expected  - 3
++ Received  + 3
+  Object {
+-   "modified": 3,
+-   "scanned": 4,
+-   "toUpdate": 3,
+== review.migration.db.test.js | a dry run only counts
+BSONError: Argument passed in does not match the accepted types
+    at new ObjectId (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\bson\src\objectid.ts:241:13)
+    at seed (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\review.migration.db.test.js:17:19)
+    at Object.seed (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\review.migration.db.test.js:57:31)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+== review.migration.db.test.js | upgrades every review, keeps content, and is safe to run twice
+BSONError: Argument passed in does not match the accepted types
+    at new ObjectId (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\bson\src\objectid.ts:241:13)
+    at seed (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\review.migration.db.test.js:17:19)
+    at Object.seed (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\review.migration.db.test.js:69:64)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+== review.migration.db.test.js | a review of a stay is not marked legacy
+BSONError: Argument passed in does not match the accepted types
+    at new ObjectId (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\bson\src\objectid.ts:241:13)
+    at seed (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\review.migration.db.test.js:17:19)
+    at Object.seed (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\review.migration.db.test.js:104:31)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+== review.migration.db.test.js | builds the unique index: one review per reservation, any number without one
+BSONError: Argument passed in does not match the accepted types
+    at new ObjectId (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\bson\src\objectid.ts:241:13)
+    at seed (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\review.migration.db.test.js:17:19)
+    at Object.seed (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\review.migration.db.test.js:117:11)
+    at Promise.finally.completed (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1834:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\jest-circus\build\jestAdapterInit.js:1774:10)
+== flexibleDates.db.test.js | an expired hold counts as free, a live hold does not
+TypeError: holdExpiresAt must be in the future
+    at normalizeHold (C:\Users\Lakshay\Desktop\WebDev\project\src\services\ledger.js:109:13)
+    at Object.normalizeHold (C:\Users\Lakshay\Desktop\WebDev\project\src\services\ledger.js:146:18)
+    at reserveNights (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\flexibleDates.db.test.js:40:12)
+    at Object.take (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\flexibleDates.db.test.js:81:11)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== emailAuth.db.test.js | asking again is throttled, and a new link replaces the old one
+assert.strictEqual(received, expected)
+Expected value to strictly be equal to:
+  2
+Received:
+  1
+    at Object.equal (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\emailAuth.db.test.js:93:14)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== emailAuth.db.test.js | the link sets a new password once; the old one stops working; the lock is lifted
+assert.strictEqual(received, expected)
+Expected value to strictly be equal to:
+  0
+Received:
+  1
+    at Object.equal (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\emailAuth.db.test.js:195:14)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== emailAuth.db.test.js | a new request replaces the old link; an expired or invented link fails
+assert.strictEqual(received, expected)
+Expected value to strictly be equal to:
+  2
+Received:
+  1
+    at Object.equal (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\emailAuth.db.test.js:224:14)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== emailAuth.db.test.js | five emails an hour per account, one a minute
+assert.strictEqual(received, expected)
+Expected value to strictly be equal to:
+  5
+Received:
+  1
+Message:
+  sent 1
+== availability.db.test.js | anonymous visitors are sent to /login
+MongoServerError: E11000 duplicate key error collection: dimora_test.users index: email_1 dup key: { email: "user1@example.com" }
+    at InsertOneOperation.handleOk (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\operations\insert.ts:79:13)
+    at executeOperationWithRetries (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\operations\execute_operation.ts:267:26)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at executeOperation (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\operations\execute_operation.ts:127:12)
+    at Collection.insertOne (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongodb\src\collection.ts:294:12)
+    at model.$__save (C:\Users\Lakshay\Desktop\WebDev\project\node_modules\mongoose\lib\model.js:435:16)
+== availability.db.test.js | the page carries no guest identity or ledger id
+Error: login helper: expected a redirect away from /login, got 302 /login
+    at login (C:\Users\Lakshay\Desktop\WebDev\project\tests\helpers\agent.js:102:11)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at signedIn (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\availability.db.test.js:30:17)
+    at hostWithListing (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\availability.db.test.js:35:15)
+    at Object.<anonymous> (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\availability.db.test.js:134:34)
+== availability.db.test.js | date search leaves out a listing whose dates are blocked, and includes it again after unblocking
+Error: login helper: expected a redirect away from /login, got 500 undefined
+    at login (C:\Users\Lakshay\Desktop\WebDev\project\tests\helpers\agent.js:102:11)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at signedIn (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\availability.db.test.js:30:17)
+    at hostWithListing (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\availability.db.test.js:35:15)
+    at Object.<anonymous> (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\availability.db.test.js:270:34)
+== seed.demo.db.test.js | bookings carry real snapshots, back-dated times and the host's answers
+Error: expect(received).toBeLessThan(expected)
+Expected: < 1793937210839
+Received:   1793937211803
+    at Object.toBeLessThan (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\seed.demo.db.test.js:95:47)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== search.paging.db.test.js | 30 listings are 3 pages of 12, 12 and 6, with the total on every page
+Error: expect(received).toEqual(expected) // deep equality
+- Expected  - 3
++ Received  + 1
+  Array [
+-   12,
+-   12,
+-   6,
+== search.paging.db.test.js | relevance: no listing appears twice and none is missing across pages
+Error: expect(received).toHaveLength(expected)
+Expected length: 30
+Received length: 0
+Received array:  []
+    at toHaveLength (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\search.paging.db.test.js:59:19)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== search.paging.db.test.js | price_asc: no listing appears twice and none is missing across pages
+Error: expect(received).toHaveLength(expected)
+Expected length: 30
+Received length: 0
+Received array:  []
+    at toHaveLength (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\search.paging.db.test.js:59:19)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+== search.paging.db.test.js | price_desc: no listing appears twice and none is missing across pages
+Error: expect(received).toHaveLength(expected)
+Expected length: 30
+Received length: 23
+Received array:  ["6aed4f4bc949f9d473c1de65", "6aed4f4bc949f9d473c1de5b", "6aed4f4ac949f9d473c1de51", "6aed4f4ac949f9d473c1de47", "6aed4f49c949f9d473c1de3d", "6aed4f4bc949f9d473c1de63", "6aed4f4bc949f9d473c1de59", "6aed4f4ac949f9d473c1de4f", "6aed4f4ac949f9d473c1de45", "6aed4f49c949f9d473c1de3b", â€¦]
+    at toHaveLength (C:\Users\Lakshay\Desktop\WebDev\project\tests\integration\search.paging.db.test.js:59:19)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)

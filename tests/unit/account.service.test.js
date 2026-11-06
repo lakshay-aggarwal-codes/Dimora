@@ -380,7 +380,7 @@ describe("deleteAccount", () => {
       attempts: 0,
     });
     expect(user.avatar).toBeUndefined();
-    expect(user.hash).toMatch(/^[0-9a-f]{64}$/);
+    expect(user.hash).toMatch(/^[0-9a-f]{1024}$/); // as long as a real hash, so a login attempt fails cleanly
     expect(user.salt).toMatch(/^[0-9a-f]{64}$/);
     expect(user.role).toBe("member"); // not touched
   });
