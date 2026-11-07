@@ -151,7 +151,11 @@ describe("demo accounts", () => {
 
 describe("demo reservations plan", () => {
   test("every reservation state is covered", () => {
-    expect(new Set(SCENARIOS.map((s) => s.final))).toEqual(new Set(STATUSES));
+    // awaiting_payment (P16-T01) is a 15-minute waiting state: a seeded one would
+    // be expired by the time anyone looked, so the demo has none.
+    expect(new Set(SCENARIOS.map((s) => s.final))).toEqual(
+      new Set(STATUSES.filter((s) => s !== "awaiting_payment")),
+    );
   });
 
   test("keys are unique, valid idempotency keys, and each booking is for a different place", () => {

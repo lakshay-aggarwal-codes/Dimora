@@ -31,6 +31,7 @@ const reviewRouter = require("./routes/review");
 const useRouter = require("./routes/user");
 const profileRouter = require("./routes/profile");
 const tripsRouter = require("./routes/trips");
+const paymentsRouter = require("./routes/payments");
 const notificationsRouter = require("./routes/notifications");
 const conversationsRouter = require("./routes/conversations");
 const reportsRouter = require("./routes/reports");
@@ -98,6 +99,9 @@ function createApp({
     createEmailService({ email: config.email, isProduction: Boolean(config.isProduction), logger });
   app.locals.emailVerificationRequired = Boolean(config.email && config.email.verificationRequired);
   app.locals.appBaseUrl = config.appBaseUrl;
+  // The simulated payment step (P16-T01). A config without `payments` (older
+  // test configs) books directly, as before the step existed.
+  app.locals.payments = config.payments || { simulated: false, outcomeSelector: false, holdMinutes: 15 };
   // How long after a stay a review may be written, and edited (P12-T01, P12-T03).
   app.locals.reviewWindowDays = config.reviews && config.reviews.windowDays;
   app.locals.reviewEditDays = config.reviews && config.reviews.editDays;
@@ -265,6 +269,7 @@ function createApp({
   app.use("/", compareRouter);
   app.use("/", profileRouter);
   app.use("/", tripsRouter);
+  app.use("/", paymentsRouter);
   app.use("/", notificationsRouter);
   app.use("/", conversationsRouter);
   app.use("/", pagesRouter);

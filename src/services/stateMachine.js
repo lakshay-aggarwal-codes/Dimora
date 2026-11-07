@@ -6,16 +6,24 @@
 //   pending ──system► expired          confirmed ──system─► completed
 //   pending ──guest─► cancelled_by_guest
 //
+//   awaiting_payment ──guest──► confirmed   (paid, instant-book listing)
+//   awaiting_payment ──guest──► pending     (paid, the host must still answer)
+//   awaiting_payment ──system─► expired     (the payment hold ran out)
+//
 // A booking on an instant-book listing is created already `confirmed`
-// (that is a creation, not a transition). Any other move is an
+// (that is a creation, not a transition), unless simulated payments are on
+// (P16-T01): then every booking is created `awaiting_payment` and only a
+// successful simulated payment moves it on. Any other move is an
 // InvalidTransitionError (409).
 //
-// Nights: pending and confirmed reservations hold their nights in the ledger
-// (ADR-004). declined, expired and both cancellations RELEASE them. completed
-// keeps its (past) rows, as ADR-004 says "past rows kept".
+// Nights: awaiting_payment, pending and confirmed reservations hold their
+// nights in the ledger (ADR-004). declined, expired and both cancellations
+// RELEASE them. completed keeps its (past) rows, as ADR-004 says "past rows
+// kept".
 const { InvalidTransitionError } = require("../utils/errors");
 
 const STATUSES = Object.freeze([
+  "awaiting_payment",
   "pending",
   "confirmed",
   "declined",
@@ -29,6 +37,11 @@ const ACTORS = Object.freeze(["guest", "host", "system"]);
 
 // from -> to -> the actors who may make the move.
 const TRANSITIONS = Object.freeze({
+  awaiting_payment: Object.freeze({
+    confirmed: ["guest"],
+    pending: ["guest"],
+    expired: ["system"],
+  }),
   pending: Object.freeze({
     confirmed: ["host"],
     declined: ["host"],
@@ -62,7 +75,10 @@ const isTerminal = (status) =>
 
 /** Does a reservation in this status keep rows in the night ledger? */
 const holdsNights = (status) =>
-  status === "pending" || status === "confirmed" || status === "completed";
+  status === "awaiting_payment" ||
+  status === "pending" ||
+  status === "confirmed" ||
+  status === "completed";
 
 /** Does moving INTO this status free the nights? */
 const releasesNights = (to) => RELEASING.includes(to);

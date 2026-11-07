@@ -1,8 +1,13 @@
 // Reservations (P07-T05): creating a booking and changing its status.
 //
-//   create({ guest, listing, in, out, guests, expectedTotalMinor, idempotencyKey })
+//   create({ guest, listing, in, out, guests, expectedTotalMinor, idempotencyKey,
+//            awaitPayment?, paymentHoldMs? })
 //   transition(reservationId, to, { actor, by, reason, now }?)
 //
+// With `awaitPayment` (simulated payments on, P16-T01) the booking is created
+// `awaiting_payment` with its own short hold (default 15 minutes), the host is
+// not told yet, and only services/payments.js moves it on after a successful
+// simulated payment (-> confirmed, or pending when the host must still answer).
 // create() order, which is what keeps the ledger and the reservations
 // consistent (ADR-004):
 //   1. validate input; a repeated idempotency key returns the original
@@ -39,6 +44,11 @@ const { bookingProblems } = require("./bookingRules");
 const { assertTransition, releasesNights } = require("./stateMachine");
 
 const PENDING_HOLD_MS = 24 * 60 * 60 * 1000;
+// How long the nights of an unpaid booking stay held (P16-T01). A caller may
+// pass another value between one minute and one hour (PAYMENT_HOLD_MINUTES).
+const PAYMENT_HOLD_MS = 15 * 60 * 1000;
+const MIN_PAYMENT_HOLD_MS = 60 * 1000;
+const MAX_PAYMENT_HOLD_MS = 60 * 60 * 1000;
 const KEY_PATTERN = /^[A-Za-z0-9_-]{8,64}$/;
 
 const isDuplicateKey = (err) =>
@@ -83,6 +93,14 @@ function parseKey(value) {
 
 const lineDate = (d) => formatDateOnly(d);
 
+function paymentHoldOf(value) {
+  return Number.isInteger(value) &&
+    value >= MIN_PAYMENT_HOLD_MS &&
+    value <= MAX_PAYMENT_HOLD_MS
+    ? value
+    : PAYMENT_HOLD_MS;
+}
+
 /**
  * @param {object} [deps] replaceable in unit tests
  */
@@ -96,6 +114,14 @@ const TRANSITION_EVENTS = Object.freeze({
   completed: "review.available",
 });
 
+// A booking that was waiting for its payment tells the host only once it is
+// paid: the same two events a direct booking sends. An unpaid booking that
+// runs out tells nobody (the host never knew about it).
+const PAYMENT_EVENTS = Object.freeze({
+  confirmed: "reservation.booked",
+  pending: "reservation.requested",
+});
+
 function createReservationService({
   ReservationModel = require("../models/reservation"),
   ListingModel = require("../models/listing"),
@@ -106,6 +132,10 @@ function createReservationService({
   // None by default, so a service built in a test sends nothing; the exported
   // instance at the bottom of this file gets the real one.
   notifier = null,
+  // Gives a paid booking's money back on paper when it ends without a stay
+  // (P16-T01): `{ refund(reservation, { amountMinor?, reason?, now }) }`.
+  // None by default; the exported instance gets services/payments.js.
+  refunder = null,
   replayRetries = 5,
   replayDelayMs = 40,
   sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
@@ -202,8 +232,13 @@ function createReservationService({
     }
 
     const instant = Boolean(listing.instantBook);
-    const status = instant ? "confirmed" : "pending";
-    const holdExpiresAt = instant ? null : instantAfter(now, PENDING_HOLD_MS);
+    const awaitPayment = input.awaitPayment === true;
+    const status = awaitPayment ? "awaiting_payment" : instant ? "confirmed" : "pending";
+    const holdExpiresAt = awaitPayment
+      ? instantAfter(now, paymentHoldOf(input.paymentHoldMs))
+      : instant
+        ? null
+        : instantAfter(now, PENDING_HOLD_MS);
     const _id = newId();
 
     try {
@@ -252,7 +287,14 @@ function createReservationService({
         status,
         ...(holdExpiresAt ? { holdExpiresAt } : {}),
         statusHistory: [
-          { from: null, to: status, at: now, actor: "guest", by: guest._id, note: instant ? "instant booking" : "request sent" },
+          {
+            from: null,
+            to: status,
+            at: now,
+            actor: "guest",
+            by: guest._id,
+            note: awaitPayment ? "waiting for payment" : instant ? "instant booking" : "request sent",
+          },
         ],
         pricingSnapshot: quote,
         listingSnapshot: {
@@ -269,7 +311,8 @@ function createReservationService({
         },
         idempotencyKey: key,
       });
-      await tell(instant ? "reservation.booked" : "reservation.requested", reservation);
+      // The host hears about it when it is paid (transition), not before.
+      if (!awaitPayment) await tell(instant ? "reservation.booked" : "reservation.requested", reservation);
       return { reservation, created: true };
     } catch (err) {
       await releaseQuietly(_id);
@@ -285,6 +328,14 @@ function createReservationService({
   // Extra conditions that make a transition valid only at the right time, and
   // the error when the update did not match although the status did.
   function guardFor(to, current, now) {
+    // A paid booking must still be inside its payment hold (P16-T01).
+    if (current.status === "awaiting_payment" && (to === "confirmed" || to === "pending")) {
+      return {
+        filter: { holdExpiresAt: { $gt: now } },
+        onMiss: () =>
+          new ConflictError("The time to pay for this booking has run out.", { code: "payment_hold_expired" }),
+      };
+    }
     if (to === "confirmed") {
       return {
         filter: { holdExpiresAt: { $gt: now } },
@@ -313,7 +364,11 @@ function createReservationService({
    * the caller really is (policy) is checked by the caller.
    * @returns {Promise<object>} the updated reservation
    */
-  async function transition(reservationId, to, { actor, by, reason, refund, expectStatus, now = new Date() } = {}) {
+  async function transition(
+    reservationId,
+    to,
+    { actor, by, reason, refund, expectStatus, paymentStatus, now = new Date() } = {},
+  ) {
     const current = await ReservationModel.findById(reservationId);
     if (!current) throw new NotFoundError("That reservation does not exist.");
     // The caller worked something out (a refund) from this status: if the
@@ -326,6 +381,10 @@ function createReservationService({
     const guard = guardFor(to, current, now);
     const set = { status: to };
     const unset = {};
+    const waitingForPayment = current.status === "awaiting_payment";
+    // Paid: a request now waits for the host from this moment (a fresh 24 hours).
+    if (waitingForPayment && to === "pending") set.holdExpiresAt = instantAfter(now, PENDING_HOLD_MS);
+    if (paymentStatus === "simulated_paid") set.paymentStatus = paymentStatus;
     if (to === "confirmed" || releasesNights(to) || to === "completed") unset.holdExpiresAt = 1;
     if (to === "cancelled_by_guest" || to === "cancelled_by_host") {
       set.cancelledBy = actor;
@@ -359,10 +418,27 @@ function createReservationService({
     }
 
     if (to === "confirmed") await ledgerService.confirmNights(updated._id);
-    else if (releasesNights(to)) await ledgerService.releaseNights(updated._id);
+    else if (waitingForPayment && to === "pending") {
+      await ledgerService.extendHold(updated._id, updated.holdExpiresAt, { now });
+    } else if (releasesNights(to)) await ledgerService.releaseNights(updated._id);
 
-    const event = TRANSITION_EVENTS[to];
+    const event = waitingForPayment ? PAYMENT_EVENTS[to] : TRANSITION_EVENTS[to];
     if (event) await tell(event, updated);
+
+    // A paid booking that ends without a stay gets its refund recorded (P16-T01).
+    // Never throws and never changes the result: the money is simulated, and the
+    // reservation has already moved.
+    if (refunder && releasesNights(to) && updated.paymentStatus === "simulated_paid") {
+      try {
+        await refunder.refund(updated, {
+          amountMinor: refund ? refund.refundMinor : undefined,
+          reason,
+          now,
+        });
+      } catch {
+        // the booking page still shows the refund the policy worked out
+      }
+    }
     return updated;
   }
 
@@ -370,7 +446,12 @@ function createReservationService({
 }
 
 module.exports = {
-  ...createReservationService({ notifier: require("./notificationEvents").notifier }),
+  ...createReservationService({
+    notifier: require("./notificationEvents").notifier,
+    // payments.js needs this module, so it is loaded when first used, not now.
+    refunder: { refund: (...args) => require("./payments").refundRelease(...args) },
+  }),
   createReservationService,
   PENDING_HOLD_MS,
+  PAYMENT_HOLD_MS,
 };

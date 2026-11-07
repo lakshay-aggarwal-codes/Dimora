@@ -12,7 +12,7 @@ A property-rental marketplace: hosts list places, guests search them, pick dates
 
 ## What is simulated
 
-- **Payments.** No card is asked for, nothing is charged and no host is paid ([ADR-009](docs/ADR/009-simulated-payments.md)). The checkout says so. A cancellation **calculates and records** the refund the policy gives; no money moves.
+- **Payments.** No card is asked for, nothing is charged and no host is paid ([ADR-009](docs/ADR/009-simulated-payments.md)). After checkout a booking waits on a "Pay (simulated)" page under a "TEST MODE: no money moves" banner; a successful click confirms it (or sends the request to the host), a refused one leaves the nights held until the payment hold ends. A cancellation **calculates and records** the refund the policy gives; no money moves.
 - **Email.** Nothing is ever sent: no confirmation, no password reset, no notification. Accounts have no email verification.
 - **Everything else is real**: photos go to Cloudinary, addresses are geocoded by Mapbox, the maps are Mapbox GL, the database is MongoDB. Prices are in Indian rupees (integer paise) and stay dates are calendar dates in the listing's time zone, default Asia/Kolkata ([ADR-008](docs/ADR/008-market-defaults.md)).
 
@@ -57,6 +57,9 @@ Set in `.env` (never commit it). `.env.example` has a comment for each.
 | `EMAIL_FROM` | with `resend` | | the sender address, on a domain verified at Resend |
 | `RESEND_API_KEY` | with `resend` | | Resend API key (secret) |
 | `EMAIL_VERIFICATION_REQUIRED` | no | `true` | `false` stops asking for a confirmed email before publishing or booking |
+| `SIMULATED_PAYMENTS` | no | `true` | `true` adds the "Pay (simulated)" step after checkout ([ADR-009](docs/ADR/009-simulated-payments.md)); `false` books directly. No card data either way |
+| `SIMULATED_PAYMENT_OUTCOMES` | no | `false` | `true` shows a success / declined / service-error selector on the pay page, to try the failure paths; keep it off in production |
+| `PAYMENT_HOLD_MINUTES` | no | `15` | how long the nights of an unpaid booking stay held, 1 to 60 |
 
 Old names (`ATLASDB_URL`, `CLOUD_NAME`, `CLOUD_API_KEY`, `CLOUD_API_SECRET`, `MAP_TOKEN`) still work with a warning.
 
@@ -159,6 +162,7 @@ erDiagram
   LISTING ||--o{ RESERVATION : "is booked by"
   LISTING ||--o{ STAYNIGHT : "has nights"
   RESERVATION ||--o{ STAYNIGHT : "holds"
+  RESERVATION ||--o{ PAYMENTATTEMPT : "is paid by"
   AVAILABILITYBLOCK ||--o{ STAYNIGHT : "holds"
   LISTING ||--o{ AVAILABILITYBLOCK : "has"
   USER ||--o{ AVAILABILITYBLOCK : "creates"
@@ -191,6 +195,12 @@ erDiagram
     date date
     date holdExpiresAt
   }
+  PAYMENTATTEMPT {
+    string kind
+    string status
+    int amountMinor
+    string idempotencyKey
+  }
   AVAILABILITYBLOCK {
     date from
     date to
@@ -210,15 +220,15 @@ erDiagram
   }
 ```
 
-Notes: a `STAYNIGHT` is one night of one listing held by one reservation or one host block; a unique index on (listing, date) is what makes a double booking impossible. A `REPORT` points at a listing, review or member by `targetKind` and `targetId` (not drawn). Sessions are stored in MongoDB too (`connect-mongo`). Money is whole paise ([ADR-002](docs/ADR/002-money-integer-paise.md)); stay dates are UTC midnight ([ADR-003](docs/ADR/003-calendar-dates-utc-midnight.md)).
+Notes: a `PAYMENTATTEMPT` is one simulated payment (or refund record) of one booking; it has no card fields. A `STAYNIGHT` is one night of one listing held by one reservation or one host block; a unique index on (listing, date) is what makes a double booking impossible. A `REPORT` points at a listing, review or member by `targetKind` and `targetId` (not drawn). Sessions are stored in MongoDB too (`connect-mongo`). Money is whole paise ([ADR-002](docs/ADR/002-money-integer-paise.md)); stay dates are UTC midnight ([ADR-003](docs/ADR/003-calendar-dates-utc-midnight.md)).
 
 ## API
 
-The server renders pages, so most routes are pages and form posts. Three are JSON (`/api/listings/:id/availability`, `/api/listings/:id/quote`, `/api/search/map`). The full list of the 128 routes, who may call each and what it does, is in [docs/API.md](docs/API.md).
+The server renders pages, so most routes are pages and form posts. Three are JSON (`/api/listings/:id/availability`, `/api/listings/:id/quote`, `/api/search/map`). The full list of the 130 routes, who may call each and what it does, is in [docs/API.md](docs/API.md).
 
 ## Known limitations
 
-- **No payments, no email, no notifications, no messages between guest and host.** A booking is confirmed on screen only. Nothing tells a host about a new request except the page they open.
+- **Payments are simulated** (see above): no card, no money, no payout. A booking waits for the "Pay (simulated)" click for `PAYMENT_HOLD_MINUTES` and then ends; there is no way to abandon an unpaid booking early.
 - **No password change, password reset or account deletion**, and no wishlists, comparison or neighbourhood pages. These are on the roadmap, not built.
 - **One market**: rupees, India defaults. One time zone per listing, default Asia/Kolkata.
 - **Not deployed**: there is no deployment recipe or health route yet. Free hosting tiers sleep and have limits that must be checked when one is chosen.

@@ -3,6 +3,10 @@ const sm = require("../../src/services/stateMachine");
 const { InvalidTransitionError } = require("../../src/utils/errors");
 
 const LEGAL = [
+  // paid (simulated, P16-T01): the guest's payment moves it on; the sweeper ends it
+  ["awaiting_payment", "confirmed", "guest"],
+  ["awaiting_payment", "pending", "guest"],
+  ["awaiting_payment", "expired", "system"],
   ["pending", "confirmed", "host"],
   ["pending", "declined", "host"],
   ["pending", "expired", "system"],
@@ -13,13 +17,22 @@ const LEGAL = [
 ];
 
 describe("transition table", () => {
-  test("has exactly the seven statuses of the design", () => {
+  test("has exactly the eight statuses of the design (the seven of P07-T05 and awaiting_payment of P16-T01)", () => {
     expect([...sm.STATUSES].sort()).toEqual(
-      ["cancelled_by_guest", "cancelled_by_host", "completed", "confirmed", "declined", "expired", "pending"],
+      [
+        "awaiting_payment",
+        "cancelled_by_guest",
+        "cancelled_by_host",
+        "completed",
+        "confirmed",
+        "declined",
+        "expired",
+        "pending",
+      ],
     );
   });
 
-  test("all 49 from/to pairs: only the seven legal ones pass", () => {
+  test("all 64 from/to pairs: only the ten legal ones pass", () => {
     const legal = new Set(LEGAL.map(([f, t]) => `${f}>${t}`));
     let passed = 0;
     for (const from of sm.STATUSES) {
@@ -30,7 +43,7 @@ describe("transition table", () => {
         else expect(() => sm.assertTransition(from, to)).toThrow(InvalidTransitionError);
       }
     }
-    expect(passed).toBe(7);
+    expect(passed).toBe(10);
   });
 
   test("each legal move allows only its actor", () => {
@@ -71,10 +84,28 @@ describe("what a status means for the ledger", () => {
     }
     expect(sm.isTerminal("pending")).toBe(false);
     expect(sm.isTerminal("confirmed")).toBe(false);
+    expect(sm.isTerminal("awaiting_payment")).toBe(false);
   });
 
-  test("pending, confirmed and completed hold nights; the rest do not", () => {
-    expect(sm.STATUSES.filter(sm.holdsNights).sort()).toEqual(["completed", "confirmed", "pending"]);
+  test("awaiting_payment, pending, confirmed and completed hold nights; the rest do not", () => {
+    expect(sm.STATUSES.filter(sm.holdsNights).sort()).toEqual([
+      "awaiting_payment",
+      "completed",
+      "confirmed",
+      "pending",
+    ]);
+  });
+
+  test("an unpaid booking can only be paid by the guest or ended by the system; the host and an admin cannot move it", () => {
+    for (const to of ["confirmed", "pending"]) {
+      expect(sm.actorsFor("awaiting_payment", to)).toEqual(["guest"]);
+    }
+    expect(sm.actorsFor("awaiting_payment", "expired")).toEqual(["system"]);
+    for (const to of ["declined", "cancelled_by_guest", "cancelled_by_host", "completed"]) {
+      expect(sm.canTransition("awaiting_payment", to)).toBe(false);
+    }
+    // nothing leads back into awaiting_payment: it is only a starting state
+    for (const from of sm.STATUSES) expect(sm.canTransition(from, "awaiting_payment")).toBe(false);
   });
 
   test("moving into declined, expired or a cancellation releases the nights", () => {

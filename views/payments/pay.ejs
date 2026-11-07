@@ -1,0 +1,70 @@
+<% layout("/layouts/boilerPlate") %>
+<%#
+  The simulated payment step (P16-T01). Local: pay (the view model built in
+  src/controllers/payments.js). Every value is written with the escaping tag.
+  The page asks for NO card data of any kind: only a hidden key, the optional
+  developer outcome selector and one button. Nothing is charged.
+%>
+<section class="checkout mt-3" aria-labelledby="pay-heading">
+    <p class="mb-2"><a href="<%= pay.tripUrl %>">&larr; Back to the booking</a></p>
+    <h1 id="pay-heading" class="h2 mb-3">Pay (simulated)</h1>
+
+    <div class="alert alert-warning" role="note" data-test-mode-banner>
+        <strong>TEST MODE: no money moves.</strong>
+        Dimora is a college project: nothing is charged, no host is paid and no real stay is arranged. This page never asks for a card number, an expiry date or a security code, so do not type any.
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <h2 class="h5"><%= pay.listingTitle %></h2>
+            <% if (pay.city) { %><p class="text-body-secondary"><%= pay.city %></p><% } %>
+            <dl class="know-list" data-stay>
+                <dt>Booking</dt><dd><%= pay.reference %></dd>
+                <dt>Check-in</dt><dd><%= pay.checkIn %></dd>
+                <dt>Check-out</dt><dd><%= pay.checkOut %></dd>
+                <dt>Nights</dt><dd><%= pay.nights %></dd>
+                <dt>Guests</dt><dd><%= pay.guests %></dd>
+            </dl>
+            <p data-hold>
+                Your dates are held for you until <strong><%= pay.holdUntil %></strong> (about <%= pay.minutesLeft %> minute<%= pay.minutesLeft === 1 ? "" : "s" %> from now).
+                If the payment is not completed by then, the booking ends and the dates are released.
+                <% if (pay.instant) { %>A successful payment confirms the booking straight away.<% } else { %>After a successful payment your request goes to the host, who has 24 hours to answer.<% } %>
+            </p>
+        </div>
+
+        <div class="col-lg-5">
+            <form class="checkout-card" method="POST" action="/trips/<%= pay.id %>/pay" data-checkout-form data-pay-form>
+                <%- include("../includes/csrf.ejs") %>
+                <input type="hidden" name="idempotencyKey" value="<%= pay.idempotencyKey %>">
+
+                <h2 class="h5">Amount</h2>
+                <p class="quote-total" data-total>
+                    <span>Total</span>
+                    <span><%= pay.amountText %></span>
+                </p>
+
+                <% if (pay.outcomeSelector) { %>
+                <fieldset class="mt-3" data-outcome-selector>
+                    <legend class="h6">Developer option: what should the simulation answer?</legend>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="outcome" id="outcome-success" value="success" checked>
+                        <label class="form-check-label" for="outcome-success">Succeeds</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="outcome" id="outcome-declined" value="declined">
+                        <label class="form-check-label" for="outcome-declined">Is declined</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="outcome" id="outcome-error" value="error">
+                        <label class="form-check-label" for="outcome-error">Service error</label>
+                    </div>
+                </fieldset>
+                <% } %>
+
+                <button type="submit" class="btn btn-dark w-100 mt-3" data-submit-once>Pay (simulated)</button>
+                <p class="small text-body-secondary mt-2 mb-0">Simulation only: pressing the button charges nothing.</p>
+            </form>
+        </div>
+    </div>
+</section>
+<script src="/js/checkout.js"></script>

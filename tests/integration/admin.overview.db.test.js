@@ -60,6 +60,7 @@ describeDb("admin overview, reservation lookup and audit filters (database)", ()
         total: 4,
       });
       expect(summary.reservations.byStatus).toEqual({
+        awaiting_payment: 0,
         pending: 1,
         confirmed: 0,
         declined: 0,

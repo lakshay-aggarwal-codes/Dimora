@@ -33,6 +33,9 @@ const KEYS = [
   "EMAIL_FROM",
   "RESEND_API_KEY",
   "EMAIL_VERIFICATION_REQUIRED",
+  "SIMULATED_PAYMENTS",
+  "SIMULATED_PAYMENT_OUTCOMES",
+  "PAYMENT_HOLD_MINUTES",
 ];
 
 // Secrets that were committed to the repository or are obvious placeholders.
@@ -109,6 +112,16 @@ const schema = Joi.object({
   // false = signing up still works and nothing asks for a confirmed address.
   // For a deployment that cannot send email. Default true.
   EMAIL_VERIFICATION_REQUIRED: Joi.boolean().default(true),
+  // Simulated payment step (P16-T01, ADR-009). true: a booking waits for a
+  // "Pay (simulated)" click before it is confirmed or sent to the host; no card
+  // data is ever asked for and no money moves. false: bookings are made
+  // directly, as before the step existed.
+  SIMULATED_PAYMENTS: Joi.boolean().default(true),
+  // true shows a success / declined / service-error selector on the pay page so
+  // the failure paths can be tried. A testing tool: keep it off in production.
+  SIMULATED_PAYMENT_OUTCOMES: Joi.boolean().default(false),
+  // How long the nights of an unpaid booking stay held (minutes).
+  PAYMENT_HOLD_MINUTES: Joi.number().integer().min(1).max(60).default(15),
 });
 
 function isPlaceholder(value) {
@@ -192,6 +205,11 @@ function validateEnv(source = process.env) {
     if (!raw.RESEND_API_KEY) problems.push("RESEND_API_KEY is missing (EMAIL_TRANSPORT=resend)");
     if (!raw.EMAIL_FROM) problems.push("EMAIL_FROM is missing (EMAIL_TRANSPORT=resend); use an address on a domain you verified with Resend");
   }
+  if (isProduction && value && value.SIMULATED_PAYMENT_OUTCOMES === true) {
+    warnings.push(
+      "SIMULATED_PAYMENT_OUTCOMES is on in production: every guest sees a selector that makes the simulated payment fail; it is a testing tool",
+    );
+  }
   if (isProduction && value && value.EMAIL_TRANSPORT === "console") {
     warnings.push(
       value.EMAIL_VERIFICATION_REQUIRED === false
@@ -236,6 +254,11 @@ function validateEnv(source = process.env) {
       from: value.EMAIL_FROM,
       resendApiKey: value.RESEND_API_KEY || null,
       verificationRequired: value.EMAIL_VERIFICATION_REQUIRED !== false,
+    }),
+    payments: Object.freeze({
+      simulated: value.SIMULATED_PAYMENTS !== false,
+      outcomeSelector: value.SIMULATED_PAYMENT_OUTCOMES === true,
+      holdMinutes: value.PAYMENT_HOLD_MINUTES,
     }),
     warnings: Object.freeze(warnings),
   });

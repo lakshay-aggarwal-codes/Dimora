@@ -55,6 +55,10 @@ module.exports.show = async (req, res) => {
     : sameId(reservation.host, req.user._id)
       ? "host"
       : "admin";
+  // A booking still waiting for its payment has not reached the host yet.
+  if (viewerRole === "host" && reservation.status === "awaiting_payment") {
+    throw new NotFoundError("That booking does not exist.");
+  }
   // The review form, the review itself, or why there is none (P12-T02).
   const review =
     viewerRole === "guest"

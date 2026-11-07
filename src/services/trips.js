@@ -5,11 +5,13 @@
 //
 // Tabs (a booking is in exactly one):
 //   Upcoming   confirmed, check-out after today
-//   Pending    waiting for the host, hold still running
+//   Pending    waiting for the host, hold still running; or waiting for the
+//              simulated payment (P16-T01), payment hold still running
 //   Past       completed, or confirmed with check-out passed (the sweeper has
 //              not marked it completed yet)
-//   Cancelled  declined, expired, cancelled by either side, or a request whose
-//              hold ran out and the sweeper has not expired yet
+//   Cancelled  declined, expired, cancelled by either side, or a request (or an
+//              unpaid booking) whose hold ran out and the sweeper has not
+//              expired yet
 // "Today" is the date in the app's default time zone (Asia/Kolkata).
 const {
   CANCELLATION_POLICIES,
@@ -60,7 +62,11 @@ function tabQuery(tab, guestId, { now, today }) {
       };
     case "pending":
       return {
-        filter: { ...base, status: "pending", holdExpiresAt: { $gt: now } },
+        filter: {
+          ...base,
+          status: { $in: ["pending", "awaiting_payment"] },
+          holdExpiresAt: { $gt: now },
+        },
         sort: { holdExpiresAt: 1, _id: 1 },
       };
     case "past":
@@ -81,6 +87,7 @@ function tabQuery(tab, guestId, { now, today }) {
           $or: [
             { status: { $in: CLOSED } },
             { status: "pending", holdExpiresAt: { $lte: now } },
+            { status: "awaiting_payment", holdExpiresAt: { $lte: now } },
           ],
         },
         sort: { updatedAt: -1, _id: -1 },
@@ -97,7 +104,7 @@ function tabOf(reservation, { now = new Date() } = {}) {
   if (status === "completed") return "past";
   if (status === "confirmed")
     return reservation.checkOut > today ? "upcoming" : "past";
-  if (status === "pending") {
+  if (status === "pending" || status === "awaiting_payment") {
     return reservation.holdExpiresAt && reservation.holdExpiresAt > now
       ? "pending"
       : "cancelled";
@@ -106,6 +113,7 @@ function tabOf(reservation, { now = new Date() } = {}) {
 }
 
 const STATUS_LABELS = {
+  awaiting_payment: { label: "Waiting for payment", tone: "warning" },
   pending: { label: "Waiting for the host", tone: "warning" },
   confirmed: { label: "Confirmed", tone: "success" },
   completed: { label: "Completed", tone: "secondary" },
@@ -129,6 +137,12 @@ function statusInfo(
     !(reservation.holdExpiresAt && reservation.holdExpiresAt > now)
   ) {
     return STATUS_LABELS.expired;
+  }
+  if (
+    reservation.status === "awaiting_payment" &&
+    !(reservation.holdExpiresAt && reservation.holdExpiresAt > now)
+  ) {
+    return { label: "Payment not completed", tone: "secondary" };
   }
   return (
     STATUS_LABELS[reservation.status] || {
@@ -307,6 +321,12 @@ function describeRow(
         ? formatInstant(reservation.holdExpiresAt, snap.timezone)
         : null,
     reviewPrompt: reviewPromptOf(reservation, { now, reviewed, windowDays }),
+    // A booking still waiting for its simulated payment (P16-T01).
+    ...(reservation.status === "awaiting_payment" &&
+    reservation.holdExpiresAt &&
+    reservation.holdExpiresAt > now
+      ? { payBy: formatInstant(reservation.holdExpiresAt, snap.timezone) }
+      : {}),
   };
 }
 
@@ -551,6 +571,18 @@ function describeTrip(
     changes: changesOf(reservation, { formatMoney, currency }),
     review: describeReview(review),
     paymentSimulated: true,
+    // The "Pay (simulated)" button, for the guest while the payment hold runs (P16-T01).
+    ...(viewerIsGuest &&
+    reservation.status === "awaiting_payment" &&
+    reservation.holdExpiresAt &&
+    reservation.holdExpiresAt > now
+      ? {
+          awaitingPayment: {
+            url: `/trips/${idText(reservation._id)}/pay`,
+            until: formatInstant(reservation.holdExpiresAt, snap.timezone),
+          },
+        }
+      : {}),
   };
 }
 

@@ -143,9 +143,10 @@ describe("tabQuery", () => {
       status: "confirmed",
       checkOut: { $gt: TODAY },
     });
+    // a booking waiting for its simulated payment (P16-T01) is "pending" too
     expect(trips.tabQuery("pending", guestId, ctx).filter).toEqual({
       guest: guestId,
-      status: "pending",
+      status: { $in: ["pending", "awaiting_payment"] },
       holdExpiresAt: { $gt: NOW },
     });
     expect(trips.tabQuery("past", guestId, ctx).filter.$or).toEqual([
@@ -161,6 +162,10 @@ describe("tabQuery", () => {
     ]);
     expect(cancelled[1]).toEqual({
       status: "pending",
+      holdExpiresAt: { $lte: NOW },
+    });
+    expect(cancelled[2]).toEqual({
+      status: "awaiting_payment",
       holdExpiresAt: { $lte: NOW },
     });
   });
@@ -751,5 +756,51 @@ describe("describeReview", () => {
       until: null,
     });
     expect(trips.describeReview({ state: "none" }).state).toBe("none");
+  });
+});
+
+describe("a booking waiting for its simulated payment (P16-T01)", () => {
+  const HOUR_MS = 60 * 60 * 1000;
+  const hold = (ms) => new Date(NOW.getTime() + ms);
+  const waiting = (ms = 10 * 60 * 1000) =>
+    reservation({ status: "awaiting_payment", holdExpiresAt: hold(ms) });
+  const describeFor = (r, role = "guest") =>
+    trips.describeTrip(r, { viewerRole: role, formatMoney, now: NOW });
+
+  test("is in the pending tab while its payment hold runs and in the cancelled tab after", () => {
+    expect(trips.tabOf(waiting(), { now: NOW })).toBe("pending");
+    expect(trips.tabOf(waiting(-HOUR_MS), { now: NOW })).toBe("cancelled");
+    expect(
+      trips.tabOf(reservation({ status: "awaiting_payment", holdExpiresAt: undefined }), { now: NOW }),
+    ).toBe("cancelled");
+  });
+
+  test("says what it is waiting for, and 'not completed' once the hold has ended", () => {
+    expect(trips.statusInfo(waiting(), { now: NOW }).label).toBe("Waiting for payment");
+    expect(trips.statusInfo(waiting(-HOUR_MS), { now: NOW }).label).toBe("Payment not completed");
+  });
+
+  test("its row names the time to pay by; no other row has that field", () => {
+    expect(trips.describeRow(waiting(), { now: NOW }).payBy).toEqual(expect.any(String));
+    expect(trips.describeRow(waiting(-HOUR_MS), { now: NOW })).not.toHaveProperty("payBy");
+    expect(trips.describeRow(reservation(), { now: NOW })).not.toHaveProperty("payBy");
+  });
+
+  test("the guest's booking page gets the pay link while the hold runs, the host's and a past hold's do not", () => {
+    const t = describeFor(waiting());
+    expect(t.awaitingPayment.url).toBe("/trips/64b0f0f0f0f0f0f0f0f0abcd/pay");
+    expect(t.awaitingPayment.until).toEqual(expect.any(String));
+    expect(describeFor(waiting(), "host")).not.toHaveProperty("awaitingPayment");
+    expect(describeFor(waiting(-HOUR_MS))).not.toHaveProperty("awaitingPayment");
+    expect(describeFor(reservation())).not.toHaveProperty("awaitingPayment");
+  });
+
+  test("it reveals nothing and offers neither cancel nor change", () => {
+    const t = describeFor(waiting());
+    expect(t.revealed).toBe(false);
+    expect(t.address).toBeNull();
+    expect(t.hostContact).toBeNull();
+    expect(t.cancel).toBeNull();
+    expect(t.change).toBeNull();
   });
 });

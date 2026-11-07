@@ -45,6 +45,8 @@ Every route the app serves, read from the routers themselves. The server renders
 | GET | `/trips` | signed in | Your trips: upcoming, pending, past, cancelled |
 | GET | `/trips/:id` | signed in | One booking: dates, price, rules, cancellation terms, refund, review prompt |
 | POST | `/trips/:id/cancel` | signed in; the booking's guest | Cancel a booking (guest); the refund is calculated and recorded |
+| GET | `/trips/:id/pay` | signed in; the booking's guest | The "Pay (simulated)" page of a booking that is waiting for payment: TEST MODE banner, amount, time left, no card fields |
+| POST | `/trips/:id/pay` | signed in; the booking's guest | Make the simulated payment (one attempt per key); success confirms the booking or sends it to the host, a refusal keeps the nights held |
 | GET | `/reports` | signed in | Your reports and their status |
 | POST | `/reports` | signed in | Send a report (rate-limited; one open report per target) |
 | GET | `/reports/new` | signed in | Report form for a listing, a review or a member (`?kind=&id=`) |

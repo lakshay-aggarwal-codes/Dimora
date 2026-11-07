@@ -229,6 +229,22 @@ describe("the cells", () => {
     expect(cell(view, 0, 3).srLabel).not.toContain("guest");
   });
 
+  test("a booking still waiting for its simulated payment shows as booked, with no link and no guest name (P16-T01)", async () => {
+    const unpaid = reservation({ status: "awaiting_payment" });
+    const view = await overview(
+      deps({
+        listings: [a],
+        nights: [night(a, "2026-11-03", { kind: "reservation", id: unpaid._id })],
+        reservations: [unpaid],
+      }),
+      "2026-11",
+    );
+    expect(cell(view, 0, 3)).toMatchObject({ state: "booked" });
+    expect(cell(view, 0, 3).href).toBeNull();
+    expect(cell(view, 0, 3).srLabel).not.toContain("guest");
+    expect(cell(view, 0, 3).srLabel).not.toContain("Ravi");
+  });
+
   test("the reservation lookup is limited to this host", async () => {
     const dep = deps({ listings: [a], nights, reservations: [confirmed] });
     await overview(dep, "2026-11");

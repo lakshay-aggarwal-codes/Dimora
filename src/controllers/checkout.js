@@ -43,6 +43,9 @@ const checkoutPath = (id, stay) =>
 // Where a guest lands after booking. The trips page (P09-T01) will replace it.
 const confirmationPath = (reservation) => listingPath(reservation.listing);
 
+// With simulated payments on (P16-T01) a new booking waits for its payment.
+const payPath = (reservation) => `/trips/${reservation._id}/pay`;
+
 const text = (value) => (typeof value === "string" ? value : "");
 
 async function loadBookable(id, user) {
@@ -120,6 +123,9 @@ module.exports.submit = async (req, res) => {
     return res.redirect(listingPath(listing._id));
   }
 
+  const payments = req.app.locals.payments;
+  const awaitPayment = Boolean(payments && payments.simulated);
+
   try {
     const { reservation } = await reservationService.create({
       guest: req.user,
@@ -129,7 +135,14 @@ module.exports.submit = async (req, res) => {
       guests: stay.guests,
       expectedTotalMinor: expected,
       idempotencyKey: key,
+      ...(awaitPayment
+        ? { awaitPayment: true, paymentHoldMs: (payments.holdMinutes || 15) * 60 * 1000 }
+        : {}),
     });
+    // Nights are held; nothing is confirmed or sent to the host until it is paid.
+    if (reservation.status === "awaiting_payment") {
+      return res.redirect(payPath(reservation));
+    }
     const instant = reservation.status === "confirmed";
     const reference = String(reservation._id).slice(-8).toUpperCase();
     req.flash(

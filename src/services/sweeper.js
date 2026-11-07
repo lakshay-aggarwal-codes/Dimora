@@ -3,6 +3,8 @@
 // order, and a failure in one never stops the next:
 //
 //   1. expire    pending reservations whose hold ran out   (-> "expired", nights released)
+//                and bookings still awaiting their simulated payment past
+//                their own short hold (P16-T01; same move, its own reason)
 //   2. complete  confirmed reservations whose check-out date has passed in the
 //                listing's own time zone                     (-> "completed")
 //   3. orphans   ledger rows whose reservation is missing or has released its
@@ -112,29 +114,38 @@ function createSweeper({
     }
   }
 
+  // Why each kind of hold ends. A booking that was never paid also never
+  // reached the host, so its reason says nothing about the host.
+  const EXPIRY_REASONS = Object.freeze({
+    pending: "The host did not answer before the request ran out.",
+    awaiting_payment: "The payment was not completed in time.",
+  });
+
   async function expirePending(now, summary) {
-    await forEachReservation(
-      { status: "pending", holdExpiresAt: { $lt: now } },
-      "_id",
-      async (row) => {
-        try {
-          await reservationService.transition(row._id, "expired", {
-            actor: "system",
-            now,
-            reason: "The host did not answer before the request ran out.",
-          });
-          summary.expired += 1;
-        } catch (err) {
-          if (lostRace(err)) summary.skipped += 1;
-          else
-            summary.errors.push({
-              step: "expire",
-              id: String(row._id),
-              message: describeError(err),
+    for (const status of Object.keys(EXPIRY_REASONS)) {
+      await forEachReservation(
+        { status, holdExpiresAt: { $lt: now } },
+        "_id",
+        async (row) => {
+          try {
+            await reservationService.transition(row._id, "expired", {
+              actor: "system",
+              now,
+              reason: EXPIRY_REASONS[status],
             });
-        }
-      },
-    );
+            summary.expired += 1;
+          } catch (err) {
+            if (lostRace(err)) summary.skipped += 1;
+            else
+              summary.errors.push({
+                step: "expire",
+                id: String(row._id),
+                message: describeError(err),
+              });
+          }
+        },
+      );
+    }
   }
 
   async function completeStays(now, summary) {

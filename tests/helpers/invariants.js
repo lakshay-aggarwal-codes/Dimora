@@ -3,12 +3,13 @@
 // the in-memory fakes and with rows read from MongoDB (`checkDatabase`).
 //
 //   (a) a night has one owner                      (listing, date) never repeats
-//   (b) a reservation that holds nights (pending, confirmed, completed) has
+//   (b) a reservation that holds nights (awaiting_payment, pending, confirmed,
+//       completed) has
 //       exactly one ledger row per night, on its own dates, in its own listing
 //   (c) no ledger row belongs to a reservation that released its nights
 //       (declined, expired, cancelled), or to no reservation at all
-//   (d) a pending reservation has a hold, a confirmed one has none; the rows
-//       carry the reservation's hold
+//   (d) a pending or awaiting_payment reservation has a hold, a confirmed one
+//       has none; the rows carry the reservation's hold
 const { holdsNights } = require("../../src/services/stateMachine");
 
 const DAY = 86400000;
@@ -61,10 +62,10 @@ function findViolations(reservations, nights) {
     if (rows.some((r) => idKey(r.listing) !== idKey(reservation.listing))) {
       problems.push(`(b) reservation ${id} has ledger rows in another listing`);
     }
-    if (reservation.status === "pending") {
-      if (!reservation.holdExpiresAt) problems.push(`(d) pending reservation ${id} has no hold`);
+    if (reservation.status === "pending" || reservation.status === "awaiting_payment") {
+      if (!reservation.holdExpiresAt) problems.push(`(d) ${reservation.status} reservation ${id} has no hold`);
       else if (rows.some((r) => !r.holdExpiresAt || dayKey(r.holdExpiresAt) !== dayKey(reservation.holdExpiresAt))) {
-        problems.push(`(d) pending reservation ${id}: ledger hold differs from the reservation's`);
+        problems.push(`(d) ${reservation.status} reservation ${id}: ledger hold differs from the reservation's`);
       }
     } else {
       if (reservation.holdExpiresAt) problems.push(`(d) ${reservation.status} reservation ${id} still has a hold`);

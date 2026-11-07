@@ -47,7 +47,10 @@ describeDb("seed:demo", () => {
     }
 
     const byStatus = await countsByStatus();
-    expect(Object.keys(byStatus).sort()).toEqual([...STATUSES].sort());
+    // awaiting_payment is a 15-minute waiting state (P16-T01); the demo seeds none.
+    expect(Object.keys(byStatus).sort()).toEqual(
+      STATUSES.filter((s) => s !== "awaiting_payment").sort(),
+    );
     expect(byStatus).toEqual({
       pending: 2,
       confirmed: 2,

@@ -127,6 +127,8 @@ const MATRIX = {
   "GET /trips": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
   "GET /trips/:id": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
   "POST /trips/:id/cancel": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
+  "GET /trips/:id/pay": { access: "login", who: "any signed-in member; the controller shows it only to the booking's guest (anyone else gets 404)" },
+  "POST /trips/:id/pay": { access: "login", who: "any signed-in member; the controller and the service accept only the booking's guest (anyone else gets 404)" },
   "GET /trips/:id/change": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
   "POST /trips/:id/change": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },
   "GET /wishlists": { access: "login", who: "any signed-in member; the service decides which records they may see or change" },

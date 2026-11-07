@@ -153,7 +153,11 @@ async function monthOverview(
         .select("status guest checkIn checkOut")
         .populate("guest", "displayName username")
         .lean();
-      reservations = new Map(docs.map((r) => [idText(r._id), r]));
+      // A booking still waiting for its simulated payment (P16-T01) has not
+      // reached the host: its nights show as booked, with no guest and no link.
+      reservations = new Map(
+        docs.filter((r) => r.status !== "awaiting_payment").map((r) => [idText(r._id), r]),
+      );
     }
   }
   const byNight = new Map(
