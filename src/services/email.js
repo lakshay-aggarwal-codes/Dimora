@@ -1,15 +1,21 @@
 // Sending email (P02-T05). One function, `send({ to, subject, text, html })`,
-// over three transports:
+// over four transports:
 //
 //   console  writes the message to the log (development and tests). In
 //            production it logs only the recipient and subject: a link in a log
 //            is a password-reset key in a log.
 //   resend   Resend's HTTPS API (https://resend.com/docs/api-reference/emails/send-email).
 //            HTTPS, not SMTP, because Render's free plan blocks SMTP ports.
+//   smtp     any SMTP server, for example Gmail (smtp.gmail.com:465 with an app
+//            password), through the built-in client in smtpClient.js (no
+//            dependency). For a computer where outbound SMTP is open: Render's
+//            free plan blocks the SMTP ports, use resend there.
 //   memory   keeps the messages in an array (`service.outbox`) for tests.
 //
 // A failed send throws EmailError with a short, safe message: never the API
 // key, the address or the provider's reply.
+const { sendMail, SmtpError } = require("./smtpClient");
+
 const RESEND_URL = "https://api.resend.com/emails";
 const TIMEOUT_MS = 8000;
 
@@ -52,16 +58,19 @@ function createMemoryEmailService() {
 
 /**
  * @param {object} options
- * @param {{ transport?: string, from?: string, resendApiKey?: string|null }} [options.email]  config.email
+ * @param {{ transport?: string, from?: string, resendApiKey?: string|null,
+ *   smtp?: { host?: string, port?: number, secure?: boolean, user?: string, pass?: string } }} [options.email]  config.email
  * @param {boolean} [options.isProduction]
  * @param {{ info?: Function, warn?: Function }} [options.logger]
  * @param {typeof fetch} [options.fetchImpl]
+ * @param {typeof sendMail} [options.smtpSend]  replaced in tests
  */
 function createEmailService({
   email = {},
   isProduction = false,
   logger = {},
   fetchImpl = globalThis.fetch,
+  smtpSend = sendMail,
 } = {}) {
   const transport = email.transport || "console";
   const from = email.from || "Dimora <no-reply@localhost>";
@@ -95,6 +104,25 @@ function createEmailService({
           );
         }
         if (!res.ok) throw new EmailError(`the email provider answered ${res.status}`);
+      },
+    };
+  }
+
+  if (transport === "smtp") {
+    const smtp = email.smtp || {};
+    return {
+      transport,
+      async send(message) {
+        checkMessage(message);
+        try {
+          await smtpSend(
+            { host: smtp.host, port: smtp.port, secure: smtp.secure, user: smtp.user, pass: smtp.pass },
+            { from, ...message },
+          );
+        } catch (err) {
+          // SmtpError messages are short and safe (no password, no server text).
+          throw new EmailError(err instanceof SmtpError ? err.message : "could not send through the mail server");
+        }
       },
     };
   }

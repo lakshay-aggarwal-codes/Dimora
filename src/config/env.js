@@ -32,6 +32,11 @@ const KEYS = [
   "EMAIL_TRANSPORT",
   "EMAIL_FROM",
   "RESEND_API_KEY",
+  "SMTP_HOST",
+  "SMTP_PORT",
+  "SMTP_SECURE",
+  "SMTP_USER",
+  "SMTP_PASS",
   "EMAIL_VERIFICATION_REQUIRED",
   "SIMULATED_PAYMENTS",
   "SIMULATED_PAYMENT_OUTCOMES",
@@ -106,9 +111,17 @@ const schema = Joi.object({
   // Email (P02-T05). "console" writes the message to the server log (development:
   // the link you would click is in the terminal); "resend" sends it through
   // Resend's HTTPS API (docs/EMAIL.md; hosts such as Render's free plan block SMTP).
-  EMAIL_TRANSPORT: Joi.string().valid("console", "resend").default("console"),
+  EMAIL_TRANSPORT: Joi.string().valid("console", "resend", "smtp").default("console"),
   EMAIL_FROM: Joi.string().max(200).default("Dimora <no-reply@localhost>"),
   RESEND_API_KEY: Joi.string().max(200),
+  // EMAIL_TRANSPORT=smtp (docs/EMAIL.md). Gmail: smtp.gmail.com, 465, your Gmail
+  // address and a 16-character app password. SMTP_SECURE defaults to true on
+  // port 465 (TLS at once) and false otherwise (STARTTLS, e.g. port 587).
+  SMTP_HOST: Joi.string().max(200),
+  SMTP_PORT: Joi.number().integer().min(1).max(65535).default(465),
+  SMTP_SECURE: Joi.boolean(),
+  SMTP_USER: Joi.string().max(200),
+  SMTP_PASS: Joi.string().max(200),
   // false = signing up still works and nothing asks for a confirmed address.
   // For a deployment that cannot send email. Default true.
   EMAIL_VERIFICATION_REQUIRED: Joi.boolean().default(true),
@@ -205,6 +218,19 @@ function validateEnv(source = process.env) {
     if (!raw.RESEND_API_KEY) problems.push("RESEND_API_KEY is missing (EMAIL_TRANSPORT=resend)");
     if (!raw.EMAIL_FROM) problems.push("EMAIL_FROM is missing (EMAIL_TRANSPORT=resend); use an address on a domain you verified with Resend");
   }
+  if (value && value.EMAIL_TRANSPORT === "smtp") {
+    if (!raw.SMTP_HOST) problems.push("SMTP_HOST is missing (EMAIL_TRANSPORT=smtp); for Gmail use smtp.gmail.com");
+    if (!raw.SMTP_USER) problems.push("SMTP_USER is missing (EMAIL_TRANSPORT=smtp); for Gmail it is your Gmail address");
+    if (!raw.SMTP_PASS) problems.push("SMTP_PASS is missing (EMAIL_TRANSPORT=smtp); for Gmail it is an app password, not your Google password");
+    if (raw.SMTP_USER && !/@/.test(raw.SMTP_USER) && !raw.EMAIL_FROM) {
+      problems.push("EMAIL_FROM is missing (EMAIL_TRANSPORT=smtp): SMTP_USER is not an email address");
+    }
+    if (isProduction) {
+      warnings.push(
+        "EMAIL_TRANSPORT=smtp in production: some hosts (Render's free plan) block outbound SMTP ports; Resend over HTTPS is the safer choice there",
+      );
+    }
+  }
   if (isProduction && value && value.SIMULATED_PAYMENT_OUTCOMES === true) {
     warnings.push(
       "SIMULATED_PAYMENT_OUTCOMES is on in production: every guest sees a selector that makes the simulated payment fail; it is a testing tool",
@@ -251,8 +277,25 @@ function validateEnv(source = process.env) {
     trustProxyHops: value.TRUST_PROXY_HOPS,
     email: Object.freeze({
       transport: value.EMAIL_TRANSPORT,
-      from: value.EMAIL_FROM,
+      // With smtp and no EMAIL_FROM the mail goes out as "Dimora <SMTP_USER>":
+      // Gmail sends as the logged-in account anyway.
+      from:
+        value.EMAIL_TRANSPORT === "smtp" && !raw.EMAIL_FROM && /@/.test(value.SMTP_USER || "")
+          ? `Dimora <${value.SMTP_USER}>`
+          : value.EMAIL_FROM,
       resendApiKey: value.RESEND_API_KEY || null,
+      smtp: Object.freeze({
+        host: value.SMTP_HOST || null,
+        port: value.SMTP_PORT,
+        secure: value.SMTP_SECURE === undefined ? value.SMTP_PORT === 465 : value.SMTP_SECURE,
+        user: value.SMTP_USER || null,
+        // Google shows app passwords in groups of four with spaces; they are not part of it.
+        pass: value.SMTP_PASS
+          ? value.SMTP_HOST === "smtp.gmail.com"
+            ? value.SMTP_PASS.replace(/\s+/g, "")
+            : value.SMTP_PASS
+          : null,
+      }),
       verificationRequired: value.EMAIL_VERIFICATION_REQUIRED !== false,
     }),
     payments: Object.freeze({

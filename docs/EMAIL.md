@@ -39,7 +39,37 @@ Volume: the free Resend plan allows 100 emails a day (see below). There is no co
 | `EMAIL_TRANSPORT` | `console` | `console` writes the message to the server log (development: the link is in your terminal; in production only the subject is logged, never the link). `resend` sends through Resend's HTTPS API. |
 | `EMAIL_FROM` | `Dimora <no-reply@localhost>` | Required with `resend`: an address on a domain verified at Resend. |
 | `RESEND_API_KEY` | none | Required with `resend`. Secret. |
+| `SMTP_HOST` | none | Required with `smtp`. Gmail: `smtp.gmail.com`. |
+| `SMTP_PORT` | `465` | `465` connects with TLS at once, `587` starts plain and upgrades with STARTTLS. |
+| `SMTP_SECURE` | by port | `true` TLS at once, `false` STARTTLS. Default: true on 465, false otherwise. |
+| `SMTP_USER` | none | Required with `smtp`. Gmail: your Gmail address. |
+| `SMTP_PASS` | none | Required with `smtp`. Secret. Gmail: an app password (spaces are ignored). |
 | `EMAIL_VERIFICATION_REQUIRED` | `true` | `false`: nothing asks for a confirmed address (for a deployment that cannot send email). Signup then sends no email either. |
+
+## Sending through Gmail (SMTP)
+
+`EMAIL_TRANSPORT=smtp` sends through any SMTP server with a small built-in client (`src/services/smtpClient.js`, Node's `net` and `tls`, no new dependency). For Gmail:
+
+1. Turn on 2-Step Verification for the Google account (Google account > Security).
+2. Create an app password: Google account > Security > 2-Step Verification > App passwords. Google shows 16 letters in four groups; use it as `SMTP_PASS` (the spaces are ignored). Your normal Google password does not work.
+3. Put this in `.env` and restart the server:
+
+```
+EMAIL_TRANSPORT=smtp
+SMTP_HOST=smtp.gmail.com
+SMTP_USER=you@gmail.com
+SMTP_PASS=abcd efgh ijkl mnop
+```
+
+4. Sign up, or press "Send the link again" on `/verify-email/needed`: the message arrives in that Gmail (check Spam the first time). Mail is sent as `Dimora <you@gmail.com>`; Gmail sends as the logged-in account whatever `EMAIL_FROM` says.
+
+Behaviour worth knowing:
+
+- TLS is always used for a login. Port 465 is TLS from the first byte; on port 587 the client requires STARTTLS and **never sends the password in clear text** (a server without TLS is refused). The server's certificate is checked.
+- A failure is an `EmailError` with a short safe message (for a wrong password: "the mail server refused the login (535): check SMTP_USER and the app password"). The password, the address and the server's own reply text are never logged.
+- Gmail's limit for a normal account is about 500 messages a day. There is no counter in the app.
+- Some hosts block outbound SMTP (Render's free plan does, see below): `env` prints a warning for `smtp` in production. Use Resend there.
+- Tested against a scripted local server (`tests/unit/smtpClient.test.js`) and by hand with a throwaway certificate for TLS on 465 and STARTTLS on 587. **Not tested against Gmail itself**: the first real send is the owner's check.
 
 ## Choice of provider (ADR-012)
 

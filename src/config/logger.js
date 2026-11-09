@@ -30,6 +30,7 @@ const REDACT_PATHS = [
   "*.tokenHash",
   "*.apiSecret",
   "*.resendApiKey",
+  "*.smtp.pass",
   "*.sessionSecret",
   "*.mongodbUri",
 ];

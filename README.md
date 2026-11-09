@@ -53,9 +53,14 @@ Set in `.env` (never commit it). `.env.example` has a comment for each.
 | `REVIEW_WINDOW_DAYS` | no | `30` | days after check-out a guest can still review the stay (1 to 365) |
 | `REVIEW_EDIT_DAYS` | no | `7` | days after posting a review its author can still edit it (1 to 90) |
 | `TRUST_PROXY_HOPS` | no | `1` | how many reverse proxies sit in front of the app in production (1 to 5); see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
-| `EMAIL_TRANSPORT` | no | `console` | `console` writes the message to the log, `resend` sends through Resend's HTTPS API ([docs/EMAIL.md](docs/EMAIL.md)) |
-| `EMAIL_FROM` | with `resend` | | the sender address, on a domain verified at Resend |
+| `EMAIL_TRANSPORT` | no | `console` | `console` writes the message to the log, `resend` sends through Resend's HTTPS API, `smtp` sends through any SMTP server such as Gmail ([docs/EMAIL.md](docs/EMAIL.md)) |
+| `EMAIL_FROM` | with `resend` | | the sender address, on a domain verified at Resend; with `smtp` it defaults to `SMTP_USER` |
 | `RESEND_API_KEY` | with `resend` | | Resend API key (secret) |
+| `SMTP_HOST` | with `smtp` | | the mail server, `smtp.gmail.com` for Gmail |
+| `SMTP_PORT` | no | `465` | `465` = TLS at once, `587` = STARTTLS |
+| `SMTP_SECURE` | no | | `true` TLS at once, `false` STARTTLS; default follows the port |
+| `SMTP_USER` | with `smtp` | | the login, your Gmail address for Gmail |
+| `SMTP_PASS` | with `smtp` | | the password; for Gmail a 16-character app password (secret) |
 | `EMAIL_VERIFICATION_REQUIRED` | no | `true` | `false` stops asking for a confirmed email before publishing or booking |
 | `SIMULATED_PAYMENTS` | no | `true` | `true` adds the "Pay (simulated)" step after checkout ([ADR-009](docs/ADR/009-simulated-payments.md)); `false` books directly. No card data either way |
 | `SIMULATED_PAYMENT_OUTCOMES` | no | `false` | `true` shows a success / declined / service-error selector on the pay page, to try the failure paths; keep it off in production |
